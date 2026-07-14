@@ -108,6 +108,17 @@ describe("batch calculation pipeline", () => {
     expect(deficiency.adjustedFeedComposition.amounts).toEqual({ Li: "0.98" });
   });
 
+  it("sets a direct elemental feed coefficient before solving with coefficient-oriented trace", () => {
+    const result = calculateBatchRecipe(baseInput({ adjustments: [{ schemaVersion: "1.0.0", id: "li-feed", type: "elemental-feed-coefficient", stage: "pre-solver", element: "Li", coefficient: "1.2", idealCoefficient: "1", calculationScaleFactor: "1", order: 0, source: "user" }] }));
+    expect(result.adjustedFeedComposition.amounts.Li).toBe("1.2"); expect(result.matrix?.rows.find((row) => row.element === "Li")?.requirement).toBe("1.2"); expect(result.solver?.quantitiesByPrecursorId.li).toBe("1.2");
+    expect(result.trace.find((item) => item.stepCode === "ELEMENTAL_FEED_COEFFICIENT_APPLIED")).toMatchObject({ before: { idealCoefficient: "1" }, after: { enteredCoefficient: "1.2", adjustedRequirement: "1.2" }, parameters: { scaleRelativeToIdeal: "1.2" } });
+  });
+
+  it("applies direct aluminum independently of precursor identity", () => {
+    const result = calculateBatchRecipe(baseInput({ idealCrystalComposition: formula("TiAlN"), precursors: [{ schemaVersion: "1.0.0", id: "ti", name: "Ti", formula: "Ti" }, { schemaVersion: "1.0.0", id: "aln", name: "AlN", formula: "AlN" }, { schemaVersion: "1.0.0", id: "tial", name: "TiAl", formula: "TiAl" }], adjustments: [{ schemaVersion: "1.0.0", id: "al-feed", type: "elemental-feed-coefficient", stage: "pre-solver", element: "Al", coefficient: "1.2", idealCoefficient: "1", calculationScaleFactor: "1", order: 0, source: "user" }] }));
+    expect(result.status).toMatch(/^success/); expect(result.adjustedFeedComposition.amounts.Al).toBe("1.2"); expect(result.solver?.quantitiesByPrecursorId).toEqual({ aln: "1", ti: "0.8", tial: "0.2" });
+  });
+
   it("applies multiple elemental adjustments sequentially with visible order", () => {
     const result = calculateBatchRecipe(baseInput({ adjustments: [elemental("elemental-deficiency", "b", "Li", "0.05", 1), elemental("elemental-excess", "a", "Li", "0.1", 0)] }));
     expect(result.adjustedFeedComposition.amounts.Li).toBe("1.045");

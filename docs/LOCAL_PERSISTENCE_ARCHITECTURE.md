@@ -2,9 +2,9 @@
 
 ## Boundary and schema
 
-The React workspace calls project-owned `RecipeRepository` and `RouteRepository` interfaces. `LocalDataRepositories` implements them with Dexie/IndexedDB; the chemistry engine has no persistence or browser imports. Database version 2 contains `recipes`, `recipeRevisions`, `snapshots`, `routes`, `routeRevisions`, `recentCalculations`, `recovery`, and `migrations`. Compound revision indexes enforce deterministic lookups; name, formula, status, archive, and update-time indexes support the compact libraries.
+The React workspace calls project-owned repository interfaces. `LocalDataRepositories` implements them with Dexie/IndexedDB; the chemistry engine has no persistence or browser imports. Database version 6 contains recipes, immutable revisions/snapshots, routes, recovery, comparisons, layouts, datasets, and migration records. Compound revision indexes enforce deterministic lookups; name, formula, status, archive, and update-time indexes support the compact libraries.
 
-All records carry local schema version `2.0.0`. Migration definitions are ordered and append-only in `lib/persistence/migrations.ts`. A migration failure does not delete or reset the database. The UI reports a blocking recovery message, and `exportRawBackup()` remains available to development/recovery tooling.
+Current mutable records carry local schema version `6.0.0`. Migration definitions are ordered and append-only in `lib/persistence/migrations.ts`. Migration `5-to-6-aluminum-feed-coefficient` converts editable recovery/comparison inputs from legacy excess percentage using `Al_feed=Al_ideal*(1+excess/100)`: 20 becomes 1.2 and 120 becomes 2.2 for ideal Al1. Immutable recipe revisions and historical calculation snapshots are not rewritten; legacy input is migrated only when opened into editable current-engine work. A migration failure does not delete or reset the database.
 
 ## Transactions and concurrency
 

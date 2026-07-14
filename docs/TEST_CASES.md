@@ -114,7 +114,7 @@ Element capitalization, multi-digit and decimal subscripts, nested groups, mixed
 |---|---|---|
 | UX-001 | Routine formula workflow | Ti₃AlC₂ preset and batch edit update masses without Calculate |
 | UX-002 | Explicit mixed site | Ti/Nb site fractions remain visible and mode-safe |
-| UX-003 | Apply Al excess | Adjusted feed, mass, and trace update |
+| UX-003 | Set aluminum per formula | Direct adjusted feed, mass, solver requirement, and coefficient trace update |
 | UX-004 | Purity correction | Gross mass increases and impurity warning appears |
 | UX-005 | Invalid route | Last valid output is unmistakably stale and recovers automatically |
 | UX-006 | Missing N source | Specific matrix diagnostic appears; current masses are blocked |
@@ -148,3 +148,13 @@ Radius-gate fixtures use explicitly labeled synthetic schema-contract values onl
 The superseding suite verifies blank start/example copies, top-bar demotion, meaningful modes/layouts, warning hierarchy/merging, human formatting with lossless exports, all-118 CIAAW coverage and C/Al/Ti/V/Zr/Nb/Mo/Hf/Ta/W/Re spot checks, deterministic importers/digests, and Teatum/Cordero/Rahm source spot checks for Ti/V/Nb/Zr/Hf/Ta/W/Al/C/N.
 
 Descriptor fixtures cover mixed Ti/V/Nb, mixed C/N, single-element zero mismatch, nine-element support, vacancy normalization, missing-value blocking, provenance-bearing overrides, definition separation, mean/range/weighted standard deviation/delta, multiplicity invariance, and flat-formula non-inference. Persistence fixtures verify per-site dataset/resolved-value/result snapshots and imported-trust downgrade. Playwright workflows are `UX-REMEDIATION-001` through `007` plus the updated radius workflow.
+
+# Precursor-suggestion fixtures
+
+Engine fixtures cover Ti3AlC2, Ti4AlN3, Nb2AlN, mixed Ti/Nb M-site coverage, missing registry elements, negative-quantity rejection, saved lab-approved priority, deterministic ordering, candidate limits, and non-mutation of inputs. Candidate display is limited without weakening exact verification.
+
+Playwright cases `PRECURSOR-SUGGEST-001` through `004` cover panel/status visibility, purity-safe autofill and recalculation, confirmed clear-all plus exact one-step restoration, target-change preservation and replacement offer, and cancellation of non-empty-route replacement. Persistence tests verify route origin is excluded from canonical arithmetic and saved route revisions retain their target for exact matching.
+
+# Direct aluminum-feed fixtures
+
+Engine and adapter fixtures cover coefficients 1, 1.2, 2.2, and 0.9; direct matrix requirements; coupled AlN/TiAl supply; combined Al/C feed coefficients; normalized calculation scaling; zero, negative, malformed, NaN, and infinite rejection; no-Al targets; explicit Al1.2 target parsing; coefficient trace; canonical input differences; undo/redo; and schema-5 migration of 20% to 1.2 and 120% to 2.2. The migration fixture verifies editable recovery is converted while the stored historical snapshot remains byte-equivalent. Playwright `AL-FEED-001` verifies live formula/mass updates and save/reopen preservation.

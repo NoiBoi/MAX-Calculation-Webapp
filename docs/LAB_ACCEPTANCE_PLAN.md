@@ -11,7 +11,7 @@ Use five trained intended users where practical. Record a non-identifying partic
 | ID | Required workflow | Required observation |
 |---|---|---|
 | LAB-001 | Open a saved recipe, change batch mass, review final masses, save revision | Time and any transcription error |
-| LAB-002 | Apply specified Al excess, identify adjusted feed, confirm masses | Meaning of excess understood |
+| LAB-002 | Enter specified total aluminum coefficient, identify adjusted feed, confirm masses | Direct coefficient and explanatory relative percentage understood |
 | LAB-003 | Add route precursors, resolve missing-source warning, obtain valid result | Warning comprehension |
 | LAB-004 | Duplicate/load two routes, identify mass/warning differences, save preferred scenario | Sources remain unchanged; no “best route” inference |
 | LAB-005 | Open old revision, identify engine version, recalculate explicitly | Historical/current outputs distinguished |

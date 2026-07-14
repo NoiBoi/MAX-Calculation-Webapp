@@ -107,3 +107,9 @@ Diagnostics use blocking/action/minor/information hierarchy and information is n
 # Atomic-radius product scope
 
 Advanced mode exposes per-site atomic-radius selection, resolved values, missing-value state, source/laboratory status, and screening aggregates for explicit sites. Missing or provisional data block aggregates; no placeholder result is emitted.
+
+# Deterministic precursor candidates
+
+A valid target can produce advisory candidate precursor routes from the checked-in precursor registry and exact-target saved routes. Candidates are verified through the existing balance matrix and exact non-negative solver before display. Ranking is explicit: matching lab-approved, spreadsheet-matched, and hand-audited saved routes; source-verified built-ins; conservative registered binary/elemental candidates; then registered elemental fallback. This ranking predicts neither synthesis success nor phase formation.
+
+Autofill never runs on formula entry. Applying a candidate replaces the entire working route in one undoable command and requires confirmation when rows already exist. Clear all removes only working precursor rows, preserves target and batch controls, requires confirmation, and is one undoable command. Formula changes preserve rows and show a coverage warning when the old route is no longer usable.

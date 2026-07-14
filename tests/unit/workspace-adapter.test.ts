@@ -2,10 +2,11 @@ import { describe, expect, it } from "vitest";
 import { buildWorkspaceCalculation, percentDisplayToFraction, type WorkspaceRecipeState } from "../../lib/workspace/adapter";
 import { getWorkspacePreset, WORKSPACE_PRESETS } from "../../lib/workspace/presets";
 import { SCIENTIFIC_REFERENCE_CASES } from "../../lib/workspace/reference-cases";
+import { analyzeWorkspaceAluminumFeed, migrateWorkspaceAluminumInput } from "../../lib/workspace/aluminum-feed";
 
 function recipe(id = "ti2aln"): WorkspaceRecipeState {
   const preset = getWorkspacePreset(id);
-  return { transientId: "test", presetId: id, targetFormula: preset.targetFormula, ...(preset.siteComposition ? { siteComposition: preset.siteComposition } : {}), precursors: preset.precursors, requestedMassGrams: "10", basis: "ideal-product-mass", expectedYieldPercent: "80", alExcessPercent: "0", precursorExcessId: "", precursorExcessPercent: "0", handlingLossPercent: "0", balanceIncrementGrams: "0.001", roundingMode: "nearest-half-even", practicalMinimumMassGrams: "0.001", objective: "deterministic-feasible" };
+  return { transientId: "test", presetId: id, targetFormula: preset.targetFormula, ...(preset.siteComposition ? { siteComposition: preset.siteComposition } : {}), precursors: preset.precursors, requestedMassGrams: "10", basis: "ideal-product-mass", expectedYieldPercent: "80", aluminumPerFormula: "1", precursorExcessId: "", precursorExcessPercent: "0", handlingLossPercent: "0", balanceIncrementGrams: "0.001", roundingMode: "nearest-half-even", practicalMinimumMassGrams: "0.001", objective: "deterministic-feasible" };
 }
 
 describe("workspace UI-to-engine adapter", () => {
@@ -34,6 +35,27 @@ describe("workspace UI-to-engine adapter", () => {
     expect(calculated.result?.intendedFeedComposition.amounts.C).toBe("2.7");
     expect(calculated.result?.adjustedFeedComposition.amounts.C).toBe("2.7");
     expect(calculated.result?.matrix?.rows.find((row) => row.element === "C")?.requirement).toBe("2.7");
+  });
+  it.each([["1", "1", "Stoichiometric"], ["1.2", "1.2", "excess"], ["2.2", "2.2", "excess"], ["0.9", "0.9", "deficiency"]])("uses direct aluminum coefficient %s before solving", (coefficient, expected) => {
+    const calculated = buildWorkspaceCalculation({ ...recipe("ti3alc2"), aluminumPerFormula: coefficient });
+    expect(calculated.result?.adjustedFeedComposition.amounts.Al).toBe(expected); expect(calculated.result?.matrix?.rows.find((row) => row.element === "Al")?.requirement).toBe(expected);
+  });
+  it("works when aluminum comes from coupled precursors rather than elemental Al", () => {
+    const precursors = ["Ti", "AlN", "TiAl"].map((formula) => ({ ...recipe().precursors[0]!, id: formula.toLowerCase(), name: formula, formula }));
+    const calculated = buildWorkspaceCalculation({ ...recipe(), targetFormula: "TiAlN", siteComposition: undefined, precursors, aluminumPerFormula: "1.2" });
+    expect(calculated.result?.solver?.quantitiesByPrecursorId).toEqual({ aln: "1", ti: "0.8", tial: "0.2" });
+  });
+  it("rejects invalid direct coefficients and does not apply aluminum to a target without Al", () => {
+    for (const value of ["0", "-1", "NaN", "Infinity", "nope"]) expect(buildWorkspaceCalculation({ ...recipe(), aluminumPerFormula: value }).state).toBe("invalid");
+    const withoutAl = { ...recipe(), targetFormula: "TiN", siteComposition: undefined, precursors: recipe().precursors.filter((item) => item.formula !== "Al"), aluminumPerFormula: "2.2" };
+    expect(analyzeWorkspaceAluminumFeed(withoutAl).visible).toBe(false); expect(buildWorkspaceCalculation(withoutAl).result?.adjustedFeedComposition.amounts.Al).toBeUndefined();
+  });
+  it("migrates legacy excess percentages without reinterpreting 120 percent", () => {
+    expect(migrateWorkspaceAluminumInput({ ...recipe(), aluminumPerFormula: undefined, alExcessPercent: "20" }).aluminumPerFormula).toBe("1.2");
+    expect(migrateWorkspaceAluminumInput({ ...recipe(), aluminumPerFormula: undefined, alExcessPercent: "120" }).aluminumPerFormula).toBe("2.2");
+  });
+  it("derives a direct coefficient from explicit target formula text", () => {
+    expect(analyzeWorkspaceAluminumFeed({ ...recipe(), targetFormula: "Ti4Al1.2C3", siteComposition: undefined, aluminumPerFormula: undefined }).enteredCoefficient).toBe("1.2");
   });
   it("keeps every built-in example explicitly below lab-approved status", () => { expect(WORKSPACE_PRESETS).toHaveLength(6); expect(WORKSPACE_PRESETS.every((item) => item.validationStatus !== "lab-approved" && item.validationNote.length > 20)).toBe(true); });
   it("records all twenty required reference categories and review fields", () => { expect(SCIENTIFIC_REFERENCE_CASES).toHaveLength(20); expect(new Set(SCIENTIFIC_REFERENCE_CASES.map((item) => item.caseId)).size).toBe(20); for (const item of SCIENTIFIC_REFERENCE_CASES) { expect(item.reviewerStatus).toContain("Provisional"); expect(item.expectedValueSource.length).toBeGreaterThan(10); expect(item.tolerance.length).toBeGreaterThan(10); expect(item.validationClass).not.toBe("laboratory-approved"); } });

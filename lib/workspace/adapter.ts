@@ -11,6 +11,7 @@ import {
   type SolverPrecursorConstraint,
 } from "@max-stoich/chemistry-engine";
 import type { WorkspacePrecursorInput } from "./presets";
+import { analyzeWorkspaceAluminumFeed } from "./aluminum-feed";
 
 export interface WorkspaceRecipeState {
   readonly transientId: string;
@@ -22,7 +23,8 @@ export interface WorkspaceRecipeState {
   readonly requestedMassGrams: string;
   readonly basis: BatchMassBasis;
   readonly expectedYieldPercent: string;
-  readonly alExcessPercent: string;
+  readonly aluminumPerFormula?: string;
+  readonly alExcessPercent?: string;
   readonly precursorExcessId: string;
   readonly precursorExcessPercent: string;
   readonly handlingLossPercent: string;
@@ -32,6 +34,7 @@ export interface WorkspaceRecipeState {
   readonly objective: "deterministic-feasible" | "minimize-total-quantity";
   readonly notes?: string;
   readonly routeSource?: Readonly<{ routeId: string; routeRevisionId: string }>;
+  readonly routeOrigin?: Readonly<{ kind: "manual" | "loaded" | "suggestion-generated"; candidateId?: string; sourceRouteId?: string; sourceRouteRevisionId?: string; validationStatus?: string }>;
   readonly radiusDescriptorConfig?: RadiusDescriptorConfig;
 }
 
@@ -47,6 +50,14 @@ export function percentDisplayToFraction(value: string): string {
   catch { return trimmed; }
 }
 
+export function resolveWorkspaceTarget(recipe: WorkspaceRecipeState) {
+  const normalized = recipe.normalizeLeadingSiteRatios ? normalizeLeadingSiteRatioGroup(recipe.targetFormula, { enabled: true, expectedSite: "M" }) : undefined;
+  if (normalized?.success) return normalized.value.calculationComposition;
+  if (recipe.siteComposition) return recipe.siteComposition;
+  const parsed = parseFormula(recipe.targetFormula);
+  return parsed.success ? parsed.composition : undefined;
+}
+
 export function buildWorkspaceCalculation(recipe: WorkspaceRecipeState): WorkspaceCalculationState {
   const normalized = recipe.normalizeLeadingSiteRatios ? normalizeLeadingSiteRatioGroup(recipe.targetFormula, { enabled: true, expectedSite: "M" }) : undefined;
   if (normalized && !normalized.success) return { state: "invalid", errors: normalized.errors.map((error) => ({ code: error.code, message: error.message, fieldPath: "targetFormula" })) };
@@ -58,11 +69,11 @@ export function buildWorkspaceCalculation(recipe: WorkspaceRecipeState): Workspa
     if (item.constraintMode === "bounded") constraints.push({ schemaVersion: "1.0.0", mode: "bounded", precursorId: item.id, ...(item.minimum.trim() ? { minimum: item.minimum } : {}), ...(item.maximum.trim() ? { maximum: item.maximum } : {}) });
     if (item.constraintMode === "ratio") constraints.push({ schemaVersion: "1.0.0", mode: "ratio", numeratorPrecursorId: item.id, denominatorPrecursorId: item.ratioDenominatorId, numeratorRatio: item.numeratorRatio, denominatorRatio: item.denominatorRatio });
   }
-  const alExcess = percentDisplayToFraction(recipe.alExcessPercent);
+  const aluminum = analyzeWorkspaceAluminumFeed(recipe);
   const precursorExcess = percentDisplayToFraction(recipe.precursorExcessPercent);
   const loss = percentDisplayToFraction(recipe.handlingLossPercent);
   const adjustments = [
-    ...(alExcess !== "" && alExcess !== "0" ? [{ schemaVersion: "1.0.0" as const, id: "ui-al-excess", type: "elemental-excess" as const, stage: "pre-solver" as const, element: "Al", fraction: alExcess, order: 0, source: "user" as const }] : []),
+    ...(aluminum.visible ? [{ schemaVersion: "1.0.0" as const, id: "ui-aluminum-feed", type: "elemental-feed-coefficient" as const, stage: "pre-solver" as const, element: "Al", coefficient: aluminum.enteredCoefficient ?? recipe.aluminumPerFormula ?? "", idealCoefficient: aluminum.idealCoefficient ?? "", calculationScaleFactor: aluminum.calculationScaleFactor ?? "1", order: 0, source: "user" as const }] : []),
     ...(recipe.precursorExcessId && precursorExcess !== "" && precursorExcess !== "0" ? [{ schemaVersion: "1.0.0" as const, id: "ui-precursor-excess", type: "precursor-molar-excess" as const, stage: "post-solver" as const, precursorId: recipe.precursorExcessId, fraction: precursorExcess, order: 0, source: "user" as const }] : []),
     ...(loss !== "" && loss !== "0" ? [{ schemaVersion: "1.0.0" as const, id: "ui-handling-loss", type: "handling-loss" as const, stage: "mass-domain" as const, label: "Handling loss", fraction: loss, scope: "all" as const, order: 0, source: "user" as const }] : []),
   ];
@@ -71,7 +82,7 @@ export function buildWorkspaceCalculation(recipe: WorkspaceRecipeState): Workspa
       schemaVersion: "1.0.0",
       idealCrystalComposition: normalized?.success ? normalized.value.idealCalculationComposition : recipe.siteComposition ?? parsed!.composition,
       ...(normalized?.success ? { intendedFeedComposition: normalized.value.calculationComposition } : {}),
-      precursors: recipe.precursors.map((item, order) => ({ schemaVersion: "1.0.0", id: item.id, name: item.name, formula: item.formula, order, purity: percentDisplayToFraction(item.purityPercent), ...(item.molarMassOverride.trim() ? { molarMassOverride: { value: item.molarMassOverride, units: "g/mol" as const, source: item.molarMassOverrideSource, reason: "Explicit workspace material override", provenance: "User-entered advanced workspace value" } } : {}) })),
+      precursors: recipe.precursors.map((item, order) => ({ schemaVersion: "1.0.0", id: item.id, name: item.name, formula: item.formula, order, ...(item.purityPercent.trim() ? { purity: percentDisplayToFraction(item.purityPercent) } : {}), ...(item.molarMassOverride.trim() ? { molarMassOverride: { value: item.molarMassOverride, units: "g/mol" as const, source: item.molarMassOverrideSource, reason: "Explicit workspace material override", provenance: "User-entered advanced workspace value" } } : {}) })),
       solverConstraints: constraints,
       solverOptions: { objectives: [{ kind: recipe.objective }] },
       batch: { basis: recipe.basis, requestedMassGrams: recipe.requestedMassGrams, ...(recipe.basis === "recovered-product-mass" ? { expectedYield: percentDisplayToFraction(recipe.expectedYieldPercent) } : {}) },

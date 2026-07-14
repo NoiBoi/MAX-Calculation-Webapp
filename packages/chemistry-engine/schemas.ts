@@ -255,6 +255,7 @@ const BatchAdjustmentBaseSchema = z.object({
 });
 
 export const BatchAdjustmentSchema = z.discriminatedUnion("type", [
+  BatchAdjustmentBaseSchema.extend({ type: z.literal("elemental-feed-coefficient"), stage: z.literal("pre-solver"), element: ElementSymbolSchema, coefficient: PositiveDecimalStringSchema, idealCoefficient: PositiveDecimalStringSchema, calculationScaleFactor: PositiveDecimalStringSchema }),
   BatchAdjustmentBaseSchema.extend({ type: z.literal("elemental-excess"), stage: z.literal("pre-solver"), element: ElementSymbolSchema, fraction: NonNegativeDecimalStringSchema }),
   BatchAdjustmentBaseSchema.extend({ type: z.literal("elemental-deficiency"), stage: z.literal("pre-solver"), element: ElementSymbolSchema, fraction: NonNegativeDecimalStringSchema }),
   BatchAdjustmentBaseSchema.extend({ type: z.literal("precursor-molar-excess"), stage: z.literal("post-solver"), precursorId: IdSchema, fraction: NonNegativeDecimalStringSchema }),

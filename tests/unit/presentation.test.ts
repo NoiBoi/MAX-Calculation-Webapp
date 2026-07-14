@@ -6,7 +6,7 @@ import { getWorkspacePreset } from "../../lib/workspace/presets";
 
 function stateFromPreset(id: string) {
   const preset = getWorkspacePreset(id);
-  return { transientId: `test-${id}`, presetId: id, targetFormula: preset.targetFormula, ...(preset.siteComposition ? { siteComposition: preset.siteComposition } : {}), precursors: preset.precursors.map((item) => ({ ...item })), requestedMassGrams: "10.000", basis: "ideal-product-mass" as const, expectedYieldPercent: "80", alExcessPercent: "0", precursorExcessId: "", precursorExcessPercent: "0", handlingLossPercent: "0", balanceIncrementGrams: "0.001", roundingMode: "nearest-half-even" as const, practicalMinimumMassGrams: "0.001", objective: "deterministic-feasible" as const };
+  return { transientId: `test-${id}`, presetId: id, targetFormula: preset.targetFormula, ...(preset.siteComposition ? { siteComposition: preset.siteComposition } : {}), precursors: preset.precursors.map((item) => ({ ...item })), requestedMassGrams: "10.000", basis: "ideal-product-mass" as const, expectedYieldPercent: "80", aluminumPerFormula: "1", precursorExcessId: "", precursorExcessPercent: "0", handlingLossPercent: "0", balanceIncrementGrams: "0.001", roundingMode: "nearest-half-even" as const, practicalMinimumMassGrams: "0.001", objective: "deterministic-feasible" as const };
 }
 
 describe("scientific presentation", () => {

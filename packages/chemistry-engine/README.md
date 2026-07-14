@@ -129,6 +129,12 @@ The internal backend uses normalized `BigInt` fractions and deterministic vertex
 
 Known solver limitations: exact active-precursor cardinality minimization is deferred and rejected as unsupported, strict closed-system mode is absent, and no numerical conditioning advisory is provided. The solver does not establish reaction feasibility, phase formation, yield, or experimental suitability.
 
+### Deterministic precursor suggestions
+
+`suggestPrecursorRoutes(target, precursorRegistry, savedRoutes?, options?)` is a framework-independent advisory layer over the balance matrix and exact non-negative solver. It checks exact target coverage, rank consistency, non-negative feasibility, introduced non-target elements, and underdetermination before returning usable candidates. Results contain stable candidate IDs, registered formulas, source and validation status, exact solver quantities, warnings, explanations, and explicit deterministic priority fields. `assessPrecursorRoute` applies the same checks to an existing route.
+
+Generation is deliberately bounded: exact-target saved routes are considered first, registered C/N binaries are combined with registered elemental sources, and a registered elemental fallback is considered last. It does not enumerate arbitrary subsets or invent compounds. Candidate and search limits produce structured diagnostics. The API neither predicts synthesis success nor labels a route experimentally optimal.
+
 ### Batch scaling and final weighing masses
 
 `calculateBatchRecipe` composes the existing composition, matrix, solver, and molar-mass APIs into one immutable result. The input explicitly chooses ideal-product, recovered-product, or final-precursor-mixture mass basis. Only recovered-product basis uses expected yield.

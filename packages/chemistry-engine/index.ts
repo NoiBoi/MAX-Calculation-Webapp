@@ -14,6 +14,7 @@ export * from "./site-ratio-normalization";
 export * from "./balance-matrix";
 export * from "./version";
 export * from "./precursor-solver";
+export * from "./precursor-suggestions";
 export * from "./batch-calculation";
 export * from "./descriptors";
 

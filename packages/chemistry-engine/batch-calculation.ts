@@ -33,6 +33,7 @@ export type AdjustmentSource = "user" | "route-default" | "system-default";
 
 interface AdjustmentBase { readonly schemaVersion: "1.0.0"; readonly id: string; readonly order: number; readonly source: AdjustmentSource }
 export type BatchAdjustment =
+  | (AdjustmentBase & { readonly type: "elemental-feed-coefficient"; readonly stage: "pre-solver"; readonly element: string; readonly coefficient: string; readonly idealCoefficient: string; readonly calculationScaleFactor: string })
   | (AdjustmentBase & { readonly type: "elemental-excess"; readonly stage: "pre-solver"; readonly element: string; readonly fraction: string })
   | (AdjustmentBase & { readonly type: "elemental-deficiency"; readonly stage: "pre-solver"; readonly element: string; readonly fraction: string })
   | (AdjustmentBase & { readonly type: "precursor-molar-excess"; readonly stage: "post-solver"; readonly precursorId: string; readonly fraction: string })
@@ -205,7 +206,7 @@ export function calculateBatchRecipe(input: BatchRecipeInput): BatchCalculationR
     if (ids.has(adjustment.id) || adjustment.id === input.rounding.adjustmentId) errors.push(diag({ code: "DUPLICATE_ADJUSTMENT_ID", severity: "error", blocking: true, fieldPath: `adjustments.${adjustment.id}`, message: `Adjustment ID "${adjustment.id}" is duplicated.` }));
     ids.add(adjustment.id);
     if (adjustment.schemaVersion !== "1.0.0") errors.push(diag({ code: "UNSUPPORTED_ADJUSTMENT_SCHEMA_VERSION", severity: "error", blocking: true, fieldPath: `adjustments.${adjustment.id}.schemaVersion`, message: "Unsupported adjustment schema version." }));
-    const supportedType = ["elemental-excess", "elemental-deficiency", "precursor-molar-excess", "precursor-molar-deficiency", "handling-loss"].includes(String(adjustment.type));
+    const supportedType = ["elemental-feed-coefficient", "elemental-excess", "elemental-deficiency", "precursor-molar-excess", "precursor-molar-deficiency", "handling-loss"].includes(String(adjustment.type));
     if (!supportedType) errors.push(diag({ code: "UNSUPPORTED_ADJUSTMENT", severity: "error", blocking: true, fieldPath: `adjustments.${adjustment.id}.type`, message: `Unsupported or nonlinear adjustment type "${String(adjustment.type)}".` }));
     else if (adjustment.stage !== expectedStage(adjustment.type)) errors.push(diag({ code: "INVALID_ADJUSTMENT_STAGE", severity: "error", blocking: true, fieldPath: `adjustments.${adjustment.id}.stage`, message: `Adjustment type "${adjustment.type}" must execute in stage "${expectedStage(adjustment.type)}".` }));
     const key = `${adjustment.stage}|${adjustment.order}`;
@@ -218,6 +219,19 @@ export function calculateBatchRecipe(input: BatchRecipeInput): BatchCalculationR
   const adjustedAmounts = exactAmounts(intended);
   for (const adjustment of ordered.filter((item) => item.stage === "pre-solver")) {
     if (!(adjustment.element in adjustedAmounts)) { errors.push(diag({ code: "ADJUSTMENT_ELEMENT_ABSENT", severity: "error", blocking: true, fieldPath: `adjustments.${adjustment.id}.element`, message: `Element ${adjustment.element} is absent from the intended feed.`, element: adjustment.element })); continue; }
+    if (adjustment.type === "elemental-feed-coefficient") {
+      const coefficient = decimal(adjustment.coefficient, `adjustments.${adjustment.id}.coefficient`, errors, "positive");
+      const idealCoefficient = decimal(adjustment.idealCoefficient, `adjustments.${adjustment.id}.idealCoefficient`, errors, "positive");
+      const calculationScaleFactor = decimal(adjustment.calculationScaleFactor, `adjustments.${adjustment.id}.calculationScaleFactor`, errors, "positive");
+      if (!coefficient || !idealCoefficient || !calculationScaleFactor) continue;
+      const before = adjustedAmounts[adjustment.element]!;
+      const expectedBefore = multiplyRational(idealCoefficient, calculationScaleFactor);
+      if (compareRational(before, expectedBefore) !== 0) { errors.push(diag({ code: "COEFFICIENT_BASIS_MISMATCH", severity: "error", blocking: true, fieldPath: `adjustments.${adjustment.id}.idealCoefficient`, message: `The ${adjustment.element} reference coefficient and calculation scale do not reproduce the intended-feed requirement.`, element: adjustment.element })); continue; }
+      const after = multiplyRational(coefficient, calculationScaleFactor);
+      adjustedAmounts[adjustment.element] = after;
+      traces.push(trace({ stepCode: "ELEMENTAL_FEED_COEFFICIENT_APPLIED", adjustmentId: adjustment.id, adjustmentType: adjustment.type, stage: adjustment.stage, resolvedOrder: adjustment.order, description: `${adjustment.element} feed coefficient applied directly before precursor solving.`, affectedEntities: [adjustment.element], before: { idealCoefficient: out(idealCoefficient), calculationRequirement: out(before) }, after: { enteredCoefficient: out(coefficient), adjustedRequirement: out(after) }, equation: "adjustedRequirement=enteredCoefficient*calculationScaleFactor", units: { coefficient: "mol element / mol target formula", requirement: "mol element / mol calculation formula" }, parameters: { idealCoefficient: out(idealCoefficient), enteredCoefficient: out(coefficient), scaleRelativeToIdeal: out(divideRational(coefficient, idealCoefficient)), calculationScaleFactor: out(calculationScaleFactor) }, source: adjustment.source }));
+      continue;
+    }
     const fraction = decimal(adjustment.fraction, `adjustments.${adjustment.id}.fraction`, errors, adjustment.type === "elemental-deficiency" ? "deficiency" : "nonnegative");
     if (!fraction) continue;
     const before = adjustedAmounts[adjustment.element]!;

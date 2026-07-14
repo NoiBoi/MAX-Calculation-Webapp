@@ -89,12 +89,17 @@ test("SITE-RATIO-002 preserves deficient carbon feed and sorts weighing rows wit
   await ready(page);
   const formula = "(TiVMoTa0.5W1.5)4AlC2.7";
   await page.getByLabel("Target formula").fill(formula);
-  await expect(page.getByText(`Entered formula: ${formula}`)).toBeVisible();
+  await expect(page.getByText(`Entered target formula: ${formula}`)).toBeVisible();
   const carbon = page.getByLabel("Carbon per formula");
   await expect(carbon).toHaveValue("2.7");
-  const alBox = await page.getByLabel("Elemental Al excess").boundingBox(); const carbonBox = await carbon.boundingBox();
+  const alBox = await page.getByLabel("Aluminum per formula").boundingBox(); const carbonBox = await carbon.boundingBox();
   expect(Math.abs((alBox?.y ?? 0) - (carbonBox?.y ?? 100))).toBeLessThan(8);
   await page.getByLabel("Normalize leading mixed-site ratios").check();
+  await page.getByLabel("Aluminum per formula").fill("1.2");
+  const formulaStages = page.getByRole("region", { name: "Target and adjusted feed formulas" });
+  await expect(formulaStages.getByText("(Ti1/5V1/5Mo1/5Ta1/10W3/10)4AlC3", { exact: true })).toBeVisible();
+  await expect(formulaStages.getByText("Ti4/5V4/5Mo4/5Ta2/5W6/5AlC3", { exact: true })).toBeVisible();
+  await expect(formulaStages.getByText("Ti4/5V4/5Mo4/5Ta2/5W6/5Al1.2C2.7", { exact: true })).toBeVisible();
   await expect(page.getByRole("columnheader", { name: "Entered ratio" })).toBeVisible();
   await expect(page.getByText("(Ti1/5V1/5Mo1/5Ta1/10W3/10)4AlC2.7", { exact: true })).toBeVisible();
   await expect(page.getByText("Ti4/5V4/5Mo4/5Ta2/5W6/5AlC2.7", { exact: true })).toBeVisible();
@@ -104,7 +109,7 @@ test("SITE-RATIO-002 preserves deficient carbon feed and sorts weighing rows wit
   await carbon.fill("0"); await expect(page.getByText(/greater than zero/)).toBeVisible(); await expect(page.getByLabel("Target formula")).toHaveValue("(TiVMoTa0.5W1.5)4AlC3.15");
   await carbon.fill("2.7"); await expect(page.getByText(/10% below ideal carbon/)).toBeVisible(); await expect(page.getByLabel("Target formula")).toHaveValue(formula);
   await page.getByLabel("Normalize leading mixed-site ratios").uncheck();
-  await expect(page.getByText(`Entered formula: ${formula}`)).toBeVisible();
+  await expect(page.getByText(`Entered target formula: ${formula}`)).toBeVisible();
   for (const precursor of ["Ti", "V", "Mo", "Ta", "W", "Al", "C"]) { await page.getByRole("button", { name: "Add precursor" }).click(); await page.locator('[id^="precursor-formula-"]').last().fill(precursor); }
   await expect(page.getByText("Final rounded total")).toBeVisible();
   const masses = async () => Object.fromEntries(await page.locator("tbody tr[data-precursor-id]").evaluateAll((rows) => rows.map((row) => [row.getAttribute("data-precursor-id"), row.querySelector('[title^="Exact stored value"]')?.getAttribute("title")])));
@@ -116,6 +121,23 @@ test("SITE-RATIO-002 preserves deficient carbon feed and sorts weighing rows wit
   const names = await page.locator("tbody tr[data-precursor-id] th:first-child").allTextContents(); expect(names).toEqual([...names].sort((left, right) => left.toLowerCase().localeCompare(right.toLowerCase())));
   await page.getByLabel("Sort").selectOption("status-high"); expect(await masses()).toEqual(before);
   await page.getByLabel("Sort").selectOption("mass-desc"); await page.reload(); await expect(page.getByLabel("Sort")).toHaveValue("mass-desc");
+});
+
+test("AL-FEED-001 uses and persists direct aluminum and carbon feed coefficients", async ({ page }) => {
+  await ready(page); await example(page, "ti3alc2");
+  const aluminum = page.getByLabel("Aluminum per formula"), carbon = page.getByLabel("Carbon per formula");
+  await expect(aluminum).toHaveValue("1"); await expect(page.getByText(/Stoichiometric aluminum/)).toBeVisible();
+  const before = await page.getByRole("row", { name: /Al Al/ }).getByText(/g$/).first().textContent();
+  await aluminum.fill("1.2"); await carbon.fill("2.7");
+  await expect(page.getByText("Ti3Al1.2C2.7", { exact: true })).toBeVisible(); await expect(page.getByText(/20% above ideal aluminum/)).toBeVisible();
+  expect(await page.getByRole("row", { name: /Al Al/ }).getByText(/g$/).first().textContent()).not.toBe(before);
+  await aluminum.fill("2.2"); await expect(page.getByText("Ti3Al2.2C2.7", { exact: true })).toBeVisible(); await expect(page.getByText(/120% above ideal aluminum/)).toBeVisible();
+  await page.getByRole("button", { name: "Undo", exact: true }).click(); await expect(aluminum).toHaveValue("1.2");
+  await page.getByRole("button", { name: "Redo", exact: true }).click(); await expect(aluminum).toHaveValue("2.2");
+  await page.getByRole("button", { name: "Save", exact: true }).click(); await expect(page.getByText(/revision 1/)).toBeVisible();
+  await page.getByRole("button", { name: "New", exact: true }).click(); await page.getByRole("button", { name: "Open", exact: true }).click();
+  await page.locator("article").filter({ hasText: "Ti3AlC2.7" }).getByRole("button", { name: "Open" }).click();
+  await expect(page.getByLabel("Aluminum per formula")).toHaveValue("2.2"); await expect(page.getByLabel("Carbon per formula")).toHaveValue("2.7");
 });
 
 test("UX-REMEDIATION-ACCESS blank, standard, and advanced workspaces have no serious accessibility violations", async ({ page }) => {

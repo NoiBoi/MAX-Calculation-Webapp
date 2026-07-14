@@ -1,5 +1,6 @@
 import { ChemistryDecimal, type ScientificScalar } from "@max-stoich/chemistry-engine";
 import type { WorkspaceRecipeState } from "../workspace/adapter";
+import { analyzeWorkspaceAluminumFeed } from "../workspace/aluminum-feed";
 
 const numericKey = /(?:mass|grams|moles|percent|fraction|increment|minimum|maximum|ratio|purity|residual|tolerance|amount)$/i;
 const numericContainerKey = /amounts$/i;
@@ -38,6 +39,7 @@ function normalize(value: unknown, key = ""): unknown {
 export function stableCanonicalize(value: unknown): string { return JSON.stringify(normalize(value)); }
 
 export function canonicalizeWorkspaceScientificInput(recipe: WorkspaceRecipeState): string {
+  const aluminum = analyzeWorkspaceAluminumFeed(recipe);
   const scientific = {
     targetFormula: recipe.targetFormula,
     normalizeLeadingSiteRatios: recipe.normalizeLeadingSiteRatios ?? false,
@@ -46,7 +48,7 @@ export function canonicalizeWorkspaceScientificInput(recipe: WorkspaceRecipeStat
     requestedMassGrams: recipe.requestedMassGrams,
     basis: recipe.basis,
     expectedYieldPercent: recipe.expectedYieldPercent,
-    alExcessPercent: recipe.alExcessPercent,
+    aluminumPerFormula: aluminum.enteredCoefficient ?? recipe.aluminumPerFormula ?? "",
     precursorExcessId: recipe.precursorExcessId,
     precursorExcessPercent: recipe.precursorExcessPercent,
     handlingLossPercent: recipe.handlingLossPercent,
@@ -55,7 +57,6 @@ export function canonicalizeWorkspaceScientificInput(recipe: WorkspaceRecipeStat
     practicalMinimumMassGrams: recipe.practicalMinimumMassGrams,
     objective: recipe.objective,
     notes: recipe.notes ?? "",
-    routeSource: recipe.routeSource,
     radiusDescriptorConfig: recipe.radiusDescriptorConfig,
   };
   return stableCanonicalize(scientific);

@@ -1,6 +1,20 @@
 {
   "schemaVersion": "1.0.0",
-  "dataVersion": "0.1.0",
-  "precursors": [],
-  "note": "Precursor and lot defaults require laboratory review; no supplier, purity, particle size, or route assumption is preloaded."
+  "dataVersion": "0.2.0",
+  "precursors": [
+    { "schemaVersion": "1.0.0", "id": "element-ti", "name": "Titanium", "formula": "Ti", "validationStatus": "registered" },
+    { "schemaVersion": "1.0.0", "id": "element-v", "name": "Vanadium", "formula": "V", "validationStatus": "registered" },
+    { "schemaVersion": "1.0.0", "id": "element-mo", "name": "Molybdenum", "formula": "Mo", "validationStatus": "registered" },
+    { "schemaVersion": "1.0.0", "id": "element-nb", "name": "Niobium", "formula": "Nb", "validationStatus": "registered" },
+    { "schemaVersion": "1.0.0", "id": "element-w", "name": "Tungsten", "formula": "W", "validationStatus": "registered" },
+    { "schemaVersion": "1.0.0", "id": "element-ta", "name": "Tantalum", "formula": "Ta", "validationStatus": "registered" },
+    { "schemaVersion": "1.0.0", "id": "element-al", "name": "Aluminum", "formula": "Al", "validationStatus": "registered" },
+    { "schemaVersion": "1.0.0", "id": "element-c", "name": "Carbon", "formula": "C", "validationStatus": "registered" },
+    { "schemaVersion": "1.0.0", "id": "element-n", "name": "Nitrogen formula unit", "formula": "N", "validationStatus": "registered" },
+    { "schemaVersion": "1.0.0", "id": "binary-tic", "name": "Titanium carbide", "formula": "TiC", "validationStatus": "registered" },
+    { "schemaVersion": "1.0.0", "id": "binary-tin", "name": "Titanium nitride", "formula": "TiN", "validationStatus": "registered" },
+    { "schemaVersion": "1.0.0", "id": "binary-aln", "name": "Aluminum nitride", "formula": "AlN", "validationStatus": "registered" },
+    { "schemaVersion": "1.0.0", "id": "binary-nbn", "name": "Niobium nitride", "formula": "NbN", "validationStatus": "registered" }
+  ],
+  "note": "Formula identities only. No supplier, purity, particle size, handling state, route efficacy, or laboratory approval is implied."
 }

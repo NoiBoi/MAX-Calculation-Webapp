@@ -25,15 +25,15 @@ test("UX-002 mixed-site state survives standard and advanced modes", async ({ pa
   await expect(page.getByLabel("Target formula")).toHaveValue("(Ti0.5Nb0.5)2AlN");
 });
 
-test("UX-003 Al excess updates masses, composition, and trace", async ({ page }) => {
+test("UX-003 direct aluminum coefficient updates masses, composition, and trace", async ({ page }) => {
   const before = await page.getByRole("row", { name: /Al Al/ }).getByText(/g$/).first().textContent();
-  await page.getByLabel("Elemental Al excess").fill("5");
+  await page.getByLabel("Aluminum per formula").fill("1.05");
   const after = await page.getByRole("row", { name: /Al Al/ }).getByText(/g$/).first().textContent();
   expect(after).not.toBe(before);
   await expect(page.getByText(/Al:1.05/)).toBeVisible();
   await page.getByRole("button", { name: "Advanced", exact: true }).click();
   await page.getByRole("button", { name: "Open calculation trace" }).click();
-  await expect(page.getByLabel("Calculation trace").getByText("ELEMENTAL_ADJUSTMENT_APPLIED")).toBeVisible();
+  await expect(page.getByLabel("Calculation trace").getByText("ELEMENTAL_FEED_COEFFICIENT_APPLIED")).toBeVisible();
 });
 
 test("UX-004 purity correction increases gross mass and warns", async ({ page }) => {
@@ -72,7 +72,7 @@ test("UX-007 keyboard shortcuts reach the complete routine workflow", async ({ p
   await expect(page.locator("#precursor-formula-ti")).toBeFocused();
   await page.keyboard.press("Alt+3");
   await expect(page.getByLabel("Target batch mass")).toBeFocused();
-  await page.getByLabel("Elemental Al excess").fill("5");
+  await page.getByLabel("Aluminum per formula").fill("1.05");
   await page.keyboard.press("Alt+4");
   await expect(page.getByRole("table", { name: /Final gross weighing masses/ }).locator("..")).toBeFocused();
   await page.getByRole("button", { name: "Advanced", exact: true }).click();

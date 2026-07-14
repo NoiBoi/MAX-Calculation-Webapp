@@ -3,8 +3,8 @@ import type { Mode } from "./workspace-types";
 import type { WorkspaceRecipeState } from "../workspace/adapter";
 import type { ValidationStatus, WorkspacePrecursorInput } from "../workspace/presets";
 
-export const LOCAL_SCHEMA_VERSION = "5.0.0" as const;
-export type LocalSchemaVersion = "2.0.0" | "3.0.0" | "4.0.0" | typeof LOCAL_SCHEMA_VERSION;
+export const LOCAL_SCHEMA_VERSION = "6.0.0" as const;
+export type LocalSchemaVersion = "2.0.0" | "3.0.0" | "4.0.0" | "5.0.0" | typeof LOCAL_SCHEMA_VERSION;
 export type PersistedValidationStatus = ValidationStatus | "deprecated";
 
 export interface SavedRecipe {
@@ -90,8 +90,10 @@ export interface RouteRevision {
   readonly routeId: string;
   readonly revisionNumber: number;
   readonly parentRevisionId?: string;
+  readonly targetFormula?: string;
+  readonly siteComposition?: SiteComposition;
   readonly precursors: readonly WorkspacePrecursorInput[];
-  readonly defaults: Pick<WorkspaceRecipeState, "objective" | "alExcessPercent" | "precursorExcessId" | "precursorExcessPercent" | "handlingLossPercent" | "balanceIncrementGrams" | "roundingMode" | "practicalMinimumMassGrams">;
+  readonly defaults: Pick<WorkspaceRecipeState, "objective" | "precursorExcessId" | "precursorExcessPercent" | "handlingLossPercent" | "balanceIncrementGrams" | "roundingMode" | "practicalMinimumMassGrams"> & Pick<WorkspaceRecipeState, "aluminumPerFormula" | "alExcessPercent">;
   readonly createdAt: string;
   readonly canonicalDigest: string;
 }

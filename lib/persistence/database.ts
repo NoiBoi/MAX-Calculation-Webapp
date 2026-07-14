@@ -1,8 +1,8 @@
 import Dexie, { type Table } from "dexie";
 import type { CalculationSnapshot, ComparisonWorkspace, MigrationMetadata, RecentCalculation, RecipeRevision, RouteRevision, SavedRecipe, SavedRoute, StoredAtomicRadiusDataset, WorkspaceLayout, WorkspaceRecoveryState } from "./entities";
-import { migrateRecord } from "./migrations";
+import { migrateEditableWorkspaceInput, migrateRecord } from "./migrations";
 
-export const DATABASE_VERSION = 5;
+export const DATABASE_VERSION = 6;
 
 export class MaxStoichDatabase extends Dexie {
   recipes!: Table<SavedRecipe, string>;
@@ -36,6 +36,14 @@ export class MaxStoichDatabase extends Dexie {
     this.version(5).stores({ recipes: "&id,name,targetFormula,updatedAt,archived,currentRevisionNumber,validationStatus", recipeRevisions: "&id,[recipeId+revisionNumber],recipeId", snapshots: "&id,recipeId,recipeRevisionId,createdAt", routes: "&id,name,updatedAt,archived,validationStatus", routeRevisions: "&id,[routeId+revisionNumber],routeId", recentCalculations: "&snapshotId,lastOpenedAt,recipeId", recovery: "&id", migrations: "&id", comparisons: "&id,name,updatedAt,validationStatus", layouts: "&id,name,kind,isDefault,builtIn,updatedAt", radiusDatasets: "&id,&[datasetId+datasetVersion],datasetId,datasetVersion,localTrust,updatedAt" }).upgrade(async (transaction) => {
       for (const tableName of ["recipes", "recipeRevisions", "snapshots", "routes", "routeRevisions", "recentCalculations", "recovery", "migrations", "comparisons", "layouts", "radiusDatasets"]) await transaction.table(tableName).toCollection().modify((record: Record<string, unknown>) => { Object.assign(record, migrateRecord(record, 4, 5)); if (tableName === "snapshots" && record.radiusDatasetSelections === undefined) record.radiusDatasetSelections = null; });
       await transaction.table("migrations").put({ schemaVersion: "5.0.0", id: "4-to-5", fromVersion: 4, toVersion: 5, appliedAt: new Date().toISOString(), status: "complete" });
+    });
+    this.version(6).stores({ recipes: "&id,name,targetFormula,updatedAt,archived,currentRevisionNumber,validationStatus", recipeRevisions: "&id,[recipeId+revisionNumber],recipeId", snapshots: "&id,recipeId,recipeRevisionId,createdAt", routes: "&id,name,updatedAt,archived,validationStatus", routeRevisions: "&id,[routeId+revisionNumber],routeId", recentCalculations: "&snapshotId,lastOpenedAt,recipeId", recovery: "&id", migrations: "&id", comparisons: "&id,name,updatedAt,validationStatus", layouts: "&id,name,kind,isDefault,builtIn,updatedAt", radiusDatasets: "&id,&[datasetId+datasetVersion],datasetId,datasetVersion,localTrust,updatedAt" }).upgrade(async (transaction) => {
+      for (const tableName of ["recipes", "routes", "recentCalculations", "recovery", "migrations", "comparisons", "layouts", "radiusDatasets"]) await transaction.table(tableName).toCollection().modify((record: Record<string, unknown>) => {
+        Object.assign(record, migrateRecord(record, 5, 6));
+        if (tableName === "recovery" && record.committedRecipe) record.committedRecipe = migrateEditableWorkspaceInput(record.committedRecipe);
+        if (tableName === "comparisons" && Array.isArray(record.scenarios)) record.scenarios = record.scenarios.map((scenario: Record<string, unknown>) => ({ ...scenario, inputState: migrateEditableWorkspaceInput(scenario.inputState) }));
+      });
+      await transaction.table("migrations").put({ schemaVersion: "6.0.0", id: "5-to-6-aluminum-feed-coefficient", fromVersion: 5, toVersion: 6, appliedAt: new Date().toISOString(), status: "complete" });
     });
   }
 }

@@ -257,9 +257,11 @@ export class LocalDataRepositories implements RecipeRepository, RouteRepository 
     const routeId = request.routeId ?? id("route");
     const revisionId = id("route-revision");
     const routeScientific = {
+      targetFormula: request.inputState.targetFormula,
+      siteComposition: request.inputState.siteComposition,
       precursors: [...request.inputState.precursors].sort((left, right) => left.id.localeCompare(right.id)),
       objective: request.inputState.objective,
-      alExcessPercent: request.inputState.alExcessPercent,
+      aluminumPerFormula: request.inputState.aluminumPerFormula,
       precursorExcessId: request.inputState.precursorExcessId,
       precursorExcessPercent: request.inputState.precursorExcessPercent,
       handlingLossPercent: request.inputState.handlingLossPercent,
@@ -279,10 +281,12 @@ export class LocalDataRepositories implements RecipeRepository, RouteRepository 
         routeId,
         revisionNumber,
         ...(existing ? { parentRevisionId: existing.currentRevisionId } : {}),
+        targetFormula: request.inputState.targetFormula,
+        ...(request.inputState.siteComposition ? { siteComposition: clone(request.inputState.siteComposition) } : {}),
         precursors: clone(request.inputState.precursors),
         defaults: {
           objective: request.inputState.objective,
-          alExcessPercent: request.inputState.alExcessPercent,
+          aluminumPerFormula: request.inputState.aluminumPerFormula,
           precursorExcessId: request.inputState.precursorExcessId,
           precursorExcessPercent: request.inputState.precursorExcessPercent,
           handlingLossPercent: request.inputState.handlingLossPercent,

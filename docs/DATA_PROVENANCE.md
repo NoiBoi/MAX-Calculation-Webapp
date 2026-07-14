@@ -30,7 +30,7 @@ Datasets of different definitions remain separate. The engine rejects mixed defi
 
 ## Precursors and lots
 
-No default precursor purity, supplier, particle size, cost, or route is scientifically universal. The checked-in default file is empty pending laboratory review. Saved lots require supplier, lot identifier, purity value, purity source (certificate, assay, nominal, or user estimate), date, and optional molar-mass override provenance.
+No default precursor purity, supplier, particle size, cost, or route is scientifically universal. The checked-in registry contains formula-identity records for elemental and common binary materials used by deterministic candidate generation; it stores no purity or claim of route efficacy or laboratory approval. Saved lots require supplier, lot identifier, purity value, purity source (certificate, assay, nominal, or user estimate), date, and optional molar-mass override provenance.
 
 ## Versioning and review
 

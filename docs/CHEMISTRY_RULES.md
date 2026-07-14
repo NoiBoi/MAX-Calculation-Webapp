@@ -156,7 +156,9 @@ The intended elemental requirement is scaled from formula moles only after order
 
 ## Ordered adjustments
 
-Stages are fixed: elemental excess/deficiency before solving, precursor molar excess/deficiency after solving without re-solving, purity and scoped handling-loss corrections in the mass domain, and final balance rounding. Within a stage, adjustments use ascending explicit `order`, then stable ID. Duplicate order values warn. Each step records before/after values, equation, units, source, and affected entities.
+Stages are fixed: direct elemental feed coefficients and advanced elemental excess/deficiency before solving, precursor molar excess/deficiency after solving without re-solving, purity and scoped handling-loss corrections in the mass domain, and final balance rounding. Within a stage, adjustments use ascending explicit `order`, then stable ID. Duplicate order values warn. Each step records before/after values, equation, units, source, and affected entities.
+
+`Aluminum per formula` is the total intended-feed coefficient, never a percentage. If `Al_ideal` is the target/template coefficient and `Al_feed` is entered, the pre-solver requirement is set directly to `Al_feed`; the explanatory relative change is `Al_feed/Al_ideal - 1`. Thus `1.2` means Al1.2 and 20% above an ideal coefficient of 1, while `2.2` means Al2.2 and 120% above ideal. Exact normalized compositions may use an equivalent calculation scale, which is recorded separately in the trace and never changes the displayed per-formula coefficient.
 
 Approved algebraic identity for purity correction, when purity fraction `q` is in `(0,1]`:
 

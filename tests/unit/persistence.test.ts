@@ -6,7 +6,7 @@ import { buildLaboratoryCsv, buildLaboratoryJson, buildWeighingTableTsv, safeExp
 import { canonicalizeWorkspaceScientificInput, sha256Hex, stableCanonicalize } from "../../lib/persistence/canonical";
 import { MaxStoichDatabase } from "../../lib/persistence/database";
 import { LOCAL_SCHEMA_VERSION, type WorkspaceRecoveryState } from "../../lib/persistence/entities";
-import { migrateRecord } from "../../lib/persistence/migrations";
+import { migrateEditableWorkspaceInput, migrateRecord } from "../../lib/persistence/migrations";
 import { LocalDataRepositories, PersistenceConflictError } from "../../lib/persistence/repositories";
 import { buildWorkspaceCalculation, type WorkspaceRecipeState } from "../../lib/workspace/adapter";
 import { RecipeCommandHistory } from "../../lib/workspace/history";
@@ -17,7 +17,7 @@ function state(patch: Partial<WorkspaceRecipeState> = {}): WorkspaceRecipeState 
   return {
     transientId: "temporary-test", presetId: "custom", targetFormula: "Ti2AlN",
     precursors: ["Ti", "Al", "N"].map((formula) => ({ id: formula.toLowerCase(), name: formula, formula, purityPercent: "100", constraintMode: "solver" as const, fixedValue: "", minimum: "", maximum: "", ratioDenominatorId: "", numeratorRatio: "1", denominatorRatio: "1", molarMassOverride: "", molarMassOverrideSource: "" })),
-    requestedMassGrams: "10.000", basis: "ideal-product-mass", expectedYieldPercent: "80", alExcessPercent: "0", precursorExcessId: "", precursorExcessPercent: "0", handlingLossPercent: "0", balanceIncrementGrams: "0.001", roundingMode: "nearest-half-even", practicalMinimumMassGrams: "0.001", objective: "deterministic-feasible", notes: "",
+    requestedMassGrams: "10.000", basis: "ideal-product-mass", expectedYieldPercent: "80", aluminumPerFormula: "1", precursorExcessId: "", precursorExcessPercent: "0", handlingLossPercent: "0", balanceIncrementGrams: "0.001", roundingMode: "nearest-half-even", practicalMinimumMassGrams: "0.001", objective: "deterministic-feasible", notes: "",
     ...patch,
   };
 }
@@ -47,12 +47,19 @@ describe("canonical scientific persistence", () => {
     const equivalent = { ...base, transientId: "different", presetId: "anything", precursors: [...base.precursors].reverse() };
     expect(canonicalizeWorkspaceScientificInput(equivalent)).toBe(canonicalizeWorkspaceScientificInput(base));
     expect(canonicalizeWorkspaceScientificInput({ ...base, requestedMassGrams: "11" })).not.toBe(canonicalizeWorkspaceScientificInput(base));
+    expect(canonicalizeWorkspaceScientificInput({ ...base, aluminumPerFormula: "1.2" })).not.toBe(canonicalizeWorkspaceScientificInput(base));
+    expect(canonicalizeWorkspaceScientificInput({ ...base, aluminumPerFormula: undefined, alExcessPercent: "20" })).toBe(canonicalizeWorkspaceScientificInput({ ...base, aluminumPerFormula: "1.2" }));
+    expect(canonicalizeWorkspaceScientificInput({ ...base, routeOrigin: { kind: "suggestion-generated", candidateId: "candidate-a" }, routeSource: { routeId: "route-a", routeRevisionId: "revision-a" } })).toBe(canonicalizeWorkspaceScientificInput(base));
   });
 
   it("applies the migration registry deterministically and idempotently", () => {
     const migrated = migrateRecord({ id: "r", currentRevisionNumber: 1 }, 1, 2) as Record<string, unknown>;
     expect(migrated).toMatchObject({ schemaVersion: LOCAL_SCHEMA_VERSION, validationStatus: "synthetic", archived: false, targetFormula: "" });
     expect(migrateRecord(migrated, 2, 2)).toEqual(migrated);
+  });
+  it("migrates legacy aluminum percentages exactly for editable inputs", () => {
+    expect((migrateEditableWorkspaceInput({ ...state(), aluminumPerFormula: undefined, alExcessPercent: "20" }) as WorkspaceRecipeState).aluminumPerFormula).toBe("1.2");
+    expect((migrateEditableWorkspaceInput({ ...state(), aluminumPerFormula: undefined, alExcessPercent: "120" }) as WorkspaceRecipeState).aluminumPerFormula).toBe("2.2");
   });
 });
 
@@ -161,6 +168,18 @@ describe("atomic local repositories", () => {
     expect(await repo.database.radiusDatasets.count()).toBe(0);
   });
 
+  it("migrates editable schema-5 aluminum input without mutating historical snapshots", async () => {
+    const name = `aluminum-migration-${crypto.randomUUID()}`, old = new Dexie(name);
+    old.version(5).stores({ recipes: "&id,name,targetFormula,updatedAt,archived,currentRevisionNumber,validationStatus", recipeRevisions: "&id,[recipeId+revisionNumber],recipeId", snapshots: "&id,recipeId,recipeRevisionId,createdAt", routes: "&id,name,updatedAt,archived,validationStatus", routeRevisions: "&id,[routeId+revisionNumber],routeId", recentCalculations: "&snapshotId,lastOpenedAt,recipeId", recovery: "&id", migrations: "&id", comparisons: "&id,name,updatedAt,validationStatus", layouts: "&id,name,kind,isDefault,builtIn,updatedAt", radiusDatasets: "&id,&[datasetId+datasetVersion],datasetId,datasetVersion,localTrust,updatedAt" });
+    const legacyRecipe = { ...state(), aluminumPerFormula: undefined, alExcessPercent: "120" };
+    await old.table("recovery").put({ schemaVersion: "5.0.0", id: "current", committedRecipe: legacyRecipe, mode: "standard", activePanel: "none", inputPanelCollapsed: false, savedAsRecipe: false, unsavedChanges: true, committedEditSequence: 1, updatedAt: "2026-01-01T00:00:00.000Z" });
+    const historical = { schemaVersion: "5.0.0", id: "historical", recipeId: "r", recipeRevisionId: "rr", createdAt: "2026-01-01T00:00:00.000Z", immutableMarker: { alExcessPercent: "120" } }; await old.table("snapshots").put(historical); old.close();
+    const repo = new LocalDataRepositories(new MaxStoichDatabase(name)); databases.push(repo); await repo.database.open();
+    expect((await repo.loadRecovery())?.committedRecipe.aluminumPerFormula).toBe("2.2");
+    expect(await repo.database.snapshots.get("historical")).toEqual(historical);
+    expect((await repo.database.migrations.get("5-to-6-aluminum-feed-coefficient"))?.status).toBe("complete");
+  });
+
   it("records representative 100-recipe, 1,000-snapshot, and 100-route observations without a timing gate", async () => {
     const repo = repository();
     const input = state();
@@ -191,6 +210,15 @@ describe("undo and laboratory export", () => {
     expect(history.redo(a).requestedMassGrams).toBe("12");
     history.undo(c); history.record("formula", "formula", a, state({ targetFormula: "Nb2AlN" }), new Date(3000));
     expect(history.canRedo).toBe(false);
+  });
+
+  it("restores autofill and clear-all as one exact precursor command each", () => {
+    const original = state();
+    const autofilled = state({ precursors: original.precursors.map((item) => ({ ...item, id: `suggested-${item.id}`, purityPercent: "" })), routeOrigin: { kind: "suggestion-generated", candidateId: "candidate-1" } });
+    const history = new RecipeCommandHistory(); history.record("autofill-suggestion", "autofill-suggestion", original, autofilled);
+    expect(history.undo(autofilled)).toEqual(original);
+    history.record("clear-all-precursors", "clear-all-precursors", autofilled, { ...autofilled, precursors: [], routeOrigin: { kind: "manual" } });
+    expect(history.undo({ ...autofilled, precursors: [], routeOrigin: { kind: "manual" } })).toEqual(autofilled);
   });
 
   it.each([["Li", "Li3", "1/3"], ["Li2", "Li3", "2/3"], ["Li", "Li7", "1/7"]])("exports exact %s/%s solver quantities beside labeled approximations", (target, precursorFormula, exact) => {

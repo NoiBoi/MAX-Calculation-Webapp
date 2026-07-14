@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import Link from "next/link";
-import { ChemistryDecimal, DEFAULT_ATOMIC_RADIUS_REGISTRY, ENGINE_VERSION, analyzeMaxXComponent, normalizeLeadingSiteRatioGroup, replaceMaxXCoefficient, type BatchCalculationResult, type BatchMassBasis, type RadiusDescriptorConfig, type RoundingMode } from "@max-stoich/chemistry-engine";
-import { buildWorkspaceCalculation, formatComposition, type WorkspaceRecipeState } from "@/lib/workspace/adapter";
+import { ChemistryDecimal, DEFAULT_ATOMIC_RADIUS_REGISTRY, ENGINE_VERSION, analyzeMaxXComponent, assessPrecursorRoute, normalizeLeadingSiteRatioGroup, parseFormula, replaceMaxXCoefficient, suggestPrecursorRoutes, type BatchCalculationResult, type BatchMassBasis, type PrecursorRouteSuggestion, type PrecursorSuggestionResult, type RadiusDescriptorConfig, type RegisteredPrecursorDefinition, type RegisteredPrecursorRoute, type RoundingMode } from "@max-stoich/chemistry-engine";
+import { buildWorkspaceCalculation, formatComposition, resolveWorkspaceTarget, type WorkspaceRecipeState } from "@/lib/workspace/adapter";
 import { getWorkspacePreset, WORKSPACE_PRESETS, type WorkspacePrecursorInput } from "@/lib/workspace/presets";
 import { buildLaboratoryCsv, buildLaboratoryJson, buildWeighingTableTsv, downloadText, safeExportFilename } from "@/lib/export/laboratory-export";
 import { LOCAL_SCHEMA_VERSION, type CalculationSnapshot, type RecipeRevision, type RouteRevision, type SavedRecipe, type SavedRoute, type WorkspaceLayout } from "@/lib/persistence/entities";
@@ -15,15 +15,17 @@ import { AtomicRadiusPanel } from "@/components/descriptor-panel/atomic-radius-p
 import { presentDiagnostics, precursorStatus } from "@/lib/presentation/diagnostics";
 import { formatDescriptor, formatMassForBalance, formatMoles, formatPercent } from "@/lib/presentation/scientific-format";
 import { sortWeighingPrecursors, WEIGHING_SORT_OPTIONS, type WeighingSortOption } from "@/lib/presentation/weighing-sort";
+import { DEFAULT_PRECURSOR_REGISTRY } from "@/lib/workspace/precursor-registry";
+import { analyzeWorkspaceAluminumFeed, migrateWorkspaceAluminumInput } from "@/lib/workspace/aluminum-feed";
 
 const WEIGHING_SORT_STORAGE_KEY = "max-stoich.weighing-sort.v1";
 
 export function blankWorkspaceState(): WorkspaceRecipeState {
   return {
     transientId: "temporary-blank", presetId: "blank", targetFormula: "", precursors: [], requestedMassGrams: "10.000",
-    basis: "ideal-product-mass", expectedYieldPercent: "80", alExcessPercent: "0", precursorExcessId: "", precursorExcessPercent: "0",
+    basis: "ideal-product-mass", expectedYieldPercent: "80", aluminumPerFormula: "", precursorExcessId: "", precursorExcessPercent: "0",
     handlingLossPercent: "0", balanceIncrementGrams: "0.001", roundingMode: "nearest-half-even", practicalMinimumMassGrams: "0.001",
-    objective: "deterministic-feasible",
+    objective: "deterministic-feasible", routeOrigin: { kind: "manual" },
   };
 }
 
@@ -47,19 +49,23 @@ export function stateFromPreset(id: string): WorkspaceRecipeState {
     requestedMassGrams: "10.000",
     basis: "ideal-product-mass",
     expectedYieldPercent: "80",
-    alExcessPercent: "0",
+    aluminumPerFormula: "1",
     precursorExcessId: "",
     precursorExcessPercent: "0",
     handlingLossPercent: "0",
     balanceIncrementGrams: "0.001",
     roundingMode: "nearest-half-even",
     practicalMinimumMassGrams: "0.001",
-    objective: "deterministic-feasible",
+    objective: "deterministic-feasible", routeOrigin: { kind: "loaded", sourceRouteId: preset.id, validationStatus: preset.validationStatus },
   };
 }
 
 function replacePrecursor(recipe: WorkspaceRecipeState, index: number, patch: Partial<WorkspacePrecursorInput>): WorkspaceRecipeState {
-  return { ...recipe, precursors: recipe.precursors.map((item, itemIndex) => itemIndex === index ? { ...item, ...patch } : item) };
+  return { ...recipe, precursors: recipe.precursors.map((item, itemIndex) => itemIndex === index ? { ...item, ...patch } : item), routeOrigin: { kind: "manual" }, routeSource: undefined };
+}
+
+function suggestionPrecursor(item: RegisteredPrecursorDefinition): WorkspacePrecursorInput {
+  return { id: item.id, name: item.name, formula: item.formula ?? "", purityPercent: item.defaultPurityPercent ?? "", constraintMode: "solver", fixedValue: "", minimum: "", maximum: "", ratioDenominatorId: "", numeratorRatio: "1", denominatorRatio: "1", molarMassOverride: "", molarMassOverrideSource: "" };
 }
 
 function NumberField({ id, label, value, unit, onChange }: { id: string; label: string; value: string; unit: string; onChange: (value: string) => void }) {
@@ -97,6 +103,9 @@ export function WorkspaceShell() {
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const [duplicationSource, setDuplicationSource] = useState<Readonly<{ recipeId: string; revisionId: string; name: string }>>();
   const [historyVersion, setHistoryVersion] = useState(0);
+  const [suggestionOpen, setSuggestionOpen] = useState(false);
+  const [suggestionResult, setSuggestionResult] = useState<PrecursorSuggestionResult>();
+  const [dismissedCoverageFormula, setDismissedCoverageFormula] = useState<string>();
   const repositories = useMemo(() => new LocalDataRepositories(), []);
   const [history] = useState(() => new RecipeCommandHistory(150, 500));
   const committedValidRecipe = useRef(recipe);
@@ -104,14 +113,30 @@ export function WorkspaceShell() {
   const formulaRef = useRef<HTMLInputElement>(null);
   const batchRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const suggestRef = useRef<HTMLButtonElement>(null);
   const calculation = useMemo(() => buildWorkspaceCalculation(recipe), [recipe]);
+  const suggestionTarget = useMemo(() => resolveWorkspaceTarget(recipe), [recipe]);
+  const builtInSuggestions = useMemo(() => suggestionTarget ? suggestPrecursorRoutes(suggestionTarget, DEFAULT_PRECURSOR_REGISTRY) : undefined, [suggestionTarget]);
+  const currentRouteAssessment = useMemo(() => suggestionTarget && recipe.precursors.length ? assessPrecursorRoute(suggestionTarget, recipe.precursors.map((item) => ({ schemaVersion: "1.0.0", id: item.id, name: item.name, formula: item.formula }))) : undefined, [recipe.precursors, suggestionTarget]);
+  const currentRouteInvalid = Boolean(currentRouteAssessment && !currentRouteAssessment.usable);
   const ratioNormalization = useMemo(() => recipe.normalizeLeadingSiteRatios ? normalizeLeadingSiteRatioGroup(recipe.targetFormula, { enabled: true, expectedSite: "M" }) : undefined, [recipe.normalizeLeadingSiteRatios, recipe.targetFormula]);
   const xComponent = useMemo(() => analyzeMaxXComponent(recipe.targetFormula), [recipe.targetFormula]);
+  const aluminumFeed = useMemo(() => analyzeWorkspaceAluminumFeed(recipe), [recipe]);
+  const aluminumHelper = useMemo(() => {
+    if (!aluminumFeed.visible || aluminumFeed.error || !aluminumFeed.idealCoefficient || !aluminumFeed.enteredCoefficient) return aluminumFeed.error;
+    const relative = new ChemistryDecimal(aluminumFeed.enteredCoefficient).dividedBy(aluminumFeed.idealCoefficient).minus(1).times(100);
+    if (relative.isZero()) return "Stoichiometric aluminum";
+    return `${relative.abs().toDecimalPlaces(6).toString()}% ${relative.isPositive() ? "above" : "below"} ideal aluminum`;
+  }, [aluminumFeed]);
   const initialValid = calculation.state === "valid" || calculation.state === "valid-with-warnings" ? calculation.result : undefined;
   const [lastValid, setLastValid] = useState<BatchCalculationResult | undefined>(initialValid);
   const currentValid = calculation.state === "valid" || calculation.state === "valid-with-warnings";
   const stale = !currentValid && lastValid !== undefined;
   const displayed = historicalSnapshot?.result ?? (currentValid ? calculation.result : lastValid);
+  const workingAdjustedFormula = calculation.result ? compositionFormula(calculation.result.adjustedFeedComposition.amounts, recipe.targetFormula) : undefined;
+  const normalizedAdjustedFormula = ratioNormalization?.success && aluminumFeed.visible && aluminumFeed.enteredCoefficient ? `${ratioNormalization.value.enteredRatios.map((entry) => `${entry.element}${coefficientSuffix(entry.normalizedFormulaCoefficient.canonical)}`).join("")}Al${coefficientSuffix(aluminumFeed.enteredCoefficient)}${ratioNormalization.value.intendedFeedXElement}${coefficientSuffix(ratioNormalization.value.intendedFeedXCoefficientText)}` : undefined;
+  const normalizedIdealFormula = ratioNormalization?.success ? `(${ratioNormalization.value.enteredRatios.map((entry) => `${entry.element}${coefficientSuffix(entry.normalizedOccupancy.canonical)}`).join("")})${ratioNormalization.value.requestedMultiplicity.canonical}Al${ratioNormalization.value.intendedFeedXElement}${coefficientSuffix(ratioNormalization.value.idealXCoefficient.canonical)}` : undefined;
+  const expandedIdealFormula = ratioNormalization?.success ? `${ratioNormalization.value.enteredRatios.map((entry) => `${entry.element}${coefficientSuffix(entry.normalizedFormulaCoefficient.canonical)}`).join("")}Al${ratioNormalization.value.intendedFeedXElement}${coefficientSuffix(ratioNormalization.value.idealXCoefficient.canonical)}` : undefined;
   const diagnosticPresentation = useMemo(() => displayed ? presentDiagnostics(displayed) : undefined, [displayed]);
   const sortedPrecursors = useMemo(() => displayed ? sortWeighingPrecursors(displayed, recipe.precursors, weighingSort) : [], [displayed, recipe.precursors, weighingSort]);
   const activePreset = WORKSPACE_PRESETS.find((item) => item.id === recipe.presetId);
@@ -160,8 +185,9 @@ export function WorkspaceShell() {
         if (!integrity.valid) setStatusMessage(`Local data needs attention: ${integrity.diagnostics[0]?.message ?? "integrity check failed"}`);
         const recovery = await repositories.loadRecovery();
         if (recovery && active) {
-          setRecipeState(recovery.committedRecipe);
-          committedValidRecipe.current = recovery.committedRecipe;
+          const migratedRecovery = migrateWorkspaceAluminumInput(recovery.committedRecipe);
+          setRecipeState(migratedRecovery);
+          committedValidRecipe.current = migratedRecovery;
           setMode(recovery.mode);
           setUnsavedChanges(recovery.unsavedChanges);
           editSequence.current = recovery.committedEditSequence;
@@ -218,12 +244,12 @@ export function WorkspaceShell() {
   };
   const addPrecursor = () => {
     const id = `precursor-${recipe.precursors.length + 1}`;
-    setRecipe({ ...recipe, precursors: [...recipe.precursors, { id, name: "New precursor", formula: "", purityPercent: "100", constraintMode: "solver", fixedValue: "", minimum: "", maximum: "", ratioDenominatorId: "", numeratorRatio: "1", denominatorRatio: "1", molarMassOverride: "", molarMassOverrideSource: "" }] });
+    setRecipe({ ...recipe, precursors: [...recipe.precursors, { id, name: "New precursor", formula: "", purityPercent: "100", constraintMode: "solver", fixedValue: "", minimum: "", maximum: "", ratioDenominatorId: "", numeratorRatio: "1", denominatorRatio: "1", molarMassOverride: "", molarMassOverrideSource: "" }], routeOrigin: { kind: "manual" }, routeSource: undefined });
     requestAnimationFrame(() => document.getElementById(`precursor-formula-${id}`)?.focus());
   };
   const removePrecursor = (index: number) => {
     const remaining = recipe.precursors.filter((_, itemIndex) => itemIndex !== index);
-    setRecipe({ ...recipe, precursors: remaining });
+    setRecipe({ ...recipe, precursors: remaining, routeOrigin: { kind: "manual" }, routeSource: undefined });
     requestAnimationFrame(() => document.getElementById(`precursor-formula-${remaining[Math.min(index, remaining.length - 1)]?.id}`)?.focus());
   };
   const movePrecursor = (index: number, direction: -1 | 1) => {
@@ -231,7 +257,36 @@ export function WorkspaceShell() {
     if (target < 0 || target >= recipe.precursors.length) return;
     const values = [...recipe.precursors];
     [values[index], values[target]] = [values[target]!, values[index]!];
-    setRecipe({ ...recipe, precursors: values });
+    setRecipe({ ...recipe, precursors: values, routeOrigin: { kind: "manual" }, routeSource: undefined });
+  };
+  const collectSuggestions = async (): Promise<PrecursorSuggestionResult | undefined> => {
+    if (!suggestionTarget) return undefined;
+    const registry: RegisteredPrecursorDefinition[] = [...DEFAULT_PRECURSOR_REGISTRY];
+    const registeredRoutes: RegisteredPrecursorRoute[] = [];
+    for (const route of routes) {
+      const revision = await repositories.getRouteRevision(route.currentRevisionId);
+      if (!revision?.targetFormula) continue;
+      const routeTarget = revision.siteComposition ?? (() => { const parsed = parseFormula(revision.targetFormula!); return parsed.success ? parsed.composition : undefined; })();
+      if (!routeTarget) continue;
+      const precursorIds = revision.precursors.map((item) => `saved:${route.id}:${item.id}`);
+      revision.precursors.forEach((item, index) => registry.push({ schemaVersion: "1.0.0", id: precursorIds[index]!, name: item.name, formula: item.formula, validationStatus: route.validationStatus, ...(item.purityPercent.trim() ? { defaultPurityPercent: item.purityPercent } : {}) }));
+      registeredRoutes.push({ id: route.id, name: route.name, target: routeTarget, precursorIds, validationStatus: route.validationStatus, sourceType: "saved-route", sourceRouteRevisionId: revision.id });
+    }
+    const result = suggestPrecursorRoutes(suggestionTarget, registry, registeredRoutes);
+    setSuggestionResult(result);
+    return result;
+  };
+  const showSuggestions = async () => { setSuggestionOpen(true); await collectSuggestions(); requestAnimationFrame(() => document.getElementById("precursor-suggestions")?.focus()); };
+  const applySuggestion = (candidate: PrecursorRouteSuggestion) => {
+    if (recipe.precursors.length && !window.confirm(`Replace the current ${recipe.precursors.length} precursor${recipe.precursors.length === 1 ? "" : "s"} with ${candidate.name}?`)) return;
+    setRecipe({ ...recipe, precursors: candidate.precursors.map(suggestionPrecursor), routeOrigin: { kind: "suggestion-generated", candidateId: candidate.candidateId, ...(candidate.sourceRouteId ? { sourceRouteId: candidate.sourceRouteId } : {}), ...(candidate.sourceRouteRevisionId ? { sourceRouteRevisionId: candidate.sourceRouteRevisionId } : {}), validationStatus: candidate.validationStatus }, routeSource: candidate.sourceRouteId && candidate.sourceRouteRevisionId ? { routeId: candidate.sourceRouteId, routeRevisionId: candidate.sourceRouteRevisionId } : undefined, presetId: "custom" }, "autofill-suggestion", "autofill-suggestion");
+    setSuggestionOpen(false); setDismissedCoverageFormula(undefined); setStatusMessage(`Autofilled ${candidate.name}. Review materials and purity before laboratory use.`);
+  };
+  const autofillBest = async () => { const result = await collectSuggestions() ?? builtInSuggestions; const candidate = result?.suggestions[0]; if (!candidate) { setSuggestionOpen(true); setStatusMessage("No usable registered precursor candidate was found."); return; } applySuggestion(candidate); };
+  const clearAllPrecursors = () => {
+    if (!recipe.precursors.length || !window.confirm(`Remove all ${recipe.precursors.length} precursor${recipe.precursors.length === 1 ? "" : "s"} from this working calculation?`)) return;
+    setRecipe({ ...recipe, precursors: [], routeOrigin: { kind: "manual" }, routeSource: undefined }, "clear-all-precursors", "clear-all-precursors");
+    setStatusMessage("Cleared all working precursors. Saved routes and historical revisions were not changed."); requestAnimationFrame(() => suggestRef.current?.focus());
   };
   const updateSiteMultiplicity = (siteIndex: number, multiplicity: string) => {
     if (!recipe.siteComposition) return;
@@ -280,8 +335,9 @@ export function WorkspaceShell() {
     if (!snapshot) { setStatusMessage("The selected immutable snapshot is missing."); return; }
     const integrity = await repositories.verifySnapshot(snapshot);
     if (!integrity.valid) { setStatusMessage(`Snapshot blocked: ${integrity.diagnostics[0]?.message}`); return; }
-    setRecipeState(structuredClone(revision.inputState));
-    committedValidRecipe.current = revision.inputState;
+    const migratedInput = migrateWorkspaceAluminumInput(structuredClone(revision.inputState));
+    setRecipeState(migratedInput);
+    committedValidRecipe.current = migratedInput;
     setSavedRecipe(item); setSavedRevision(revision); setSavedSnapshot(snapshot); setHistoricalSnapshot(snapshot);
     setUnsavedChanges(false); setDuplicationSource(undefined); history.clear(); setHistoryVersion((value) => value + 1);
     setActivePanel("none");
@@ -298,7 +354,7 @@ export function WorkspaceShell() {
   const duplicateSaved = async (item: SavedRecipe, revisionId = item.currentRevisionId) => {
     try {
       const duplicate = await repositories.duplicateRecipe(item.id, revisionId);
-      setRecipeState({ ...duplicate.inputState, transientId: `duplicate-${recipe.transientId}`, presetId: "custom" });
+      setRecipeState({ ...migrateWorkspaceAluminumInput(duplicate.inputState), transientId: `duplicate-${recipe.transientId}`, presetId: "custom" });
       setSavedRecipe(undefined); setSavedRevision(undefined); setSavedSnapshot(undefined); setHistoricalSnapshot(undefined);
       setDuplicationSource({ recipeId: duplicate.sourceRecipeId, revisionId: duplicate.sourceRevisionId, name: item.name });
       setUnsavedChanges(true); history.clear(); setHistoryVersion((value) => value + 1); setActivePanel("none");
@@ -323,7 +379,7 @@ export function WorkspaceShell() {
   const applyRoute = async (route: SavedRoute) => {
     const revision = await repositories.getRouteRevision(route.currentRevisionId);
     if (!revision) { setStatusMessage("Route revision is missing."); return; }
-    setRecipe({ ...recipe, precursors: structuredClone(revision.precursors), ...revision.defaults, routeSource: { routeId: route.id, routeRevisionId: revision.id }, presetId: "custom" }, "apply-route", "apply-route");
+    setRecipe(migrateWorkspaceAluminumInput({ ...recipe, precursors: structuredClone(revision.precursors), ...revision.defaults, routeSource: { routeId: route.id, routeRevisionId: revision.id }, routeOrigin: { kind: "loaded" as const, sourceRouteId: route.id, sourceRouteRevisionId: revision.id, validationStatus: route.validationStatus }, presetId: "custom" }), "apply-route", "apply-route");
     setActivePanel("none"); setStatusMessage(`Applied ${route.name} revision ${revision.revisionNumber}; the saved route was not changed.`);
   };
   const updateXCoefficient = (value: string) => {
@@ -448,18 +504,22 @@ export function WorkspaceShell() {
         <h1 id="inputs-heading" className="text-lg font-semibold">Target and precursor route</h1>
         <p className="mt-1 text-xs text-slate-600">{activePreset ? `You are editing an unsaved copy; ${activePreset.name} remains unchanged. ` : ""}{validationNote}</p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
-          <label className="block text-sm font-medium" htmlFor="target-formula">Target formula<input aria-describedby={recipe.targetFormula.trim() !== "" && calculation.errors.some((item) => item.fieldPath === "targetFormula") ? "formula-error" : undefined} className="mt-1 min-h-11 w-full rounded-md border border-slate-400 px-3 font-mono outline-none focus:border-teal-700 focus:ring-2 focus:ring-teal-200" data-primary-field id="target-formula" onChange={(event) => { const targetFormula = event.target.value; const normalized = recipe.normalizeLeadingSiteRatios ? normalizeLeadingSiteRatioGroup(targetFormula, { enabled: true, expectedSite: "M" }) : undefined; setRecipe({ ...recipe, targetFormula, siteComposition: normalized?.success ? normalized.value.explicitSiteModel : undefined, radiusDescriptorConfig: undefined }); }} ref={formulaRef} spellCheck={false} value={recipe.targetFormula} /></label>
+          <label className="block text-sm font-medium" htmlFor="target-formula">Target formula<input aria-describedby={recipe.targetFormula.trim() !== "" && calculation.errors.some((item) => item.fieldPath === "targetFormula") ? "formula-error" : undefined} className="mt-1 min-h-11 w-full rounded-md border border-slate-400 px-3 font-mono outline-none focus:border-teal-700 focus:ring-2 focus:ring-teal-200" data-primary-field id="target-formula" onChange={(event) => { const targetFormula = event.target.value; const normalized = recipe.normalizeLeadingSiteRatios ? normalizeLeadingSiteRatioGroup(targetFormula, { enabled: true, expectedSite: "M" }) : undefined; const parsed = parseFormula(targetFormula); setRecipe({ ...recipe, targetFormula, ...(parsed.success ? { aluminumPerFormula: parsed.composition.amounts.Al ?? "" } : {}), siteComposition: normalized?.success ? normalized.value.explicitSiteModel : undefined, radiusDescriptorConfig: undefined }); }} ref={formulaRef} spellCheck={false} value={recipe.targetFormula} /></label>
           <div className="rounded-md bg-slate-100 p-3 text-sm"><span className="font-semibold">Site model:</span> {recipe.siteComposition ? `${recipe.siteComposition.structure} explicit M/A/X` : "Flat elemental formula · no site inference"}</div>
         </div>
         <label className="mt-3 flex min-h-10 items-center gap-2 rounded border border-slate-300 bg-white px-3 text-sm"><input checked={recipe.normalizeLeadingSiteRatios ?? false} onChange={(event) => { const enabled = event.target.checked; const normalized = enabled ? normalizeLeadingSiteRatioGroup(recipe.targetFormula, { enabled: true, expectedSite: "M" }) : undefined; setRecipe({ ...recipe, normalizeLeadingSiteRatios: enabled, siteComposition: normalized?.success ? normalized.value.explicitSiteModel : undefined, radiusDescriptorConfig: undefined }, "site-ratio-normalization", "normalize-leading-site-ratios"); }} type="checkbox" />Normalize leading mixed-site ratios</label>
-        {!recipe.normalizeLeadingSiteRatios && recipe.targetFormula.trim() !== "" && <p className="mt-3 rounded-md border border-slate-300 bg-slate-50 p-3 text-sm"><span className="font-semibold">Entered formula:</span> <span className="select-text font-mono">{recipe.targetFormula}</span></p>}
+        {!recipe.normalizeLeadingSiteRatios && recipe.targetFormula.trim() !== "" && <><p className="mt-3 rounded-md border border-slate-300 bg-slate-50 p-3 text-sm"><span className="font-semibold">Entered target formula:</span> <span className="select-text font-mono">{recipe.targetFormula}</span></p>{workingAdjustedFormula && aluminumFeed.visible && aluminumFeed.enteredCoefficient !== aluminumFeed.idealCoefficient && <p className="mt-2 rounded-md border border-teal-300 bg-teal-50 p-3 text-sm"><span className="font-semibold">Adjusted intended feed formula:</span> <span className="select-text font-mono text-base">{workingAdjustedFormula}</span></p>}</>}
+        {ratioNormalization?.success && normalizedAdjustedFormula && <section aria-label="Target and adjusted feed formulas" className="mt-3 grid gap-2 rounded-md border border-teal-400 bg-white p-3 text-sm"><div><h3 className="text-xs font-semibold uppercase tracking-wide text-slate-600">Normalized target formula</h3><p className="break-all font-mono text-base font-semibold">{normalizedIdealFormula}</p></div><div className="border-t pt-2"><h3 className="text-xs font-semibold uppercase tracking-wide text-slate-600">Expanded target formula</h3><p className="break-all font-mono text-base font-semibold">{expandedIdealFormula}</p></div><div className="border-t-2 border-teal-400 bg-teal-50 p-2"><h3 className="text-xs font-semibold uppercase tracking-wide text-teal-900">Adjusted intended feed formula</h3><p className="break-all font-mono text-lg font-bold text-teal-950">{normalizedAdjustedFormula}</p></div></section>}
         {ratioNormalization?.success && <section aria-labelledby="site-ratio-preview-heading" className="mt-3 rounded-md border border-teal-300 bg-teal-50 p-3 text-sm"><h2 className="font-semibold" id="site-ratio-preview-heading">M-site ratio normalization</h2><p className="mt-1">Entered ratio total: <strong className="font-mono">{ratioNormalization.value.ratioSum.canonical}</strong></p><p>Normalized to M-site multiplicity: <strong className="font-mono">{ratioNormalization.value.requestedMultiplicity.canonical}</strong></p><div className="mt-3 grid gap-2 rounded border border-teal-200 bg-white p-3"><div><h3 className="text-xs font-semibold uppercase tracking-wide text-slate-600">Site-occupancy formula</h3><p className="select-text break-all font-mono text-base font-semibold">{ratioNormalization.value.siteOccupancyFormula}</p><button className="mt-1 rounded border px-2 py-1 text-xs print:hidden" onClick={() => void navigator.clipboard.writeText(ratioNormalization.value.siteOccupancyFormula).then(() => setStatusMessage("Copied site-occupancy formula"))}>Copy site formula</button></div><div className="border-t border-slate-200 pt-2"><h3 className="text-xs font-semibold uppercase tracking-wide text-slate-600">Expanded per-formula formula</h3><p className="select-text break-all font-mono text-base font-semibold">{ratioNormalization.value.expandedPerFormulaFormula}</p><button className="mt-1 rounded border px-2 py-1 text-xs print:hidden" onClick={() => void navigator.clipboard.writeText(ratioNormalization.value.expandedPerFormulaFormula).then(() => setStatusMessage("Copied expanded per-formula formula"))}>Copy expanded formula</button></div></div><div className="mt-2 overflow-x-auto"><table className="min-w-full text-left text-xs"><thead><tr><th className="pr-3">Element</th><th className="pr-3">Entered ratio</th><th className="pr-3">M-site occupancy</th><th>Per formula</th></tr></thead><tbody>{ratioNormalization.value.enteredRatios.map((entry) => <tr key={entry.element}><th className="py-1 pr-3">{entry.element}</th><td className="pr-3 font-mono">{entry.enteredRatio.canonical}</td><td className="pr-3 font-mono">{formatPercent(entry.occupancyApproximation, 5)}</td><td className="font-mono">{formatDescriptor(entry.formulaCoefficientApproximation, "", 6)}</td></tr>)}</tbody></table></div><p className="mt-2 font-semibold">Derived explicit site model: {ratioNormalization.value.siteModelLabel}</p><p className="text-xs">Ideal template: {ratioNormalization.value.idealTemplateFormula} · Intended feed preserves {ratioNormalization.value.intendedFeedXElement}{ratioNormalization.value.intendedFeedXCoefficientText}.</p><details className="mt-2"><summary className="cursor-pointer font-medium">Show exact normalized values</summary><ul className="mt-1 space-y-1 font-mono text-xs">{ratioNormalization.value.enteredRatios.map((entry) => <li key={`exact-${entry.element}`}>{entry.element}: occupancy {entry.normalizedOccupancy.canonical}; per formula {entry.normalizedFormulaCoefficient.canonical}</li>)}<li>{ratioNormalization.value.intendedFeedXElement}: per formula {ratioNormalization.value.intendedFeedXCoefficient.canonical}</li></ul><p className="mt-2 text-xs">Exact calculation composition ×{ratioNormalization.value.calculationCompositionScaleFactor.canonical}: {formatComposition(ratioNormalization.value.calculationComposition.amounts)}</p></details></section>}
         {recipe.targetFormula.trim() !== "" && calculation.errors.filter((item) => item.fieldPath === "targetFormula").map((error) => <p className="mt-2 text-sm font-medium text-red-800" id="formula-error" key={error.code}>Error: {error.message}</p>)}
 
-        <div className="mt-5 flex items-center justify-between"><h2 className="font-semibold">Precursors</h2><button className="min-h-9 rounded-md border border-slate-400 px-3 text-sm font-medium" onClick={addPrecursor}>Add precursor</button></div>
+        <div className="mt-5"><h2 className="font-semibold">Precursors</h2><div className="mt-2 flex flex-wrap gap-2"><button className="min-h-9 rounded-md bg-teal-800 px-3 text-sm font-semibold text-white disabled:bg-slate-300" disabled={!suggestionTarget} onClick={() => void showSuggestions()} ref={suggestRef}>Suggest precursors</button><button className="min-h-9 rounded-md border border-teal-700 px-3 text-sm font-medium text-teal-900 disabled:text-slate-400" disabled={!suggestionTarget || !(suggestionResult ?? builtInSuggestions)?.suggestions.length} onClick={() => void autofillBest()}>Autofill best candidate</button><button className="min-h-9 rounded-md border border-slate-400 px-3 text-sm font-medium" onClick={addPrecursor}>Add precursor</button><button aria-label="Clear all precursors" className="min-h-9 rounded-md border border-red-400 px-3 text-sm font-medium text-red-800 disabled:border-slate-300 disabled:text-slate-400" disabled={!recipe.precursors.length} onClick={clearAllPrecursors}>Clear all</button></div></div>
+        {suggestionTarget && recipe.precursors.length === 0 && !suggestionOpen && Boolean(builtInSuggestions?.suggestions.length) && <p className="mt-2 rounded border border-teal-200 bg-teal-50 p-2 text-sm">Candidate precursor routes available. Suggestions are deterministic starting points, not experimental-success predictions.</p>}
+        {currentRouteInvalid && dismissedCoverageFormula !== recipe.targetFormula && <section aria-live="polite" className="mt-2 rounded border border-amber-400 bg-amber-50 p-3 text-sm"><p className="font-semibold text-amber-950">Current precursor route no longer covers all target elements.</p>{currentRouteAssessment?.missingElements.length ? <p className="mt-1">Missing registered source in the current route: <span className="font-mono">{currentRouteAssessment.missingElements.join(", ")}</span></p> : <p className="mt-1">The exact non-negative balance is infeasible for the current target.</p>}<div className="mt-2 flex flex-wrap gap-2"><button className="rounded bg-amber-900 px-3 py-1 text-white" onClick={() => void showSuggestions()}>Suggest replacements</button><button className="rounded border border-amber-700 px-3 py-1" onClick={() => setDismissedCoverageFormula(recipe.targetFormula)}>Keep current route</button><button className="rounded border border-red-500 px-3 py-1 text-red-900" onClick={clearAllPrecursors}>Clear precursors</button></div></section>}
+        {suggestionOpen && <section aria-labelledby="precursor-suggestions-heading" className="mt-3 rounded-md border border-teal-300 bg-teal-50 p-3" id="precursor-suggestions" tabIndex={-1}><div className="flex items-start justify-between gap-3"><div><h3 className="font-semibold" id="precursor-suggestions-heading">Suggested precursors</h3><p className="text-xs text-slate-700">Deterministic candidate routes only. Verify material form, purity, hazards, and experimental suitability.</p></div><button aria-label="Close precursor suggestions" className="rounded border px-2 py-1 text-sm" onClick={() => setSuggestionOpen(false)}>Close</button></div><div className="mt-3 space-y-2">{(suggestionResult ?? builtInSuggestions)?.suggestions.map((candidate, index) => <article className="rounded border border-teal-200 bg-white p-3" key={candidate.candidateId}><h4 className="font-semibold">Candidate {index + 1} — {candidate.name}</h4><p className="mt-1 font-mono text-sm">{candidate.precursorFormulas.join(" · ")}</p><p className="mt-1 text-xs"><span className="font-semibold">{candidate.sourceType.replaceAll("-", " ")}</span> · {candidate.validationStatus} · {candidate.solverStatus}</p><p className="mt-1 text-xs">{candidate.explanation}</p><p className="mt-1 text-xs">{candidate.introducedNonTargetElements.length ? `Introduced non-target elements: ${candidate.introducedNonTargetElements.join(", ")}` : "No non-target elements"}</p><button className="mt-2 rounded bg-teal-800 px-3 py-1 text-sm font-semibold text-white" onClick={() => applySuggestion(candidate)}>Use this route</button></article>)}{!(suggestionResult ?? builtInSuggestions)?.suggestions.length && <p className="rounded border border-amber-300 bg-amber-50 p-2 text-sm">No usable candidate route was found. {(suggestionResult ?? builtInSuggestions)?.diagnostics.map((item) => item.message).join(" ")}</p>}</div></section>}
         <div className="mt-2 space-y-3">{recipe.precursors.map((item, index) => {
           const rowWarnings = diagnosticPresentation?.action.filter((warning) => warning.precursorIds.includes(item.id)) ?? [];
-          return <fieldset className="rounded-md border border-slate-300 p-3" key={item.id}><legend className="px-1 text-xs font-semibold uppercase tracking-wide text-slate-600">Route row {index + 1}</legend><div className="grid grid-cols-[minmax(0,1fr)_7rem_auto] gap-2"><label className="text-xs font-medium" htmlFor={`precursor-formula-${item.id}`}>Formula<input className="mt-1 min-h-10 w-full rounded border border-slate-400 px-2 font-mono" data-primary-field id={`precursor-formula-${item.id}`} onChange={(event) => setRecipe(replacePrecursor(recipe, index, { formula: event.target.value, name: event.target.value || item.name }))} value={item.formula} /></label><label className="text-xs font-medium" htmlFor={`purity-${item.id}`}>Purity<input className="mt-1 min-h-10 w-full rounded border border-slate-400 px-2 font-mono" data-primary-field id={`purity-${item.id}`} inputMode="decimal" onChange={(event) => setRecipe(replacePrecursor(recipe, index, { purityPercent: event.target.value }))} value={item.purityPercent} /></label><span className="mt-5 text-xs text-slate-500">%</span></div><div className="mt-2 flex flex-wrap gap-1"><button aria-label={`Move ${item.name} up`} className="min-h-8 min-w-8 rounded border" disabled={index === 0} onClick={() => movePrecursor(index, -1)}>↑</button><button aria-label={`Move ${item.name} down`} className="min-h-8 min-w-8 rounded border" disabled={index === recipe.precursors.length - 1} onClick={() => movePrecursor(index, 1)}>↓</button><button aria-label={`Remove ${item.name}`} className="min-h-8 rounded border border-red-300 px-2 text-xs text-red-800" onClick={() => removePrecursor(index)}>Remove</button></div>{rowWarnings.map((warning) => <p className="mt-2 text-xs font-medium text-amber-900" key={warning.id}>Review: {warning.message}</p>)}</fieldset>;
+          return <fieldset className="rounded-md border border-slate-300 p-3" key={item.id}><legend className="px-1 text-xs font-semibold uppercase tracking-wide text-slate-600">Route row {index + 1}</legend><div className="grid grid-cols-[minmax(0,1fr)_7rem_auto] gap-2"><label className="text-xs font-medium" htmlFor={`precursor-formula-${item.id}`}>Formula<input className="mt-1 min-h-10 w-full rounded border border-slate-400 px-2 font-mono" data-primary-field id={`precursor-formula-${item.id}`} onChange={(event) => setRecipe(replacePrecursor(recipe, index, { formula: event.target.value, name: event.target.value || item.name }))} value={item.formula} /></label><label className="text-xs font-medium" htmlFor={`purity-${item.id}`}>Purity<input className="mt-1 min-h-10 w-full rounded border border-slate-400 px-2 font-mono" data-primary-field id={`purity-${item.id}`} inputMode="decimal" onChange={(event) => setRecipe(replacePrecursor(recipe, index, { purityPercent: event.target.value }))} placeholder="default" value={item.purityPercent} /></label><span className="mt-5 text-xs text-slate-500">%</span></div><div className="mt-2 flex flex-wrap gap-1"><button aria-label={`Move ${item.name} up`} className="min-h-8 min-w-8 rounded border" disabled={index === 0} onClick={() => movePrecursor(index, -1)}>↑</button><button aria-label={`Move ${item.name} down`} className="min-h-8 min-w-8 rounded border" disabled={index === recipe.precursors.length - 1} onClick={() => movePrecursor(index, 1)}>↓</button><button aria-label={`Remove ${item.name}`} className="min-h-8 rounded border border-red-300 px-2 text-xs text-red-800" onClick={() => removePrecursor(index)}>Remove</button></div>{item.purityPercent.trim() === "" && <p className="mt-1 text-xs text-slate-600">No registry purity stored; calculation uses the engine’s visible assumed-purity default until reviewed.</p>}{rowWarnings.map((warning) => <p className="mt-2 text-xs font-medium text-amber-900" key={warning.id}>Review: {warning.message}</p>)}</fieldset>;
         })}</div>
 
         {mode === "advanced" && <AtomicRadiusPanel config={recipe.radiusDescriptorConfig} onConfigChange={(radiusDescriptorConfig) => setRecipe({ ...recipe, radiusDescriptorConfig })} onConfigureSites={() => setStatusMessage("Choose an explicit 211, 312, 413, or custom site model and assign every occupant; no sites were inferred from the flat formula.")} siteModel={recipe.siteComposition} />}
@@ -468,7 +528,7 @@ export function WorkspaceShell() {
           <label className="block text-sm font-medium" htmlFor="batch-basis">Batch-mass basis<select className="mt-1 min-h-10 w-full rounded border border-slate-400 bg-white px-2" data-primary-field id="batch-basis" onChange={(event) => setRecipe({ ...recipe, basis: event.target.value as BatchMassBasis })} value={recipe.basis}><option value="ideal-product-mass">Ideal product mass</option><option value="recovered-product-mass">Recovered product mass</option><option value="final-precursor-mixture-mass">Final precursor mixture mass</option></select></label>
           <label className="block text-sm font-medium" htmlFor="batch-mass">Target batch mass<span className="mt-1 flex rounded border border-slate-400"><input className="min-h-10 min-w-0 flex-1 px-3 font-mono" data-primary-field id="batch-mass" inputMode="decimal" onChange={(event) => setRecipe({ ...recipe, requestedMassGrams: event.target.value })} ref={batchRef} value={recipe.requestedMassGrams} /><span className="flex items-center border-l bg-slate-100 px-3 text-xs">g</span></span></label>
           {recipe.basis === "recovered-product-mass" && <div className="sm:col-span-2"><NumberField id="yield" label="Expected reaction yield" onChange={(value) => setRecipe({ ...recipe, expectedYieldPercent: value })} unit="%" value={recipe.expectedYieldPercent} /></div>}
-          <NumberField id="al-excess" label="Elemental Al excess" onChange={(value) => setRecipe({ ...recipe, alExcessPercent: value })} unit="%" value={recipe.alExcessPercent} />
+          {aluminumFeed.visible && <label className="block text-sm font-medium" htmlFor="aluminum-per-formula">Aluminum per formula<input aria-describedby={aluminumFeed.error ? "aluminum-per-formula-error" : "aluminum-per-formula-help"} className="mt-1 min-h-10 w-full rounded-md border border-slate-400 px-3 font-mono outline-none focus:border-teal-700 focus:ring-2 focus:ring-teal-200" id="aluminum-per-formula" inputMode="decimal" onChange={(event) => setRecipe({ ...recipe, aluminumPerFormula: event.target.value })} value={recipe.aluminumPerFormula ?? aluminumFeed.enteredCoefficient ?? ""} /><span className="mt-1 block text-xs font-normal text-slate-600" id="aluminum-per-formula-help">Ideal value: {aluminumFeed.idealCoefficient} · {aluminumHelper}</span>{aluminumFeed.error && <span className="mt-1 block text-xs font-semibold text-red-800" id="aluminum-per-formula-error">{aluminumFeed.error}</span>}</label>}
           {xComponent.success && <label className="block text-sm font-medium" htmlFor="x-per-formula">{xComponent.value.element === "C" ? "Carbon" : "Nitrogen"} per formula<input aria-describedby={xCoefficientError ? "x-per-formula-error" : "x-per-formula-help"} className="mt-1 min-h-10 w-full rounded-md border border-slate-400 px-3 font-mono outline-none focus:border-teal-700 focus:ring-2 focus:ring-teal-200" id="x-per-formula" inputMode="decimal" onChange={(event) => updateXCoefficient(event.target.value)} value={xCoefficientDraft ?? xComponent.value.enteredCoefficientText} /><span className="mt-1 block text-xs font-normal text-slate-600" id="x-per-formula-help">{xFeedHelper}</span>{xCoefficientError && <span className="mt-1 block text-xs font-semibold text-red-800" id="x-per-formula-error">{xCoefficientError}</span>}</label>}
           <NumberField id="handling-loss" label="Handling loss" onChange={(value) => setRecipe({ ...recipe, handlingLossPercent: value })} unit="%" value={recipe.handlingLossPercent} />
           <NumberField id="balance-increment" label="Balance increment" onChange={(value) => setRecipe({ ...recipe, balanceIncrementGrams: value })} unit="g" value={recipe.balanceIncrementGrams} />
@@ -495,3 +555,6 @@ export function WorkspaceShell() {
     {displayed && <section aria-labelledby="print-radius-heading" className="hidden mx-auto mb-6 max-w-[1500px] border-y border-slate-300 bg-white p-4 text-sm print:block"><h2 className="font-semibold" id="print-radius-heading">Site-radius screening descriptors</h2><p>{recipe.radiusDescriptorConfig ? "Per-site dataset selections, resolved values, trust status, and descriptor results are preserved with this calculation snapshot and its JSON/CSV export." : "No site-radius descriptor configuration is attached to this calculation."}</p><p>Screening descriptor only; not a direct prediction of physical stress, lattice strain, phase stability, or synthesis success.</p></section>}
   </main>;
 }
+
+function coefficientSuffix(value: string): string { return value === "1" ? "" : value; }
+function compositionFormula(amounts: Readonly<Record<string, string>>, preferredOrderFormula = ""): string { const preferred = [...preferredOrderFormula.matchAll(/[A-Z][a-z]?/g)].map((match) => match[0]!); const ordered = [...new Set([...preferred, ...Object.keys(amounts)])].filter((element) => amounts[element] !== undefined); return ordered.map((element) => `${element}${coefficientSuffix(amounts[element]!)}`).join(""); }

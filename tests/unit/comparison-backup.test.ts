@@ -13,7 +13,7 @@ import { canonicalRadiusDatasetContent, type AtomicRadiusDataset } from "../../p
 import { sha256Hex, stableCanonicalize } from "../../lib/persistence/canonical";
 
 const repositories: LocalDataRepositories[] = [];
-function state(patch: Partial<WorkspaceRecipeState> = {}): WorkspaceRecipeState { return { transientId: "compare-test", presetId: "custom", targetFormula: "Ti2AlN", precursors: ["Ti", "Al", "N"].map((formula) => ({ id: formula.toLowerCase(), name: formula, formula, purityPercent: "100", constraintMode: "solver" as const, fixedValue: "", minimum: "", maximum: "", ratioDenominatorId: "", numeratorRatio: "1", denominatorRatio: "1", molarMassOverride: "", molarMassOverrideSource: "" })), requestedMassGrams: "10", basis: "ideal-product-mass", expectedYieldPercent: "80", alExcessPercent: "0", precursorExcessId: "", precursorExcessPercent: "0", handlingLossPercent: "0", balanceIncrementGrams: "0.001", roundingMode: "nearest-half-even", practicalMinimumMassGrams: "0.001", objective: "deterministic-feasible", ...patch }; }
+function state(patch: Partial<WorkspaceRecipeState> = {}): WorkspaceRecipeState { return { transientId: "compare-test", presetId: "custom", targetFormula: "Ti2AlN", precursors: ["Ti", "Al", "N"].map((formula) => ({ id: formula.toLowerCase(), name: formula, formula, purityPercent: "100", constraintMode: "solver" as const, fixedValue: "", minimum: "", maximum: "", ratioDenominatorId: "", numeratorRatio: "1", denominatorRatio: "1", molarMassOverride: "", molarMassOverrideSource: "" })), requestedMassGrams: "10", basis: "ideal-product-mass", expectedYieldPercent: "80", aluminumPerFormula: "1", precursorExcessId: "", precursorExcessPercent: "0", handlingLossPercent: "0", balanceIncrementGrams: "0.001", roundingMode: "nearest-half-even", practicalMinimumMassGrams: "0.001", objective: "deterministic-feasible", ...patch }; }
 function repo(): LocalDataRepositories { const value = new LocalDataRepositories(new MaxStoichDatabase(`milestone-${crypto.randomUUID()}`)); repositories.push(value); return value; }
 function result(input = state()) { const calculation = buildWorkspaceCalculation(input); if (calculation.state !== "valid" && calculation.state !== "valid-with-warnings") throw new Error(calculation.errors[0]?.message); return calculation.result; }
 afterEach(async () => { while (repositories.length) await repositories.pop()!.deleteDatabase(); });
@@ -64,7 +64,7 @@ describe("route comparison model and deterministic differences", () => {
     const repository = repo(); const workspace = createComparisonWorkspace(state());
     await repository.saveComparison(workspace);
     const opened = await repository.getComparison(workspace.id);
-    expect(opened).toEqual({ ...workspace, schemaVersion: "5.0.0", updatedAt: opened?.updatedAt });
+    expect(opened).toEqual({ ...workspace, schemaVersion: "6.0.0", updatedAt: opened?.updatedAt });
     expect((await repository.checkIntegrity()).valid).toBe(true);
   });
 

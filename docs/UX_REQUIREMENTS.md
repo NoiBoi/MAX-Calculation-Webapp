@@ -12,7 +12,7 @@ The main workflow is a single desktop screen with a narrow top command bar and t
 | Formula [TiNbAlN       ]   | Precursor | formula | purity | moles | FINAL MASS |
 | Route   [NbN route     v]  | ...                                               |
 | Batch   [10.000] g         |                                                   |
-| Al excess [ 5.0] %         | Warnings appear inline beneath affected rows      |
+| Aluminum/formula [1.2]     | Warnings appear inline beneath affected rows      |
 | [site summary disclosure]  |                                                   |
 +----------------------------+---------------------------------------------------+
 | SUMMARY: ideal → excess → purity → loss → rounded | total | residual | version |
@@ -35,7 +35,7 @@ At narrower widths, composition/route becomes a collapsible top section above th
 
 - Valid changes update results immediately; formula paste may debounce no more than 150 ms.
 - A compact `Normalize leading mixed-site ratios` checkbox sits beside the target input. It is off by default and never changes the entered text. When enabled for supported 211/312/413 syntax, an inline preview shows the entered ratio total, requested M multiplicity, percentage occupancy, per-formula coefficient, ideal-versus-feed meaning, selectable site-occupancy and expanded formulas, copy actions, generated explicit site model, and expandable exact fractions. Disabling it immediately restores ordinary formula grouping and prominently shows the entered formula without clearing or integer-scaling it.
-- The common-adjustment grid places `Elemental Al excess` beside a dynamically labeled `Carbon per formula` or `Nitrogen per formula` control, followed by handling loss and balance increment. The X coefficient is synchronized with supported formula text and is the authoritative intended-feed requirement before solving. It shows ideal-template and deficiency/excess help, accepts positive decimals, and is unavailable for ambiguous mixed C/N formulas.
+- The common-adjustment grid places `Aluminum per formula` beside a dynamically labeled `Carbon per formula` or `Nitrogen per formula` control, followed by handling loss and balance increment. Both are positive direct molar coefficients used before solving. Aluminum help labels stoichiometric, below-ideal, or above-ideal state; percentages are explanatory only. Targets without Al hide the shortcut. Normalized target, expanded target, and adjusted intended-feed formulas remain visibly distinct.
 - Invalid input preserves the last valid result but marks it stale and ties the message to the field.
 - Enter commits and moves to the next logical field; Escape closes only temporary disclosures.
 - Adding an occupant/precursor focuses its first editable field. Removing one focuses the nearest surviving row.
@@ -75,7 +75,7 @@ Two calculation columns share a locked composition header. Differences in route,
 
 ## Measurable usability acceptance criteria
 
-1. A trained user loads a built-in mixed-site example, changes batch mass and Al excess, reviews warnings, and reaches the trace without navigation or a pointer-only step.
+1. A trained user loads a built-in mixed-site example, changes batch mass and the aluminum feed coefficient, reviews warnings, and reaches the trace without navigation or a pointer-only step.
 2. A built-in example reaches final masses immediately after app open.
 3. Every routine action is keyboard reachable in a logical order with no focus trap.
 4. Standard/advanced toggling 20 times preserves byte-equivalent recipe state.
@@ -108,5 +108,14 @@ Advanced mode contains a semantic Site descriptors panel. It shows explicit site
 # Remediated workspace requirements
 
 The single-row responsive command bar, mode/layout distinction, blank/example behavior, and layout semantics are normative as documented in `NAVIGATION_MODE_MODEL.md`. Standard hides matrix/rank/exact residual/constraint/trace/dataset internals. Advanced exposes those capabilities without changing inputs. The weighing table never prints diagnostic codes in its status column.
+
+# Precursor-suggestion and management requirements
+
+- `Suggest precursors`, `Autofill best candidate`, `Add precursor`, and destructive-styled `Clear all` remain beside the precursor heading.
+- Suggestion cards expose formulas, source type, validation status, exact solver status, introduced elements, explanation, and a separate Use action. They state that candidates are not experimental-success predictions.
+- Autofill confirms replacement of a non-empty list, preserves registered IDs, and leaves purity blank unless the source record explicitly stores it.
+- Clear all confirms the row count, preserves target/settings/adjustments, never deletes registry or saved-route data, returns focus to Suggest, and is one undo step.
+- A target change never replaces the active route. An invalid old route offers Suggest replacements, Keep current route, and Clear precursors.
+- Route origin (`manual`, `loaded`, or `suggestion-generated`) persists as workflow metadata but does not affect scientific arithmetic or canonical input digests.
 
 Blocking and action-required issues expand by default; minor advisories and calculation details are collapsed. Information never uses warning color or count. Display formatting follows `SCIENTIFIC_FORMATTING.md`, including balance-increment mass precision and exact-value access. The per-site radius selector reports definition, version, coverage, source-verification status, and separate laboratory approval.

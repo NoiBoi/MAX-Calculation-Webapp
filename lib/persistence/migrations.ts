@@ -1,4 +1,5 @@
 import { LOCAL_SCHEMA_VERSION } from "./entities";
+import { migrateWorkspaceAluminumInput } from "../workspace/aluminum-feed";
 
 export interface Migration {
   readonly fromVersion: number;
@@ -41,7 +42,20 @@ export const LOCAL_MIGRATIONS: readonly Migration[] = Object.freeze([
       return { ...(record as Record<string, unknown>), schemaVersion: LOCAL_SCHEMA_VERSION };
     },
   }),
+  Object.freeze({
+    fromVersion: 5,
+    toVersion: 6,
+    migrate(record: unknown): unknown {
+      if (!record || typeof record !== "object") return record;
+      return { ...(record as Record<string, unknown>), schemaVersion: LOCAL_SCHEMA_VERSION };
+    },
+  }),
 ]);
+
+export function migrateEditableWorkspaceInput(record: unknown): unknown {
+  if (!record || typeof record !== "object") return record;
+  return migrateWorkspaceAluminumInput(record as Parameters<typeof migrateWorkspaceAluminumInput>[0]);
+}
 
 export function migrateRecord(record: unknown, fromVersion: number, toVersion: number): unknown {
   let value = record;
