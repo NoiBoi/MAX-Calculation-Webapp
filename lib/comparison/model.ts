@@ -1,3 +1,4 @@
+import { normalizeLeadingSiteRatioGroup, parseFormula, siteCompositionToElementalComposition } from "@max-stoich/chemistry-engine";
 import type { WorkspaceCalculationState, WorkspaceRecipeState } from "../workspace/adapter";
 import { buildWorkspaceCalculation } from "../workspace/adapter";
 import type { ComparisonScenario, ComparisonWorkspace, PersistedValidationStatus } from "../persistence/entities";
@@ -12,11 +13,34 @@ function scenario(name: string, inputState: WorkspaceRecipeState, source: Compar
   return { id: localId("scenario"), name, source, inputState: clone(inputState), validationStatus };
 }
 
-export function createComparisonWorkspace(input: WorkspaceRecipeState, name = `${input.targetFormula} route comparison`): ComparisonWorkspace {
+export function createComparisonWorkspace(input?: WorkspaceRecipeState, name = input?.targetFormula ? `${input.targetFormula} route comparison` : "Untitled comparison"): ComparisonWorkspace {
   const now = new Date().toISOString();
-  const first = scenario("Scenario A", input, { kind: "working-recipe" }, "synthetic");
-  const second = scenario("Scenario B", input, { kind: "duplicate", scenarioId: first.id }, "synthetic");
-  return { schemaVersion: "3.0.0", id: localId("comparison"), name, sharedTarget: { targetFormula: input.targetFormula, ...(input.siteComposition ? { siteComposition: clone(input.siteComposition) } : {}) }, scenarios: [first, second], selectedMetrics: ["total-mass", "active-precursors", "largest-residual", "warning-count", "mass-closeness"], focusedScenarioId: first.id, layoutId: "builtin-route-comparison", notes: "", validationStatus: "synthetic", historical: false, createdAt: now, updatedAt: now };
+  return { schemaVersion: "3.0.0", id: localId("comparison"), name, sharedTarget: { targetFormula: input?.targetFormula ?? "", ...(input?.siteComposition ? { siteComposition: clone(input.siteComposition) } : {}) }, scenarios: [], selectedMetrics: ["total-mass", "active-precursors", "largest-residual", "warning-count", "mass-closeness"], focusedScenarioId: "", layoutId: "builtin-route-comparison", notes: "", validationStatus: "synthetic", historical: false, createdAt: now, updatedAt: now };
+}
+
+export function addComparisonScenario(workspace: ComparisonWorkspace, input: WorkspaceRecipeState, name: string, source: ComparisonScenario["source"], validationStatus: PersistedValidationStatus): ComparisonWorkspace {
+  if (workspace.scenarios.length >= MAX_COMPARISON_SCENARIOS) throw new Error(`A comparison supports at most ${MAX_COMPARISON_SCENARIOS} scenarios.`);
+  const added = scenario(name, input, source, validationStatus);
+  const sharedTarget = workspace.scenarios.length === 0 ? { targetFormula: input.targetFormula, ...(input.siteComposition ? { siteComposition: clone(input.siteComposition) } : {}) } : workspace.sharedTarget;
+  return { ...workspace, sharedTarget, scenarios: [...workspace.scenarios, added], focusedScenarioId: added.id, historical: false, updatedAt: new Date().toISOString() };
+}
+
+function targetAmounts(input: WorkspaceRecipeState): Readonly<Record<string, string>> | undefined {
+  const normalized = input.normalizeLeadingSiteRatios ? normalizeLeadingSiteRatioGroup(input.targetFormula, { enabled: true, expectedSite: "M" }) : undefined;
+  if (normalized?.success) return normalized.value.idealCalculationComposition.amounts;
+  if (input.siteComposition) {
+    const converted = siteCompositionToElementalComposition(input.siteComposition);
+    return converted.success ? converted.value.amounts : undefined;
+  }
+  const parsed = parseFormula(input.targetFormula);
+  return parsed.success ? parsed.composition.amounts : undefined;
+}
+
+export function scientificallyEquivalentWorkspaceTargets(left: WorkspaceRecipeState, right: WorkspaceRecipeState): boolean {
+  const a = targetAmounts(left); const b = targetAmounts(right);
+  if (!a || !b) return false;
+  const keys = [...new Set([...Object.keys(a), ...Object.keys(b)])].sort();
+  return keys.every((key) => a[key] === b[key]);
 }
 
 export function updateSharedTarget(workspace: ComparisonWorkspace, target: ComparisonWorkspace["sharedTarget"]): ComparisonWorkspace {
@@ -36,9 +60,8 @@ export function duplicateScenario(workspace: ComparisonWorkspace, scenarioId: st
 }
 
 export function removeScenario(workspace: ComparisonWorkspace, scenarioId: string): ComparisonWorkspace {
-  if (workspace.scenarios.length <= 2) throw new Error("A route comparison must retain at least two scenarios.");
   const scenarios = workspace.scenarios.filter((item) => item.id !== scenarioId);
-  return { ...workspace, scenarios, focusedScenarioId: workspace.focusedScenarioId === scenarioId ? scenarios[0]!.id : workspace.focusedScenarioId, historical: false, updatedAt: new Date().toISOString() };
+  return { ...workspace, scenarios, focusedScenarioId: workspace.focusedScenarioId === scenarioId ? scenarios[0]?.id ?? "" : workspace.focusedScenarioId, historical: false, updatedAt: new Date().toISOString() };
 }
 
 export function calculateComparison(workspace: ComparisonWorkspace): Readonly<Record<string, WorkspaceCalculationState>> {

@@ -31,3 +31,6 @@ Undo/redo uses immutable before/after recipe commands. Edits sharing a field key
 Copy produces tab-delimited `Precursor`, `Formula`, `Purity`, `Final weighing mass`, and `Unit` columns from the visible result. CSV is UTF-8 BOM, standards-quoted, tidy one-row-per-precursor data with repeated provenance, separate exact solver and decimal approximation columns. JSON uses export schema `1.0.0` and embeds structured scientific input/result plus digests and versions. Print CSS removes navigation and inputs while retaining tables, warnings, summary, and versions.
 
 Copy, CSV, JSON, and print are blocked for invalid or stale current work. A verified historical snapshot remains exportable as the saved record.
+# Comparison persistence behavior
+
+Comparison assembly is an in-memory working operation. Empty and one-scenario workspaces are valid while assembling but are not persisted as completed route comparisons. Saved comparisons require two to four scientifically equivalent target definitions. Saving snapshots every currently valid scenario, preserves invalid scenario inputs without inventing results, writes the stable comparison ID with scenario order and source recipe/revision metadata, and reads the record back before showing `Comparison saved`. Repository or IndexedDB failure does not replace the working state.

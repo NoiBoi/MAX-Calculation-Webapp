@@ -19,4 +19,9 @@ body { margin: 0; }
   main > div > section:first-child { display: none !important; }
   table { break-inside: avoid; }
   .print\:hidden { display: none !important; }
+  body:has(.weighing-summary-dialog[open]) main > *:not(.weighing-summary-dialog) { display: none !important; }
+  .weighing-summary-dialog[open] { position: static !important; display: block !important; width: auto !important; max-width: none !important; max-height: none !important; overflow: visible !important; border: 0 !important; padding: 0 !important; }
+  .weighing-summary-dialog::backdrop, .summary-control { display: none !important; }
+  .weighing-summary-print-root { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0 !important; }
+  .weighing-summary-card { break-inside: avoid; box-shadow: none !important; }
 }

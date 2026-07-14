@@ -2,7 +2,7 @@ import "fake-indexeddb/auto";
 import { afterEach, describe, expect, it } from "vitest";
 import { buildLaboratoryJson } from "../../lib/export/laboratory-export";
 import { compareScenarios } from "../../lib/comparison/difference";
-import { calculateComparison, createComparisonWorkspace, duplicateScenario, removeScenario, updateScenario, updateSharedTarget } from "../../lib/comparison/model";
+import { addComparisonScenario, calculateComparison, createComparisonWorkspace, duplicateScenario, removeScenario, updateScenario, updateSharedTarget } from "../../lib/comparison/model";
 import { createLocalBackup, createOwnedRecordExport, importApplicationCalculation, importOwnedRecord, previewApplicationCalculation, previewBackup, previewOwnedRecord, restoreBackup, serializeBackup } from "../../lib/persistence/backup";
 import { MaxStoichDatabase } from "../../lib/persistence/database";
 import { LocalDataRepositories } from "../../lib/persistence/repositories";
@@ -16,11 +16,16 @@ const repositories: LocalDataRepositories[] = [];
 function state(patch: Partial<WorkspaceRecipeState> = {}): WorkspaceRecipeState { return { transientId: "compare-test", presetId: "custom", targetFormula: "Ti2AlN", precursors: ["Ti", "Al", "N"].map((formula) => ({ id: formula.toLowerCase(), name: formula, formula, purityPercent: "100", constraintMode: "solver" as const, fixedValue: "", minimum: "", maximum: "", ratioDenominatorId: "", numeratorRatio: "1", denominatorRatio: "1", molarMassOverride: "", molarMassOverrideSource: "" })), requestedMassGrams: "10", basis: "ideal-product-mass", expectedYieldPercent: "80", aluminumPerFormula: "1", precursorExcessId: "", precursorExcessPercent: "0", handlingLossPercent: "0", balanceIncrementGrams: "0.001", roundingMode: "nearest-half-even", practicalMinimumMassGrams: "0.001", objective: "deterministic-feasible", ...patch }; }
 function repo(): LocalDataRepositories { const value = new LocalDataRepositories(new MaxStoichDatabase(`milestone-${crypto.randomUUID()}`)); repositories.push(value); return value; }
 function result(input = state()) { const calculation = buildWorkspaceCalculation(input); if (calculation.state !== "valid" && calculation.state !== "valid-with-warnings") throw new Error(calculation.errors[0]?.message); return calculation.result; }
+function comparison(input = state()) { let workspace = createComparisonWorkspace(input); workspace = addComparisonScenario(workspace, input, "First route", { kind: "working-recipe" }, "synthetic"); return addComparisonScenario(workspace, input, "Second route", { kind: "duplicate", scenarioId: workspace.scenarios[0]!.id }, "synthetic"); }
 afterEach(async () => { while (repositories.length) await repositories.pop()!.deleteDatabase(); });
 
 describe("route comparison model and deterministic differences", () => {
+  it("opens as an empty workspace without placeholder scenarios", () => {
+    expect(createComparisonWorkspace().scenarios).toEqual([]);
+  });
+
   it("locks the shared target while keeping scenario routes independent", () => {
-    let workspace = createComparisonWorkspace(state());
+    let workspace = comparison();
     const [first, second] = workspace.scenarios;
     workspace = updateScenario(workspace, second!.id, (input) => ({ ...input, requestedMassGrams: "20", precursors: input.precursors.map((item) => item.id === "al" ? { ...item, purityPercent: "90" } : item) }));
     expect(workspace.scenarios.find((item) => item.id === first!.id)?.inputState.requestedMassGrams).toBe("10");
@@ -30,7 +35,7 @@ describe("route comparison model and deterministic differences", () => {
   });
 
   it("preserves a scenario-specific target when recalculating an alternative composition", () => {
-    let workspace = createComparisonWorkspace(state({ targetFormula: "(TiVMo2W)4AlC2.7" }));
+    let workspace = comparison(state({ targetFormula: "(TiVMo2W)4AlC2.7" }));
     const endpoint = workspace.scenarios[1]!;
     workspace = {
       ...workspace,
@@ -42,7 +47,7 @@ describe("route comparison model and deterministic differences", () => {
 
   it("calculates Mo-only and W-only ratio endpoints with matching elemental routes", () => {
     const precursor = (formula: string) => ({ id: formula.toLowerCase(), name: formula, formula, purityPercent: "100", constraintMode: "solver" as const, fixedValue: "", minimum: "", maximum: "", ratioDenominatorId: "", numeratorRatio: "1", denominatorRatio: "1", molarMassOverride: "", molarMassOverrideSource: "" });
-    let workspace = createComparisonWorkspace(state());
+    let workspace = comparison();
     const [moEndpoint, wEndpoint] = workspace.scenarios;
     workspace = {
       ...workspace,
@@ -57,7 +62,7 @@ describe("route comparison model and deterministic differences", () => {
   });
 
   it("duplicates, enforces limits, and makes scenario removal reversible by immutable state", () => {
-    const original = createComparisonWorkspace(state());
+    const original = comparison();
     let workspace = duplicateScenario(original, original.scenarios[0]!.id);
     workspace = duplicateScenario(workspace, workspace.scenarios[0]!.id);
     expect(workspace.scenarios).toHaveLength(4);
@@ -69,7 +74,7 @@ describe("route comparison model and deterministic differences", () => {
   });
 
   it("aligns canonical precursor compositions, says missing rows are absent structurally, and never merges by display name", () => {
-    let workspace = createComparisonWorkspace(state());
+    let workspace = comparison();
     const second = workspace.scenarios[1]!;
     workspace = updateScenario(workspace, second.id, (input) => ({ ...input, precursors: [{ ...input.precursors[0]!, id: "different-ti", name: "same display", formula: "Ti" }, { ...input.precursors[1]!, id: "tin", name: "same display", formula: "TiN" }] }));
     const difference = compareScenarios(workspace.scenarios, calculateComparison(workspace));
@@ -79,7 +84,7 @@ describe("route comparison model and deterministic differences", () => {
   });
 
   it("keeps one infeasible scenario isolated and reports warning/status differences", () => {
-    let workspace = createComparisonWorkspace(state()); const second = workspace.scenarios[1]!;
+    let workspace = comparison(); const second = workspace.scenarios[1]!;
     workspace = updateScenario(workspace, second.id, (input) => ({ ...input, precursors: input.precursors.filter((item) => item.id !== "n") }));
     const calculations = calculateComparison(workspace); const difference = compareScenarios(workspace.scenarios, calculations);
     expect(calculations[workspace.scenarios[0]!.id]?.state).toMatch(/^valid/);
@@ -88,15 +93,33 @@ describe("route comparison model and deterministic differences", () => {
   });
 
   it("persists historical comparison results without recalculation", async () => {
-    const repository = repo(); const workspace = createComparisonWorkspace(state());
+    const repository = repo(); const workspace = comparison();
     await repository.saveComparison(workspace);
     const opened = await repository.getComparison(workspace.id);
     expect(opened).toEqual({ ...workspace, schemaVersion: "6.0.0", updatedAt: opened?.updatedAt });
     expect((await repository.checkIntegrity()).valid).toBe(true);
   });
 
+  it("preserves scenario order and saved recipe source metadata", async () => {
+    const repository = repo(); let workspace = createComparisonWorkspace(state(), "Named comparison");
+    workspace = addComparisonScenario(workspace, state(), "Route one", { kind: "saved-recipe", recipeId: "recipe-1", recipeRevisionId: "revision-1" }, "synthetic");
+    workspace = addComparisonScenario(workspace, state({ targetFormula: "TiTiAlN" }), "Route two", { kind: "saved-recipe", recipeId: "recipe-2", recipeRevisionId: "revision-2" }, "hand-audited");
+    await repository.saveComparison(workspace);
+    const opened = await repository.getComparison(workspace.id);
+    expect(opened?.scenarios.map((item) => [item.name, item.source.recipeRevisionId])).toEqual([["Route one", "revision-1"], ["Route two", "revision-2"]]);
+  });
+
+  it("rejects empty, one-scenario, and scientifically mismatched comparison saves", async () => {
+    const repository = repo(); const empty = createComparisonWorkspace();
+    await expect(repository.saveComparison(empty)).rejects.toThrow("two to four");
+    const one = addComparisonScenario(empty, state(), "Only", { kind: "working-recipe" }, "synthetic");
+    await expect(repository.saveComparison(one)).rejects.toThrow("two to four");
+    const mismatch = addComparisonScenario(one, state({ targetFormula: "Ti3AlC2" }), "Mismatch", { kind: "working-recipe" }, "synthetic");
+    await expect(repository.saveComparison(mismatch)).rejects.toThrow("scientifically equivalent");
+  });
+
   it("observes deterministic two- and four-scenario recalculation without a CI timing gate", () => {
-    const two = createComparisonWorkspace(state()); let four = duplicateScenario(two, two.scenarios[0]!.id); four = duplicateScenario(four, four.scenarios[0]!.id);
+    const two = comparison(); let four = duplicateScenario(two, two.scenarios[0]!.id); four = duplicateScenario(four, four.scenarios[0]!.id);
     const twoStart = performance.now(); calculateComparison(two); const twoMs = performance.now() - twoStart; const fourStart = performance.now(); calculateComparison(four); const fourMs = performance.now() - fourStart;
     console.log(`Comparison performance observation: two=${twoMs.toFixed(1)}ms, four=${fourMs.toFixed(1)}ms`); expect(Object.keys(calculateComparison(four))).toHaveLength(4);
   });
@@ -114,7 +137,7 @@ describe("workspace layouts", () => {
 });
 
 describe("verified backup, restore, and owned JSON import", () => {
-  async function populated() { const repository = repo(); const saved = await repository.saveCalculatedRevision({ name: "Backup recipe", inputState: state(), result: result() }); await repository.saveRouteRevision({ name: "Backup route", inputState: state() }); await repository.saveComparison(createComparisonWorkspace(state())); return { repository, saved }; }
+  async function populated() { const repository = repo(); const saved = await repository.saveCalculatedRevision({ name: "Backup recipe", inputState: state(), result: result() }); await repository.saveRouteRevision({ name: "Backup route", inputState: state() }); await repository.saveComparison(comparison()); return { repository, saved }; }
 
   it("creates a full deterministic manifest and validates empty and populated backups", async () => {
     const empty = repo(); const emptyBackup = await createLocalBackup(empty.database); expect((await previewBackup(serializeBackup(emptyBackup))).valid).toBe(true);

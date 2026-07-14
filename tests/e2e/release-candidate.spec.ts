@@ -5,41 +5,43 @@ async function openMore(page: import("@playwright/test").Page) { await page.getB
 async function chooseExample(page: import("@playwright/test").Page, id = "ti2aln") { await openMore(page); await page.getByLabel("Start or reset").selectOption(id); }
 async function openSettings(page: import("@playwright/test").Page) { await openMore(page); await page.getByRole("link", { name: "Layouts, data, backup, and settings" }).click(); }
 async function openCompare(page: import("@playwright/test").Page) { const direct = page.getByRole("link", { name: "Compare", exact: true }); if (await direct.isVisible()) await direct.click(); else { await openMore(page); await page.getByRole("link", { name: "Open route comparison" }).click(); } }
+async function addCurrentPair(page: import("@playwright/test").Page) { await page.locator("header").getByRole("button", { name: "Add current recipe" }).click(); await page.getByLabel("Unsaved calculation scenario").getByRole("button", { name: "Duplicate" }).click(); }
 
 test.beforeEach(async ({ page }) => { await page.goto("/workspace"); await expect(page.locator('[data-recovery-ready="true"]')).toBeVisible(); await chooseExample(page); });
 
 test("UX-COMPARE-001 duplicate scenarios share a target and remain independent", async ({ page }) => {
   await openCompare(page);
-  await expect(page.getByText("Scenario targets preserved", { exact: true })).toBeVisible();
-  const firstMass = page.getByLabel("Scenario A precursor 1 formula");
-  const secondMass = page.getByLabel("Scenario B precursor 1 formula");
+  await expect(page.getByRole("heading", { name: "No recipes selected for comparison" })).toBeVisible();
+  await addCurrentPair(page);
+  const firstMass = page.getByLabel("Unsaved calculation precursor 1 formula", { exact: true });
+  const secondMass = page.getByLabel("Copy of Unsaved calculation precursor 1 formula", { exact: true });
   await expect(firstMass).toHaveValue("Ti"); await expect(secondMass).toHaveValue("Ti");
   await secondMass.fill("TiN");
   await expect(firstMass).toHaveValue("Ti");
-  await expect(page.getByLabel("Scenario A scenario")).toContainText("Final total");
+  await expect(page.getByLabel("Unsaved calculation scenario", { exact: true })).toContainText("Final total");
   await expect(page.getByRole("heading", { name: "Deterministic differences" })).toBeVisible();
-  await page.getByLabel("Target formula").fill("Ti3AlC2");
-  await expect(page.getByLabel("Scenario A scenario")).toContainText("Scenario unavailable");
-  await expect(page.getByLabel("Scenario B scenario")).toContainText("Scenario unavailable");
+  await page.getByText("Shared target controls").click(); await page.getByLabel("Target template").fill("Ti3AlC2"); await page.getByRole("button", { name: "Apply target to every scenario" }).click();
+  await expect(page.getByLabel("Unsaved calculation scenario", { exact: true })).toContainText("No valid weighing result");
+  await expect(page.getByLabel("Copy of Unsaved calculation scenario")).toContainText("No valid weighing result");
 });
 
 test("UX-COMPARE-002/003 aligns missing precursors and isolates an invalid route", async ({ page }) => {
   await openCompare(page);
-  await page.getByRole("button", { name: "Remove N from Scenario B" }).click();
-  await expect(page.getByLabel("Scenario A scenario")).toContainText("Final total");
-  await expect(page.getByLabel("Scenario B scenario")).toContainText("Scenario unavailable");
-  await expect(page.getByRole("cell", { name: "Not used" })).toBeVisible();
-  await expect(page.getByRole("row", { name: /Warnings/ })).toContainText("None");
+  await addCurrentPair(page);
+  await page.getByRole("button", { name: "Remove N from Copy of Unsaved calculation" }).click();
+  await expect(page.getByLabel("Unsaved calculation scenario", { exact: true })).toContainText("Final total");
+  await expect(page.getByLabel("Copy of Unsaved calculation scenario")).toContainText("No valid weighing result");
 });
 
 test("UX-COMPARE-004 saves a preferred scenario as an independent recipe", async ({ page }) => {
   await openCompare(page);
-  await page.getByLabel("Scenario B precursor 2 purity").fill("95");
-  await page.getByLabel("Scenario B scenario").getByRole("button", { name: "Save as recipe" }).click();
-  await expect(page.getByText(/Saved Scenario B from comparison/)).toBeVisible();
+  await addCurrentPair(page);
+  await page.getByLabel("Copy of Unsaved calculation precursor 2 purity").fill("95");
+  await page.getByLabel("Copy of Unsaved calculation scenario").getByRole("button", { name: "Save as recipe" }).click();
+  await expect(page.getByText(/Saved Copy of Unsaved calculation from comparison/)).toBeVisible();
   await page.getByRole("link", { name: "Calculator" }).click();
   await page.getByRole("button", { name: "Open", exact: true }).click();
-  await expect(page.getByLabel("Recipe name for Ti2AlN")).toHaveValue("Scenario B from comparison");
+  await expect(page.getByLabel("Recipe name for Ti2AlN")).toHaveValue("Copy of Unsaved calculation from comparison");
 });
 
 test("UX-LAYOUT-001 saves and restores a bounded layout without scientific changes", async ({ page }) => {
@@ -88,22 +90,22 @@ test("UX-OFFLINE-001 and zoom: calculation, comparison, local save, and export r
   await page.getByLabel("Target batch mass").fill("11"); await expect(page.getByText("Final rounded total")).toBeVisible();
   await page.getByRole("button", { name: "Save", exact: true }).click(); await expect(page.getByText(/Saved/)).toBeVisible();
   const download = page.waitForEvent("download"); await page.getByRole("button", { name: "JSON", exact: true }).click(); await download;
-  await context.setOffline(false); await openCompare(page); await expect(page.getByLabel("Scenario A scenario")).toBeVisible();
-  await context.setOffline(true); await page.getByLabel("Scenario B precursor 2 purity").fill("97"); await expect(page.getByLabel("Scenario B scenario")).toContainText("Final total"); await page.getByRole("button", { name: "Save comparison" }).click(); await expect(page.getByText(/Saved historical comparison/)).toBeVisible(); const comparisonDownload = page.waitForEvent("download"); await page.getByRole("button", { name: "Export comparison JSON" }).click(); await comparisonDownload; await context.setOffline(false);
+  await context.setOffline(false); await openCompare(page); await addCurrentPair(page); await expect(page.getByLabel("Unsaved calculation scenario", { exact: true })).toBeVisible();
+  await context.setOffline(true); await page.getByLabel("Copy of Unsaved calculation precursor 2 purity").fill("97"); await expect(page.getByLabel("Copy of Unsaved calculation scenario")).toContainText("Final total"); await page.getByRole("button", { name: "Save comparison" }).click(); await expect(page.getByText("Comparison saved", { exact: true })).toBeVisible(); await page.getByText("More", { exact: true }).click(); const comparisonDownload = page.waitForEvent("download"); await page.getByRole("button", { name: "Export comparison JSON" }).click(); await comparisonDownload; await context.setOffline(false);
 });
 
 test("UX-ACCESS-001 completes comparison review and save controls from the keyboard", async ({ page }) => {
   await openCompare(page);
-  const scenarioName = page.getByLabel("Scenario B name"); await scenarioName.focus(); await page.keyboard.press("Control+A"); await page.keyboard.type("Keyboard route");
+  await addCurrentPair(page); const scenarioName = page.getByLabel("Copy of Unsaved calculation name"); await scenarioName.focus(); await page.keyboard.press("Control+A"); await page.keyboard.type("Keyboard route");
   await page.getByLabel("Keyboard route precursor 2 purity").focus(); await page.keyboard.press("Control+A"); await page.keyboard.type("96");
   await expect(page.getByRole("heading", { name: "Deterministic differences" })).toBeVisible(); await expect(page.getByLabel("Keyboard route scenario")).toContainText("Final total");
-  const save = page.getByRole("button", { name: "Save comparison" }); await save.focus(); await page.keyboard.press("Enter"); await expect(page.getByText(/Saved historical comparison/)).toBeVisible();
+  const save = page.getByRole("button", { name: "Save comparison" }); await save.focus(); await page.keyboard.press("Enter"); await expect(page.getByText("Comparison saved", { exact: true })).toBeVisible();
 });
 
 test("UX-ZOOM-001 keeps calculator, comparison, and data management usable at a 200%-equivalent viewport", async ({ page }) => {
   await page.setViewportSize({ width: 720, height: 900 });
   await expect(page.getByLabel("Target formula")).toBeVisible(); expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
-  await openCompare(page); await expect(page.getByLabel("Scenario A scenario")).toBeVisible(); expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+  await openCompare(page); await expect(page.getByRole("heading", { name: "No recipes selected for comparison" })).toBeVisible(); expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
   await page.goto("/settings"); await expect(page.getByRole("heading", { name: "Full local backup" })).toBeVisible(); await expect(page.getByLabel("Choose MAX Stoich JSON file")).toBeVisible(); expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
 });
 

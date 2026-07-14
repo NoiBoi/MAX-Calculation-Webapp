@@ -158,3 +158,11 @@ Playwright cases `PRECURSOR-SUGGEST-001` through `004` cover panel/status visibi
 # Direct aluminum-feed fixtures
 
 Engine and adapter fixtures cover coefficients 1, 1.2, 2.2, and 0.9; direct matrix requirements; coupled AlN/TiAl supply; combined Al/C feed coefficients; normalized calculation scaling; zero, negative, malformed, NaN, and infinite rejection; no-Al targets; explicit Al1.2 target parsing; coefficient trace; canonical input differences; undo/redo; and schema-5 migration of 20% to 1.2 and 120% to 2.2. The migration fixture verifies editable recovery is converted while the stored historical snapshot remains byte-equivalent. Playwright `AL-FEED-001` verifies live formula/mass updates and save/reopen preservation.
+# Summary and comparison workspace cases
+
+- `SUMMARY-001`: open a valid calculation summary, verify adjusted feed, visible precursor order, masses, total, copy text, print controls, and focus restoration.
+- `SUMMARY-002`: show valid and invalid comparison scenarios together; invalid scenarios state the human-readable reason and expose no usable masses.
+- `COMPARE-EMPTY-001`: a fresh comparison has zero scenarios and all three explicit add actions.
+- `COMPARE-MULTISELECT-001`: multiple compatible current recipe revisions are added atomically with saved names and source IDs; an already-added revision is not silently duplicated.
+- `COMPARE-MISMATCH-001`: a mixed-target selection is rejected with no partial import.
+- `COMPARE-SAVE-001`: save, leave, reopen, and verify name, scenario order, source IDs, shared target, layout, metrics, and historical results.
