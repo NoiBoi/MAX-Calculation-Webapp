@@ -24,7 +24,7 @@ export function updateSharedTarget(workspace: ComparisonWorkspace, target: Compa
 }
 
 export function updateScenario(workspace: ComparisonWorkspace, scenarioId: string, update: (input: WorkspaceRecipeState) => WorkspaceRecipeState): ComparisonWorkspace {
-  return { ...workspace, scenarios: workspace.scenarios.map((item) => item.id === scenarioId ? { ...item, inputState: { ...update(clone(item.inputState)), targetFormula: workspace.sharedTarget.targetFormula, ...(workspace.sharedTarget.siteComposition ? { siteComposition: clone(workspace.sharedTarget.siteComposition) } : { siteComposition: undefined }) }, historical: undefined } : item), historical: false, updatedAt: new Date().toISOString() };
+  return { ...workspace, scenarios: workspace.scenarios.map((item) => item.id === scenarioId ? { ...item, inputState: update(clone(item.inputState)), historical: undefined } : item), historical: false, updatedAt: new Date().toISOString() };
 }
 
 export function duplicateScenario(workspace: ComparisonWorkspace, scenarioId: string): ComparisonWorkspace {

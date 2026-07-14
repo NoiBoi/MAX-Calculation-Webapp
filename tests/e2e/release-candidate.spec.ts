@@ -10,7 +10,7 @@ test.beforeEach(async ({ page }) => { await page.goto("/workspace"); await expec
 
 test("UX-COMPARE-001 duplicate scenarios share a target and remain independent", async ({ page }) => {
   await openCompare(page);
-  await expect(page.getByText("Shared target locked", { exact: true })).toBeVisible();
+  await expect(page.getByText("Scenario targets preserved", { exact: true })).toBeVisible();
   const firstMass = page.getByLabel("Scenario A precursor 1 formula");
   const secondMass = page.getByLabel("Scenario B precursor 1 formula");
   await expect(firstMass).toHaveValue("Ti"); await expect(secondMass).toHaveValue("Ti");

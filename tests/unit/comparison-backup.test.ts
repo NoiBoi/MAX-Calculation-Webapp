@@ -29,6 +29,33 @@ describe("route comparison model and deterministic differences", () => {
     expect(workspace.scenarios.every((item) => item.inputState.targetFormula === "Ti3AlC2")).toBe(true);
   });
 
+  it("preserves a scenario-specific target when recalculating an alternative composition", () => {
+    let workspace = createComparisonWorkspace(state({ targetFormula: "(TiVMo2W)4AlC2.7" }));
+    const endpoint = workspace.scenarios[1]!;
+    workspace = {
+      ...workspace,
+      scenarios: workspace.scenarios.map((item) => item.id === endpoint.id ? { ...item, inputState: { ...item.inputState, targetFormula: "(TiVW2)4AlC2.7" } } : item),
+    };
+    workspace = updateScenario(workspace, endpoint.id, (input) => ({ ...input, requestedMassGrams: "5" }));
+    expect(workspace.scenarios.find((item) => item.id === endpoint.id)?.inputState.targetFormula).toBe("(TiVW2)4AlC2.7");
+  });
+
+  it("calculates Mo-only and W-only ratio endpoints with matching elemental routes", () => {
+    const precursor = (formula: string) => ({ id: formula.toLowerCase(), name: formula, formula, purityPercent: "100", constraintMode: "solver" as const, fixedValue: "", minimum: "", maximum: "", ratioDenominatorId: "", numeratorRatio: "1", denominatorRatio: "1", molarMassOverride: "", molarMassOverrideSource: "" });
+    let workspace = createComparisonWorkspace(state());
+    const [moEndpoint, wEndpoint] = workspace.scenarios;
+    workspace = {
+      ...workspace,
+      scenarios: workspace.scenarios.map((item) => item.id === moEndpoint!.id
+        ? { ...item, inputState: state({ targetFormula: "(TiVMo2)4AlC2.7", normalizeLeadingSiteRatios: true, aluminumPerFormula: "2", precursors: ["Al", "C", "Mo", "Ti", "V"].map(precursor) }) }
+        : { ...item, inputState: state({ targetFormula: "(TiVW2)4AlC2.7", normalizeLeadingSiteRatios: true, aluminumPerFormula: "2", precursors: ["Al", "C", "Ti", "V", "W"].map(precursor) }) }),
+    };
+    workspace = updateScenario(workspace, wEndpoint!.id, (input) => ({ ...input, requestedMassGrams: "5" }));
+    const calculations = calculateComparison(workspace);
+    expect(calculations[moEndpoint!.id]?.state).toMatch(/^valid/);
+    expect(calculations[wEndpoint!.id]?.state).toMatch(/^valid/);
+  });
+
   it("duplicates, enforces limits, and makes scenario removal reversible by immutable state", () => {
     const original = createComparisonWorkspace(state());
     let workspace = duplicateScenario(original, original.scenarios[0]!.id);
