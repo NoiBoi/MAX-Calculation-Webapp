@@ -109,7 +109,7 @@ describe("route comparison model and deterministic differences", () => {
     const repository = repo(); const workspace = comparison();
     await repository.saveComparison(workspace);
     const opened = await repository.getComparison(workspace.id);
-    expect(opened).toEqual({ ...workspace, schemaVersion: "6.0.0", updatedAt: opened?.updatedAt });
+    expect(opened).toEqual({ ...workspace, schemaVersion: "7.0.0", updatedAt: opened?.updatedAt });
     expect((await repository.checkIntegrity()).valid).toBe(true);
   });
 
@@ -151,12 +151,12 @@ describe("workspace layouts", () => {
 });
 
 describe("verified backup, restore, and owned JSON import", () => {
-  async function populated() { const repository = repo(); const saved = await repository.saveCalculatedRevision({ name: "Backup recipe", inputState: state(), result: result() }); await repository.saveRouteRevision({ name: "Backup route", inputState: state() }); await repository.saveComparison(comparison()); return { repository, saved }; }
+  async function populated() { const repository = repo(); const saved = await repository.saveCalculatedRevision({ name: "Backup recipe", inputState: state(), result: result() }); await repository.saveRecipeNote({ recipeId: saved.recipe.id, recipeRevisionId: saved.revision.id, category: "Result", title: "Backup note", body: "Multiline experimental\nobservation", tags: ["backup"] }); await repository.saveRouteRevision({ name: "Backup route", inputState: state() }); await repository.saveComparison(comparison()); return { repository, saved }; }
 
   it("creates a full deterministic manifest and validates empty and populated backups", async () => {
     const empty = repo(); const emptyBackup = await createLocalBackup(empty.database); expect((await previewBackup(serializeBackup(emptyBackup))).valid).toBe(true);
     const { repository } = await populated(); const backup = await createLocalBackup(repository.database); const preview = await previewBackup(serializeBackup(backup));
-    expect(preview.valid, JSON.stringify(preview.diagnostics)).toBe(true); expect(backup.manifest.counts).toMatchObject({ recipes: 1, recipeRevisions: 1, snapshots: 1, routes: 1, routeRevisions: 1, comparisons: 1 });
+    expect(preview.valid, JSON.stringify(preview.diagnostics)).toBe(true); expect(backup.manifest.counts).toMatchObject({ recipes: 1, recipeRevisions: 1, snapshots: 1, recipeNotes: 1, routes: 1, routeRevisions: 1, comparisons: 1 });
     expect(backup.manifest.manifestDigest).toMatch(/^[a-f0-9]{64}$/); expect(backup.manifest.datasetVersions).toContain("atomic-weights:2024.2.0"); expect(backup.manifest.counts.radiusDatasets).toBe(0);
   });
 
@@ -164,7 +164,7 @@ describe("verified backup, restore, and owned JSON import", () => {
     const { repository: source } = await populated(); const text = serializeBackup(await createLocalBackup(source.database)); const target = repo();
     const preview = await previewBackup(text, target.database); expect(preview.valid).toBe(true); expect(await target.database.recipes.count()).toBe(0);
     const outcome = await restoreBackup(text, target.database, "replace"); expect(outcome.safetyBackup).toBeDefined(); expect(await target.database.recipes.count()).toBe(1);
-    const snapshot = await target.database.snapshots.toCollection().first(); expect(snapshot?.result.precursors[0]?.solverMolesPerTargetFormulaMoleExact.denominator).toBe("1");
+    const snapshot = await target.database.snapshots.toCollection().first(); expect(snapshot?.result.precursors[0]?.solverMolesPerTargetFormulaMoleExact.denominator).toBe("1"); expect((await target.listRecipeNotes())[0]?.body).toContain("\n");
   });
 
   it("detects conflicts, keeps local, or imports a connected immutable graph under new identities", async () => {
@@ -172,7 +172,7 @@ describe("verified backup, restore, and owned JSON import", () => {
     const recipe = (await target.listRecipes())[0]!; await target.renameRecipe(recipe.id, "Local changed name");
     const preview = await previewBackup(text, target.database); expect(preview.conflicts.some((item) => item.table === "recipes" && item.kind === "divergent")).toBe(true);
     await restoreBackup(text, target.database, "merge", "keep-local"); expect(await target.database.recipes.count()).toBe(1); expect((await target.listRecipes())[0]?.name).toBe("Local changed name");
-    await restoreBackup(text, target.database, "merge", "import-as-new"); expect(await target.database.recipes.count()).toBe(2); expect(await target.database.recipeRevisions.count()).toBe(2); expect(await target.database.snapshots.count()).toBe(2);
+    await restoreBackup(text, target.database, "merge", "import-as-new"); expect(await target.database.recipes.count()).toBe(2); expect(await target.database.recipeRevisions.count()).toBe(2); expect(await target.database.snapshots.count()).toBe(2); expect(await target.database.recipeNotes.count()).toBe(2);
   });
 
   it("rejects tampered, future, missing-reference, and oversized backups", async () => {

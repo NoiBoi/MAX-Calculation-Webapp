@@ -3,6 +3,7 @@ import { TI2ALN_VISIBLE_EXPECTATION } from "../../lib/workspace/visible-expectat
 
 async function chooseExample(page: import("@playwright/test").Page, id: string) { await page.getByRole("button", { name: /More actions/ }).click(); await page.getByLabel("Start or reset").selectOption(id); }
 async function openMore(page: import("@playwright/test").Page) { await page.getByRole("button", { name: /More actions/ }).click(); }
+async function saveRecipe(page: import("@playwright/test").Page) { await page.getByRole("button", { name: "Save", exact: true }).click(); const dialog = page.getByRole("dialog", { name: "Save recipe" }); await dialog.getByRole("button", { name: /Save recipe|Save revision|Rename recipe/ }).click(); await expect(dialog).not.toBeVisible(); }
 
 test.beforeEach(async ({ page }) => { await page.goto("/workspace"); await expect(page.locator('[data-recovery-ready="true"]')).toBeVisible(); await chooseExample(page, "ti2aln"); });
 
@@ -133,10 +134,10 @@ test("records live numeric-edit latency without a CI timing gate", async ({ page
 });
 
 test("UX-PERSIST-001 saves, refreshes, and creates immutable revisions", async ({ page }) => {
-  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await saveRecipe(page);
   await expect(page.getByText(/Saved Ti2AlN recipe, revision 1/)).toBeVisible();
   await page.getByLabel("Target batch mass").fill("12.5");
-  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await saveRecipe(page);
   await expect(page.getByText(/revision 2/)).toBeVisible();
   await page.reload();
   await expect(page.locator('[data-recovery-ready="true"]')).toBeVisible();

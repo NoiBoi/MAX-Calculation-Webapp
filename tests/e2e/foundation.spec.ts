@@ -2,14 +2,12 @@ import { expect, test } from "@playwright/test";
 
 test("landing opens the one-screen laboratory calculator", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Scientific foundation in progress" })).toBeVisible();
-  await page.getByRole("link", { name: "Open laboratory calculator" }).click();
   await expect(page.getByRole("heading", { name: "Target and precursor route" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Final weighing results" })).toBeVisible();
 });
 
 test("formula demonstration calculates and reports structured errors", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo");
   const formula = page.getByLabel("Chemical formula");
   await formula.fill("(Ti0.5Nb0.5)2AlN");
   await expect(page.getByText("181.762 g/mol")).toBeVisible();
@@ -20,7 +18,7 @@ test("formula demonstration calculates and reports structured errors", async ({ 
 });
 
 test("site demonstration switches templates and preserves invalid input with an inline error", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo");
   const demo = page.getByRole("region", { name: "Site-composition development demonstration" });
   await demo.getByLabel("MAX template").selectOption("312");
   await expect(demo.getByText("Ti3Al(C0.5N0.5)2")).toBeVisible();
@@ -30,7 +28,7 @@ test("site demonstration switches templates and preserves invalid input with an 
 });
 
 test("balance-matrix demonstration shows exact structure and invalid input", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo");
   const demo = page.getByRole("region", { name: "Balance-matrix development demonstration" });
   await expect(demo.getByText("Rank: 3")).toBeVisible();
   await expect(demo.getByText("Constrained solver: exact-unique")).toBeVisible();
@@ -44,7 +42,7 @@ test("balance-matrix demonstration shows exact structure and invalid input", asy
 });
 
 test("batch calculator changes basis and reports final weighing masses", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo");
   const demo = page.getByRole("region", { name: "Batch recipe development calculator" });
   await expect(demo.getByRole("table", { name: "Final precursor weighing masses" })).toBeVisible();
   await expect(demo.getByText("Final weighing total:")).toBeVisible();

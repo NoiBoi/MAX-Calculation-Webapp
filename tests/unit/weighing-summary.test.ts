@@ -19,6 +19,7 @@ describe("weighing summary presentation", () => {
     expect(value.adjustedFeedFormula).toBe("Ti2Al1.2N");
     expect(value.precursors.map((item) => item.displayName)).toEqual(["N", "Ti", "Al"]);
     expect(value.precursors.every((item) => item.finalMass && item.unit === "g")).toBe(true);
+    expect(value.precursors.every((item) => item.molarQuantity && item.solverMolarQuantityExact)).toBe(true);
     expect(value.totalMass).toBeTruthy();
   });
 
@@ -26,6 +27,7 @@ describe("weighing summary presentation", () => {
     const value = summary(); const text = serializeWeighingSummary(value);
     expect(text.indexOf("N (N)")).toBeLessThan(text.indexOf("Ti (Ti)"));
     expect(text).toContain(`TOTAL\t${value.totalMass} g`);
+    expect(text).toContain("mol/mol target");
     expect(serializeComparisonSummaries([value, { ...value, title: "Second" }])).toContain("=== 2. Second ===");
   });
 

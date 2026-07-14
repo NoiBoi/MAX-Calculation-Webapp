@@ -5,7 +5,8 @@ async function openMore(page: import("@playwright/test").Page) { await page.getB
 async function chooseExample(page: import("@playwright/test").Page, id = "ti2aln") { await openMore(page); await page.getByLabel("Start or reset").selectOption(id); }
 async function openSettings(page: import("@playwright/test").Page) { await openMore(page); await page.getByRole("link", { name: "Layouts, data, backup, and settings" }).click(); }
 async function openCompare(page: import("@playwright/test").Page) { const direct = page.getByRole("link", { name: "Compare", exact: true }); if (await direct.isVisible()) await direct.click(); else { await openMore(page); await page.getByRole("link", { name: "Open route comparison" }).click(); } }
-async function addCurrentPair(page: import("@playwright/test").Page) { await page.locator("header").getByRole("button", { name: "Add current recipe" }).click(); await page.getByLabel("Unsaved calculation scenario").getByRole("button", { name: "Duplicate" }).click(); }
+async function addCurrentPair(page: import("@playwright/test").Page) { await page.locator("header").getByRole("button", { name: "Add current recipe" }).click(); const scenario = page.getByRole("region").filter({ has: page.getByRole("button", { name: "Duplicate" }) }).first(); await scenario.getByRole("button", { name: "Duplicate" }).click(); }
+async function saveRecipe(page: import("@playwright/test").Page) { await page.getByRole("button", { name: "Save", exact: true }).click(); const dialog = page.getByRole("dialog", { name: "Save recipe" }); await dialog.getByRole("button", { name: /Save recipe|Save revision|Rename recipe/ }).click(); await expect(dialog).not.toBeVisible(); }
 
 test.beforeEach(async ({ page }) => { await page.goto("/workspace"); await expect(page.locator('[data-recovery-ready="true"]')).toBeVisible(); await chooseExample(page); });
 
@@ -57,7 +58,7 @@ test("UX-LAYOUT-001 saves and restores a bounded layout without scientific chang
 });
 
 test("UX-BACKUP-001 creates a manifest-backed downloadable backup", async ({ page }) => {
-  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await saveRecipe(page);
   await openSettings(page);
   await page.getByRole("button", { name: "Create verified backup" }).click();
   await expect(page.getByText(/Backup ready/)).toBeVisible();
@@ -67,7 +68,7 @@ test("UX-BACKUP-001 creates a manifest-backed downloadable backup", async ({ pag
 });
 
 test("UX-RESTORE-001 previews and restores a verified backup", async ({ page }) => {
-  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await saveRecipe(page);
   await openSettings(page); await page.getByRole("button", { name: "Create verified backup" }).click();
   const pending = page.waitForEvent("download"); await page.getByRole("button", { name: "Download backup JSON" }).click(); const download = await pending; const path = await download.path(); if (!path) throw new Error("Missing download");
   await page.getByLabel("Choose MAX Stoich JSON file").setInputFiles(path);
@@ -77,7 +78,7 @@ test("UX-RESTORE-001 previews and restores a verified backup", async ({ page }) 
 });
 
 test("UX-IMPORT-001/002 preserves a valid historical export and blocks tampering", async ({ page }) => {
-  await page.getByRole("button", { name: "Save", exact: true }).click(); const pending = page.waitForEvent("download"); await page.getByRole("button", { name: "JSON", exact: true }).click(); const download = await pending; const path = await download.path(); if (!path) throw new Error("Missing download"); const json = await readFile(path, "utf8");
+  await saveRecipe(page); const pending = page.waitForEvent("download"); await page.getByRole("button", { name: "JSON", exact: true }).click(); const download = await pending; const path = await download.path(); if (!path) throw new Error("Missing download"); const json = await readFile(path, "utf8");
   await openSettings(page); await page.getByLabel("Choose MAX Stoich JSON file").setInputFiles({ name: "calculation.json", mimeType: "application/json", buffer: Buffer.from(json) });
   await expect(page.getByText("Calculation import preview · verified")).toBeVisible(); await page.getByRole("button", { name: "Import as new recipe" }).click(); await expect(page.getByText(/Imported historical calculation/)).toBeVisible();
   const tampered = JSON.parse(json); tampered.scientificResult.batch.finalRoundedTotalWeighingMassGrams = "999";
@@ -88,10 +89,10 @@ test("UX-IMPORT-001/002 preserves a valid historical export and blocks tampering
 test("UX-OFFLINE-001 and zoom: calculation, comparison, local save, and export remain usable", async ({ page, context }) => {
   await context.setOffline(true);
   await page.getByLabel("Target batch mass").fill("11"); await expect(page.getByText("Final rounded total")).toBeVisible();
-  await page.getByRole("button", { name: "Save", exact: true }).click(); await expect(page.getByText(/Saved/)).toBeVisible();
+  await saveRecipe(page); await expect(page.getByText(/Saved/)).toBeVisible();
   const download = page.waitForEvent("download"); await page.getByRole("button", { name: "JSON", exact: true }).click(); await download;
-  await context.setOffline(false); await openCompare(page); await addCurrentPair(page); await expect(page.getByLabel("Unsaved calculation scenario", { exact: true })).toBeVisible();
-  await context.setOffline(true); await page.getByLabel("Copy of Unsaved calculation precursor 2 purity").fill("97"); await expect(page.getByLabel("Copy of Unsaved calculation scenario")).toContainText("Final total"); await page.getByRole("button", { name: "Save comparison" }).click(); await expect(page.getByText("Comparison saved", { exact: true })).toBeVisible(); await page.getByText("More", { exact: true }).click(); const comparisonDownload = page.waitForEvent("download"); await page.getByRole("button", { name: "Export comparison JSON" }).click(); await comparisonDownload; await context.setOffline(false);
+  await context.setOffline(false); await openCompare(page); await addCurrentPair(page); await expect(page.getByLabel("Ti2AlN recipe scenario", { exact: true })).toBeVisible();
+  await context.setOffline(true); await page.getByLabel("Copy of Ti2AlN recipe precursor 2 purity").fill("97"); await expect(page.getByLabel("Copy of Ti2AlN recipe scenario")).toContainText("Final total"); await page.getByRole("button", { name: "Save comparison" }).click(); await expect(page.getByText("Comparison saved", { exact: true })).toBeVisible(); await page.getByText("More", { exact: true }).click(); const comparisonDownload = page.waitForEvent("download"); await page.getByRole("button", { name: "Export comparison JSON" }).click(); await comparisonDownload; await context.setOffline(false);
 });
 
 test("UX-ACCESS-001 completes comparison review and save controls from the keyboard", async ({ page }) => {

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { buildWorkspaceCalculation, percentDisplayToFraction, type WorkspaceRecipeState } from "../../lib/workspace/adapter";
 import { getWorkspacePreset, WORKSPACE_PRESETS } from "../../lib/workspace/presets";
 import { SCIENTIFIC_REFERENCE_CASES } from "../../lib/workspace/reference-cases";
-import { analyzeWorkspaceAluminumFeed, migrateWorkspaceAluminumInput } from "../../lib/workspace/aluminum-feed";
+import { aluminumCoefficientForTargetChange, analyzeWorkspaceAluminumFeed, migrateWorkspaceAluminumInput } from "../../lib/workspace/aluminum-feed";
 
 function recipe(id = "ti2aln"): WorkspaceRecipeState {
   const preset = getWorkspacePreset(id);
@@ -56,6 +56,13 @@ describe("workspace UI-to-engine adapter", () => {
   });
   it("derives a direct coefficient from explicit target formula text", () => {
     expect(analyzeWorkspaceAluminumFeed({ ...recipe(), targetFormula: "Ti4Al1.2C3", siteComposition: undefined, aluminumPerFormula: undefined }).enteredCoefficient).toBe("1.2");
+  });
+  it("preserves the user-owned aluminum coefficient across compatible target edits and clears it when aluminum is removed", () => {
+    const entered = { ...recipe("ti3alc2"), aluminumPerFormula: "1.2" };
+    expect(aluminumCoefficientForTargetChange(entered, "Ti4AlC3")).toBe("1.2");
+    expect(aluminumCoefficientForTargetChange(entered, "Ti4AlC2.7")).toBe("1.2");
+    expect(aluminumCoefficientForTargetChange(entered, "TiC")).toBe("");
+    expect(aluminumCoefficientForTargetChange({ ...entered, targetFormula: "TiC", aluminumPerFormula: "" }, "Ti2AlN")).toBe("1");
   });
   it("keeps every built-in example explicitly below lab-approved status", () => { expect(WORKSPACE_PRESETS).toHaveLength(6); expect(WORKSPACE_PRESETS.every((item) => item.validationStatus !== "lab-approved" && item.validationNote.length > 20)).toBe(true); });
   it("records all twenty required reference categories and review fields", () => { expect(SCIENTIFIC_REFERENCE_CASES).toHaveLength(20); expect(new Set(SCIENTIFIC_REFERENCE_CASES.map((item) => item.caseId)).size).toBe(20); for (const item of SCIENTIFIC_REFERENCE_CASES) { expect(item.reviewerStatus).toContain("Provisional"); expect(item.expectedValueSource.length).toBeGreaterThan(10); expect(item.tolerance.length).toBeGreaterThan(10); expect(item.validationClass).not.toBe("laboratory-approved"); } });

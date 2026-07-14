@@ -4,6 +4,7 @@ import AxeBuilder from "@axe-core/playwright";
 async function ready(page: Page) { await page.goto("/workspace"); await expect(page.locator('[data-recovery-ready="true"]')).toBeVisible(); }
 async function more(page: Page) { await page.getByRole("button", { name: /More actions/ }).click(); }
 async function example(page: Page, id: string) { await more(page); await page.getByLabel("Start or reset").selectOption(id); }
+async function saveRecipe(page: Page) { await page.getByRole("button", { name: "Save", exact: true }).click(); const dialog = page.getByRole("dialog", { name: "Save recipe" }); await dialog.getByRole("button", { name: /Save recipe|Save revision|Rename recipe/ }).click(); await expect(dialog).not.toBeVisible(); }
 
 test("UX-REMEDIATION-001 fresh workspace starts blank and calculates from scratch", async ({ page }) => {
   await ready(page);
@@ -134,7 +135,7 @@ test("AL-FEED-001 uses and persists direct aluminum and carbon feed coefficients
   await aluminum.fill("2.2"); await expect(page.getByText("Ti3Al2.2C2.7", { exact: true })).toBeVisible(); await expect(page.getByText(/120% above ideal aluminum/)).toBeVisible();
   await page.getByRole("button", { name: "Undo", exact: true }).click(); await expect(aluminum).toHaveValue("1.2");
   await page.getByRole("button", { name: "Redo", exact: true }).click(); await expect(aluminum).toHaveValue("2.2");
-  await page.getByRole("button", { name: "Save", exact: true }).click(); await expect(page.getByText(/revision 1/)).toBeVisible();
+  await saveRecipe(page); await expect(page.getByText(/revision 1/)).toBeVisible();
   await page.getByRole("button", { name: "New", exact: true }).click(); await page.getByRole("button", { name: "Open", exact: true }).click();
   await page.locator("article").filter({ hasText: "Ti3AlC2.7" }).getByRole("button", { name: "Open" }).click();
   await expect(page.getByLabel("Aluminum per formula")).toHaveValue("2.2"); await expect(page.getByLabel("Carbon per formula")).toHaveValue("2.7");

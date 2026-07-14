@@ -11,7 +11,7 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:3000/workspace`. Use `npm run check` for type checking, linting, and all unit/scientific tests; use `npm run test:e2e` for browser workflows.
+Open `http://localhost:3000/`; the primary calculator is the landing page and `/workspace` remains a compatible direct link. The feature demo and tutorial is a clearly secondary development reference at `/demo`. Use `npm run check` for type checking, linting, and all unit/scientific tests; use `npm run test:e2e` for browser workflows.
 
 ## Current scientific scope
 
@@ -23,11 +23,11 @@ The scientific reference registry records 20 required cases and their source, to
 
 ## Current workflow
 
-`/workspace` provides standard and advanced modes, direct route editing, live local calculation, stale-result protection, warnings, final weighing masses, summary, matrix/solver diagnostics, trace, and keyboard shortcuts. Valid working state is recovered automatically after refresh or browser closure.
+The calculator provides standard and advanced modes, direct route editing, live local calculation, stale-result protection, warnings, final weighing masses, summary, matrix/solver diagnostics, trace, and keyboard shortcuts. `Alt+ArrowUp` and `Alt+ArrowDown` move between precursor formula fields without changing ordinary caret behavior. Valid working state is recovered automatically after refresh or browser closure, including the authoritative direct aluminum-feed coefficient.
 
-Use **Save** to create a recipe or a new immutable revision. Autosave protects the working workspace but never silently creates scientific revisions. The Recipes panel opens, renames, duplicates, archives, deletes, and shows revision history. Historical snapshots display the saved engine result exactly; recalculation is a deliberate unsaved action. The Routes panel saves and reapplies immutable precursor-route revisions without retroactively changing recipes.
+Use **Save** to review or edit the recipe name, validation status, revision action, and optional revision note before committing. A scientific change creates a new immutable revision; a name-only change updates metadata without rewriting snapshots. The workspace is marked saved only after the transaction succeeds. Autosave protects working state but never silently creates scientific revisions. The Recipes panel opens, renames, duplicates, archives, deletes, shows revision history, and opens structured searchable experimental notes. Notes support categories, tags, multiline plain text, experiment/operator metadata, and optional revision attachment without mutating the attached snapshot. Historical snapshots display the saved engine result exactly; recalculation is a deliberate unsaved action. The Routes panel saves and reapplies immutable precursor-route revisions without retroactively changing recipes.
 
-Current valid results can be copied as tab-delimited weighing rows, exported as tidy UTF-8 CSV or structured JSON, or printed as a preparation sheet. Exact rational solver quantities remain structural in JSON and have separate exact/approximation CSV columns. Stale or invalid working results cannot be exported.
+Current valid results can be copied as tab-delimited weighing rows, exported as tidy UTF-8 CSV or structured JSON, or printed as a preparation sheet. Weighing summaries show the final intended precursor quantity in `mol precursor / mol target formula` beside final mass, with exact rational detail retained where available. Exact rational solver quantities remain structural in JSON and have separate exact/approximation CSV columns. Ordinary weighing CSV/JSON exports exclude private recipe notes; the full local backup includes them. Stale or invalid working results cannot be exported.
 
 ## Comparison, layouts, and local data
 

@@ -86,6 +86,13 @@ describe("atomic local repositories", () => {
     expect(integrity.valid, JSON.stringify(integrity.diagnostics)).toBe(true);
   });
 
+  it("renames recipe metadata without rewriting snapshots and persists revision notes only on scientific revisions", async () => {
+    const repo = repository(); const first = await repo.saveCalculatedRevision({ name: "Original name", inputState: state(), result: result(), revisionNote: "Initial route" });
+    await repo.renameRecipe(first.recipe.id, "Renamed recipe"); expect((await repo.getRecipe(first.recipe.id))?.name).toBe("Renamed recipe"); expect(await repo.database.snapshots.count()).toBe(1); expect(await repo.database.recipeRevisions.count()).toBe(1);
+    const changed = state({ requestedMassGrams: "12" }); const second = await repo.saveCalculatedRevision({ recipeId: first.recipe.id, expectedCurrentRevisionNumber: 1, name: "Renamed recipe", inputState: changed, result: result(changed), revisionNote: "Changed batch mass" });
+    expect(second.revision.revisionNote).toBe("Changed batch mass"); expect((await repo.getRevision(first.revision.id))?.revisionNote).toBe("Initial route");
+  });
+
   it("preserves a normalized carbon-deficient coefficient when saving and reopening", async () => {
     const targetFormula = "(TiVMoTa0.5W1.5)4AlC2.7";
     const input = state({ targetFormula, normalizeLeadingSiteRatios: true, precursors: ["Ti", "V", "Mo", "Ta", "W", "Al", "C"].map((formula) => ({ id: formula.toLowerCase(), name: formula, formula, purityPercent: "100", constraintMode: "solver" as const, fixedValue: "", minimum: "", maximum: "", ratioDenominatorId: "", numeratorRatio: "1", denominatorRatio: "1", molarMassOverride: "", molarMassOverrideSource: "" })) });
@@ -95,6 +102,18 @@ describe("atomic local repositories", () => {
     expect(reopened?.inputState.targetFormula).toBe(targetFormula);
     expect(reopened?.inputState.normalizeLeadingSiteRatios).toBe(true);
     expect((await repo.getSnapshot(saved.snapshot.id))?.result.intendedFeedComposition.amounts.C).toBe("2.7");
+  });
+
+  it("creates, searches, edits, archives, revision-links, and deletes structured recipe notes without changing snapshots", async () => {
+    const repo = repository(); const saved = await repo.saveCalculatedRevision({ name: "Notes recipe", inputState: state(), result: result() }); const snapshotBefore = await repo.getSnapshot(saved.snapshot.id);
+    const furnace = await repo.saveRecipeNote({ recipeId: saved.recipe.id, recipeRevisionId: saved.revision.id, category: "Furnace settings", title: "1500 °C anneal", body: "Ramp 5 °C/min.\nHold 4 h under argon.", tags: ["anneal", "furnace-2"], experimentDate: "2026-07-14", operator: "MD" });
+    await repo.saveRecipeNote({ recipeId: saved.recipe.id, category: "Result", title: "XRD result", body: "Strong MAX peaks", tags: ["xrd"] });
+    expect(await repo.searchRecipeNotes("under argon", { recipeId: saved.recipe.id })).toHaveLength(1); expect(await repo.searchRecipeNotes("", { recipeId: saved.recipe.id, category: "Result" })).toHaveLength(1); expect(await repo.searchRecipeNotes("", { recipeId: saved.recipe.id, tag: "anneal" })).toHaveLength(1);
+    const ordinaryCsv = buildLaboratoryCsv({ recipeName: saved.recipe.name, inputState: state(), result: result(), calculatedAt: "2026-07-14T00:00:00.000Z" });
+    expect(ordinaryCsv).not.toContain("under argon"); expect(ordinaryCsv).not.toContain("XRD result");
+    const edited = await repo.saveRecipeNote({ id: furnace.id, recipeId: saved.recipe.id, recipeRevisionId: saved.revision.id, category: furnace.category, title: furnace.title, body: `${furnace.body}\nFurnace cooled overnight.`, tags: furnace.tags }); expect(edited.body).toContain("overnight");
+    await repo.setRecipeNoteArchived(furnace.id, true); expect(await repo.listRecipeNotes(saved.recipe.id)).toHaveLength(1); expect(await repo.listRecipeNotes(saved.recipe.id, true)).toHaveLength(2);
+    await repo.deleteRecipeNote(furnace.id); expect(await repo.listRecipeNotes(saved.recipe.id, true)).toHaveLength(1); expect(await repo.getSnapshot(saved.snapshot.id)).toEqual(snapshotBefore); expect((await repo.listRevisions(saved.recipe.id))).toHaveLength(1);
   });
 
   it("rejects invalid calculations and stale concurrent pointers", async () => {

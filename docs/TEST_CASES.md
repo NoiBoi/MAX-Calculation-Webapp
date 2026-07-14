@@ -166,3 +166,12 @@ Engine and adapter fixtures cover coefficients 1, 1.2, 2.2, and 0.9; direct matr
 - `COMPARE-MULTISELECT-001`: multiple compatible current recipe revisions are added atomically with saved names and source IDs; an already-added revision is not silently duplicated.
 - `COMPARE-GENERAL-001`: a mixed-target selection imports in one operation; every scenario retains its own target and produces the same calculation state and result it produces in Calculator.
 - `COMPARE-SAVE-001`: save, leave, reopen, and verify name, scenario order, source IDs, shared target, layout, metrics, and historical results.
+
+# Calculator workflow and recipe-note cases
+
+- `SAVE-UI-001`: editable initial name and revision note, scientific revision increment, metadata-only rename without snapshot creation, and revision-history display. Repository rollback fixtures verify failed transactions leave the unsaved state and user text available for retry.
+- `AL-RESET-001`: direct aluminum feed survives carbon/precursor edits, autofill, mode/layout changes, save/reopen, and refresh recovery; helper tests cover compatible Al-target changes and intentional removal for no-Al targets.
+- `PRECURSOR-NAV-001`: Alt-arrow navigation selects adjacent formula inputs at both boundaries, while reorder buttons preserve row identity/metadata and move focus with the row.
+- `SUMMARY-MOLAR-001`: calculator and comparison summaries derive final intended `mol precursor / mol target formula` values from engine results, retain exact rational detail, and include quantities in copy and print output.
+- `PANEL-DISMISS-001` and `DEFAULT-ROUTE-001`: outside/Escape dismissal with focus restoration, calculator landing at `/`, and labeled demo navigation at `/demo`.
+- `NOTES-001`: multiline category/tag/date/revision-linked records remain searchable after reopen. Repository fixtures additionally cover edit, archive, deletion, body/title/category/tag search, snapshot immutability, recipe deletion cascade, backup/restore, conflict remapping, safe text storage, and exclusion from ordinary weighing export.

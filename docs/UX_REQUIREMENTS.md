@@ -34,8 +34,12 @@ At narrower widths, composition/route becomes a collapsible top section above th
 ## Interaction rules
 
 - Valid changes update results immediately; formula paste may debounce no more than 150 ms.
+- Save opens a compact modal with editable recipe name, current/new revision status, validation status, an optional multiline revision note, and explicit Cancel/Save action. Enter submits outside the multiline note; Escape cancels and returns focus to Save. Name-only edits are labeled as rename operations and do not create scientific history.
+- Ordinary buttons use a CSS-only 80–120 ms hover/focus/pressed response, a visible keyboard focus ring, a one-pixel pressed movement, and clear selected, pending, and disabled states without layout shift.
+- `Alt+ArrowUp` and `Alt+ArrowDown` move between enabled precursor formula inputs, select the destination text, stop at route boundaries, and announce the destination. Plain arrow keys retain normal caret behavior. Row reorder buttons preserve the complete row and focus the moved formula field.
 - A compact `Normalize leading mixed-site ratios` checkbox sits beside the target input. It is off by default and never changes the entered text. When enabled for supported 211/312/413 syntax, an inline preview shows the entered ratio total, requested M multiplicity, percentage occupancy, per-formula coefficient, ideal-versus-feed meaning, selectable site-occupancy and expanded formulas, copy actions, generated explicit site model, and expandable exact fractions. Disabling it immediately restores ordinary formula grouping and prominently shows the entered formula without clearing or integer-scaling it.
 - The common-adjustment grid places `Aluminum per formula` beside a dynamically labeled `Carbon per formula` or `Nitrogen per formula` control, followed by handling loss and balance increment. Both are positive direct molar coefficients used before solving. Aluminum help labels stoichiometric, below-ideal, or above-ideal state; percentages are explanatory only. Targets without Al hide the shortcut. Normalized target, expanded target, and adjusted intended-feed formulas remain visibly distinct.
+- `Aluminum per formula` is authoritative user state, not a value repeatedly derived by React effects. Compatible Al-target edits preserve it while ideal helper text changes; unrelated route, X-feed, mode, layout, suggestion, save, and recovery operations cannot reset it.
 - Invalid input preserves the last valid result but marks it stale and ties the message to the field.
 - Enter commits and moves to the next logical field; Escape closes only temporary disclosures.
 - Adding an occupant/precursor focuses its first editable field. Removing one focuses the nearest surviving row.
@@ -90,6 +94,7 @@ Two calculation columns share a locked composition header. Differences in route,
 
 - Recovery restores the last valid committed workspace, mode, base revision, and unsaved indicator within the primary screen; invalid draft text cannot destroy that valid state.
 - The recipe and route side panels are labeled, searchable, keyboard accessible, and non-modal. Archive is the routine cleanup action; permanent delete explains its cascade and requires confirmation.
+- Taskbar utility layers toggle from their trigger, close when another opens, dismiss on outside pointer interaction or Escape, remain open for inside/nested-modal interaction, and return focus to their trigger only after Escape. Explicit close controls remain available.
 - Saved/current, unsaved, stale, invalid, and historical states use visible text, not color alone. Save/copy/export results use an accessible live region.
 - Undo/redo applies only to scientific working inputs, groups rapid edits, and is bounded. Panels, scrolling, historical viewing, and export actions are excluded.
 - Historical revision contents cannot be edited in place. Recalculation is explicit and creates unsaved current-engine work.
@@ -101,6 +106,7 @@ Two calculation columns share a locked composition header. Differences in route,
 - Layout widths are bounded and critical target, precursor, batch, final-mass, warning, and status content cannot be hidden. Built-ins are immutable and 200% zoom must not require page-level horizontal scrolling.
 - Restore/import always shows preview, type/version/count or scientific metadata, digest status, conflicts, and proposed action before writing. Replace and clear operations require explicit confirmation.
 - Imported names and notes render as text only. No difference is hover-only or color-only.
+- Saved-recipe notes use a searchable modal with category and exact-tag filters, a multiline plain-text editor, optional experiment date/operator, archive/delete actions, and clearly displayed general or revision attachment. Line breaks are preserved and arbitrary HTML is never rendered.
 # Atomic-radius gate UX
 
 Advanced mode contains a semantic Site descriptors panel. It shows explicit site occupants/vacancy, one dataset selector per site, definition/version/coverage/source status/lab status, resolved values, missing entries, aggregates when complete, and the visible non-predictive disclaimer. Flat formulas show the explicit-site requirement and a Configure sites action. No essential source or status information is tooltip-only, color-only, or hover-only.

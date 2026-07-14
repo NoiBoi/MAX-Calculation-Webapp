@@ -118,3 +118,13 @@ Autofill never runs on formula entry. Applying a candidate replaces the entire w
 The calculator provides a large, paper-friendly weighing summary built only from the currently usable engine result. It shows the adjusted intended feed formula, batch basis, ordered precursor masses, total, and action-required messages. Stale working results cannot open the summary; immutable historical results remain available and are labeled historical.
 
 Recipe comparison starts empty. Users explicitly add saved recipe revisions, the current unsaved calculator state, or a blank scenario. Saved-recipe import supports multiple selections and preserves every scenario's independent target, site model, adjustments, and route even when the targets differ scientifically. A working comparison may temporarily contain one scenario, while persistence requires two to four. Comparison summaries preserve scenario order and keep invalid scenarios visible without presenting masses as usable.
+
+# Calculator workflow and recipe records (schema 7)
+
+`/` opens the production calculator directly; `/workspace` remains supported and `/demo` contains the secondary feature tutorial/development reference. The compact Save dialog separates recipe metadata from scientific history: editable naming alone renames the recipe pointer, while changed canonical scientific input creates the next immutable revision and optional concise revision note. No saved state is reported before the repository transaction succeeds.
+
+The direct `Aluminum per formula` value has one authoritative workspace field. Compatible Al-bearing target edits preserve it while independently updating ideal-reference help; precursor, carbon, mode, layout, suggestion, and recovery actions cannot derive over it. A target without Al removes the shortcut, and loading/resetting a different record intentionally supplies that record's value.
+
+Normal and comparison weighing summaries report the final intended precursor molar quantity in `mol precursor / mol target formula` and final weighing mass. Exact solver rationals remain exact; compact decimals are presentation only, and a post-solver precursor adjustment exposes both solver and final intended quantities.
+
+Saved recipes have separate structured notes with stable IDs, category, title, multiline plain-text body, tags, timestamps, optional experiment date/operator, optional revision link, and archive state. Notes are locally searchable by recipe/formula and note content and filterable by category/tag. Adding or editing a note never rewrites a scientific revision or snapshot. Full backups include notes; ordinary weighing exports exclude them by default.

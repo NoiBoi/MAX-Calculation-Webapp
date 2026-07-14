@@ -43,6 +43,18 @@ export function analyzeWorkspaceAluminumFeed(input: AluminumFeedInput): Aluminum
   return { visible: true, idealCoefficient, enteredCoefficient: entered.toFixed(), calculationScaleFactor };
 }
 
+/** Keeps the user-owned feed coefficient stable while the ideal target reference changes. */
+export function aluminumCoefficientForTargetChange(current: AluminumFeedInput, nextTargetFormula: string): string {
+  const next = parseFormula(nextTargetFormula);
+  if (!next.success) return current.aluminumPerFormula ?? "";
+  const nextIdeal = next.composition.amounts.Al;
+  if (!nextIdeal) return "";
+  const currentParsed = parseFormula(current.targetFormula);
+  const currentContainsAluminum = currentParsed.success && Boolean(currentParsed.composition.amounts.Al);
+  if (currentContainsAluminum && typeof current.aluminumPerFormula === "string" && current.aluminumPerFormula.trim() !== "") return current.aluminumPerFormula;
+  return nextIdeal;
+}
+
 export function migrateWorkspaceAluminumInput<T extends AluminumFeedInput>(input: T): Omit<T, "aluminumPerFormula" | "alExcessPercent"> & { aluminumPerFormula: string } {
   if (typeof input.aluminumPerFormula === "string") return input as Omit<T, "aluminumPerFormula" | "alExcessPercent"> & { aluminumPerFormula: string };
   const analysis = analyzeWorkspaceAluminumFeed(input);

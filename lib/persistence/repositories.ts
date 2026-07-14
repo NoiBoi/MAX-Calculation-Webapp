@@ -21,6 +21,7 @@ import {
   type ComparisonWorkspace,
   type IntegrityDiagnostic,
   type IntegrityResult,
+  type RecipeNote,
   type RecipeRevision,
   type RouteRevision,
   type SavedRecipe,
@@ -69,6 +70,21 @@ export interface RecipeRepository {
   renameRecipe(id: string, name: string): Promise<void>;
   setRecipeArchived(id: string, archived: boolean): Promise<void>;
   deleteRecipePermanently(id: string): Promise<void>;
+}
+
+export const RECIPE_NOTE_TITLE_LIMIT = 160;
+export const RECIPE_NOTE_BODY_LIMIT = 20_000;
+export const RECIPE_NOTE_TAG_LIMIT = 20;
+export interface SaveRecipeNoteRequest {
+  readonly id?: string;
+  readonly recipeId: string;
+  readonly recipeRevisionId?: string;
+  readonly category: string;
+  readonly title: string;
+  readonly body: string;
+  readonly tags?: readonly string[];
+  readonly experimentDate?: string;
+  readonly operator?: string;
 }
 
 export interface RouteRepository {
@@ -234,15 +250,43 @@ export class LocalDataRepositories implements RecipeRepository, RouteRepository 
   }
   async setRecipeArchived(recipeId: string, archived: boolean): Promise<void> { await this.database.recipes.update(recipeId, { archived, updatedAt: new Date().toISOString() }); }
   async deleteRecipePermanently(recipeId: string): Promise<void> {
-    await this.database.transaction("rw", this.database.recipes, this.database.recipeRevisions, this.database.snapshots, this.database.recentCalculations, async () => {
+    await this.database.transaction("rw", this.database.recipes, this.database.recipeRevisions, this.database.snapshots, this.database.recentCalculations, this.database.recipeNotes, async () => {
       await Promise.all([
         this.database.recipes.delete(recipeId),
         this.database.recipeRevisions.where("recipeId").equals(recipeId).delete(),
         this.database.snapshots.where("recipeId").equals(recipeId).delete(),
         this.database.recentCalculations.where("recipeId").equals(recipeId).delete(),
+        this.database.recipeNotes.where("recipeId").equals(recipeId).delete(),
       ]);
     });
   }
+
+  async saveRecipeNote(request: SaveRecipeNoteRequest): Promise<RecipeNote> {
+    const title = request.title.trim(); const body = request.body.trim(); const category = request.category.trim();
+    if (!title) throw new Error("Note title is required.");
+    if (!category) throw new Error("Note category is required.");
+    if (title.length > RECIPE_NOTE_TITLE_LIMIT) throw new Error(`Note titles may not exceed ${RECIPE_NOTE_TITLE_LIMIT} characters.`);
+    if (body.length > RECIPE_NOTE_BODY_LIMIT) throw new Error(`Note bodies may not exceed ${RECIPE_NOTE_BODY_LIMIT.toLocaleString()} characters.`);
+    const recipe = await this.database.recipes.get(request.recipeId); if (!recipe) throw new Error("The linked recipe no longer exists.");
+    if (request.recipeRevisionId) { const revision = await this.database.recipeRevisions.get(request.recipeRevisionId); if (!revision || revision.recipeId !== request.recipeId) throw new Error("The linked recipe revision is unavailable."); }
+    const tags = [...new Set((request.tags ?? []).map((item) => item.trim()).filter(Boolean))];
+    if (tags.length > RECIPE_NOTE_TAG_LIMIT) throw new Error(`A note may have at most ${RECIPE_NOTE_TAG_LIMIT} tags.`);
+    const now = new Date().toISOString(); const existing = request.id ? await this.database.recipeNotes.get(request.id) : undefined;
+    if (request.id && (!existing || existing.recipeId !== request.recipeId)) throw new Error("The note no longer exists.");
+    const note: RecipeNote = { schemaVersion: LOCAL_SCHEMA_VERSION, id: existing?.id ?? id("note"), recipeId: request.recipeId, ...(request.recipeRevisionId ? { recipeRevisionId: request.recipeRevisionId } : {}), category, title, body, tags, createdAt: existing?.createdAt ?? now, updatedAt: now, ...(request.experimentDate?.trim() ? { experimentDate: request.experimentDate.trim() } : {}), ...(request.operator?.trim() ? { operator: request.operator.trim() } : {}), archived: existing?.archived ?? false };
+    await this.database.recipeNotes.put(note); return clone(note);
+  }
+  async listRecipeNotes(recipeId?: string, includeArchived = false): Promise<readonly RecipeNote[]> {
+    const values = recipeId ? await this.database.recipeNotes.where("recipeId").equals(recipeId).toArray() : await this.database.recipeNotes.toArray();
+    return values.filter((item) => includeArchived || !item.archived).sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
+  }
+  async searchRecipeNotes(query: string, filters: Readonly<{ recipeId?: string; category?: string; tag?: string; includeArchived?: boolean }> = {}): Promise<readonly RecipeNote[]> {
+    const notes = await this.listRecipeNotes(filters.recipeId, filters.includeArchived ?? false); const needle = query.trim().toLowerCase();
+    const recipes = new Map((await this.database.recipes.toArray()).map((item) => [item.id, item]));
+    return notes.filter((note) => (!filters.category || note.category === filters.category) && (!filters.tag || note.tags.some((tag) => tag.toLowerCase() === filters.tag!.toLowerCase())) && (!needle || (() => { const recipe = recipes.get(note.recipeId); return `${recipe?.name ?? ""} ${recipe?.targetFormula ?? ""} ${note.title} ${note.body} ${note.category} ${note.tags.join(" ")}`.toLowerCase().includes(needle); })()));
+  }
+  async setRecipeNoteArchived(noteId: string, archived: boolean): Promise<void> { await this.database.recipeNotes.update(noteId, { archived, updatedAt: new Date().toISOString() }); }
+  async deleteRecipeNote(noteId: string): Promise<void> { await this.database.recipeNotes.delete(noteId); }
 
   async duplicateRecipe(sourceRecipeId: string, sourceRevisionId?: string): Promise<Readonly<{ name: string; inputState: WorkspaceRecipeState; sourceRecipeId: string; sourceRevisionId: string }>> {
     const recipe = await this.database.recipes.get(sourceRecipeId);
@@ -391,8 +435,8 @@ export class LocalDataRepositories implements RecipeRepository, RouteRepository 
 
   async checkIntegrity(): Promise<IntegrityResult> {
     const diagnostics: IntegrityDiagnostic[] = [];
-    const [recipes, revisions, snapshots, routes, routeRevisions, comparisons, layouts, radiusDatasets] = await Promise.all([
-      this.database.recipes.toArray(), this.database.recipeRevisions.toArray(), this.database.snapshots.toArray(), this.database.routes.toArray(), this.database.routeRevisions.toArray(), this.database.comparisons.toArray(), this.database.layouts.toArray(), this.database.radiusDatasets.toArray(),
+    const [recipes, revisions, snapshots, routes, routeRevisions, comparisons, layouts, radiusDatasets, recipeNotes] = await Promise.all([
+      this.database.recipes.toArray(), this.database.recipeRevisions.toArray(), this.database.snapshots.toArray(), this.database.routes.toArray(), this.database.routeRevisions.toArray(), this.database.comparisons.toArray(), this.database.layouts.toArray(), this.database.radiusDatasets.toArray(), this.database.recipeNotes.toArray(),
     ]);
     const revisionsById = new Map(revisions.map((item) => [item.id, item]));
     const snapshotsById = new Map(snapshots.map((item) => [item.id, item]));
@@ -401,6 +445,11 @@ export class LocalDataRepositories implements RecipeRepository, RouteRepository 
       if (recipe.schemaVersion !== LOCAL_SCHEMA_VERSION) diagnostics.push({ code: "UNSUPPORTED_SCHEMA_VERSION", severity: "error", recordType: "recipe", recordId: recipe.id, message: `Unsupported schema ${recipe.schemaVersion}.`, blocking: true });
       const current = revisionsById.get(recipe.currentRevisionId);
       if (!current || current.recipeId !== recipe.id || current.revisionNumber !== recipe.currentRevisionNumber) diagnostics.push({ code: "INVALID_CURRENT_REVISION", severity: "error", recordType: "recipe", recordId: recipe.id, message: "The current revision pointer is invalid.", blocking: true });
+    }
+    const recipeIds = new Set(recipes.map((item) => item.id));
+    for (const note of recipeNotes) {
+      if (!recipeIds.has(note.recipeId)) diagnostics.push({ code: "ORPHANED_RECIPE_NOTE", severity: "error", recordType: "recipe-note", recordId: note.id, message: "The note's linked recipe is missing.", blocking: true });
+      if (note.recipeRevisionId && (!revisionsById.has(note.recipeRevisionId) || revisionsById.get(note.recipeRevisionId)?.recipeId !== note.recipeId)) diagnostics.push({ code: "INVALID_NOTE_REVISION_LINK", severity: "error", recordType: "recipe-note", recordId: note.id, message: "The note's linked revision is missing or belongs to another recipe.", blocking: true });
     }
     for (const revision of revisions) {
       const snapshot = snapshotsById.get(revision.snapshotId);
@@ -417,10 +466,10 @@ export class LocalDataRepositories implements RecipeRepository, RouteRepository 
   }
 
   async exportRawBackup(): Promise<string> {
-    const [recipes, recipeRevisions, snapshots, routes, routeRevisions, recentCalculations, recovery, migrations, comparisons, layouts, radiusDatasets] = await Promise.all([
-      this.database.recipes.toArray(), this.database.recipeRevisions.toArray(), this.database.snapshots.toArray(), this.database.routes.toArray(), this.database.routeRevisions.toArray(), this.database.recentCalculations.toArray(), this.database.recovery.toArray(), this.database.migrations.toArray(), this.database.comparisons.toArray(), this.database.layouts.toArray(), this.database.radiusDatasets.toArray(),
+    const [recipes, recipeRevisions, snapshots, routes, routeRevisions, recentCalculations, recovery, migrations, comparisons, layouts, radiusDatasets, recipeNotes] = await Promise.all([
+      this.database.recipes.toArray(), this.database.recipeRevisions.toArray(), this.database.snapshots.toArray(), this.database.routes.toArray(), this.database.routeRevisions.toArray(), this.database.recentCalculations.toArray(), this.database.recovery.toArray(), this.database.migrations.toArray(), this.database.comparisons.toArray(), this.database.layouts.toArray(), this.database.radiusDatasets.toArray(), this.database.recipeNotes.toArray(),
     ]);
-    return JSON.stringify({ schemaVersion: LOCAL_SCHEMA_VERSION, exportedAt: new Date().toISOString(), recipes, recipeRevisions, snapshots, routes, routeRevisions, recentCalculations, recovery, migrations, comparisons, layouts, radiusDatasets }, null, 2);
+    return JSON.stringify({ schemaVersion: LOCAL_SCHEMA_VERSION, exportedAt: new Date().toISOString(), recipes, recipeRevisions, snapshots, routes, routeRevisions, recentCalculations, recovery, migrations, comparisons, layouts, radiusDatasets, recipeNotes }, null, 2);
   }
 
   close(): void { this.database.close(); }

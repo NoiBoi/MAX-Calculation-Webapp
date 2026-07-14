@@ -4,6 +4,7 @@ async function openMore(page: import("@playwright/test").Page) { await page.getB
 async function chooseExample(page: import("@playwright/test").Page, id = "ti2aln") { await openMore(page); await page.getByLabel("Start or reset").selectOption(id); }
 async function openCompare(page: import("@playwright/test").Page) { await page.getByRole("link", { name: "Compare", exact: true }).click(); }
 async function addCurrentPair(page: import("@playwright/test").Page) { await page.locator("header").getByRole("button", { name: "Add current recipe" }).click(); await page.getByLabel("Unsaved calculation scenario", { exact: true }).getByRole("button", { name: "Duplicate" }).click(); }
+async function saveRecipe(page: import("@playwright/test").Page) { await page.getByRole("button", { name: "Save", exact: true }).click(); const dialog = page.getByRole("dialog", { name: "Save recipe" }); await dialog.getByRole("button", { name: /Save recipe|Save revision|Rename recipe/ }).click(); await expect(dialog).not.toBeVisible(); }
 
 test.beforeEach(async ({ page }) => { await page.goto("/workspace"); await expect(page.locator('[data-recovery-ready="true"]')).toBeVisible(); await chooseExample(page); });
 
@@ -20,7 +21,7 @@ test("SUMMARY-001 shows and copies the current balance-side summary", async ({ p
 });
 
 test("historical weighing summaries are available and clearly labeled", async ({ page }) => {
-  await page.getByRole("button", { name: "Save", exact: true }).click(); await page.getByLabel("Target batch mass").fill("12"); await page.getByRole("button", { name: "Save", exact: true }).click(); await page.getByRole("button", { name: "Open", exact: true }).click(); await page.getByRole("button", { name: "History" }).click(); await page.getByRole("heading", { name: "Revision 1" }).locator("..").getByRole("button", { name: "Open snapshot" }).click();
+  await saveRecipe(page); await page.getByLabel("Target batch mass").fill("12"); await saveRecipe(page); await page.getByRole("button", { name: "Open", exact: true }).click(); await page.getByRole("button", { name: "History" }).click(); await page.getByRole("heading", { name: "Revision 1" }).locator("..").getByRole("button", { name: "Open snapshot" }).click();
   await page.getByRole("button", { name: "View weighing summary" }).click(); const dialog = page.getByRole("dialog", { name: "Weighing summary" }); await expect(dialog.getByText(/Historical saved result/)).toBeVisible();
 });
 
@@ -50,21 +51,21 @@ test("SUMMARY-002 keeps valid and invalid comparison scenarios visible", async (
 test("COMPARE-SAVE-001 saves and reopens scenario names and order", async ({ page }) => {
   await openCompare(page); await addCurrentPair(page); const secondName = page.getByLabel("Copy of Unsaved calculation name"); await secondName.fill("Alternate route");
   await page.getByRole("button", { name: "Save comparison" }).click(); await expect(page.getByText("Comparison saved", { exact: true })).toBeVisible();
-  await page.getByRole("link", { name: "Calculator" }).click(); await openCompare(page); await page.getByLabel("Open saved comparison").selectOption({ label: "Ti2AlN route comparison" });
+  await page.getByRole("link", { name: "Calculator" }).click(); await openCompare(page); await page.getByLabel("Open saved comparison").selectOption({ label: "Untitled comparison" });
   const regions = page.locator('section[aria-label$=" scenario"]'); await expect(regions).toHaveCount(2); await expect(regions.nth(0)).toHaveAttribute("aria-label", "Unsaved calculation scenario"); await expect(regions.nth(1)).toHaveAttribute("aria-label", "Alternate route scenario");
 });
 
 test("COMPARE-MULTISELECT-001 adds three saved recipes in one operation", async ({ page }) => {
   for (let index = 0; index < 3; index += 1) {
     if (index > 0) { await page.getByRole("button", { name: "New", exact: true }).click(); await chooseExample(page); }
-    await page.getByLabel("Target batch mass").fill(`${10 + index}`); await page.getByRole("button", { name: "Save", exact: true }).click(); await expect(page.getByText(/Saved Ti2AlN recipe, revision 1/)).toBeVisible();
+    await page.getByLabel("Target batch mass").fill(`${10 + index}`); await saveRecipe(page); await expect(page.getByText(/Saved Ti2AlN recipe, revision 1/)).toBeVisible();
   }
   await openCompare(page); await page.locator("header").getByRole("button", { name: "Add saved recipes" }).click(); const picker = page.getByRole("dialog", { name: "Add saved recipes" }); await picker.getByRole("button", { name: "Select all visible" }).click(); await picker.getByRole("button", { name: "Add selected" }).click();
   await expect(page.locator('section[aria-label$=" scenario"]')).toHaveCount(3); await expect(page.getByLabel("Ti2AlN recipe scenario", { exact: true })).toBeVisible(); await expect(page.getByLabel("Ti2AlN recipe (2) scenario", { exact: true })).toBeVisible(); await expect(page.getByLabel("Ti2AlN recipe (3) scenario", { exact: true })).toBeVisible();
 });
 
 test("COMPARE-GENERAL-001 imports and calculates recipes with different targets", async ({ page }) => {
-  await page.getByRole("button", { name: "Save", exact: true }).click(); await expect(page.getByText(/Saved Ti2AlN recipe/)).toBeVisible(); await page.getByRole("button", { name: "New", exact: true }).click(); await chooseExample(page, "ti3alc2"); await page.getByRole("button", { name: "Save", exact: true }).click(); await expect(page.getByText(/Saved Ti3AlC2 recipe/)).toBeVisible();
+  await saveRecipe(page); await expect(page.getByText(/Saved Ti2AlN recipe/)).toBeVisible(); await page.getByRole("button", { name: "New", exact: true }).click(); await chooseExample(page, "ti3alc2"); await saveRecipe(page); await expect(page.getByText(/Saved Ti3AlC2 recipe/)).toBeVisible();
   await openCompare(page); await page.locator("header").getByRole("button", { name: "Add saved recipes" }).click(); const picker = page.getByRole("dialog", { name: "Add saved recipes" }); await picker.getByRole("button", { name: "Select all visible" }).click(); await picker.getByRole("button", { name: "Add selected" }).click();
   await expect(picker).not.toBeVisible(); await expect(page.locator('section[aria-label$=" scenario"]')).toHaveCount(2); await expect(page.getByLabel("Ti2AlN recipe scenario", { exact: true })).toContainText("Final total"); await expect(page.getByLabel("Ti3AlC2 recipe scenario", { exact: true })).toContainText("Final total");
   await page.getByLabel("Comparison name").fill("Mixed target comparison"); await page.getByRole("button", { name: "Save comparison" }).click(); await expect(page.getByText("Comparison saved", { exact: true })).toBeVisible();

@@ -1,4 +1,4 @@
-import type { BatchCalculationResult } from "@max-stoich/chemistry-engine";
+import { ChemistryDecimal, type BatchCalculationResult } from "@max-stoich/chemistry-engine";
 import type { WorkspaceRecipeState } from "../workspace/adapter";
 import { presentDiagnostics, precursorStatus } from "./diagnostics";
 import { formatMassForBalance } from "./scientific-format";
@@ -7,6 +7,11 @@ export interface WeighingSummaryPrecursor {
   readonly id: string;
   readonly displayName: string;
   readonly formula: string;
+  readonly molarQuantity: string;
+  readonly molarQuantityExact?: string;
+  readonly solverMolarQuantity: string;
+  readonly solverMolarQuantityExact: string;
+  readonly hasPostSolverAdjustment: boolean;
   readonly finalMass: string;
   readonly unit: "g";
   readonly status: string;
@@ -28,6 +33,7 @@ export interface WeighingSummary {
 }
 
 export function coefficientSuffix(value: string): string { return value === "1" ? "" : value; }
+function conciseMolar(value: string): string { try { return new ChemistryDecimal(value).toDecimalPlaces(6).toString(); } catch { return value; } }
 
 export function formatAdjustedFeedFormula(amounts: Readonly<Record<string, string>>, preferredOrderFormula = ""): string {
   const preferred = [...preferredOrderFormula.matchAll(/[A-Z][a-z]?/g)].map((match) => match[0]!);
@@ -58,7 +64,10 @@ export function buildWeighingSummary(input: Readonly<{
     precursors: order.flatMap((id) => {
       const result = resultById.get(id); if (!result) return [];
       const definition = definitionById.get(id);
-      return [{ id, displayName: result.displayName, formula: definition?.formula ?? result.displayName, finalMass: formatMassForBalance(result.finalRoundedGrossWeighingMassGrams, input.inputState.balanceIncrementGrams), unit: "g" as const, status: precursorStatus(input.result, id) }];
+      const adjusted = result.precursorAdjustmentIds.length > 0;
+      const solverMolarQuantity = conciseMolar(result.solverMolesPerTargetFormulaMoleDecimalApproximation.value);
+      const finalMolarQuantity = adjusted ? conciseMolar(new ChemistryDecimal(result.postSolverAdjustedMoles).dividedBy(input.result.batch.targetFormulaMoles).toString()) : solverMolarQuantity;
+      return [{ id, displayName: result.displayName, formula: definition?.formula ?? result.displayName, molarQuantity: finalMolarQuantity, ...(!adjusted ? { molarQuantityExact: result.solverMolesPerTargetFormulaMoleExact.canonical } : {}), solverMolarQuantity, solverMolarQuantityExact: result.solverMolesPerTargetFormulaMoleExact.canonical, hasPostSolverAdjustment: adjusted, finalMass: formatMassForBalance(result.finalRoundedGrossWeighingMassGrams, input.inputState.balanceIncrementGrams), unit: "g" as const, status: precursorStatus(input.result, id) }];
     }),
     totalMass: formatMassForBalance(input.result.batch.finalRoundedTotalWeighingMassGrams, input.inputState.balanceIncrementGrams),
     unit: "g",
@@ -71,7 +80,7 @@ export function buildWeighingSummary(input: Readonly<{
 
 export function serializeWeighingSummary(summary: WeighingSummary): string {
   const lines = [summary.title, summary.sourceStatus, "", "Adjusted intended feed", summary.adjustedFeedFormula, "", `Target batch: ${summary.batchMass} g · ${summary.batchBasis}`, ""];
-  summary.precursors.forEach((item) => lines.push(`${item.displayName} (${item.formula})\t${item.finalMass} ${item.unit}`));
+  summary.precursors.forEach((item) => lines.push(`${item.displayName} (${item.formula})\t${item.molarQuantity} mol/mol target${item.molarQuantityExact ? ` (exact ${item.molarQuantityExact})` : ""}${item.hasPostSolverAdjustment ? ` · solver ${item.solverMolarQuantity} (exact ${item.solverMolarQuantityExact})` : ""}\t${item.finalMass} ${item.unit}`));
   lines.push("", `TOTAL\t${summary.totalMass} ${summary.unit}`);
   if (summary.actionRequiredMessages.length) lines.push("", "Action required", ...summary.actionRequiredMessages.map((message) => `- ${message}`));
   if (summary.isHistorical) lines.push("", "Historical saved result");
