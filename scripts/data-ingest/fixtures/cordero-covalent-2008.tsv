@@ -1,0 +1,102 @@
+element	radiusAngstrom	selectionKey	defaultForPolicy	estimated	sourceLocation	notes
+H	0.31	default	true	false	Table 2, H row	Cordero et al. Table 2 default value
+He	0.28	default	true	true	Table 2, He row	Cordero et al. Table 2 default value
+Li	1.28	default	true	false	Table 2, Li row	Cordero et al. Table 2 default value
+Be	0.96	default	true	false	Table 2, Be row	Cordero et al. Table 2 default value
+B	0.84	default	true	false	Table 2, B row	Cordero et al. Table 2 default value
+C	0.76	sp3-default	true	false	Table 2, C row	sp3 carbon default; source also reports sp2 and sp variants
+N	0.71	default	true	false	Table 2, N row	Cordero et al. Table 2 default value
+O	0.66	default	true	false	Table 2, O row	Cordero et al. Table 2 default value
+F	0.57	default	true	false	Table 2, F row	Cordero et al. Table 2 default value
+Ne	0.58	default	true	true	Table 2, Ne row	Cordero et al. Table 2 default value
+Na	1.66	default	true	false	Table 2, Na row	Cordero et al. Table 2 default value
+Mg	1.41	default	true	false	Table 2, Mg row	Cordero et al. Table 2 default value
+Al	1.21	default	true	false	Table 2, Al row	Cordero et al. Table 2 default value
+Si	1.11	default	true	false	Table 2, Si row	Cordero et al. Table 2 default value
+P	1.07	default	true	false	Table 2, P row	Cordero et al. Table 2 default value
+S	1.05	default	true	false	Table 2, S row	Cordero et al. Table 2 default value
+Cl	1.02	default	true	false	Table 2, Cl row	Cordero et al. Table 2 default value
+Ar	1.06	default	true	false	Table 2, Ar row	Cordero et al. Table 2 default value
+K	2.03	default	true	false	Table 2, K row	Cordero et al. Table 2 default value
+Ca	1.76	default	true	false	Table 2, Ca row	Cordero et al. Table 2 default value
+Sc	1.7	default	true	false	Table 2, Sc row	Cordero et al. Table 2 default value
+Ti	1.6	default	true	false	Table 2, Ti row	Cordero et al. Table 2 default value
+V	1.53	default	true	false	Table 2, V row	Cordero et al. Table 2 default value
+Cr	1.39	default	true	false	Table 2, Cr row	Cordero et al. Table 2 default value
+Mn	1.61	high-spin-default	true	false	Table 2, Mn row	high-spin transition-metal value selected by declared dataset policy; low-spin variant retained separately
+Fe	1.52	high-spin-default	true	false	Table 2, Fe row	high-spin transition-metal value selected by declared dataset policy; low-spin variant retained separately
+Co	1.5	high-spin-default	true	false	Table 2, Co row	high-spin transition-metal value selected by declared dataset policy; low-spin variant retained separately
+Ni	1.24	default	true	false	Table 2, Ni row	Cordero et al. Table 2 default value
+Cu	1.32	default	true	false	Table 2, Cu row	Cordero et al. Table 2 default value
+Zn	1.22	default	true	false	Table 2, Zn row	Cordero et al. Table 2 default value
+Ga	1.22	default	true	false	Table 2, Ga row	Cordero et al. Table 2 default value
+Ge	1.2	default	true	false	Table 2, Ge row	Cordero et al. Table 2 default value
+As	1.19	default	true	false	Table 2, As row	Cordero et al. Table 2 default value
+Se	1.2	default	true	false	Table 2, Se row	Cordero et al. Table 2 default value
+Br	1.2	default	true	false	Table 2, Br row	Cordero et al. Table 2 default value
+Kr	1.16	default	true	false	Table 2, Kr row	Cordero et al. Table 2 default value
+Rb	2.2	default	true	false	Table 2, Rb row	Cordero et al. Table 2 default value
+Sr	1.95	default	true	false	Table 2, Sr row	Cordero et al. Table 2 default value
+Y	1.9	default	true	false	Table 2, Y row	Cordero et al. Table 2 default value
+Zr	1.75	default	true	false	Table 2, Zr row	Cordero et al. Table 2 default value
+Nb	1.64	default	true	false	Table 2, Nb row	Cordero et al. Table 2 default value
+Mo	1.54	default	true	false	Table 2, Mo row	Cordero et al. Table 2 default value
+Tc	1.47	default	true	false	Table 2, Tc row	Cordero et al. Table 2 default value
+Ru	1.46	default	true	false	Table 2, Ru row	Cordero et al. Table 2 default value
+Rh	1.42	default	true	false	Table 2, Rh row	Cordero et al. Table 2 default value
+Pd	1.39	default	true	false	Table 2, Pd row	Cordero et al. Table 2 default value
+Ag	1.45	default	true	false	Table 2, Ag row	Cordero et al. Table 2 default value
+Cd	1.44	default	true	false	Table 2, Cd row	Cordero et al. Table 2 default value
+In	1.42	default	true	false	Table 2, In row	Cordero et al. Table 2 default value
+Sn	1.39	default	true	false	Table 2, Sn row	Cordero et al. Table 2 default value
+Sb	1.39	default	true	false	Table 2, Sb row	Cordero et al. Table 2 default value
+Te	1.38	default	true	false	Table 2, Te row	Cordero et al. Table 2 default value
+I	1.39	default	true	false	Table 2, I row	Cordero et al. Table 2 default value
+Xe	1.4	default	true	false	Table 2, Xe row	Cordero et al. Table 2 default value
+Cs	2.44	default	true	false	Table 2, Cs row	Cordero et al. Table 2 default value
+Ba	2.15	default	true	false	Table 2, Ba row	Cordero et al. Table 2 default value
+La	2.07	default	true	false	Table 2, La row	Cordero et al. Table 2 default value
+Ce	2.04	default	true	false	Table 2, Ce row	Cordero et al. Table 2 default value
+Pr	2.03	default	true	false	Table 2, Pr row	Cordero et al. Table 2 default value
+Nd	2.01	default	true	false	Table 2, Nd row	Cordero et al. Table 2 default value
+Pm	1.99	default	true	true	Table 2, Pm row	Cordero et al. Table 2 default value
+Sm	1.98	default	true	false	Table 2, Sm row	Cordero et al. Table 2 default value
+Eu	1.98	default	true	false	Table 2, Eu row	Cordero et al. Table 2 default value
+Gd	1.96	default	true	false	Table 2, Gd row	Cordero et al. Table 2 default value
+Tb	1.94	default	true	false	Table 2, Tb row	Cordero et al. Table 2 default value
+Dy	1.92	default	true	false	Table 2, Dy row	Cordero et al. Table 2 default value
+Ho	1.92	default	true	false	Table 2, Ho row	Cordero et al. Table 2 default value
+Er	1.89	default	true	false	Table 2, Er row	Cordero et al. Table 2 default value
+Tm	1.9	default	true	false	Table 2, Tm row	Cordero et al. Table 2 default value
+Yb	1.87	default	true	false	Table 2, Yb row	Cordero et al. Table 2 default value
+Lu	1.87	default	true	false	Table 2, Lu row	Cordero et al. Table 2 default value
+Hf	1.75	default	true	false	Table 2, Hf row	Cordero et al. Table 2 default value
+Ta	1.7	default	true	false	Table 2, Ta row	Cordero et al. Table 2 default value
+W	1.62	default	true	false	Table 2, W row	Cordero et al. Table 2 default value
+Re	1.51	default	true	false	Table 2, Re row	Cordero et al. Table 2 default value
+Os	1.44	default	true	false	Table 2, Os row	Cordero et al. Table 2 default value
+Ir	1.41	default	true	false	Table 2, Ir row	Cordero et al. Table 2 default value
+Pt	1.36	default	true	false	Table 2, Pt row	Cordero et al. Table 2 default value
+Au	1.36	default	true	false	Table 2, Au row	Cordero et al. Table 2 default value
+Hg	1.32	default	true	false	Table 2, Hg row	Cordero et al. Table 2 default value
+Tl	1.45	default	true	false	Table 2, Tl row	Cordero et al. Table 2 default value
+Pb	1.46	default	true	false	Table 2, Pb row	Cordero et al. Table 2 default value
+Bi	1.48	default	true	false	Table 2, Bi row	Cordero et al. Table 2 default value
+Po	1.4	default	true	false	Table 2, Po row	Cordero et al. Table 2 default value
+At	1.5	default	true	true	Table 2, At row	Cordero et al. Table 2 default value
+Rn	1.5	default	true	true	Table 2, Rn row	Cordero et al. Table 2 default value
+Fr	2.6	default	true	true	Table 2, Fr row	Cordero et al. Table 2 default value
+Ra	2.21	default	true	false	Table 2, Ra row	Cordero et al. Table 2 default value
+Ac	2.15	default	true	false	Table 2, Ac row	Cordero et al. Table 2 default value
+Th	2.06	default	true	false	Table 2, Th row	Cordero et al. Table 2 default value
+Pa	2	default	true	false	Table 2, Pa row	Cordero et al. Table 2 default value
+U	1.96	default	true	false	Table 2, U row	Cordero et al. Table 2 default value
+Np	1.9	default	true	false	Table 2, Np row	Cordero et al. Table 2 default value
+Pu	1.87	default	true	false	Table 2, Pu row	Cordero et al. Table 2 default value
+Am	1.8	default	true	false	Table 2, Am row	Cordero et al. Table 2 default value
+Cm	1.69	default	true	false	Table 2, Cm row	Cordero et al. Table 2 default value
+C	0.73	sp2	false	false	Table 2, C row	sp2 carbon variant
+C	0.69	sp	false	false	Table 2, C row	sp carbon variant
+Mn	1.39	low-spin	false	false	Table 2, Mn row	low-spin variant
+Fe	1.32	low-spin	false	false	Table 2, Fe row	low-spin variant
+Co	1.26	low-spin	false	false	Table 2, Co row	low-spin variant 

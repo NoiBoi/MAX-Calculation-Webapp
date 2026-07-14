@@ -1,10 +1,12 @@
 import {
   BALANCE_MATRIX_SCHEMA_VERSION,
   BATCH_CALCULATION_SCHEMA_VERSION,
+  DEFAULT_ATOMIC_RADIUS_REGISTRY,
   DEFAULT_ELEMENT_DATA,
   ENGINE_VERSION,
   PRECURSOR_SOLVER_SCHEMA_VERSION,
   canonicalRadiusDatasetContent,
+  calculateSiteRadiusDescriptor,
   validateAtomicRadiusDataset,
   type AtomicRadiusDataset,
   type BatchCalculationResult,
@@ -163,6 +165,15 @@ export class LocalDataRepositories implements RecipeRepository, RouteRepository 
         snapshotId,
         inputDigest: scientific.inputDigest,
       };
+      const radiusDatasetSelections = request.inputState.radiusDescriptorConfig && request.inputState.siteComposition ? request.inputState.radiusDescriptorConfig.siteDatasets.map((selection) => {
+        const dataset = DEFAULT_ATOMIC_RADIUS_REGISTRY.datasets.find((item) => item.datasetId === selection.datasetId && item.datasetVersion === selection.datasetVersion && item.digest === selection.datasetDigest);
+        const descriptor = dataset ? calculateSiteRadiusDescriptor(request.inputState.siteComposition!, selection.siteId, dataset, selection.overrides) : undefined;
+        return { siteId: selection.siteId, datasetId: selection.datasetId, datasetVersion: selection.datasetVersion, datasetDigest: selection.datasetDigest, sourceVerificationStatus: dataset?.approval.status ?? "unavailable", labApprovalStatus: dataset?.approval.labApproval ?? "not-reviewed", resolvedValues: descriptor?.occupants.map((item) => ({ element: item.element, ...(item.radiusPm ? { radiusPm: item.radiusPm } : {}), missing: item.missing, ...(item.sourceLocation ? { sourceLocation: item.sourceLocation } : {}) })) ?? [] };
+      }) : undefined;
+      const radiusDescriptorResults = request.inputState.radiusDescriptorConfig && request.inputState.siteComposition ? request.inputState.radiusDescriptorConfig.siteDatasets.flatMap((selection) => {
+        const dataset = DEFAULT_ATOMIC_RADIUS_REGISTRY.datasets.find((item) => item.datasetId === selection.datasetId && item.datasetVersion === selection.datasetVersion && item.digest === selection.datasetDigest);
+        return dataset ? [calculateSiteRadiusDescriptor(request.inputState.siteComposition!, selection.siteId, dataset, selection.overrides)] : [];
+      }) : undefined;
       const snapshot: CalculationSnapshot = {
         schemaVersion: LOCAL_SCHEMA_VERSION,
         id: snapshotId,
@@ -180,7 +191,7 @@ export class LocalDataRepositories implements RecipeRepository, RouteRepository 
         batchCalculationVersion: BATCH_CALCULATION_SCHEMA_VERSION,
         atomicWeightDataVersion: request.result.dataVersions.atomicWeights,
         atomicWeightDataDigest: scientific.dataDigest,
-        ...(request.inputState.radiusDescriptorConfig ? { atomicRadiusDatasetId: request.inputState.radiusDescriptorConfig.datasetId, atomicRadiusDatasetVersion: request.inputState.radiusDescriptorConfig.datasetVersion, atomicRadiusDatasetDigest: request.inputState.radiusDescriptorConfig.datasetDigest, radiusDescriptorSchemaVersion: "1.0.0" as const, radiusDescriptorConfig: clone(request.inputState.radiusDescriptorConfig), ...(request.inputState.siteComposition ? { radiusSiteModel: clone(request.inputState.siteComposition) } : {}) } : {}),
+        ...(request.inputState.radiusDescriptorConfig && request.inputState.siteComposition ? { radiusDescriptorSchemaVersion: "2.0.0" as const, radiusDescriptorConfig: clone(request.inputState.radiusDescriptorConfig), radiusSiteModel: clone(request.inputState.siteComposition), radiusDatasetSelections: clone(radiusDatasetSelections ?? []), radiusDescriptorResults: clone(radiusDescriptorResults ?? []), radiusDisclaimerVersion: "1.0.0" as const } : {}),
         result: clone(request.result),
         createdAt: now,
         validationStatus: recipe.validationStatus,
@@ -343,9 +354,9 @@ export class LocalDataRepositories implements RecipeRepository, RouteRepository 
   async installRadiusDataset(dataset: AtomicRadiusDataset, localTrust: StoredAtomicRadiusDataset["localTrust"] = "imported-unverified"): Promise<StoredAtomicRadiusDataset> {
     const digest = await sha256Hex(stableCanonicalize(canonicalRadiusDatasetContent(dataset)));
     const validation = validateAtomicRadiusDataset(dataset, digest);
-    if (!validation.dataset || validation.diagnostics.some((item) => item.code !== "RADIUS_DATASET_UNAPPROVED" && item.blocking)) throw new Error(validation.diagnostics[0]?.message ?? "Atomic-radius dataset validation failed.");
+    if (!validation.dataset || validation.diagnostics.some((item) => item.code !== "RADIUS_DATASET_UNVERIFIED" && item.blocking)) throw new Error(validation.diagnostics[0]?.message ?? "Atomic-radius dataset validation failed.");
     const trust = localTrust === "built-in-approved" || localTrust === "locally-reviewed" ? localTrust : "imported-unverified";
-    const storedDataset = trust === "imported-unverified" ? { ...validation.dataset, approval: { ...validation.dataset.approval, status: "imported-unverified" as const, reviewer: undefined, reviewDate: undefined } } : validation.dataset;
+    const storedDataset = trust === "imported-unverified" ? { ...validation.dataset, approval: { ...validation.dataset.approval, status: "unverified-import" as const, sourceVerified: false, labApproval: "not-reviewed" as const, reviewer: undefined, reviewDate: undefined } } : validation.dataset;
     const now = new Date().toISOString(); const record: StoredAtomicRadiusDataset = { schemaVersion: LOCAL_SCHEMA_VERSION, id: `${storedDataset.datasetId}@${storedDataset.datasetVersion}`, datasetId: storedDataset.datasetId, datasetVersion: storedDataset.datasetVersion, digest: storedDataset.digest, localTrust: trust, dataset: clone(storedDataset), installedAt: now, updatedAt: now };
     const existing = await this.database.radiusDatasets.get(record.id); if (existing && existing.digest !== record.digest) throw new Error("A different immutable radius dataset already uses this ID and version."); if (!existing) await this.database.radiusDatasets.add(record); return existing ?? record;
   }
@@ -360,8 +371,8 @@ export class LocalDataRepositories implements RecipeRepository, RouteRepository 
     if (!hasValidRationals(snapshot.result)) diagnostics.push({ code: "INVALID_SCIENTIFIC_SCALAR", severity: "error", recordType: "snapshot", recordId: snapshot.id, message: "An exact rational has a missing or non-positive denominator.", blocking: true });
     if (!hasValidScientificNumbers(snapshot.result)) diagnostics.push({ code: "INVALID_SCIENTIFIC_NUMBER", severity: "error", recordType: "snapshot", recordId: snapshot.id, message: `The snapshot contains a non-finite or malformed scientific number at ${invalidScientificNumberPath(snapshot.result)}.`, blocking: true });
     if (!snapshot.engineVersion || !snapshot.atomicWeightDataVersion || !snapshot.atomicWeightDataDigest) diagnostics.push({ code: "MISSING_VERSION_METADATA", severity: "error", recordType: "snapshot", recordId: snapshot.id, message: "Required engine or dataset version metadata is missing.", blocking: true });
-    if (snapshot.radiusDescriptorConfig && (!snapshot.atomicRadiusDatasetId || !snapshot.atomicRadiusDatasetVersion || !snapshot.atomicRadiusDatasetDigest || !snapshot.radiusDescriptorSchemaVersion || !snapshot.radiusSiteModel)) diagnostics.push({ code: "INCOMPLETE_RADIUS_PROVENANCE", severity: "error", recordType: "snapshot", recordId: snapshot.id, message: "A radius-enabled snapshot is missing its dataset identity, digest, descriptor schema, or explicit site model.", blocking: true });
-    if (snapshot.radiusDescriptorConfig && (snapshot.radiusDescriptorConfig.datasetId !== snapshot.atomicRadiusDatasetId || snapshot.radiusDescriptorConfig.datasetVersion !== snapshot.atomicRadiusDatasetVersion || snapshot.radiusDescriptorConfig.datasetDigest !== snapshot.atomicRadiusDatasetDigest)) diagnostics.push({ code: "RADIUS_PROVENANCE_MISMATCH", severity: "error", recordType: "snapshot", recordId: snapshot.id, message: "Radius descriptor selection differs from snapshot dataset provenance.", blocking: true });
+    if (snapshot.radiusDescriptorConfig?.schemaVersion === "2.0.0" && (!snapshot.radiusDescriptorSchemaVersion || !snapshot.radiusSiteModel || !snapshot.radiusDatasetSelections || !snapshot.radiusDescriptorResults || !snapshot.radiusDisclaimerVersion)) diagnostics.push({ code: "INCOMPLETE_RADIUS_PROVENANCE", severity: "error", recordType: "snapshot", recordId: snapshot.id, message: "A radius-enabled snapshot is missing per-site dataset, resolved-value, descriptor, disclaimer, or explicit-site provenance.", blocking: true });
+    if (snapshot.radiusDescriptorConfig?.schemaVersion === "2.0.0" && snapshot.radiusDatasetSelections && snapshot.radiusDescriptorConfig.siteDatasets.some((selection) => !snapshot.radiusDatasetSelections!.some((stored) => stored.siteId === selection.siteId && stored.datasetId === selection.datasetId && stored.datasetVersion === selection.datasetVersion && stored.datasetDigest === selection.datasetDigest))) diagnostics.push({ code: "RADIUS_PROVENANCE_MISMATCH", severity: "error", recordType: "snapshot", recordId: snapshot.id, message: "A per-site radius selection differs from immutable snapshot provenance.", blocking: true });
     return { valid: diagnostics.length === 0, diagnostics };
   }
 

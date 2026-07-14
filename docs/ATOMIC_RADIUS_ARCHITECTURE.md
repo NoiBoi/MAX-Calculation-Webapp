@@ -1,25 +1,23 @@
-# Atomic-radius registry and descriptor gate
+# Atomic-radius registry and descriptor architecture
 
 ## Current decision
 
-No atomic-radius dataset is installed or approved. The registry therefore returns `unavailable-no-approved-dataset` and the product displays: **Atomic-radius descriptors unavailable: no approved dataset is installed.** No mean, range, variance, standard deviation, mismatch, element radius, or override calculation is executed.
-
-Enabling calculations requires one laboratory-approved dataset containing a stable ID/name/version, one radius definition, primary source and edition, pm units, coordination/oxidation/spin policies, `block-site-descriptor` missing-value policy, complete values, named reviewer, review date, review record, and SHA-256 content digest. Hand-audited scientific fixtures and tolerance review must accompany approval.
+Schema `2.0.0` separates scientific-source verification from laboratory approval. Teatum metallic CN12 and Cordero covalent datasets are source-verified and usable for exploratory screening; neither is lab-approved. Rahm neutral-isodensity values are installed provisionally and cannot produce aggregates until the primary SI transcription is directly verified.
 
 ## Registry and validation
 
-`radius-data.ts` defines immutable dataset, source, approval, record, override, recipe-selection, diagnostic, registry, and availability contracts. Validation checks required metadata, positive decimal-string values, real element symbols, duplicate unconditional records, pm-only units, reviewer/date requirements, approval state, and an independently calculated digest. Definitions remain separate; no conversion, fallback, or merged “best radius” table exists.
+`radius-data.ts` validates named definition/source/version, pm units, coordination/oxidation/spin policy, qualified record uniqueness, positive Decimal values, coverage, missing-value policy, trust state, and an independently verified SHA-256 content digest. Multiple values for one element are legal only with distinct qualifier keys and an explicit default policy. Definitions remain separate; there is no fallback or merged “best radius” table.
 
-The content digest covers scientific identity, policies, source, and values. Local approval metadata is excluded so import trust can be downgraded without changing the scientific-content address.
+The scientific content digest excludes local trust metadata, so imported trust can be downgraded without altering the immutable scientific payload. `source-verified` enables screening; `lab-approved` requires a separate explicit laboratory decision.
 
-## Persistence and historical behavior
+## Descriptor engine
 
-Database schema 4 adds `radiusDatasets` without rewriting immutable recipe revisions or snapshots. New revisions can carry a selected dataset ID/version/digest and provenance-complete overrides. New snapshots have optional fields for that exact selection, explicit site model, and descriptor schema version. Because the current gate is closed, ordinary new records omit those optional fields.
+`calculateSiteRadiusDescriptor` accepts one explicit `SiteComposition` site, one explicit dataset, and provenance-bearing same-definition overrides. It normalizes fractions over occupied atoms, excludes vacancy, blocks aggregates on missing/ambiguous values, and calculates mean, extrema/range, weighted variance/Decimal square root, standard deviation, and atomic-size mismatch. Site multiplicity does not scale statistics. Flat formulas never infer M/A/X sites, and different site definitions are never combined into a global mismatch.
 
-Backups include installed dataset records, versions, and record/global digests. Restore validates content and identity before writing. Imported approval metadata is never trusted: imported datasets are stored as `imported-unverified`. A divergent immutable dataset with the same ID/version is a conflict, never a silent overwrite.
+## Persistence and history
 
-## Future descriptor engine
+Database schema 5 stores per-site dataset ID/version/digest, source and lab status, resolved values including missing entries, overrides, results, explicit site model, descriptor version, and disclaimer version in new immutable snapshots. Schema-4 snapshots migrate with `radiusDatasetSelections: null`; they are not recalculated or assigned a current dataset. Recalculation is an explicit new working result/revision.
 
-After approval, the engine—not React—will validate explicit sites, exclude vacancy, normalize occupied fractions, resolve values/overrides, and calculate each site independently using Decimal precision. The future implementation must expose contributions, mean, extrema/range, weighted variance/standard deviation, atomic-size mismatch, trace, warnings, and canonical output. Flat formulas never infer M/A/X sites. Site multiplicity is metadata and does not scale site statistics.
+Backups preserve these records and verify digests. Imported dataset trust is always downgraded to `unverified-import`.
 
-Every future atomic-size mismatch display must retain the visible disclaimer: “Screening descriptor only. It is not a direct prediction of physical stress, lattice strain, phase stability, or synthesis success.”
+Every mismatch display retains: “Atomic-size mismatch is a screening descriptor. It is not a direct prediction of physical stress, lattice strain, phase stability, or synthesis success.”

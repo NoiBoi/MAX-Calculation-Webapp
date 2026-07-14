@@ -154,7 +154,7 @@ describe("batch calculation pipeline", () => {
   it("rejects invalid overrides and missing atomic data", () => {
     const invalid = calculateBatchRecipe(baseInput({ precursors: [{ schemaVersion: "1.0.0", id: "li", name: "Li", formula: "Li", molarMassOverride: { ...override("0") } }] }));
     expect(invalid.status).toBe("invalid-input");
-    const missing = calculateBatchRecipe(baseInput({ idealCrystalComposition: formula("H"), precursors: [{ schemaVersion: "1.0.0", id: "h", name: "H", formula: "H" }] }));
+    const missing = calculateBatchRecipe(baseInput({ idealCrystalComposition: formula("Tc"), precursors: [{ schemaVersion: "1.0.0", id: "tc", name: "Tc", formula: "Tc" }] }));
     expect(missing.status).toBe("calculation-failure");
     expect(missing.errors.map((item) => item.code)).toContain("MISSING_ATOMIC_WEIGHT");
   });
@@ -320,7 +320,7 @@ describe("batch calculation pipeline", () => {
     const timings: string[] = [];
     for (const [rowCount, columnCount] of [[4, 5], [9, 12], [15, 20]] as const) {
       const elements = symbols.slice(0, rowCount);
-      const data: ElementDataSet = { schemaVersion: "1.0.0", dataVersion: "2026.0.0", title: "Synthetic arithmetic and performance data", effectiveDate: "2026-07-13", unit: "g/mol", sources: [source], elements: elements.map((symbol, index) => ({ atomicNumber: index + 1, symbol, name: `synthetic-${symbol}`, standardAtomicWeight: { kind: "point", value: String(index + 1) }, calculationValue: String(index + 1), calculationValuePolicy: "user-specified", sourceIds: [source.id] })) };
+      const data: ElementDataSet = { schemaVersion: "2.0.0", dataVersion: "2026.0.0", title: "Synthetic arithmetic and performance data", effectiveDate: "2026-07-13", unit: "g/mol", digest: "0".repeat(64), calculationValuePolicyDescription: "Synthetic performance fixture values.", sources: [source], elements: elements.map((symbol, index) => ({ atomicNumber: index + 1, symbol, name: `synthetic-${symbol}`, standardAtomicWeight: { kind: "point", value: String(index + 1) }, calculationValue: String(index + 1), calculationValuePolicy: "user-specified", sourceIds: [source.id] })) };
       const target = composition(Object.fromEntries(elements.map((element) => [element, "1"])));
       const precursors = elements.map((element, index) => ({ schemaVersion: "1.0.0" as const, id: `base-${index.toString().padStart(2, "0")}`, name: element, composition: composition({ [element]: "1" }), molarMassOverride: override(String(index + 1)) }));
       while (precursors.length < columnCount) {

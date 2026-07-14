@@ -99,4 +99,10 @@ Two calculation columns share a locked composition header. Differences in route,
 - Imported names and notes render as text only. No difference is hover-only or color-only.
 # Atomic-radius gate UX
 
-Advanced mode contains a semantic Atomic radii and site descriptors panel. It shows explicit site occupants and vacancy where available, a labeled disabled dataset selector, the exact unavailable message, approval requirements, and a screen-reader-visible disclaimer. Flat formulas show the explicit-site requirement. Comparison and settings expose the same neutral unavailable state. No essential source or status information is tooltip-only, color-only, or hover-only.
+Advanced mode contains a semantic Site descriptors panel. It shows explicit site occupants/vacancy, one dataset selector per site, definition/version/coverage/source status/lab status, resolved values, missing entries, aggregates when complete, and the visible non-predictive disclaimer. Flat formulas show the explicit-site requirement and a Configure sites action. No essential source or status information is tooltip-only, color-only, or hover-only.
+
+# Remediated workspace requirements
+
+The single-row responsive command bar, mode/layout distinction, blank/example behavior, and layout semantics are normative as documented in `NAVIGATION_MODE_MODEL.md`. Standard hides matrix/rank/exact residual/constraint/trace/dataset internals. Advanced exposes those capabilities without changing inputs. The weighing table never prints diagnostic codes in its status column.
+
+Blocking and action-required issues expand by default; minor advisories and calculation details are collapsed. Information never uses warning color or count. Display formatting follows `SCIENTIFIC_FORMATTING.md`, including balance-increment mass precision and exact-value access. The per-site radius selector reports definition, version, coverage, source-verification status, and separate laboratory approval.

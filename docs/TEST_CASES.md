@@ -138,3 +138,9 @@ Backup/import fixtures cover empty and populated manifests, digest verification,
 # Atomic-radius gate fixtures
 
 Radius-gate fixtures use explicitly labeled synthetic schema-contract values only; they are not scientific reference radii. They cover required metadata, units, positive values, real and unique symbols, digest verification, immutable output, approval state, empty-registry behavior, no-site behavior, explicit-site preservation, backup content, and imported-trust downgrade. Mean/range/variance/standard-deviation/mismatch fixtures are intentionally absent until a reviewed dataset and independent expected values are approved.
+
+# Remediation fixtures
+
+The superseding suite verifies blank start/example copies, top-bar demotion, meaningful modes/layouts, warning hierarchy/merging, human formatting with lossless exports, all-118 CIAAW coverage and C/Al/Ti/V/Zr/Nb/Mo/Hf/Ta/W/Re spot checks, deterministic importers/digests, and Teatum/Cordero/Rahm source spot checks for Ti/V/Nb/Zr/Hf/Ta/W/Al/C/N.
+
+Descriptor fixtures cover mixed Ti/V/Nb, mixed C/N, single-element zero mismatch, nine-element support, vacancy normalization, missing-value blocking, provenance-bearing overrides, definition separation, mean/range/weighted standard deviation/delta, multiplicity invariance, and flat-formula non-inference. Persistence fixtures verify per-site dataset/resolved-value/result snapshots and imported-trust downgrade. Playwright workflows are `UX-REMEDIATION-001` through `007` plus the updated radius workflow.

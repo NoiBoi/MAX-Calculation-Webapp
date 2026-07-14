@@ -64,7 +64,7 @@ describe("route comparison model and deterministic differences", () => {
     const repository = repo(); const workspace = createComparisonWorkspace(state());
     await repository.saveComparison(workspace);
     const opened = await repository.getComparison(workspace.id);
-    expect(opened).toEqual({ ...workspace, schemaVersion: "4.0.0", updatedAt: opened?.updatedAt });
+    expect(opened).toEqual({ ...workspace, schemaVersion: "5.0.0", updatedAt: opened?.updatedAt });
     expect((await repository.checkIntegrity()).valid).toBe(true);
   });
 
@@ -93,7 +93,7 @@ describe("verified backup, restore, and owned JSON import", () => {
     const empty = repo(); const emptyBackup = await createLocalBackup(empty.database); expect((await previewBackup(serializeBackup(emptyBackup))).valid).toBe(true);
     const { repository } = await populated(); const backup = await createLocalBackup(repository.database); const preview = await previewBackup(serializeBackup(backup));
     expect(preview.valid, JSON.stringify(preview.diagnostics)).toBe(true); expect(backup.manifest.counts).toMatchObject({ recipes: 1, recipeRevisions: 1, snapshots: 1, routes: 1, routeRevisions: 1, comparisons: 1 });
-    expect(backup.manifest.manifestDigest).toMatch(/^[a-f0-9]{64}$/); expect(backup.manifest.datasetVersions).toContain("atomic-weights:2024.1.0"); expect(backup.manifest.counts.radiusDatasets).toBe(0);
+    expect(backup.manifest.manifestDigest).toMatch(/^[a-f0-9]{64}$/); expect(backup.manifest.datasetVersions).toContain("atomic-weights:2024.2.0"); expect(backup.manifest.counts.radiusDatasets).toBe(0);
   });
 
   it("previews without writes, replaces transactionally, and preserves exact rational data", async () => {
@@ -159,10 +159,10 @@ describe("verified backup, restore, and owned JSON import", () => {
   });
 
   it("backs up radius datasets, verifies their digest, and distrusts imported approval", async () => {
-    const source = repo(); const base = { schemaVersion: "1.0.0" as const, datasetId: "synthetic-persistence-fixture", datasetVersion: "2026.1.0", name: "Synthetic persistence fixture", definition: "metallic" as const, source: { sourceId: "fixture", title: "Test fixture", primarySource: "Test-only", editionOrVersion: "1" }, units: "pm" as const, coordinationPolicy: "unconditional fixture", oxidationStatePolicy: "not represented", spinStatePolicy: "not represented", missingValuePolicy: "block-site-descriptor" as const, approval: { status: "approved" as const, reviewer: "Test reviewer", reviewDate: "2026-07-13" }, digest: "0".repeat(64), values: [{ element: "Ti", radiusPm: "100" }] };
+    const source = repo(); const base = { schemaVersion: "2.0.0" as const, datasetId: "synthetic-persistence-fixture", datasetVersion: "2026.1.0", name: "Synthetic persistence fixture", definition: "metallic" as const, definitionDetail: "Synthetic unconditional fixture", source: { sourceId: "fixture", title: "Test fixture", primarySource: "Test-only", editionOrVersion: "1" }, units: "pm" as const, coordinationPolicy: "unconditional fixture", oxidationStatePolicy: "not represented", spinStatePolicy: "not represented", missingValuePolicy: "block-site-descriptor" as const, approval: { status: "lab-reviewed" as const, sourceVerified: true, labApproval: "lab-reviewed" as const, reviewer: "Test reviewer", reviewDate: "2026-07-13" }, digest: "0".repeat(64), coverage: { elements: ["Ti"], missingElements: [], recordCount: 1 }, parsingWarnings: [], values: [{ element: "Ti", radiusPm: "100", selectionKey: "default", defaultForPolicy: true, estimated: false, sourceLocation: "test row" }] };
     const digest = await sha256Hex(stableCanonicalize(canonicalRadiusDatasetContent(base as AtomicRadiusDataset))); const approved = { ...base, digest } as AtomicRadiusDataset;
     await source.installRadiusDataset(approved, "locally-reviewed"); const backup = await createLocalBackup(source.database); expect(backup.manifest.counts.radiusDatasets).toBe(1); expect(backup.manifest.datasetVersions).toContain("atomic-radii:synthetic-persistence-fixture@2026.1.0");
-    const target = repo(); await restoreBackup(serializeBackup(backup), target.database, "replace"); const imported = (await target.listRadiusDatasets())[0]!; expect(imported.localTrust).toBe("imported-unverified"); expect(imported.dataset.approval.status).toBe("imported-unverified"); expect(imported.digest).toBe(digest);
+    const target = repo(); await restoreBackup(serializeBackup(backup), target.database, "replace"); const imported = (await target.listRadiusDatasets())[0]!; expect(imported.localTrust).toBe("imported-unverified"); expect(imported.dataset.approval.status).toBe("unverified-import"); expect(imported.dataset.approval.sourceVerified).toBe(false); expect(imported.digest).toBe(digest);
     const tampered = structuredClone(backup); (tampered.records.radiusDatasets[0]!.dataset.values[0] as { radiusPm: string }).radiusPm = "101"; expect((await previewBackup(JSON.stringify(tampered))).valid).toBe(false);
   });
 });

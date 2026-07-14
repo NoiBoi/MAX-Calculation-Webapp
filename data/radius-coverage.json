@@ -1,0 +1,8 @@
+{
+  "requiredElements": ["Ti", "V", "Cr", "Zr", "Nb", "Mo", "Hf", "Ta", "W", "Sc", "Y", "Al", "C", "N"],
+  "datasets": [
+    { "datasetId": "teatum-metallic-cn12", "covered": ["Ti", "V", "Cr", "Zr", "Nb", "Mo", "Hf", "Ta", "W", "Sc", "Y", "Al", "C", "N"], "missing": [] },
+    { "datasetId": "cordero-covalent-2008", "covered": ["Ti", "V", "Cr", "Zr", "Nb", "Mo", "Hf", "Ta", "W", "Sc", "Y", "Al", "C", "N"], "missing": [] },
+    { "datasetId": "rahm-neutral-isodensity-2016", "covered": ["Ti", "V", "Cr", "Zr", "Nb", "Mo", "Hf", "Ta", "W", "Sc", "Y", "Al", "C", "N"], "missing": [] }
+  ]
+}

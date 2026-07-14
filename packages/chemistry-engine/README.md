@@ -168,6 +168,12 @@ All fallible functions return a discriminated `success` result with structured, 
 Formula parsing produces only a flat elemental vector. It never infers crystallographic sites, structure family, feed meaning, or realized composition. A valid element symbol may parse even when the selected atomic-weight dataset cannot calculate its molar mass.
 # Atomic-radius registry
 
-`createAtomicRadiusRegistry`, `validateAtomicRadiusDataset`, and `assessRadiusDescriptorAvailability` expose the framework-independent data gate. The shipped registry is empty, so descriptor arithmetic is not implemented or called. A flat formula never supplies site assignments; pass an explicit `SiteComposition` only after a reviewed dataset is installed.
+`createAtomicRadiusRegistry`, `validateAtomicRadiusDataset`, `assessRadiusDescriptorAvailability`, and `calculateSiteRadiusDescriptor` expose the framework-independent data and calculation layer. The shipped registry has two source-verified screening datasets and one provisional dataset. A flat formula never supplies site assignments; calculations require an explicit `SiteComposition` and per-site dataset.
 
 Future overrides must match the selected definition and include a reason, source or measurement basis, label, and revision date. Vacancies will be excluded—not assigned radius zero—and any missing occupied value will block the site aggregate. Atomic-size mismatch is always a screening descriptor, never a prediction of stress, strain, stability, or synthesis success.
+
+# Current atomic registries and descriptors
+
+Element schema `2.0.0` distinguishes a valid element from atomic-weight availability. The CIAAW-derived `2024.2.0` registry has all 118 symbols; molar mass returns `MISSING_ATOMIC_WEIGHT` only when a valid record lacks an authoritative calculation value.
+
+Radius schema/descriptor schema `2.0.0` installs separate Teatum metallic, Cordero covalent, and provisional Rahm neutral-isodensity datasets. `calculateSiteRadiusDescriptor` uses Decimal mean/variance/square root/mismatch arithmetic on one explicit site and one explicit dataset; vacancies are excluded and missing values block aggregates. `source-verified` permits exploratory screening but is independent of `lab-approved`.

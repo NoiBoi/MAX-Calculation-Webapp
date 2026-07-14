@@ -1,36 +1,1881 @@
 {
-  "schemaVersion": "1.0.0",
-  "dataVersion": "2024.1.0",
-  "title": "CIAAW 2024 standard and abridged atomic weights — MAX Stoich seed subset",
+  "schemaVersion": "2.0.0",
+  "dataVersion": "2024.2.0",
+  "title": "CIAAW 2024 standard and abridged atomic weights — complete element registry",
   "effectiveDate": "2024-01-01",
   "unit": "g/mol",
+  "digest": "118c45b66dd312a658965d0d0fe58b88ff68c5764653f2866804c2815b9d3376",
+  "calculationValuePolicyDescription": "Use the explicit CIAAW 2024 abridged value when published; otherwise use the CIAAW point value. Never substitute a representative mass number.",
   "sources": [
     {
       "id": "ciaaw-standard-2024",
       "title": "Standard Atomic Weights 2024",
       "organization": "IUPAC Commission on Isotopic Abundances and Atomic Weights",
       "url": "https://ciaaw.org/atomic-weights.htm",
-      "accessedAt": "2026-07-13T00:00:00-04:00"
+      "accessedAt": "2026-07-14T00:00:00-04:00"
     },
     {
       "id": "ciaaw-abridged-2024",
       "title": "Abridged Standard Atomic Weights 2024",
       "organization": "IUPAC Commission on Isotopic Abundances and Atomic Weights",
       "url": "https://ciaaw.org/abridged-atomic-weights.htm",
-      "accessedAt": "2026-07-13T00:00:00-04:00"
+      "accessedAt": "2026-07-14T00:00:00-04:00"
     }
   ],
   "elements": [
-    { "atomicNumber": 3, "symbol": "Li", "name": "lithium", "standardAtomicWeight": { "kind": "interval", "lower": "6.938", "upper": "6.997" }, "calculationValue": "6.94", "calculationValuePolicy": "abridged-standard-value", "sourceIds": ["ciaaw-standard-2024", "ciaaw-abridged-2024"] },
-    { "atomicNumber": 6, "symbol": "C", "name": "carbon", "standardAtomicWeight": { "kind": "interval", "lower": "12.0096", "upper": "12.0116" }, "calculationValue": "12.011", "calculationValuePolicy": "abridged-standard-value", "sourceIds": ["ciaaw-standard-2024", "ciaaw-abridged-2024"] },
-    { "atomicNumber": 7, "symbol": "N", "name": "nitrogen", "standardAtomicWeight": { "kind": "interval", "lower": "14.00643", "upper": "14.00728" }, "calculationValue": "14.007", "calculationValuePolicy": "abridged-standard-value", "sourceIds": ["ciaaw-standard-2024", "ciaaw-abridged-2024"] },
-    { "atomicNumber": 8, "symbol": "O", "name": "oxygen", "standardAtomicWeight": { "kind": "interval", "lower": "15.99903", "upper": "15.99977" }, "calculationValue": "15.999", "calculationValuePolicy": "abridged-standard-value", "sourceIds": ["ciaaw-standard-2024", "ciaaw-abridged-2024"] },
-    { "atomicNumber": 9, "symbol": "F", "name": "fluorine", "standardAtomicWeight": { "kind": "point", "value": "18.998403162", "uncertainty": "0.000000005" }, "calculationValue": "18.998", "calculationValuePolicy": "abridged-standard-value", "sourceIds": ["ciaaw-standard-2024", "ciaaw-abridged-2024"] },
-    { "atomicNumber": 11, "symbol": "Na", "name": "sodium", "standardAtomicWeight": { "kind": "point", "value": "22.98976928", "uncertainty": "0.00000002" }, "calculationValue": "22.990", "calculationValuePolicy": "abridged-standard-value", "sourceIds": ["ciaaw-standard-2024", "ciaaw-abridged-2024"] },
-    { "atomicNumber": 13, "symbol": "Al", "name": "aluminium", "standardAtomicWeight": { "kind": "point", "value": "26.9815384", "uncertainty": "0.0000003" }, "calculationValue": "26.982", "calculationValuePolicy": "abridged-standard-value", "sourceIds": ["ciaaw-standard-2024", "ciaaw-abridged-2024"] },
-    { "atomicNumber": 19, "symbol": "K", "name": "potassium", "standardAtomicWeight": { "kind": "point", "value": "39.0983", "uncertainty": "0.0001" }, "calculationValue": "39.098", "calculationValuePolicy": "abridged-standard-value", "sourceIds": ["ciaaw-standard-2024", "ciaaw-abridged-2024"] },
-    { "atomicNumber": 22, "symbol": "Ti", "name": "titanium", "standardAtomicWeight": { "kind": "point", "value": "47.867", "uncertainty": "0.001" }, "calculationValue": "47.867", "calculationValuePolicy": "point-value", "sourceIds": ["ciaaw-standard-2024"] },
-    { "atomicNumber": 23, "symbol": "V", "name": "vanadium", "standardAtomicWeight": { "kind": "point", "value": "50.9415", "uncertainty": "0.0001" }, "calculationValue": "50.942", "calculationValuePolicy": "abridged-standard-value", "sourceIds": ["ciaaw-standard-2024", "ciaaw-abridged-2024"] },
-    { "atomicNumber": 41, "symbol": "Nb", "name": "niobium", "standardAtomicWeight": { "kind": "point", "value": "92.90637", "uncertainty": "0.00001" }, "calculationValue": "92.906", "calculationValuePolicy": "abridged-standard-value", "sourceIds": ["ciaaw-standard-2024", "ciaaw-abridged-2024"] }
+    {
+      "atomicNumber": 1,
+      "symbol": "H",
+      "name": "hydrogen",
+      "standardAtomicWeight": {
+        "kind": "interval",
+        "lower": "1.00784",
+        "upper": "1.00811"
+      },
+      "calculationValue": "1.0080",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 2,
+      "symbol": "He",
+      "name": "helium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "4.002602",
+        "uncertainty": "0.000002"
+      },
+      "calculationValue": "4.0026",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 3,
+      "symbol": "Li",
+      "name": "lithium",
+      "standardAtomicWeight": {
+        "kind": "interval",
+        "lower": "6.938",
+        "upper": "6.997"
+      },
+      "calculationValue": "6.94",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 4,
+      "symbol": "Be",
+      "name": "beryllium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "9.0121831",
+        "uncertainty": "5e-7"
+      },
+      "calculationValue": "9.0122",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 5,
+      "symbol": "B",
+      "name": "boron",
+      "standardAtomicWeight": {
+        "kind": "interval",
+        "lower": "10.806",
+        "upper": "10.821"
+      },
+      "calculationValue": "10.81",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 6,
+      "symbol": "C",
+      "name": "carbon",
+      "standardAtomicWeight": {
+        "kind": "interval",
+        "lower": "12.0096",
+        "upper": "12.0116"
+      },
+      "calculationValue": "12.011",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 7,
+      "symbol": "N",
+      "name": "nitrogen",
+      "standardAtomicWeight": {
+        "kind": "interval",
+        "lower": "14.00643",
+        "upper": "14.00728"
+      },
+      "calculationValue": "14.007",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 8,
+      "symbol": "O",
+      "name": "oxygen",
+      "standardAtomicWeight": {
+        "kind": "interval",
+        "lower": "15.99903",
+        "upper": "15.99977"
+      },
+      "calculationValue": "15.999",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 9,
+      "symbol": "F",
+      "name": "fluorine",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "18.998403162",
+        "uncertainty": "5e-9"
+      },
+      "calculationValue": "18.998",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 10,
+      "symbol": "Ne",
+      "name": "neon",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "20.1797",
+        "uncertainty": "0.0006000000000000001"
+      },
+      "calculationValue": "20.180",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 11,
+      "symbol": "Na",
+      "name": "sodium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "22.98976928",
+        "uncertainty": "2e-8"
+      },
+      "calculationValue": "22.990",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 12,
+      "symbol": "Mg",
+      "name": "magnesium",
+      "standardAtomicWeight": {
+        "kind": "interval",
+        "lower": "24.304",
+        "upper": "24.307"
+      },
+      "calculationValue": "24.305",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 13,
+      "symbol": "Al",
+      "name": "aluminium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "26.9815384",
+        "uncertainty": "3e-7"
+      },
+      "calculationValue": "26.982",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 14,
+      "symbol": "Si",
+      "name": "silicon",
+      "standardAtomicWeight": {
+        "kind": "interval",
+        "lower": "28.084",
+        "upper": "28.086"
+      },
+      "calculationValue": "28.085",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 15,
+      "symbol": "P",
+      "name": "phosphorus",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "30.973761998",
+        "uncertainty": "5e-9"
+      },
+      "calculationValue": "30.974",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 16,
+      "symbol": "S",
+      "name": "sulfur",
+      "standardAtomicWeight": {
+        "kind": "interval",
+        "lower": "32.059",
+        "upper": "32.076"
+      },
+      "calculationValue": "32.06",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 17,
+      "symbol": "Cl",
+      "name": "chlorine",
+      "standardAtomicWeight": {
+        "kind": "interval",
+        "lower": "35.446",
+        "upper": "35.457"
+      },
+      "calculationValue": "35.45",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 18,
+      "symbol": "Ar",
+      "name": "argon",
+      "standardAtomicWeight": {
+        "kind": "interval",
+        "lower": "39.792",
+        "upper": "39.963"
+      },
+      "calculationValue": "39.95",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 19,
+      "symbol": "K",
+      "name": "potassium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "39.0983",
+        "uncertainty": "0.0001"
+      },
+      "calculationValue": "39.098",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 20,
+      "symbol": "Ca",
+      "name": "calcium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "40.078",
+        "uncertainty": "0.004"
+      },
+      "calculationValue": "40.078",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 21,
+      "symbol": "Sc",
+      "name": "scandium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "44.955907",
+        "uncertainty": "0.000004"
+      },
+      "calculationValue": "44.956",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 22,
+      "symbol": "Ti",
+      "name": "titanium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "47.867",
+        "uncertainty": "0.001"
+      },
+      "calculationValue": "47.867",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 23,
+      "symbol": "V",
+      "name": "vanadium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "50.9415",
+        "uncertainty": "0.0001"
+      },
+      "calculationValue": "50.942",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 24,
+      "symbol": "Cr",
+      "name": "chromium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "51.9961",
+        "uncertainty": "0.0006000000000000001"
+      },
+      "calculationValue": "51.996",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 25,
+      "symbol": "Mn",
+      "name": "manganese",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "54.938043",
+        "uncertainty": "0.000002"
+      },
+      "calculationValue": "54.938",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 26,
+      "symbol": "Fe",
+      "name": "iron",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "55.845",
+        "uncertainty": "0.002"
+      },
+      "calculationValue": "55.845",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 27,
+      "symbol": "Co",
+      "name": "cobalt",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "58.933194",
+        "uncertainty": "0.000003"
+      },
+      "calculationValue": "58.933",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 28,
+      "symbol": "Ni",
+      "name": "nickel",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "58.6934",
+        "uncertainty": "0.0004"
+      },
+      "calculationValue": "58.693",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 29,
+      "symbol": "Cu",
+      "name": "copper",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "63.546",
+        "uncertainty": "0.003"
+      },
+      "calculationValue": "63.546",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 30,
+      "symbol": "Zn",
+      "name": "zinc",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "65.38",
+        "uncertainty": "0.02"
+      },
+      "calculationValue": "65.38",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 31,
+      "symbol": "Ga",
+      "name": "gallium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "69.723",
+        "uncertainty": "0.001"
+      },
+      "calculationValue": "69.723",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 32,
+      "symbol": "Ge",
+      "name": "germanium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "72.630",
+        "uncertainty": "0.008"
+      },
+      "calculationValue": "72.630",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 33,
+      "symbol": "As",
+      "name": "arsenic",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "74.921595",
+        "uncertainty": "0.000006"
+      },
+      "calculationValue": "74.922",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 34,
+      "symbol": "Se",
+      "name": "selenium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "78.971",
+        "uncertainty": "0.008"
+      },
+      "calculationValue": "78.971",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 35,
+      "symbol": "Br",
+      "name": "bromine",
+      "standardAtomicWeight": {
+        "kind": "interval",
+        "lower": "79.901",
+        "upper": "79.907"
+      },
+      "calculationValue": "79.904",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 36,
+      "symbol": "Kr",
+      "name": "krypton",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "83.798",
+        "uncertainty": "0.002"
+      },
+      "calculationValue": "83.798",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 37,
+      "symbol": "Rb",
+      "name": "rubidium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "85.4678",
+        "uncertainty": "0.00030000000000000003"
+      },
+      "calculationValue": "85.468",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 38,
+      "symbol": "Sr",
+      "name": "strontium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "87.62",
+        "uncertainty": "0.01"
+      },
+      "calculationValue": "87.62",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 39,
+      "symbol": "Y",
+      "name": "yttrium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "88.905838",
+        "uncertainty": "0.000002"
+      },
+      "calculationValue": "88.906",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 40,
+      "symbol": "Zr",
+      "name": "zirconium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "91.222",
+        "uncertainty": "0.003"
+      },
+      "calculationValue": "91.222",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 41,
+      "symbol": "Nb",
+      "name": "niobium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "92.90637",
+        "uncertainty": "0.00001"
+      },
+      "calculationValue": "92.906",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 42,
+      "symbol": "Mo",
+      "name": "molybdenum",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "95.95",
+        "uncertainty": "0.01"
+      },
+      "calculationValue": "95.95",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 43,
+      "symbol": "Tc",
+      "name": "technetium",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 44,
+      "symbol": "Ru",
+      "name": "ruthenium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "101.07",
+        "uncertainty": "0.02"
+      },
+      "calculationValue": "101.07",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 45,
+      "symbol": "Rh",
+      "name": "rhodium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "102.90549",
+        "uncertainty": "0.00002"
+      },
+      "calculationValue": "102.91",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 46,
+      "symbol": "Pd",
+      "name": "palladium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "106.42",
+        "uncertainty": "0.01"
+      },
+      "calculationValue": "106.42",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 47,
+      "symbol": "Ag",
+      "name": "silver",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "107.8682",
+        "uncertainty": "0.0002"
+      },
+      "calculationValue": "107.87",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 48,
+      "symbol": "Cd",
+      "name": "cadmium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "112.414",
+        "uncertainty": "0.004"
+      },
+      "calculationValue": "112.41",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 49,
+      "symbol": "In",
+      "name": "indium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "114.818",
+        "uncertainty": "0.001"
+      },
+      "calculationValue": "114.82",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 50,
+      "symbol": "Sn",
+      "name": "tin",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "118.710",
+        "uncertainty": "0.007"
+      },
+      "calculationValue": "118.71",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 51,
+      "symbol": "Sb",
+      "name": "antimony",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "121.760",
+        "uncertainty": "0.001"
+      },
+      "calculationValue": "121.76",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 52,
+      "symbol": "Te",
+      "name": "tellurium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "127.60",
+        "uncertainty": "0.03"
+      },
+      "calculationValue": "127.60",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 53,
+      "symbol": "I",
+      "name": "iodine",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "126.90447",
+        "uncertainty": "0.000030000000000000004"
+      },
+      "calculationValue": "126.90",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 54,
+      "symbol": "Xe",
+      "name": "xenon",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "131.293",
+        "uncertainty": "0.006"
+      },
+      "calculationValue": "131.29",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 55,
+      "symbol": "Cs",
+      "name": "caesium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "132.90545196",
+        "uncertainty": "6.000000000000001e-8"
+      },
+      "calculationValue": "132.91",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 56,
+      "symbol": "Ba",
+      "name": "barium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "137.327",
+        "uncertainty": "0.007"
+      },
+      "calculationValue": "137.33",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 57,
+      "symbol": "La",
+      "name": "lanthanum",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "138.90547",
+        "uncertainty": "0.00007000000000000001"
+      },
+      "calculationValue": "138.91",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 58,
+      "symbol": "Ce",
+      "name": "cerium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "140.116",
+        "uncertainty": "0.001"
+      },
+      "calculationValue": "140.12",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 59,
+      "symbol": "Pr",
+      "name": "praseodymium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "140.90766",
+        "uncertainty": "0.00001"
+      },
+      "calculationValue": "140.91",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 60,
+      "symbol": "Nd",
+      "name": "neodymium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "144.242",
+        "uncertainty": "0.003"
+      },
+      "calculationValue": "144.24",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 61,
+      "symbol": "Pm",
+      "name": "promethium",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 62,
+      "symbol": "Sm",
+      "name": "samarium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "150.36",
+        "uncertainty": "0.02"
+      },
+      "calculationValue": "150.36",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 63,
+      "symbol": "Eu",
+      "name": "europium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "151.964",
+        "uncertainty": "0.001"
+      },
+      "calculationValue": "151.96",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 64,
+      "symbol": "Gd",
+      "name": "gadolinium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "157.249",
+        "uncertainty": "0.002"
+      },
+      "calculationValue": "157.25",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 65,
+      "symbol": "Tb",
+      "name": "terbium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "158.925354",
+        "uncertainty": "0.000007"
+      },
+      "calculationValue": "158.93",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 66,
+      "symbol": "Dy",
+      "name": "dysprosium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "162.500",
+        "uncertainty": "0.001"
+      },
+      "calculationValue": "162.50",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 67,
+      "symbol": "Ho",
+      "name": "holmium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "164.930329",
+        "uncertainty": "0.0000049999999999999996"
+      },
+      "calculationValue": "164.93",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 68,
+      "symbol": "Er",
+      "name": "erbium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "167.259",
+        "uncertainty": "0.003"
+      },
+      "calculationValue": "167.26",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 69,
+      "symbol": "Tm",
+      "name": "thulium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "168.934219",
+        "uncertainty": "0.0000049999999999999996"
+      },
+      "calculationValue": "168.93",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 70,
+      "symbol": "Yb",
+      "name": "ytterbium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "173.045",
+        "uncertainty": "0.01"
+      },
+      "calculationValue": "173.05",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 71,
+      "symbol": "Lu",
+      "name": "lutetium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "174.96669",
+        "uncertainty": "0.00005"
+      },
+      "calculationValue": "174.97",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 72,
+      "symbol": "Hf",
+      "name": "hafnium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "178.486",
+        "uncertainty": "0.006"
+      },
+      "calculationValue": "178.49",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 73,
+      "symbol": "Ta",
+      "name": "tantalum",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "180.94788",
+        "uncertainty": "0.00002"
+      },
+      "calculationValue": "180.95",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 74,
+      "symbol": "W",
+      "name": "tungsten",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "183.84",
+        "uncertainty": "0.01"
+      },
+      "calculationValue": "183.84",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 75,
+      "symbol": "Re",
+      "name": "rhenium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "186.207",
+        "uncertainty": "0.001"
+      },
+      "calculationValue": "186.21",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 76,
+      "symbol": "Os",
+      "name": "osmium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "190.23",
+        "uncertainty": "0.03"
+      },
+      "calculationValue": "190.23",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 77,
+      "symbol": "Ir",
+      "name": "iridium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "192.217",
+        "uncertainty": "0.002"
+      },
+      "calculationValue": "192.22",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 78,
+      "symbol": "Pt",
+      "name": "platinum",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "195.084",
+        "uncertainty": "0.009000000000000001"
+      },
+      "calculationValue": "195.08",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 79,
+      "symbol": "Au",
+      "name": "gold",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "196.966570",
+        "uncertainty": "0.000004"
+      },
+      "calculationValue": "196.97",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 80,
+      "symbol": "Hg",
+      "name": "mercury",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "200.592",
+        "uncertainty": "0.003"
+      },
+      "calculationValue": "200.59",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 81,
+      "symbol": "Tl",
+      "name": "thallium",
+      "standardAtomicWeight": {
+        "kind": "interval",
+        "lower": "204.382",
+        "upper": "204.385"
+      },
+      "calculationValue": "204.38",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 82,
+      "symbol": "Pb",
+      "name": "lead",
+      "standardAtomicWeight": {
+        "kind": "interval",
+        "lower": "206.14",
+        "upper": "207.94"
+      },
+      "calculationValue": "207.2",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 83,
+      "symbol": "Bi",
+      "name": "bismuth",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "208.98040",
+        "uncertainty": "0.00001"
+      },
+      "calculationValue": "208.98",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 84,
+      "symbol": "Po",
+      "name": "polonium",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 85,
+      "symbol": "At",
+      "name": "astatine",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 86,
+      "symbol": "Rn",
+      "name": "radon",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 87,
+      "symbol": "Fr",
+      "name": "francium",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 88,
+      "symbol": "Ra",
+      "name": "radium",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 89,
+      "symbol": "Ac",
+      "name": "actinium",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 90,
+      "symbol": "Th",
+      "name": "thorium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "232.0377",
+        "uncertainty": "0.0004"
+      },
+      "calculationValue": "232.04",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 91,
+      "symbol": "Pa",
+      "name": "protactinium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "231.03588",
+        "uncertainty": "0.00001"
+      },
+      "calculationValue": "231.04",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 92,
+      "symbol": "U",
+      "name": "uranium",
+      "standardAtomicWeight": {
+        "kind": "point",
+        "value": "238.02891",
+        "uncertainty": "0.000030000000000000004"
+      },
+      "calculationValue": "238.03",
+      "calculationValuePolicy": "abridged-standard-value",
+      "sourceIds": [
+        "ciaaw-standard-2024",
+        "ciaaw-abridged-2024"
+      ]
+    },
+    {
+      "atomicNumber": 93,
+      "symbol": "Np",
+      "name": "neptunium",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 94,
+      "symbol": "Pu",
+      "name": "plutonium",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 95,
+      "symbol": "Am",
+      "name": "americium",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 96,
+      "symbol": "Cm",
+      "name": "curium",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 97,
+      "symbol": "Bk",
+      "name": "berkelium",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 98,
+      "symbol": "Cf",
+      "name": "californium",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 99,
+      "symbol": "Es",
+      "name": "einsteinium",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 100,
+      "symbol": "Fm",
+      "name": "fermium",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 101,
+      "symbol": "Md",
+      "name": "mendelevium",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 102,
+      "symbol": "No",
+      "name": "nobelium",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 103,
+      "symbol": "Lr",
+      "name": "lawrencium",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 104,
+      "symbol": "Rf",
+      "name": "rutherfordium",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 105,
+      "symbol": "Db",
+      "name": "dubnium",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 106,
+      "symbol": "Sg",
+      "name": "seaborgium",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 107,
+      "symbol": "Bh",
+      "name": "bohrium",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 108,
+      "symbol": "Hs",
+      "name": "hassium",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 109,
+      "symbol": "Mt",
+      "name": "meitnerium",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 110,
+      "symbol": "Ds",
+      "name": "darmstadtium",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 111,
+      "symbol": "Rg",
+      "name": "roentgenium",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 112,
+      "symbol": "Cn",
+      "name": "copernicium",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 113,
+      "symbol": "Nh",
+      "name": "nihonium",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 114,
+      "symbol": "Fl",
+      "name": "flerovium",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 115,
+      "symbol": "Mc",
+      "name": "moscovium",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 116,
+      "symbol": "Lv",
+      "name": "livermorium",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 117,
+      "symbol": "Ts",
+      "name": "tennessine",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    },
+    {
+      "atomicNumber": 118,
+      "symbol": "Og",
+      "name": "oganesson",
+      "standardAtomicWeight": {
+        "kind": "unavailable",
+        "reason": "no-standard-atomic-weight"
+      },
+      "calculationValue": null,
+      "calculationValuePolicy": "unavailable",
+      "sourceIds": [
+        "ciaaw-standard-2024"
+      ],
+      "notes": "CIAAW publishes no standard atomic weight; no representative mass number is used for calculation."
+    }
   ]
 }

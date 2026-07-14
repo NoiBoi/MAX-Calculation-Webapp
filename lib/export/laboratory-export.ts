@@ -1,4 +1,4 @@
-import { DEFAULT_ATOMIC_RADIUS_REGISTRY, assessRadiusDescriptorAvailability, type BatchCalculationResult } from "@max-stoich/chemistry-engine";
+import { DEFAULT_ATOMIC_RADIUS_REGISTRY, RADIUS_DESCRIPTOR_DISCLAIMER, calculateSiteRadiusDescriptor, type BatchCalculationResult } from "@max-stoich/chemistry-engine";
 import type { CalculationSnapshot, RecipeRevision, SavedRecipe } from "../persistence/entities";
 import type { WorkspaceRecipeState } from "../workspace/adapter";
 
@@ -30,12 +30,22 @@ function csv(value: unknown): string {
   return /[",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
 }
 
+function radiusExportState(input: WorkspaceRecipeState) {
+  if (!input.siteComposition) return { status: "unavailable-no-site-model", selections: [], results: [] };
+  const selections = (input.radiusDescriptorConfig?.siteDatasets ?? []).map((selection) => {
+    const dataset = DEFAULT_ATOMIC_RADIUS_REGISTRY.datasets.find((item) => item.datasetId === selection.datasetId && item.datasetVersion === selection.datasetVersion && item.digest === selection.datasetDigest);
+    return { ...selection, definition: dataset?.definition ?? null, definitionDetail: dataset?.definitionDetail ?? null, sourceVerificationStatus: dataset?.approval.status ?? "unavailable", labApprovalStatus: dataset?.approval.labApproval ?? "not-reviewed", source: dataset?.source ?? null };
+  });
+  const results = (input.radiusDescriptorConfig?.siteDatasets ?? []).flatMap((selection) => { const dataset = DEFAULT_ATOMIC_RADIUS_REGISTRY.datasets.find((item) => item.datasetId === selection.datasetId && item.datasetVersion === selection.datasetVersion && item.digest === selection.datasetDigest); return dataset ? [calculateSiteRadiusDescriptor(input.siteComposition!, selection.siteId, dataset, selection.overrides)] : []; });
+  return { status: !selections.length ? "unavailable-no-dataset-selection" : results.every((item) => item.available) ? "available-screening-descriptors" : "unavailable-missing-radius-value", selections, results };
+}
+
 export function buildLaboratoryCsv(context: LaboratoryExportContext): string {
-  const radiusAvailability = assessRadiusDescriptorAvailability(context.inputState.siteComposition, DEFAULT_ATOMIC_RADIUS_REGISTRY, context.inputState.radiusDescriptorConfig?.datasetId);
+  const radius = radiusExportState(context.inputState);
   const headers = [
     "recipe_name", "recipe_id", "recipe_revision", "snapshot_id", "input_digest", "output_digest", "target_formula", "batch_mass_g", "batch_basis",
     "precursor_id", "precursor", "formula", "solver_quantity_exact", "solver_quantity_decimal_approximation", "approximation_precision_digits", "approximation_rounding_mode",
-    "purity_fraction", "pre_round_mass_g", "final_mass_g", "realized_moles", "warning_codes", "engine_version", "atomic_weight_data_version", "radius_descriptor_status", "radius_dataset_id", "radius_dataset_version", "radius_dataset_digest", "radius_definition", "radius_units", "radius_disclaimer", "calculation_timestamp",
+    "purity_fraction", "pre_round_mass_g", "final_mass_g", "realized_moles", "warning_codes", "engine_version", "atomic_weight_data_version", "radius_descriptor_status", "radius_site_datasets_json", "radius_descriptor_results_json", "radius_units", "radius_disclaimer", "calculation_timestamp",
   ];
   const rows = context.result.precursors.map((item) => {
     const input = context.inputState.precursors.find((candidate) => candidate.id === item.precursorId);
@@ -45,14 +55,14 @@ export function buildLaboratoryCsv(context: LaboratoryExportContext): string {
       item.solverMolesPerTargetFormulaMoleExact.canonical, item.solverMolesPerTargetFormulaMoleDecimalApproximation.value,
       item.solverMolesPerTargetFormulaMoleDecimalApproximation.calculationPrecisionSignificantDigits, item.solverMolesPerTargetFormulaMoleDecimalApproximation.roundingMode,
       item.purity, item.preRoundGrossWeighingMassGrams, item.finalRoundedGrossWeighingMassGrams, item.realizedPrecursorMoles, warningsFor(context.result, item.precursorId),
-      context.result.engineVersion, context.result.dataVersions.atomicWeights, radiusAvailability.status, context.inputState.radiusDescriptorConfig?.datasetId, context.inputState.radiusDescriptorConfig?.datasetVersion, context.inputState.radiusDescriptorConfig?.datasetDigest, "", "pm", "Screening descriptor only; not a direct prediction of physical stress, lattice strain, phase stability, or synthesis success.", context.calculatedAt,
+      context.result.engineVersion, context.result.dataVersions.atomicWeights, radius.status, JSON.stringify(radius.selections), JSON.stringify(radius.results), "pm", RADIUS_DESCRIPTOR_DISCLAIMER, context.calculatedAt,
     ];
   });
   return `\uFEFF${[headers, ...rows].map((row) => row.map(csv).join(",")).join("\r\n")}\r\n`;
 }
 
 export function buildLaboratoryJson(context: LaboratoryExportContext): string {
-  const radiusAvailability = assessRadiusDescriptorAvailability(context.inputState.siteComposition, DEFAULT_ATOMIC_RADIUS_REGISTRY, context.inputState.radiusDescriptorConfig?.datasetId);
+  const radius = radiusExportState(context.inputState);
   return JSON.stringify({
     exportSchemaVersion: "1.0.0",
     recordType: "max-stoich-laboratory-calculation",
@@ -60,8 +70,8 @@ export function buildLaboratoryJson(context: LaboratoryExportContext): string {
     snapshot: context.snapshot ? { id: context.snapshot.id, inputDigest: context.snapshot.inputDigest, outputDigest: context.snapshot.outputDigest } : null,
     scientificInput: context.inputState,
     scientificResult: context.result,
-    atomicRadiusDescriptors: { descriptorSchemaVersion: radiusAvailability.descriptorSchemaVersion, availabilityStatus: radiusAvailability.status, message: radiusAvailability.message, selectedDataset: context.inputState.radiusDescriptorConfig ?? null, siteModel: context.inputState.siteComposition ?? null, aggregateResults: null, disclaimerVersion: "1.0.0", disclaimer: "Screening descriptor only. It is not a direct prediction of physical stress, lattice strain, phase stability, or synthesis success." },
-    provenance: { engineVersion: context.result.engineVersion, atomicWeightDataVersion: context.result.dataVersions.atomicWeights, atomicRadiusDatasetId: context.inputState.radiusDescriptorConfig?.datasetId ?? null, atomicRadiusDatasetVersion: context.inputState.radiusDescriptorConfig?.datasetVersion ?? null, atomicRadiusDatasetDigest: context.inputState.radiusDescriptorConfig?.datasetDigest ?? null, calculationTimestamp: context.calculatedAt },
+    atomicRadiusDescriptors: { descriptorSchemaVersion: "2.0.0", availabilityStatus: radius.status, siteDatasetSelections: radius.selections, siteModel: context.inputState.siteComposition ?? null, aggregateResults: radius.results, disclaimerVersion: "1.0.0", disclaimer: RADIUS_DESCRIPTOR_DISCLAIMER },
+    provenance: { engineVersion: context.result.engineVersion, atomicWeightDataVersion: context.result.dataVersions.atomicWeights, atomicRadiusDatasets: radius.selections.map((selection) => ({ siteId: selection.siteId, datasetId: selection.datasetId, datasetVersion: selection.datasetVersion, datasetDigest: selection.datasetDigest, sourceVerificationStatus: selection.sourceVerificationStatus, labApprovalStatus: selection.labApprovalStatus })), calculationTimestamp: context.calculatedAt },
   }, null, 2);
 }
 

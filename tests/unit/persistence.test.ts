@@ -1,7 +1,7 @@
 import "fake-indexeddb/auto";
 import Dexie from "dexie";
 import { afterEach, describe, expect, it } from "vitest";
-import { calculateBatchRecipe, parseFormula, type BatchCalculationResult } from "@max-stoich/chemistry-engine";
+import { DEFAULT_ATOMIC_RADIUS_REGISTRY, calculateBatchRecipe, createStandardMaxComposition, parseFormula, type BatchCalculationResult } from "@max-stoich/chemistry-engine";
 import { buildLaboratoryCsv, buildLaboratoryJson, buildWeighingTableTsv, safeExportFilename } from "../../lib/export/laboratory-export";
 import { canonicalizeWorkspaceScientificInput, sha256Hex, stableCanonicalize } from "../../lib/persistence/canonical";
 import { MaxStoichDatabase } from "../../lib/persistence/database";
@@ -57,6 +57,14 @@ describe("canonical scientific persistence", () => {
 });
 
 describe("atomic local repositories", () => {
+  it("snapshots immutable per-site radius provenance, resolved values, and descriptors", async () => {
+    const site = createStandardMaxComposition("211", { M: { occupants: [{ element: "Ti", fraction: "0.5" }, { element: "Nb", fraction: "0.5" }] }, A: { occupants: [{ element: "Al", fraction: "1" }] }, X: { occupants: [{ element: "N", fraction: "1" }] } }); if (!site.success) throw new Error();
+    const teatum = DEFAULT_ATOMIC_RADIUS_REGISTRY.datasets.find((item) => item.datasetId === "teatum-metallic-cn12")!; const cordero = DEFAULT_ATOMIC_RADIUS_REGISTRY.datasets.find((item) => item.datasetId === "cordero-covalent-2008")!;
+    const input = state({ targetFormula: "(Ti0.5Nb0.5)2AlN", siteComposition: site.value.composition, precursors: ["Ti", "Nb", "Al", "N"].map((formula) => ({ id: formula.toLowerCase(), name: formula, formula, purityPercent: "100", constraintMode: "solver" as const, fixedValue: "", minimum: "", maximum: "", ratioDenominatorId: "", numeratorRatio: "1", denominatorRatio: "1", molarMassOverride: "", molarMassOverrideSource: "" })), radiusDescriptorConfig: { schemaVersion: "2.0.0", enabled: true, siteDatasets: [{ siteId: "M", datasetId: teatum.datasetId, datasetVersion: teatum.datasetVersion, datasetDigest: teatum.digest, overrides: [] }, { siteId: "A", datasetId: teatum.datasetId, datasetVersion: teatum.datasetVersion, datasetDigest: teatum.digest, overrides: [] }, { siteId: "X", datasetId: cordero.datasetId, datasetVersion: cordero.datasetVersion, datasetDigest: cordero.digest, overrides: [] }] } });
+    const repo = repository(); const saved = await repo.saveCalculatedRevision({ name: "Radius snapshot", inputState: input, result: result(input) }); const snapshot = await repo.getSnapshot(saved.snapshot.id);
+    expect(snapshot?.radiusDatasetSelections).toHaveLength(3); expect(snapshot?.radiusDatasetSelections?.find((item) => item.siteId === "M")?.resolvedValues).toEqual(expect.arrayContaining([expect.objectContaining({ element: "Ti", radiusPm: "146.2", missing: false }), expect.objectContaining({ element: "Nb", radiusPm: "146.8", missing: false })])); expect(snapshot?.radiusDescriptorResults?.find((item) => item.siteId === "M")?.available).toBe(true); expect(snapshot?.radiusDisclaimerVersion).toBe("1.0.0"); expect((await repo.verifySnapshot(snapshot!)).valid).toBe(true);
+  });
+
   it("creates immutable snapshots and monotonically numbered revisions", async () => {
     const repo = repository();
     const firstState = state();

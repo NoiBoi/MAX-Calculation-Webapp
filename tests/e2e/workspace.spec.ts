@@ -1,12 +1,15 @@
 import { expect, test } from "@playwright/test";
 import { TI2ALN_VISIBLE_EXPECTATION } from "../../lib/workspace/visible-expectations";
 
-test.beforeEach(async ({ page }) => { await page.goto("/workspace"); await expect(page.locator('[data-recovery-ready="true"]')).toBeVisible(); });
+async function chooseExample(page: import("@playwright/test").Page, id: string) { await page.getByRole("button", { name: /More actions/ }).click(); await page.getByLabel("Start or reset").selectOption(id); }
+async function openMore(page: import("@playwright/test").Page) { await page.getByRole("button", { name: /More actions/ }).click(); }
+
+test.beforeEach(async ({ page }) => { await page.goto("/workspace"); await expect(page.locator('[data-recovery-ready="true"]')).toBeVisible(); await chooseExample(page, "ti2aln"); });
 
 test("UX-001 routine formula workflow updates without a calculate action", async ({ page }) => {
   for (const [precursor, mass] of Object.entries(TI2ALN_VISIBLE_EXPECTATION.finalMassesGrams)) await expect(page.getByRole("row", { name: new RegExp(`^${precursor} `) })).toContainText(`${mass} g`);
   await expect(page.getByText(`${TI2ALN_VISIBLE_EXPECTATION.finalTotalGrams} g`, { exact: true })).toBeVisible();
-  await page.getByLabel("Built-in example").selectOption("ti3alc2");
+  await chooseExample(page, "ti3alc2");
   const before = await page.getByRole("row", { name: /Ti Ti/ }).getByText(/g$/).first().textContent();
   await page.getByLabel("Target batch mass").fill("20");
   const after = await page.getByRole("row", { name: /Ti Ti/ }).getByText(/g$/).first().textContent();
@@ -15,10 +18,10 @@ test("UX-001 routine formula workflow updates without a calculate action", async
 });
 
 test("UX-002 mixed-site state survives standard and advanced modes", async ({ page }) => {
-  await page.getByLabel("Built-in example").selectOption("tinbaln");
-  await page.getByRole("button", { name: "Advanced mode" }).click();
+  await chooseExample(page, "tinbaln");
+  await page.getByRole("button", { name: "Advanced", exact: true }).click();
   await expect(page.getByText("Ti 0.5 + Nb 0.5")).toBeVisible();
-  await page.getByRole("button", { name: "Standard mode" }).click();
+  await page.getByRole("button", { name: "Standard", exact: true }).click();
   await expect(page.getByLabel("Target formula")).toHaveValue("(Ti0.5Nb0.5)2AlN");
 });
 
@@ -28,6 +31,7 @@ test("UX-003 Al excess updates masses, composition, and trace", async ({ page })
   const after = await page.getByRole("row", { name: /Al Al/ }).getByText(/g$/).first().textContent();
   expect(after).not.toBe(before);
   await expect(page.getByText(/Al:1.05/)).toBeVisible();
+  await page.getByRole("button", { name: "Advanced", exact: true }).click();
   await page.getByRole("button", { name: "Open calculation trace" }).click();
   await expect(page.getByLabel("Calculation trace").getByText("ELEMENTAL_ADJUSTMENT_APPLIED")).toBeVisible();
 });
@@ -38,6 +42,7 @@ test("UX-004 purity correction increases gross mass and warns", async ({ page })
   await page.locator("#purity-al").fill("95");
   const after = await row.getByText(/g$/).first().textContent();
   expect(Number(after?.replace(" g", ""))).toBeGreaterThan(Number(before?.replace(" g", "")));
+  await page.getByText(/Minor advisories/).click();
   await expect(page.getByText(/IMPURITY_COMPOSITION_UNMODELED/).first()).toBeVisible();
 });
 
@@ -70,24 +75,25 @@ test("UX-007 keyboard shortcuts reach the complete routine workflow", async ({ p
   await page.getByLabel("Elemental Al excess").fill("5");
   await page.keyboard.press("Alt+4");
   await expect(page.getByRole("table", { name: /Final gross weighing masses/ }).locator("..")).toBeFocused();
+  await page.getByRole("button", { name: "Advanced", exact: true }).click();
   await page.keyboard.press("Control+K");
-  await page.getByLabel("Command menu", { exact: true }).getByRole("button", { name: "Open calculation trace" }).click();
+  await page.getByLabel("More actions", { exact: true }).getByRole("button", { name: "Open calculation trace" }).click();
   await expect(page.getByLabel("Calculation trace")).toBeVisible();
 });
 
 test("UX-008 twenty mode toggles preserve recipe state", async ({ page }) => {
-  await page.getByLabel("Built-in example").selectOption("tinbaln");
+  await chooseExample(page, "tinbaln");
   await page.getByLabel("Target batch mass").fill("12.340");
   for (let index = 0; index < 20; index += 1) await page.keyboard.press("Control+Alt+A");
   await expect(page.getByLabel("Target formula")).toHaveValue("(Ti0.5Nb0.5)2AlN");
   await expect(page.getByLabel("Target batch mass")).toHaveValue("12.340");
-  await expect(page.getByRole("button", { name: "Advanced mode" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Advanced", exact: true })).toBeVisible();
 });
 
 test("UX-009 coarse rounding produces a material-shift warning", async ({ page }) => {
   await page.getByLabel("Balance increment").fill("1");
   await page.getByLabel("Target batch mass").fill("1.4");
-  await expect(page.getByText(/MATERIAL_ROUNDING_SHIFT/).first()).toBeVisible();
+  await expect(page.getByText(/rounding shift/i).first()).toBeVisible();
 });
 
 test("UX-010 tablet layout has usable inputs and no page-level horizontal overflow", async ({ page }) => {
@@ -135,7 +141,7 @@ test("UX-PERSIST-001 saves, refreshes, and creates immutable revisions", async (
   await page.reload();
   await expect(page.locator('[data-recovery-ready="true"]')).toBeVisible();
   await expect(page.getByLabel("Target batch mass")).toHaveValue("12.5");
-  await page.getByRole("button", { name: "Recipes" }).click();
+  await page.getByRole("button", { name: "Open", exact: true }).click();
   await page.getByRole("button", { name: "History" }).click();
   await expect(page.getByRole("heading", { name: "Revision 2" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Revision 1" })).toBeVisible();
@@ -157,11 +163,11 @@ test("UX-PERSIST-004 undo and redo restore scientific edits synchronously", asyn
 });
 
 test("UX-PERSIST-006 saves and applies an immutable reusable route", async ({ page }) => {
-  await page.getByRole("button", { name: "Routes" }).click();
+  await openMore(page); await page.getByRole("button", { name: "Apply or save route" }).click();
   await page.getByRole("button", { name: "Save current precursor setup as route" }).click();
   await page.getByLabel("Close library").click();
   await page.keyboard.press("Control+Alt+N");
-  await page.getByRole("button", { name: "Routes" }).click();
+  await openMore(page); await page.getByRole("button", { name: "Apply or save route" }).click();
   await page.getByRole("button", { name: "Apply copy" }).click();
   await expect(page.locator("#precursor-formula-ti")).toHaveValue("Ti");
   await expect(page.getByText(/Applied .* revision 1/)).toBeVisible();

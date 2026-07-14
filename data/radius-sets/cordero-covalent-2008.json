@@ -1,0 +1,1069 @@
+{
+  "schemaVersion": "2.0.0",
+  "datasetId": "cordero-covalent-2008",
+  "datasetVersion": "2008.1.0",
+  "name": "Cordero et al. covalent radii",
+  "definition": "covalent",
+  "definitionDetail": "Covalent radii derived from crystallographic bond distances; Table 2 values in angstroms normalized to pm.",
+  "source": {
+    "sourceId": "cordero-2008",
+    "title": "Covalent radii revisited",
+    "primarySource": "Dalton Transactions 2008, 2832–2838, Table 2",
+    "editionOrVersion": "2008 article",
+    "publicationYear": "2008",
+    "url": "https://doi.org/10.1039/B801115J",
+    "doi": "10.1039/B801115J",
+    "accessedAt": "2026-07-14"
+  },
+  "units": "pm",
+  "coordinationPolicy": "Source Table 2 conventions apply; carbon defaults to sp3 and listed transition-metal defaults are explicitly identified.",
+  "oxidationStatePolicy": "Not selected by oxidation state.",
+  "spinStatePolicy": "High-spin default and low-spin alternatives are retained for Mn, Fe, and Co.",
+  "missingValuePolicy": "block-site-descriptor",
+  "approval": {
+    "status": "source-verified",
+    "sourceVerified": true,
+    "labApproval": "not-reviewed"
+  },
+  "digest": "51ec69fdc98debfe64fea936e0e332db897c5903dfa49ada8a90e43ffefeb0d8",
+  "coverage": {
+    "elements": [
+      "H",
+      "He",
+      "Li",
+      "Be",
+      "B",
+      "C",
+      "N",
+      "O",
+      "F",
+      "Ne",
+      "Na",
+      "Mg",
+      "Al",
+      "Si",
+      "P",
+      "S",
+      "Cl",
+      "Ar",
+      "K",
+      "Ca",
+      "Sc",
+      "Ti",
+      "V",
+      "Cr",
+      "Mn",
+      "Fe",
+      "Co",
+      "Ni",
+      "Cu",
+      "Zn",
+      "Ga",
+      "Ge",
+      "As",
+      "Se",
+      "Br",
+      "Kr",
+      "Rb",
+      "Sr",
+      "Y",
+      "Zr",
+      "Nb",
+      "Mo",
+      "Tc",
+      "Ru",
+      "Rh",
+      "Pd",
+      "Ag",
+      "Cd",
+      "In",
+      "Sn",
+      "Sb",
+      "Te",
+      "I",
+      "Xe",
+      "Cs",
+      "Ba",
+      "La",
+      "Ce",
+      "Pr",
+      "Nd",
+      "Pm",
+      "Sm",
+      "Eu",
+      "Gd",
+      "Tb",
+      "Dy",
+      "Ho",
+      "Er",
+      "Tm",
+      "Yb",
+      "Lu",
+      "Hf",
+      "Ta",
+      "W",
+      "Re",
+      "Os",
+      "Ir",
+      "Pt",
+      "Au",
+      "Hg",
+      "Tl",
+      "Pb",
+      "Bi",
+      "Po",
+      "At",
+      "Rn",
+      "Fr",
+      "Ra",
+      "Ac",
+      "Th",
+      "Pa",
+      "U",
+      "Np",
+      "Pu",
+      "Am",
+      "Cm"
+    ],
+    "missingElements": [
+      "Bk",
+      "Cf",
+      "Es",
+      "Fm",
+      "Md",
+      "No",
+      "Lr",
+      "Rf",
+      "Db",
+      "Sg",
+      "Bh",
+      "Hs",
+      "Mt",
+      "Ds",
+      "Rg",
+      "Cn",
+      "Nh",
+      "Fl",
+      "Mc",
+      "Lv",
+      "Ts",
+      "Og"
+    ],
+    "recordCount": 101
+  },
+  "parsingWarnings": [
+    "Reviewed structured transcription used; the publisher article is not redistributed.",
+    "Source-estimated or extrapolated values are marked."
+  ],
+  "values": [
+    {
+      "element": "H",
+      "radiusPm": "31",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, H row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "He",
+      "radiusPm": "28",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": true,
+      "sourceLocation": "Table 2, He row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Li",
+      "radiusPm": "128",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Li row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Be",
+      "radiusPm": "96",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Be row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "B",
+      "radiusPm": "84",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, B row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "C",
+      "radiusPm": "76",
+      "selectionKey": "sp3-default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, C row",
+      "notes": "sp3 carbon default; source also reports sp2 and sp variants"
+    },
+    {
+      "element": "N",
+      "radiusPm": "71",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, N row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "O",
+      "radiusPm": "66",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, O row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "F",
+      "radiusPm": "57",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, F row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Ne",
+      "radiusPm": "58",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": true,
+      "sourceLocation": "Table 2, Ne row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Na",
+      "radiusPm": "166",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Na row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Mg",
+      "radiusPm": "141",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Mg row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Al",
+      "radiusPm": "121",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Al row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Si",
+      "radiusPm": "111",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Si row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "P",
+      "radiusPm": "107",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, P row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "S",
+      "radiusPm": "105",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, S row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Cl",
+      "radiusPm": "102",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Cl row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Ar",
+      "radiusPm": "106",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Ar row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "K",
+      "radiusPm": "203",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, K row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Ca",
+      "radiusPm": "176",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Ca row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Sc",
+      "radiusPm": "170",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Sc row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Ti",
+      "radiusPm": "160",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Ti row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "V",
+      "radiusPm": "153",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, V row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Cr",
+      "radiusPm": "139",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Cr row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Mn",
+      "radiusPm": "161",
+      "selectionKey": "high-spin-default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Mn row",
+      "notes": "high-spin transition-metal value selected by declared dataset policy; low-spin variant retained separately"
+    },
+    {
+      "element": "Fe",
+      "radiusPm": "152",
+      "selectionKey": "high-spin-default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Fe row",
+      "notes": "high-spin transition-metal value selected by declared dataset policy; low-spin variant retained separately"
+    },
+    {
+      "element": "Co",
+      "radiusPm": "150",
+      "selectionKey": "high-spin-default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Co row",
+      "notes": "high-spin transition-metal value selected by declared dataset policy; low-spin variant retained separately"
+    },
+    {
+      "element": "Ni",
+      "radiusPm": "124",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Ni row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Cu",
+      "radiusPm": "132",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Cu row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Zn",
+      "radiusPm": "122",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Zn row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Ga",
+      "radiusPm": "122",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Ga row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Ge",
+      "radiusPm": "120",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Ge row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "As",
+      "radiusPm": "119",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, As row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Se",
+      "radiusPm": "120",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Se row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Br",
+      "radiusPm": "120",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Br row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Kr",
+      "radiusPm": "116",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Kr row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Rb",
+      "radiusPm": "220",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Rb row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Sr",
+      "radiusPm": "195",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Sr row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Y",
+      "radiusPm": "190",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Y row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Zr",
+      "radiusPm": "175",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Zr row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Nb",
+      "radiusPm": "164",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Nb row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Mo",
+      "radiusPm": "154",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Mo row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Tc",
+      "radiusPm": "147",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Tc row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Ru",
+      "radiusPm": "146",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Ru row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Rh",
+      "radiusPm": "142",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Rh row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Pd",
+      "radiusPm": "139",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Pd row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Ag",
+      "radiusPm": "145",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Ag row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Cd",
+      "radiusPm": "144",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Cd row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "In",
+      "radiusPm": "142",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, In row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Sn",
+      "radiusPm": "139",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Sn row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Sb",
+      "radiusPm": "139",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Sb row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Te",
+      "radiusPm": "138",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Te row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "I",
+      "radiusPm": "139",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, I row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Xe",
+      "radiusPm": "140",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Xe row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Cs",
+      "radiusPm": "244",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Cs row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Ba",
+      "radiusPm": "215",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Ba row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "La",
+      "radiusPm": "207",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, La row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Ce",
+      "radiusPm": "204",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Ce row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Pr",
+      "radiusPm": "203",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Pr row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Nd",
+      "radiusPm": "201",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Nd row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Pm",
+      "radiusPm": "199",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": true,
+      "sourceLocation": "Table 2, Pm row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Sm",
+      "radiusPm": "198",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Sm row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Eu",
+      "radiusPm": "198",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Eu row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Gd",
+      "radiusPm": "196",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Gd row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Tb",
+      "radiusPm": "194",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Tb row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Dy",
+      "radiusPm": "192",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Dy row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Ho",
+      "radiusPm": "192",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Ho row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Er",
+      "radiusPm": "189",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Er row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Tm",
+      "radiusPm": "190",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Tm row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Yb",
+      "radiusPm": "187",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Yb row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Lu",
+      "radiusPm": "187",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Lu row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Hf",
+      "radiusPm": "175",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Hf row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Ta",
+      "radiusPm": "170",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Ta row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "W",
+      "radiusPm": "162",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, W row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Re",
+      "radiusPm": "151",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Re row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Os",
+      "radiusPm": "144",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Os row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Ir",
+      "radiusPm": "141",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Ir row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Pt",
+      "radiusPm": "136",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Pt row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Au",
+      "radiusPm": "136",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Au row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Hg",
+      "radiusPm": "132",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Hg row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Tl",
+      "radiusPm": "145",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Tl row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Pb",
+      "radiusPm": "146",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Pb row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Bi",
+      "radiusPm": "148",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Bi row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Po",
+      "radiusPm": "140",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Po row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "At",
+      "radiusPm": "150",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": true,
+      "sourceLocation": "Table 2, At row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Rn",
+      "radiusPm": "150",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": true,
+      "sourceLocation": "Table 2, Rn row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Fr",
+      "radiusPm": "260",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": true,
+      "sourceLocation": "Table 2, Fr row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Ra",
+      "radiusPm": "221",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Ra row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Ac",
+      "radiusPm": "215",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Ac row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Th",
+      "radiusPm": "206",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Th row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Pa",
+      "radiusPm": "200",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Pa row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "U",
+      "radiusPm": "196",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, U row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Np",
+      "radiusPm": "190",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Np row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Pu",
+      "radiusPm": "187",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Pu row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Am",
+      "radiusPm": "180",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Am row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "Cm",
+      "radiusPm": "169",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Table 2, Cm row",
+      "notes": "Cordero et al. Table 2 default value"
+    },
+    {
+      "element": "C",
+      "radiusPm": "73",
+      "selectionKey": "sp2",
+      "defaultForPolicy": false,
+      "estimated": false,
+      "sourceLocation": "Table 2, C row",
+      "notes": "sp2 carbon variant"
+    },
+    {
+      "element": "C",
+      "radiusPm": "69",
+      "selectionKey": "sp",
+      "defaultForPolicy": false,
+      "estimated": false,
+      "sourceLocation": "Table 2, C row",
+      "notes": "sp carbon variant"
+    },
+    {
+      "element": "Mn",
+      "radiusPm": "139",
+      "selectionKey": "low-spin",
+      "defaultForPolicy": false,
+      "estimated": false,
+      "sourceLocation": "Table 2, Mn row",
+      "notes": "low-spin variant"
+    },
+    {
+      "element": "Fe",
+      "radiusPm": "132",
+      "selectionKey": "low-spin",
+      "defaultForPolicy": false,
+      "estimated": false,
+      "sourceLocation": "Table 2, Fe row",
+      "notes": "low-spin variant"
+    },
+    {
+      "element": "Co",
+      "radiusPm": "126",
+      "selectionKey": "low-spin",
+      "defaultForPolicy": false,
+      "estimated": false,
+      "sourceLocation": "Table 2, Co row",
+      "notes": "low-spin variant"
+    }
+  ]
+}

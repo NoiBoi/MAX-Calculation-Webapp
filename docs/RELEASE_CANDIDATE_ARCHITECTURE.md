@@ -26,4 +26,4 @@ Release approval is documentation metadata, separate from recipe validation. Cur
 
 ## Descriptor gate
 
-No approved atomic-radius dataset with definition, source/version, coordination and oxidation policies, reviewer, missing-value policy, units, and digest exists. Descriptor controls therefore remain disabled and return no placeholder values.
+Atomic-radius remediation supersedes the original closed gate. Two source-verified, definition-separated datasets are usable for explicitly labeled screening; a third remains provisional. None is laboratory approved. Missing or unverified data still return no placeholder aggregate.

@@ -95,7 +95,15 @@ Workspace recovery is automatic and separate from explicit scientific saves. A s
 
 The local product includes a locked-target route comparison for two to four independently editable scenarios, bounded named layouts, and verified full backup/preview/merge/replace. Import accepts only application-owned calculation, recipe, route, comparison, and backup JSON. Historical outputs are preserved and explicit recalculation creates new state. There is no backend, authentication, synchronization, or multi-user permission model.
 
-Release status is **Laboratory validation in progress**, not laboratory approved. Atomic-radius/configurational-entropy descriptors remain unavailable until a versioned, sourced, policy-complete dataset has a named laboratory reviewer.
+Release status is **Laboratory validation in progress**, not laboratory approved. Atomic-radius descriptors are exploratory screening outputs from source-verified data; configurational-entropy descriptors remain out of scope.
+
+# Scientific-data and UX remediation (schema 5)
+
+Fresh local state opens a blank unsaved calculation with no target, sites, precursors, route, or result; valid recovery still wins. Built-in examples are immutable templates cloned into a transient state labeled `Unsaved copy of …`; reset restores that copy and Save creates an ordinary user recipe.
+
+The top bar integrates current identity/status with a reduced primary action set. Standard mode is the routine laboratory workflow. Advanced mode adds explicit-site editing, solver controls, overrides, matrix/rank diagnostics, installed radius descriptors, provenance, and trace. Compact Balance View makes final masses dominant; Route Comparison opens the real comparison product.
+
+Diagnostics use blocking/action/minor/information hierarchy and information is not counted as a warning. CIAAW dataset `2024.2.0` covers all 118 symbols. Source-verified Teatum metallic and Cordero covalent datasets are usable for screening without being labeled lab-approved; Rahm neutral-isodensity data remain provisional pending direct SI verification.
 # Atomic-radius product scope
 
-Advanced mode exposes the atomic-radius registry and explicit-site availability state. Dataset selection, element values, overrides, and aggregates remain disabled because zero approved datasets are installed. Application-owned exports record this unavailable status and the non-predictive disclaimer; no placeholder result is emitted.
+Advanced mode exposes per-site atomic-radius selection, resolved values, missing-value state, source/laboratory status, and screening aggregates for explicit sites. Missing or provisional data block aggregates; no placeholder result is emitted.

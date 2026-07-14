@@ -6,19 +6,19 @@ Scientific data is immutable by `dataVersion`. Corrections create a new version;
 
 ## Atomic weights
 
-The seed subset in `data/elements.json` is transcribed from the IUPAC Commission on Isotopic Abundances and Atomic Weights (CIAAW) [2024 standard table](https://ciaaw.org/atomic-weights.htm) and [2024 abridged table](https://ciaaw.org/abridged-atomic-weights.htm), accessed 2026-07-13.
+The complete registry in `data/elements.json` is deterministically parsed from the IUPAC Commission on Isotopic Abundances and Atomic Weights (CIAAW) [2024 standard table](https://ciaaw.org/atomic-weights.htm) and [2024 abridged table](https://ciaaw.org/abridged-atomic-weights.htm), accessed 2026-07-14.
 
 CIAAW represents some standard atomic weights as intervals because normal terrestrial materials vary isotopically. MAX Stoich preserves those intervals and separately stores the CIAAW abridged value used for routine molar-mass calculation. The `calculationValuePolicy` makes this choice explicit. Samples with known nonstandard isotopic composition require a user-defined value and provenance note.
 
-The seed file includes only elements needed by the named initial reference cases. Expansion to the full periodic table is a reviewed data task, not a generated placeholder.
+The registry contains all 118 symbols, all 84 CIAAW entries with usable standard calculation values, and explicit unavailable records for 34 elements without a standard atomic weight.
 
-Formula symbol validation is deliberately separate from atomic-weight data. The parser recognizes the complete IUPAC element-symbol set in atomic-number order, based on the [IUPAC periodic table and element naming recommendations](https://iupac.org/what-we-do/periodic-table-of-elements/). The seed atomic-weight dataset remains smaller; molar-mass calculation returns a structured data-unavailable error for recognized elements it does not contain.
+Formula symbol validation is deliberately separate from atomic-weight availability. The parser recognizes the complete IUPAC element-symbol set in atomic-number order, based on the [IUPAC periodic table and element naming recommendations](https://iupac.org/what-we-do/periodic-table-of-elements/). Molar-mass calculation returns a structured data-unavailable error only when the valid record has no authoritative calculation value.
 
 Molar-mass calculation validates the supplied dataset, selects each record's explicit `calculationValue`, and reports `calculationValuePolicy`, source IDs, data version, and warnings. Interval standard weights produce a deterministic notice explaining the selected calculation value. The existing `user-specified` record policy is the only atomic-weight customization consumed in this milestone and is always exposed in warnings and trace. No separate per-call override structure was invented.
 
 ## Atomic radii
 
-No radius dataset is approved yet. `data/radius-sets.json` is intentionally empty. Before release of descriptors, the laboratory must approve:
+Three separate radius definitions are installed under `data/radius-sets/`. Teatum metallic CN12 and Cordero covalent values are source-verified for screening; Rahm neutral-isodensity values remain provisional. No dataset is lab-approved. Any future laboratory approval must record:
 
 1. Definition(s): metallic, covalent, ionic, or another named convention.
 2. Source and edition/version.
@@ -42,8 +42,8 @@ No default precursor purity, supplier, particle size, cost, or route is scientif
 
 ## Known provenance gaps
 
-- Full 118-element atomic-weight dataset is not yet transcribed and independently checked; all 118 symbols can still be parsed.
-- Atomic-radius source/definition is unresolved and blocks descriptor implementation.
+- Representative mass numbers for no-standard-weight elements are intentionally not populated or used.
+- Direct retrieval of the Rahm Supporting Information remains blocked; that dataset is provisional.
 - Laboratory precursor routes and lots are not supplied.
 - Numerical reference outputs for the named chemistry test cases require independent laboratory-approved values.
 
@@ -56,7 +56,13 @@ Historical snapshots retain the original stored result even when the installed e
 
 Full backups preserve snapshot engine/parser/solver/batch versions, atomic-weight dataset version and digest, exact rationals, canonical output, and record/manifest SHA-256 digests. Importing an older application snapshot preserves its historical output; it is never silently recalculated or relabeled with current versions.
 
-No approved atomic-radius dataset is present. Descriptor release remains blocked until one definition/source/edition, units, coordination and oxidation-state policies, missing-value policy, named reviewer, and digest are recorded. Radius values must not be inferred from the atomic-weight dataset or mixed across definitions.
-# Atomic-radius registry gate (schema 1.0.0)
+No atomic-radius dataset is lab-approved. Source-verified datasets remain usable only for explicitly labeled screening. Radius values are never inferred from atomic weights or mixed across definitions.
 
-The installed registry contains zero datasets and has no default. Dataset validation requires pm units, positive decimal strings, real unique element symbols, complete policies/source/reviewer metadata, and an independently verified SHA-256 content digest. Imported approval is downgraded to `imported-unverified`; only a separate local review may promote it. Overrides require element, pm value, matching definition, reason, source or measurement basis, label, and revision date, but remain disabled until a base dataset definition is approved.
+# Current reviewed registries
+
+The superseding atomic-weight source, ingestion policy, version, digest, coverage, and absence rules are in `ATOMIC_WEIGHT_INGESTION.md`. Atomic-radius primary sources, definitions, source locations, qualifiers, conversion, coverage, warnings, and digests are in `RADIUS_DATA_INGESTION.md`. Trust semantics are in `DATASET_TRUST.md`.
+
+Historical schema-5 snapshots store the atomic-weight version/digest and, per explicit site, radius dataset ID/version/digest, source and laboratory status, resolved values including missing entries, overrides, descriptor results, and disclaimer version. Existing schema-4 snapshots migrate with `radiusDatasetSelections: null`; no dataset is assigned or recalculated silently.
+# Atomic-radius registry gate (schema 2.0.0)
+
+The installed registry contains three separate datasets and has a source-verified screening default. Validation requires pm units, positive decimals, real symbols, qualifier-aware uniqueness, complete source/policy/coverage metadata, and an independently verified SHA-256 digest. Imported trust is downgraded to `unverified-import`. Overrides require element, matching definition, reason, source/measurement basis, label, and revision date.

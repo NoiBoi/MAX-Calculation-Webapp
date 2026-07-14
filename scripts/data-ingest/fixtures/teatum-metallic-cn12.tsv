@@ -1,0 +1,25 @@
+element	radiusAngstrom	selectionKey	defaultForPolicy	estimated	sourceLocation	notes
+B	0.920	default	true	false	Table I, report p. 10 (PDF p. 15)	Calculated metallic radius, CN=12
+C	0.876	default	true	true	Table I, report p. 10 (PDF p. 15)	Estimated marker retained; calculated metallic radius, CN=12
+N	0.825	default	true	true	Table I, report p. 10 (PDF p. 15)	Estimated marker retained; calculated metallic radius, CN=12
+Al	1.432	default	true	false	Table I, report p. 10 (PDF p. 15)	Calculated metallic radius, CN=12
+Si	1.322	default	true	false	Table I, report p. 10 (PDF p. 15)	Calculated metallic radius, CN=12
+Sc	1.641	default	true	false	Table I, report p. 10 (PDF p. 15)	Calculated metallic radius, CN=12
+Ti	1.462	default	true	false	Table I, report p. 10 (PDF p. 15)	Calculated metallic radius, CN=12
+V	1.346	default	true	false	Table I, report p. 10 (PDF p. 15)	Calculated metallic radius, CN=12
+Cr	1.282	default	true	false	Table I, report p. 10 (PDF p. 15)	Calculated metallic radius, CN=12
+Mn	1.307	valence-5	true	false	Table I, report p. 10 (PDF p. 15)	Valence 5 policy record
+Mn	1.254	valence-7	false	false	Table I, report p. 10 (PDF p. 15)	Valence 7 variant
+Fe	1.274	default	true	false	Table I, report p. 10 (PDF p. 15)	Calculated metallic radius, CN=12
+Co	1.252	default	true	false	Table I, report p. 10 (PDF p. 15)	Calculated metallic radius, CN=12
+Ni	1.246	default	true	false	Table I, report p. 10 (PDF p. 15)	Calculated metallic radius, CN=12
+Cu	1.278	default	true	false	Table I, report p. 10 (PDF p. 15)	Calculated metallic radius, CN=12
+Zn	1.394	default	true	false	Table I, report p. 10 (PDF p. 15)	Calculated metallic radius, CN=12
+Y	1.773	default	true	false	Table I, report p. 10 (PDF p. 15)	Calculated metallic radius, CN=12
+Zr	1.692	default	true	false	Table I, report p. 10 (PDF p. 15)	Calculated metallic radius, CN=12
+Nb	1.468	default	true	false	Table I, report p. 10 (PDF p. 15)	Calculated metallic radius, CN=12
+Mo	1.400	default	true	false	Table I, report p. 10 (PDF p. 15)	Calculated metallic radius, CN=12
+Hf	1.580	default	true	false	Table I, report p. 11 (PDF p. 16)	Calculated metallic radius, CN=12
+Ta	1.467	default	true	false	Table I, report p. 11 (PDF p. 16)	Calculated metallic radius, CN=12
+W	1.408	default	true	false	Table I, report p. 11 (PDF p. 16)	Calculated metallic radius, CN=12
+Re	1.375	default	true	false	Table I, report p. 11 (PDF p. 16)	Calculated metallic radius, CN=12

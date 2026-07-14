@@ -1,0 +1,1025 @@
+{
+  "schemaVersion": "2.0.0",
+  "datasetId": "rahm-neutral-isodensity-2016",
+  "datasetVersion": "2016.1.0",
+  "name": "Rahm–Hoffmann–Ashcroft neutral-atom radii",
+  "definition": "neutral-isodensity",
+  "definitionDetail": "Radius of an isolated neutral atom at electron density 0.001 e/bohr³ from relativistic all-electron DFT; angstrom values normalized to pm.",
+  "source": {
+    "sourceId": "rahm-2016",
+    "title": "Atomic and Ionic Radii of Elements 1–96",
+    "primarySource": "Chemistry – A European Journal 2016 and Supporting Information Table S1",
+    "editionOrVersion": "2016 article",
+    "publicationYear": "2016",
+    "url": "https://doi.org/10.1002/chem.201602949",
+    "doi": "10.1002/chem.201602949",
+    "accessedAt": "2026-07-14",
+    "sourceDigest": "b59a4176174662f1e5541c2c3abe365266a653f4e3a8868b3ca038ebccca46db"
+  },
+  "units": "pm",
+  "coordinationPolicy": "Isolated neutral atoms; coordination is not applicable.",
+  "oxidationStatePolicy": "Neutral atoms only.",
+  "spinStatePolicy": "Electronic-structure method follows the primary article and SI.",
+  "missingValuePolicy": "block-site-descriptor",
+  "approval": {
+    "status": "provisional",
+    "sourceVerified": false,
+    "labApproval": "not-reviewed"
+  },
+  "digest": "030831e29c6fd3c51f042d0e3b7548e90fd22b81625865bfe5e7f5628ef5cee1",
+  "coverage": {
+    "elements": [
+      "H",
+      "He",
+      "Li",
+      "Be",
+      "B",
+      "C",
+      "N",
+      "O",
+      "F",
+      "Ne",
+      "Na",
+      "Mg",
+      "Al",
+      "Si",
+      "P",
+      "S",
+      "Cl",
+      "Ar",
+      "K",
+      "Ca",
+      "Sc",
+      "Ti",
+      "V",
+      "Cr",
+      "Mn",
+      "Fe",
+      "Co",
+      "Ni",
+      "Cu",
+      "Zn",
+      "Ga",
+      "Ge",
+      "As",
+      "Se",
+      "Br",
+      "Kr",
+      "Rb",
+      "Sr",
+      "Y",
+      "Zr",
+      "Nb",
+      "Mo",
+      "Tc",
+      "Ru",
+      "Rh",
+      "Pd",
+      "Ag",
+      "Cd",
+      "In",
+      "Sn",
+      "Sb",
+      "Te",
+      "I",
+      "Xe",
+      "Cs",
+      "Ba",
+      "La",
+      "Ce",
+      "Pr",
+      "Nd",
+      "Pm",
+      "Sm",
+      "Eu",
+      "Gd",
+      "Tb",
+      "Dy",
+      "Ho",
+      "Er",
+      "Tm",
+      "Yb",
+      "Lu",
+      "Hf",
+      "Ta",
+      "W",
+      "Re",
+      "Os",
+      "Ir",
+      "Pt",
+      "Au",
+      "Hg",
+      "Tl",
+      "Pb",
+      "Bi",
+      "Po",
+      "At",
+      "Rn",
+      "Fr",
+      "Ra",
+      "Ac",
+      "Th",
+      "Pa",
+      "U",
+      "Np",
+      "Pu",
+      "Am",
+      "Cm"
+    ],
+    "missingElements": [
+      "Bk",
+      "Cf",
+      "Es",
+      "Fm",
+      "Md",
+      "No",
+      "Lr",
+      "Rf",
+      "Db",
+      "Sg",
+      "Bh",
+      "Hs",
+      "Mt",
+      "Ds",
+      "Rg",
+      "Cn",
+      "Nh",
+      "Fl",
+      "Mc",
+      "Lv",
+      "Ts",
+      "Og"
+    ],
+    "recordCount": 96
+  },
+  "parsingWarnings": [
+    "Primary article retrieved and definition verified.",
+    "Wiley blocked retrieval of the full Supporting Information during this build; values were cross-checked against a provenance-rich Table S1 transcription and therefore remain provisional."
+  ],
+  "values": [
+    {
+      "element": "H",
+      "radiusPm": "154",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "He",
+      "radiusPm": "134",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Li",
+      "radiusPm": "220",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Be",
+      "radiusPm": "219",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "B",
+      "radiusPm": "205",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "C",
+      "radiusPm": "190",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "N",
+      "radiusPm": "179",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "O",
+      "radiusPm": "171",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "F",
+      "radiusPm": "163",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Ne",
+      "radiusPm": "156",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Na",
+      "radiusPm": "225",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Mg",
+      "radiusPm": "240",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Al",
+      "radiusPm": "239",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Si",
+      "radiusPm": "232",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "P",
+      "radiusPm": "223",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "S",
+      "radiusPm": "214",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Cl",
+      "radiusPm": "206",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Ar",
+      "radiusPm": "197",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "K",
+      "radiusPm": "234",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Ca",
+      "radiusPm": "270",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Sc",
+      "radiusPm": "263",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Ti",
+      "radiusPm": "257",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "V",
+      "radiusPm": "252",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Cr",
+      "radiusPm": "233",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Mn",
+      "radiusPm": "242",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Fe",
+      "radiusPm": "226",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Co",
+      "radiusPm": "222",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Ni",
+      "radiusPm": "219",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Cu",
+      "radiusPm": "217",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Zn",
+      "radiusPm": "222",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Ga",
+      "radiusPm": "233",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Ge",
+      "radiusPm": "234",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "As",
+      "radiusPm": "231",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Se",
+      "radiusPm": "224",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Br",
+      "radiusPm": "219",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Kr",
+      "radiusPm": "212",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Rb",
+      "radiusPm": "240",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Sr",
+      "radiusPm": "279",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Y",
+      "radiusPm": "274",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Zr",
+      "radiusPm": "268",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Nb",
+      "radiusPm": "251",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Mo",
+      "radiusPm": "244",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Tc",
+      "radiusPm": "241",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Ru",
+      "radiusPm": "237",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Rh",
+      "radiusPm": "233",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Pd",
+      "radiusPm": "215",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Ag",
+      "radiusPm": "225",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Cd",
+      "radiusPm": "238",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "In",
+      "radiusPm": "246",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Sn",
+      "radiusPm": "248",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Sb",
+      "radiusPm": "246",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Te",
+      "radiusPm": "242",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "I",
+      "radiusPm": "238",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Xe",
+      "radiusPm": "232",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Cs",
+      "radiusPm": "249",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Ba",
+      "radiusPm": "293",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "La",
+      "radiusPm": "284",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Ce",
+      "radiusPm": "282",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Pr",
+      "radiusPm": "286",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Nd",
+      "radiusPm": "284",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Pm",
+      "radiusPm": "283",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Sm",
+      "radiusPm": "280",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Eu",
+      "radiusPm": "280",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Gd",
+      "radiusPm": "277",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Tb",
+      "radiusPm": "276",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Dy",
+      "radiusPm": "275",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Ho",
+      "radiusPm": "273",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Er",
+      "radiusPm": "272",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Tm",
+      "radiusPm": "271",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Yb",
+      "radiusPm": "277",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Lu",
+      "radiusPm": "270",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Hf",
+      "radiusPm": "264",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Ta",
+      "radiusPm": "258",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "W",
+      "radiusPm": "253",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Re",
+      "radiusPm": "249",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Os",
+      "radiusPm": "244",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Ir",
+      "radiusPm": "233",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Pt",
+      "radiusPm": "230",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Au",
+      "radiusPm": "226",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Hg",
+      "radiusPm": "229",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Tl",
+      "radiusPm": "242",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Pb",
+      "radiusPm": "249",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Bi",
+      "radiusPm": "250",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Po",
+      "radiusPm": "250",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "At",
+      "radiusPm": "247",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Rn",
+      "radiusPm": "243",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Fr",
+      "radiusPm": "258",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Ra",
+      "radiusPm": "292",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Ac",
+      "radiusPm": "293",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Th",
+      "radiusPm": "289",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Pa",
+      "radiusPm": "285",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "U",
+      "radiusPm": "283",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Np",
+      "radiusPm": "280",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Pu",
+      "radiusPm": "278",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Am",
+      "radiusPm": "276",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    },
+    {
+      "element": "Cm",
+      "radiusPm": "276",
+      "selectionKey": "default",
+      "defaultForPolicy": true,
+      "estimated": false,
+      "sourceLocation": "Supporting Information Table S1, neutral atom row",
+      "notes": "Neutral isolated-atom radius at 0.001 e/bohr^3"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "2.0.0",
+  "defaultDatasetId": "teatum-metallic-cn12",
+  "datasets": [
+    { "datasetId": "teatum-metallic-cn12", "file": "teatum-metallic-cn12.json", "digest": "c5338656e7933399b980c6a2527d09e62b298fb15a8586a6178c3faed9325e5f", "status": "source-verified", "labApproval": "not-reviewed" },
+    { "datasetId": "cordero-covalent-2008", "file": "cordero-covalent-2008.json", "digest": "51ec69fdc98debfe64fea936e0e332db897c5903dfa49ada8a90e43ffefeb0d8", "status": "source-verified", "labApproval": "not-reviewed" },
+    { "datasetId": "rahm-neutral-isodensity-2016", "file": "rahm-atomic-2016.json", "digest": "030831e29c6fd3c51f042d0e3b7548e90fd22b81625865bfe5e7f5628ef5cee1", "status": "provisional", "labApproval": "not-reviewed" }
+  ]
+}

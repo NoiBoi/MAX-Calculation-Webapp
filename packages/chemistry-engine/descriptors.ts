@@ -1,6 +1,3 @@
-/**
- * Site-radius calculation remains deliberately gated: no approved dataset is installed.
- * Registry and availability contracts live here without implementing unreviewed arithmetic.
- */
+/** Site-radius registry, selection, trust, and Decimal descriptor contracts. */
 export * from "./radius-data";
 export * from "./default-radius-data";

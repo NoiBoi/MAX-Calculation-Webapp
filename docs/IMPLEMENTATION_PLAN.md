@@ -40,15 +40,17 @@ Implemented Dexie repositories and ordered migrations, transactional immutable s
 
 ## 13. Route comparison and production hardening — engineering implementation complete
 
-Implemented locked-target two-to-four route comparison, deterministic difference projection, historical comparison records, bounded saved layouts, schema-3 migration, verified backup/preview/merge/replace, application-owned import, error boundaries, offline loaded-page workflows, descriptor unavailable gate, and laboratory acceptance materials. Engineering validation is complete only when the recorded validation commands pass. Actual supervised laboratory acceptance remains pending and the product is not laboratory approved.
+Implemented locked-target two-to-four route comparison, deterministic difference projection, historical comparison records, bounded saved layouts, schema-3 migration, verified backup/preview/merge/replace, application-owned import, error boundaries, offline loaded-page workflows, the original descriptor-registry gate, and laboratory acceptance materials. Engineering validation is complete only when the recorded validation commands pass. Actual supervised laboratory acceptance remains pending and the product is not laboratory approved.
 
-## Next milestone: laboratory feedback remediation
+## 14. Scientific-data and UX remediation — engineering implementation complete
 
-Run `LAB_ACCEPTANCE_PLAN.md`, then remediate observed scientific or usability failures. Secure shared-backend preparation is an alternative only after local workflow approval and explicit authorization. Advanced descriptors remain blocked until atomic-radius data approval.
+Implemented a blank-first workspace and immutable example copies; a unified primary command bar; explicit Standard/Advanced modes; bounded layouts; centralized scientific formatting and diagnostic presentation; the complete versioned 118-element CIAAW registry; separate Teatum, Cordero, and Rahm radius datasets and deterministic importers; Decimal-based site descriptors; immutable schema-5 dataset snapshots; and provenance-rich JSON/CSV/print surfaces. Source verification and laboratory approval are independent trust axes. Teatum and Cordero are source verified; Rahm remains provisional because automated retrieval of the publisher-hosted primary supporting-information file is unresolved. No radius dataset is represented as laboratory approved.
 
-## 13–14. Descriptors and layout customization
+Engineering gates: type checking, lint, 295 unit/integration tests, 40 browser tests including target viewport/zoom and accessibility checks, deterministic re-import hashes, production build, and dependency audit. Independent scientific review and supervised laboratory acceptance remain pending.
 
-After radius-data approval, implement lazy descriptor panels and screening labels. Add bounded layout/density presets, comparison view, and reset. Gate: no mixed radii; layouts remain usable at target viewports/zoom.
+## Next milestone: independent scientific review and laboratory acceptance
+
+Run `LAB_ACCEPTANCE_PLAN.md`, have named reviewers verify the atomic-weight policy and radius transcriptions against primary sources, acquire and verify the Rahm supporting information, and record laboratory approval per dataset/version where warranted. Secure shared-backend preparation remains optional and requires explicit authorization.
 
 ## 15. Shared backend
 
@@ -63,4 +65,4 @@ Define Supabase sync/auth/permissions/revision adapters only after local FUR val
 - Do not implement a phase whose blocking decision remains unresolved.
 # Atomic-radius infrastructure milestone
 
-Registry infrastructure is complete: versioned schema, approval/digest gate, override contract, schema-4 persistence, backup/import trust policy, unavailable calculator/comparison/settings UI, and export status. Scientific descriptor arithmetic remains blocked because `data/radius-sets.json` contains zero approved datasets. This phase must not be marked scientifically complete until dataset approval and hand-audited mean/range/variance/standard-deviation/mismatch fixtures pass.
+Registry infrastructure is superseded by schema 2: three definition-separated datasets, source-verification/lab-approval split, Decimal descriptor arithmetic, per-site selectors, missing-value blocking, schema-5 immutable provenance, importer/spot-check fixtures, and screening disclaimers are implemented. Laboratory approval remains pending and is not implied.

@@ -27,11 +27,12 @@ function orderedEntries(
   if (!index.success) return index;
   const entries = Object.entries(validated.value.amounts);
   for (const [element] of entries) {
-    if (!index.value.bySymbol.has(element)) {
+    const record = index.value.bySymbol.get(element);
+    if (!record || record.calculationValue === null) {
       return failure(
         chemistryError("MISSING_ATOMIC_WEIGHT", `No usable atomic weight is available for ${element}.`, {
           offendingValue: element,
-          suggestedCorrection: "Select a versioned element dataset containing this element.",
+          suggestedCorrection: "Select an atomic dataset with an authoritative calculation value or provide a provenance-bearing molar-mass override.",
         }),
       );
     }
@@ -97,8 +98,10 @@ export function calculateMolarMass(
   const internal = entriesResult.value.map(([element, coefficient]) => {
     const record = index.value.bySymbol.get(element);
     if (!record) return undefined;
+    if (record.calculationValue === null || record.calculationValuePolicy === "unavailable") return undefined;
     const atomicWeight = new ChemistryDecimal(record.calculationValue);
-    return { element, coefficient, record, atomicWeight, contribution: atomicWeight.times(coefficient) };
+    const calculationValuePolicy = record.calculationValuePolicy;
+    return { element, coefficient, record, calculationValuePolicy, atomicWeight, contribution: atomicWeight.times(coefficient) };
   });
   if (internal.some((entry) => entry === undefined)) {
     return failure(chemistryError("MISSING_ATOMIC_WEIGHT", "An element has no usable atomic-weight record."));
@@ -139,7 +142,7 @@ export function calculateMolarMass(
         atomicWeightGramsPerMole: formatDecimal(entry.atomicWeight),
         contributionGramsPerMole: formatDecimal(entry.contribution),
         massFraction: formatDecimal(entry.contribution.dividedBy(internalTotal)),
-        calculationValuePolicy: entry.record.calculationValuePolicy,
+        calculationValuePolicy: entry.calculationValuePolicy,
         sourceIds: Object.freeze([...entry.record.sourceIds]),
       });
     }),
@@ -154,7 +157,7 @@ export function calculateMolarMass(
         operation: "atomic-weight-selection" as const,
         element: entry.element,
         valueGramsPerMole: formatDecimal(entry.atomicWeight),
-        policy: entry.record.calculationValuePolicy,
+        policy: entry.calculationValuePolicy,
         sourceIds: Object.freeze([...entry.record.sourceIds]),
       }),
     ),

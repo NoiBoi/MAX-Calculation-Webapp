@@ -46,6 +46,10 @@ Persistence internals and export contracts are documented in `docs/LOCAL_PERSIST
 Cloud collaboration, descriptors, inventory, cost, phase prediction, and route recommendations are not implemented. Descriptors are visibly unavailable because no laboratory-approved atomic-radius dataset exists.
 
 **Release status: Laboratory validation in progress.** This is not a laboratory-approved system. Approval requires the completed versioned record in `docs/LAB_ACCEPTANCE_RESULTS_TEMPLATE.md`, approved reference cases, and a named reviewer.
+
+Fresh use starts with a genuinely blank calculation. Open More → Start or reset to create an unsaved copy of an immutable example. The result area separates action-required issues, collapsed minor advisories, and calculation details; ordinary values are human-formatted while exports and snapshots remain lossless.
+
+Atomic data now include all 118 element symbols from CIAAW 2024 (84 usable standard calculation values; explicit absence for the rest). Advanced explicit-site workflows install Teatum CN12 metallic and Cordero 2008 covalent radii as source-verified screening data; Rahm 2016 neutral-isodensity radii are installed provisionally. None is labeled laboratory approved. Radius mismatch is a screening descriptor, not a prediction of stress, phase stability, or synthesis success.
 # Atomic-radius data gate
 
-The advanced workspace includes the versioned atomic-radius registry gate. The installed registry has zero approved datasets, so it displays no element radii or aggregate descriptors. To enable a future release, install and locally approve one sourced, versioned, policy-complete, digest-verified definition and add independently reviewed scientific fixtures. Imported approval metadata is never trusted automatically.
+The advanced workspace includes versioned per-site radius selection. Source-verified Teatum and Cordero datasets can produce explicitly labeled screening descriptors; the provisional Rahm dataset cannot. No dataset is laboratory approved, and imported trust is never accepted automatically.

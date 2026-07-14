@@ -35,7 +35,7 @@ describe("molar mass from versioned atomic data", () => {
     if (result.success) {
       expect(result.value.totalMolarMass).toBe(expected);
       expect(result.value.units).toBe("g/mol");
-      expect(result.value.elementDataVersion).toBe("2024.1.0");
+      expect(result.value.elementDataVersion).toBe("2024.2.0");
       expect(MolarMassResultSchema.safeParse(result.value).success).toBe(true);
     }
   });
@@ -87,12 +87,12 @@ describe("molar mass from versioned atomic data", () => {
     }));
   });
 
-  it("returns atomic-data-unavailable for a real element absent from the seed dataset", () => {
-    const result = calculateMolarMass(composition("W"), DEFAULT_ELEMENT_DATA);
+  it("returns atomic-data-unavailable for a real element with no CIAAW calculation value", () => {
+    const result = calculateMolarMass(composition("Tc"), DEFAULT_ELEMENT_DATA);
     expect(result.success).toBe(false);
     if (!result.success) expect(result.errors[0]).toMatchObject({
       code: "MISSING_ATOMIC_WEIGHT",
-      offendingValue: "W",
+      offendingValue: "Tc",
     });
   });
 });
@@ -113,7 +113,7 @@ describe("atomic and mass fractions", () => {
     if (!result.success) return;
     expect(FractionResultSchema.safeParse(result.value).success).toBe(true);
     expect(new ChemistryDecimal(result.value.sum).minus(1).abs().lessThanOrEqualTo("1e-32")).toBe(true);
-    expect(result.value.elementDataVersion).toBe("2024.1.0");
+    expect(result.value.elementDataVersion).toBe("2024.2.0");
   });
 
   it("rejects fractions for an empty composition", async () => {

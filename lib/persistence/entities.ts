@@ -1,10 +1,10 @@
-import type { AtomicRadiusDataset, BatchCalculationResult, RadiusDescriptorConfig, SiteComposition } from "@max-stoich/chemistry-engine";
+import type { AtomicRadiusDataset, BatchCalculationResult, RadiusDescriptorConfig, SiteComposition, SiteRadiusDescriptor } from "@max-stoich/chemistry-engine";
 import type { Mode } from "./workspace-types";
 import type { WorkspaceRecipeState } from "../workspace/adapter";
 import type { ValidationStatus, WorkspacePrecursorInput } from "../workspace/presets";
 
-export const LOCAL_SCHEMA_VERSION = "4.0.0" as const;
-export type LocalSchemaVersion = "2.0.0" | "3.0.0" | typeof LOCAL_SCHEMA_VERSION;
+export const LOCAL_SCHEMA_VERSION = "5.0.0" as const;
+export type LocalSchemaVersion = "2.0.0" | "3.0.0" | "4.0.0" | typeof LOCAL_SCHEMA_VERSION;
 export type PersistedValidationStatus = ValidationStatus | "deprecated";
 
 export interface SavedRecipe {
@@ -60,9 +60,12 @@ export interface CalculationSnapshot {
   readonly atomicRadiusDatasetId?: string;
   readonly atomicRadiusDatasetVersion?: string;
   readonly atomicRadiusDatasetDigest?: string;
-  readonly radiusDescriptorSchemaVersion?: "1.0.0";
+  readonly radiusDescriptorSchemaVersion?: "1.0.0" | "2.0.0";
   readonly radiusDescriptorConfig?: RadiusDescriptorConfig;
   readonly radiusSiteModel?: SiteComposition;
+  readonly radiusDatasetSelections?: readonly Readonly<{ siteId: string; datasetId: string; datasetVersion: string; datasetDigest: string; sourceVerificationStatus: string; labApprovalStatus: string; resolvedValues: readonly Readonly<{ element: string; radiusPm?: string; missing: boolean; sourceLocation?: string }>[] }> [] | null;
+  readonly radiusDescriptorResults?: readonly SiteRadiusDescriptor[];
+  readonly radiusDisclaimerVersion?: "1.0.0";
   readonly result: BatchCalculationResult;
   readonly createdAt: string;
   readonly validationStatus: PersistedValidationStatus;

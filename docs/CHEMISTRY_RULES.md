@@ -202,6 +202,12 @@ Comparison performs no chemistry. Every scenario uses the normal end-to-end engi
 Immutable historical output retains the engine and dataset versions that produced it. Current-engine recalculation is explicit and must preserve the historical result as a distinct state.
 # Atomic-radius occupied-site rules
 
-Radius calculations remain disabled until dataset approval. When enabled, vacancy is reported separately and excluded from the occupied distribution: `f_occupied = sum(x_i) = 1-v`, `c_i=x_i/f_occupied`, and `sum(c_i)=1`. Vacancy never receives radius zero. A fully vacant site is unavailable. Any missing occupied-element value blocks aggregates without omission or renormalization. Site statistics are independent of site multiplicity and M/A/X/custom sites are never combined into one unlabeled score.
+Radius calculations use source-verified data for labeled screening. Vacancy is reported separately and excluded from the occupied distribution: `f_occupied = sum(x_i) = 1-v`, `c_i=x_i/f_occupied`, and `sum(c_i)=1`. Vacancy never receives radius zero. A fully vacant site is unavailable. Any missing occupied-element value blocks aggregates without omission or renormalization. Site statistics are independent of site multiplicity and M/A/X/custom sites are never combined into one unlabeled score.
 
-Future approved calculations use `r_mean=sum(c_i r_i)`, `range=max(r_i)-min(r_i)`, `variance=sum(c_i(r_i-r_mean)^2)`, `standardDeviation=sqrt(variance)`, and `delta=100 sqrt(sum(c_i(1-r_i/r_mean)^2))`. Decimal.js uses 50 significant digits internally, 34 for canonical output, half-even rounding, and Decimal square root—not `Math.sqrt`.
+Implemented screening calculations use `r_mean=sum(c_i r_i)`, `range=max(r_i)-min(r_i)`, `variance=sum(c_i(r_i-r_mean)^2)`, `standardDeviation=sqrt(variance)`, and `delta=100 sqrt(sum(c_i(1-r_i/r_mean)^2))`. Decimal.js uses 50 significant digits internally, 34 for canonical output, half-even rounding, and Decimal square root—not `Math.sqrt`.
+
+# Active radius and diagnostic rules
+
+The equations above are now implemented for explicit sites and source-verified screening datasets. Occupant fractions are normalized over occupied atoms, vacancy is excluded, multiplicity does not affect site statistics, and any missing or qualifier-ambiguous occupant blocks every aggregate without omission. One explicit dataset is selected per site; definitions are never combined into a global mismatch number. Flat formulas never assign M/A/X sites.
+
+Scientific residual calculation/tolerance remains unchanged. Presentation policy `1.0.0` separately considers relative residual and practical rounding context: below 0.1% defaults to minor, 0.1–1% remains minor unless a material balance decision is affected, and above 1% defaults to action required. These are UI defaults, not chemistry acceptance limits.
