@@ -20,8 +20,8 @@ test("UX-COMPARE-001 duplicate scenarios share a target and remain independent",
   await expect(firstMass).toHaveValue("Ti");
   await expect(page.getByLabel("Unsaved calculation scenario", { exact: true })).toContainText("Final total");
   await expect(page.getByRole("heading", { name: "Deterministic differences" })).toBeVisible();
-  await page.getByText("Shared target controls").click(); await page.getByLabel("Target template").fill("Ti3AlC2"); await page.getByRole("button", { name: "Apply target to every scenario" }).click();
-  await expect(page.getByLabel("Unsaved calculation scenario", { exact: true })).toContainText("No valid weighing result");
+  await page.getByLabel("Copy of Unsaved calculation target formula").fill("Ti3AlC2");
+  await expect(page.getByLabel("Unsaved calculation scenario", { exact: true })).toContainText("Final total");
   await expect(page.getByLabel("Copy of Unsaved calculation scenario")).toContainText("No valid weighing result");
 });
 

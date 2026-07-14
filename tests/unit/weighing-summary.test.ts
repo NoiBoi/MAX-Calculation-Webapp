@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildWorkspaceCalculation, type WorkspaceRecipeState } from "../../lib/workspace/adapter";
 import { buildWeighingSummary, formatAdjustedFeedFormula, serializeComparisonSummaries, serializeWeighingSummary } from "../../lib/presentation/weighing-summary";
-import { scientificallyEquivalentWorkspaceTargets } from "../../lib/comparison/model";
 
 function state(patch: Partial<WorkspaceRecipeState> = {}): WorkspaceRecipeState {
   const precursor = (formula: string) => ({ id: formula.toLowerCase(), name: formula, formula, purityPercent: "100", constraintMode: "solver" as const, fixedValue: "", minimum: "", maximum: "", ratioDenominatorId: "", numeratorRatio: "1", denominatorRatio: "1", molarMassOverride: "", molarMassOverrideSource: "" });
@@ -34,8 +33,4 @@ describe("weighing summary presentation", () => {
     expect(formatAdjustedFeedFormula({ Ti: "4/5", V: "4/5", Al: "1.2", C: "2.7" }, "TiVAlC")).toBe("Ti4/5V4/5Al1.2C2.7");
   });
 
-  it("accepts syntactically different equivalent targets and rejects different chemistry", () => {
-    expect(scientificallyEquivalentWorkspaceTargets(state({ targetFormula: "Ti2AlN" }), state({ targetFormula: "TiTiAlN" }))).toBe(true);
-    expect(scientificallyEquivalentWorkspaceTargets(state({ targetFormula: "Ti2AlN" }), state({ targetFormula: "Ti3AlC2" }))).toBe(false);
-  });
 });

@@ -30,7 +30,6 @@ import {
   type StoredAtomicRadiusDataset,
 } from "./entities";
 import { BUILT_IN_LAYOUTS, validateLayout } from "../layouts/layouts";
-import { scientificallyEquivalentWorkspaceTargets } from "../comparison/model";
 
 export class PersistenceConflictError extends Error {
   constructor(message = "This recipe changed in another tab. Reopen it before saving another revision.") {
@@ -329,8 +328,6 @@ export class LocalDataRepositories implements RecipeRepository, RouteRepository 
 
   async saveComparison(workspace: ComparisonWorkspace): Promise<void> {
     if (workspace.scenarios.length < 2 || workspace.scenarios.length > 4) throw new Error("A comparison requires two to four scenarios.");
-    const reference = workspace.scenarios[0]!.inputState;
-    if (workspace.scenarios.some((item) => !scientificallyEquivalentWorkspaceTargets(reference, item.inputState))) throw new Error("Every scenario must use a scientifically equivalent target.");
     await this.database.comparisons.put(clone({ ...workspace, schemaVersion: LOCAL_SCHEMA_VERSION, updatedAt: new Date().toISOString() }));
   }
   async getComparison(id: string): Promise<ComparisonWorkspace | undefined> { return this.database.comparisons.get(id); }
@@ -413,7 +410,6 @@ export class LocalDataRepositories implements RecipeRepository, RouteRepository 
     for (const route of routes) if (!routeRevisionsById.has(route.currentRevisionId)) diagnostics.push({ code: "INVALID_ROUTE_REVISION", severity: "error", recordType: "route", recordId: route.id, message: "The current route revision pointer is invalid.", blocking: true });
     for (const comparison of comparisons) {
       if (comparison.scenarios.length < 2 || comparison.scenarios.length > 4) diagnostics.push({ code: "INVALID_COMPARISON_SCENARIO_COUNT", severity: "error", recordType: "comparison", recordId: comparison.id, message: "Comparison must contain two to four scenarios.", blocking: true });
-      if (comparison.scenarios.length > 0 && comparison.scenarios.some((item) => !scientificallyEquivalentWorkspaceTargets(comparison.scenarios[0]!.inputState, item.inputState))) diagnostics.push({ code: "COMPARISON_TARGET_MISMATCH", severity: "error", recordType: "comparison", recordId: comparison.id, message: "A scenario does not match the shared target.", blocking: true });
     }
     for (const layout of layouts) for (const message of validateLayout(layout)) diagnostics.push({ code: "INVALID_LAYOUT", severity: "warning", recordType: "layout", recordId: layout.id, message, blocking: false });
     for (const record of radiusDatasets) { const digest = await sha256Hex(stableCanonicalize(canonicalRadiusDatasetContent(record.dataset))); const validation = validateAtomicRadiusDataset(record.dataset, digest); if (digest !== record.digest || validation.diagnostics.some((item) => item.code === "RADIUS_DATASET_DIGEST_MISMATCH")) diagnostics.push({ code: "RADIUS_DATASET_DIGEST_MISMATCH", severity: "error", recordType: "radius-dataset", recordId: record.id, message: "The installed radius dataset digest is invalid.", blocking: true }); }

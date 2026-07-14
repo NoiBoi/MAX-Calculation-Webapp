@@ -1,6 +1,6 @@
 # MAX Stoich
 
-The calculator includes a paper-friendly balance-side weighing summary. Route comparison starts empty, can import several compatible saved recipes at once, and offers an ordered comparison summary for copying or printing.
+The calculator includes a paper-friendly balance-side weighing summary. General recipe comparison starts empty, can import several saved recipes with the same or different targets at once, and offers an ordered comparison summary for copying or printing.
 
 MAX Stoich is a local, one-screen MAX-phase precursor calculator. It turns an explicit target and precursor route into auditable final gross weighing masses using the framework-independent chemistry engine.
 

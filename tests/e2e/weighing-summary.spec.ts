@@ -31,6 +31,14 @@ test("COMPARE-EMPTY-001 starts empty and adds one named current scenario", async
   await expect(page.getByLabel("Unsaved calculation scenario", { exact: true })).toBeVisible(); await expect(page.getByText("Add at least one more scenario to compare results.")).toBeVisible();
 });
 
+test("COMPARE-CONTROLS-001 add, duplicate, remove, undo, and precursor buttons stay functional", async ({ page }) => {
+  await openCompare(page); await page.locator("header").getByRole("button", { name: "Add blank scenario" }).click();
+  const blank = page.getByLabel("Blank scenario scenario", { exact: true }); await blank.getByRole("button", { name: "Add precursor" }).click(); await expect(blank.getByLabel("Blank scenario precursor 1 formula")).toBeVisible();
+  await blank.getByRole("button", { name: "Duplicate" }).click(); await expect(page.locator('section[aria-label$=" scenario"]')).toHaveCount(2); await expect(page.getByText("Duplicated Blank scenario.", { exact: true })).toBeVisible();
+  await page.getByLabel("Copy of Blank scenario scenario", { exact: true }).getByRole("button", { name: "Remove", exact: true }).click(); await expect(page.locator('section[aria-label$=" scenario"]')).toHaveCount(1);
+  await page.getByRole("button", { name: "Undo scenario removal" }).click(); await expect(page.locator('section[aria-label$=" scenario"]')).toHaveCount(2); await expect(page.getByText("Restored the removed scenario.", { exact: true })).toBeVisible();
+});
+
 test("SUMMARY-002 keeps valid and invalid comparison scenarios visible", async ({ page, context }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]); await openCompare(page); await addCurrentPair(page);
   await page.getByRole("button", { name: "Remove N from Copy of Unsaved calculation" }).click(); await page.getByRole("button", { name: "View comparison summaries" }).click();
@@ -55,8 +63,11 @@ test("COMPARE-MULTISELECT-001 adds three saved recipes in one operation", async 
   await expect(page.locator('section[aria-label$=" scenario"]')).toHaveCount(3); await expect(page.getByLabel("Ti2AlN recipe scenario", { exact: true })).toBeVisible(); await expect(page.getByLabel("Ti2AlN recipe (2) scenario", { exact: true })).toBeVisible(); await expect(page.getByLabel("Ti2AlN recipe (3) scenario", { exact: true })).toBeVisible();
 });
 
-test("COMPARE-MISMATCH-001 rejects a mixed-target selection without partial import", async ({ page }) => {
+test("COMPARE-GENERAL-001 imports and calculates recipes with different targets", async ({ page }) => {
   await page.getByRole("button", { name: "Save", exact: true }).click(); await expect(page.getByText(/Saved Ti2AlN recipe/)).toBeVisible(); await page.getByRole("button", { name: "New", exact: true }).click(); await chooseExample(page, "ti3alc2"); await page.getByRole("button", { name: "Save", exact: true }).click(); await expect(page.getByText(/Saved Ti3AlC2 recipe/)).toBeVisible();
   await openCompare(page); await page.locator("header").getByRole("button", { name: "Add saved recipes" }).click(); const picker = page.getByRole("dialog", { name: "Add saved recipes" }); await picker.getByRole("button", { name: "Select all visible" }).click(); await picker.getByRole("button", { name: "Add selected" }).click();
-  await expect(picker.getByText(/Target mismatch:/)).toBeVisible(); await expect(page.locator('section[aria-label$=" scenario"]')).toHaveCount(0);
+  await expect(picker).not.toBeVisible(); await expect(page.locator('section[aria-label$=" scenario"]')).toHaveCount(2); await expect(page.getByLabel("Ti2AlN recipe scenario", { exact: true })).toContainText("Final total"); await expect(page.getByLabel("Ti3AlC2 recipe scenario", { exact: true })).toContainText("Final total");
+  await page.getByLabel("Comparison name").fill("Mixed target comparison"); await page.getByRole("button", { name: "Save comparison" }).click(); await expect(page.getByText("Comparison saved", { exact: true })).toBeVisible();
+  await page.getByRole("link", { name: "Calculator" }).click(); await openCompare(page); await page.getByLabel("Open saved comparison").selectOption({ label: "Mixed target comparison" });
+  await expect(page.getByLabel("Ti2AlN recipe scenario", { exact: true })).toContainText("Final total"); await expect(page.getByLabel("Ti3AlC2 recipe scenario", { exact: true })).toContainText("Final total");
 });

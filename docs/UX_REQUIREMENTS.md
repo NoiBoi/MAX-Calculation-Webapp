@@ -124,5 +124,5 @@ Blocking and action-required issues expand by default; minor advisories and calc
 - `View weighing summary` is prominent beside the result export actions and is enabled only for a current valid result or an explicitly opened historical snapshot.
 - Summary dialogs use semantic headings and tables, restore focus on close, close with Escape, remain usable at 200% zoom, and provide plain-text copy and clean print actions.
 - Comparison opens with no placeholder scenarios and exposes `Add saved recipes`, `Add current recipe`, and `Add blank scenario` actions.
-- The saved-recipe picker supports search, checkbox multi-selection, select-all-visible, clear, duplicate indication, current revision metadata, and atomic target-compatibility validation.
+- The saved-recipe picker supports search, checkbox multi-selection, select-all-visible, clear, duplicate indication, and current revision metadata. Recipes with different targets are allowed and remain independent.
 - A successful comparison save is reported only after persistence readback. Failure leaves the working comparison unchanged and provides an actionable message.

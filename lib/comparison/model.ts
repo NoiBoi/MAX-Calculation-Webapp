@@ -1,4 +1,3 @@
-import { normalizeLeadingSiteRatioGroup, parseFormula, siteCompositionToElementalComposition } from "@max-stoich/chemistry-engine";
 import type { WorkspaceCalculationState, WorkspaceRecipeState } from "../workspace/adapter";
 import { buildWorkspaceCalculation } from "../workspace/adapter";
 import type { ComparisonScenario, ComparisonWorkspace, PersistedValidationStatus } from "../persistence/entities";
@@ -25,30 +24,15 @@ export function addComparisonScenario(workspace: ComparisonWorkspace, input: Wor
   return { ...workspace, sharedTarget, scenarios: [...workspace.scenarios, added], focusedScenarioId: added.id, historical: false, updatedAt: new Date().toISOString() };
 }
 
-function targetAmounts(input: WorkspaceRecipeState): Readonly<Record<string, string>> | undefined {
-  const normalized = input.normalizeLeadingSiteRatios ? normalizeLeadingSiteRatioGroup(input.targetFormula, { enabled: true, expectedSite: "M" }) : undefined;
-  if (normalized?.success) return normalized.value.idealCalculationComposition.amounts;
-  if (input.siteComposition) {
-    const converted = siteCompositionToElementalComposition(input.siteComposition);
-    return converted.success ? converted.value.amounts : undefined;
-  }
-  const parsed = parseFormula(input.targetFormula);
-  return parsed.success ? parsed.composition.amounts : undefined;
-}
-
-export function scientificallyEquivalentWorkspaceTargets(left: WorkspaceRecipeState, right: WorkspaceRecipeState): boolean {
-  const a = targetAmounts(left); const b = targetAmounts(right);
-  if (!a || !b) return false;
-  const keys = [...new Set([...Object.keys(a), ...Object.keys(b)])].sort();
-  return keys.every((key) => a[key] === b[key]);
-}
-
 export function updateSharedTarget(workspace: ComparisonWorkspace, target: ComparisonWorkspace["sharedTarget"]): ComparisonWorkspace {
   return { ...workspace, sharedTarget: clone(target), scenarios: workspace.scenarios.map((item) => ({ ...item, inputState: { ...item.inputState, targetFormula: target.targetFormula, ...(target.siteComposition ? { siteComposition: clone(target.siteComposition) } : { siteComposition: undefined }), presetId: "custom" }, historical: undefined })), historical: false, updatedAt: new Date().toISOString() };
 }
 
 export function updateScenario(workspace: ComparisonWorkspace, scenarioId: string, update: (input: WorkspaceRecipeState) => WorkspaceRecipeState): ComparisonWorkspace {
-  return { ...workspace, scenarios: workspace.scenarios.map((item) => item.id === scenarioId ? { ...item, inputState: update(clone(item.inputState)), historical: undefined } : item), historical: false, updatedAt: new Date().toISOString() };
+  let updatedInput: WorkspaceRecipeState | undefined;
+  const scenarios = workspace.scenarios.map((item) => { if (item.id !== scenarioId) return item; updatedInput = update(clone(item.inputState)); return { ...item, inputState: updatedInput, historical: undefined }; });
+  const changedFirst = workspace.scenarios[0]?.id === scenarioId && updatedInput;
+  return { ...workspace, ...(changedFirst ? { sharedTarget: { targetFormula: updatedInput!.targetFormula, ...(updatedInput!.siteComposition ? { siteComposition: clone(updatedInput!.siteComposition) } : {}) } } : {}), scenarios, historical: false, updatedAt: new Date().toISOString() };
 }
 
 export function duplicateScenario(workspace: ComparisonWorkspace, scenarioId: string): ComparisonWorkspace {
@@ -61,7 +45,8 @@ export function duplicateScenario(workspace: ComparisonWorkspace, scenarioId: st
 
 export function removeScenario(workspace: ComparisonWorkspace, scenarioId: string): ComparisonWorkspace {
   const scenarios = workspace.scenarios.filter((item) => item.id !== scenarioId);
-  return { ...workspace, scenarios, focusedScenarioId: workspace.focusedScenarioId === scenarioId ? scenarios[0]?.id ?? "" : workspace.focusedScenarioId, historical: false, updatedAt: new Date().toISOString() };
+  const first = scenarios[0]?.inputState;
+  return { ...workspace, ...(first ? { sharedTarget: { targetFormula: first.targetFormula, ...(first.siteComposition ? { siteComposition: clone(first.siteComposition) } : {}) } } : {}), scenarios, focusedScenarioId: workspace.focusedScenarioId === scenarioId ? scenarios[0]?.id ?? "" : workspace.focusedScenarioId, historical: false, updatedAt: new Date().toISOString() };
 }
 
 export function calculateComparison(workspace: ComparisonWorkspace): Readonly<Record<string, WorkspaceCalculationState>> {

@@ -164,5 +164,5 @@ Engine and adapter fixtures cover coefficients 1, 1.2, 2.2, and 0.9; direct matr
 - `SUMMARY-002`: show valid and invalid comparison scenarios together; invalid scenarios state the human-readable reason and expose no usable masses.
 - `COMPARE-EMPTY-001`: a fresh comparison has zero scenarios and all three explicit add actions.
 - `COMPARE-MULTISELECT-001`: multiple compatible current recipe revisions are added atomically with saved names and source IDs; an already-added revision is not silently duplicated.
-- `COMPARE-MISMATCH-001`: a mixed-target selection is rejected with no partial import.
+- `COMPARE-GENERAL-001`: a mixed-target selection imports in one operation; every scenario retains its own target and produces the same calculation state and result it produces in Calculator.
 - `COMPARE-SAVE-001`: save, leave, reopen, and verify name, scenario order, source IDs, shared target, layout, metrics, and historical results.

@@ -61,6 +61,19 @@ describe("route comparison model and deterministic differences", () => {
     expect(calculations[wEndpoint!.id]?.state).toMatch(/^valid/);
   });
 
+  it("matches Calculator exactly for a normalized mixed-target scenario", () => {
+    const precursor = (formula: string) => ({ id: formula.toLowerCase(), name: formula, formula, purityPercent: "100", constraintMode: "solver" as const, fixedValue: "", minimum: "", maximum: "", ratioDenominatorId: "", numeratorRatio: "1", denominatorRatio: "1", molarMassOverride: "", molarMassOverrideSource: "" });
+    const endpoint = state({ targetFormula: "(TiVW2)4AlC2.7", normalizeLeadingSiteRatios: true, aluminumPerFormula: "2", precursors: ["Al", "C", "Ti", "V", "W"].map(precursor), requestedMassGrams: "5" });
+    const calculator = buildWorkspaceCalculation(endpoint);
+    expect(calculator.state).toMatch(/^valid/);
+    let workspace = createComparisonWorkspace();
+    workspace = addComparisonScenario(workspace, state(), "Nitride", { kind: "working-recipe" }, "synthetic");
+    workspace = addComparisonScenario(workspace, endpoint, "W endpoint", { kind: "saved-recipe", recipeId: "endpoint", recipeRevisionId: "endpoint-r1" }, "synthetic");
+    const comparisonResult = calculateComparison(workspace)[workspace.scenarios[1]!.id]!;
+    expect(comparisonResult.state).toBe(calculator.state);
+    if ((calculator.state === "valid" || calculator.state === "valid-with-warnings") && (comparisonResult.state === "valid" || comparisonResult.state === "valid-with-warnings")) expect(comparisonResult.result.canonicalScientificRepresentation).toBe(calculator.result.canonicalScientificRepresentation);
+  });
+
   it("duplicates, enforces limits, and makes scenario removal reversible by immutable state", () => {
     const original = comparison();
     let workspace = duplicateScenario(original, original.scenarios[0]!.id);
@@ -109,13 +122,14 @@ describe("route comparison model and deterministic differences", () => {
     expect(opened?.scenarios.map((item) => [item.name, item.source.recipeRevisionId])).toEqual([["Route one", "revision-1"], ["Route two", "revision-2"]]);
   });
 
-  it("rejects empty, one-scenario, and scientifically mismatched comparison saves", async () => {
+  it("rejects incomplete workspaces but saves scenarios with different scientific targets", async () => {
     const repository = repo(); const empty = createComparisonWorkspace();
     await expect(repository.saveComparison(empty)).rejects.toThrow("two to four");
     const one = addComparisonScenario(empty, state(), "Only", { kind: "working-recipe" }, "synthetic");
     await expect(repository.saveComparison(one)).rejects.toThrow("two to four");
-    const mismatch = addComparisonScenario(one, state({ targetFormula: "Ti3AlC2" }), "Mismatch", { kind: "working-recipe" }, "synthetic");
-    await expect(repository.saveComparison(mismatch)).rejects.toThrow("scientifically equivalent");
+    const mixedTargets = addComparisonScenario(one, state({ targetFormula: "Ti3AlC2" }), "Different target", { kind: "working-recipe" }, "synthetic");
+    await expect(repository.saveComparison(mixedTargets)).resolves.toBeUndefined();
+    expect((await repository.getComparison(mixedTargets.id))?.scenarios.map((item) => item.inputState.targetFormula)).toEqual(["Ti2AlN", "Ti3AlC2"]);
   });
 
   it("observes deterministic two- and four-scenario recalculation without a CI timing gate", () => {
