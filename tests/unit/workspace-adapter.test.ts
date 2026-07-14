@@ -14,6 +14,27 @@ describe("workspace UI-to-engine adapter", () => {
   it("returns an associated formula error without clearing input", () => { const result = buildWorkspaceCalculation({ ...recipe(), targetFormula: "Ti(" }); expect(result).toMatchObject({ state: "invalid", errors: [expect.objectContaining({ fieldPath: "targetFormula", code: "UNMATCHED_OPENING_PARENTHESIS" })] }); });
   it("uses declared purity and lower purity increases gross mass", () => { const baseline = buildWorkspaceCalculation(recipe()); const changed = buildWorkspaceCalculation({ ...recipe(), precursors: recipe().precursors.map((item) => item.id === "al" ? { ...item, purityPercent: "95" } : item) }); expect(Number(changed.result?.precursors.find((item) => item.precursorId === "al")?.finalRoundedGrossWeighingMassGrams)).toBeGreaterThan(Number(baseline.result?.precursors.find((item) => item.precursorId === "al")?.finalRoundedGrossWeighingMassGrams)); expect(changed.result?.warnings.map((item) => item.code)).toContain("IMPURITY_COMPOSITION_UNMODELED"); });
   it("preserves explicit site composition in mixed presets", () => { const preset = getWorkspacePreset("tinbaln"); expect(preset.siteComposition?.sites.find((site) => site.id === "M")?.occupants.map((item) => [item.element, item.fraction])).toEqual([["Ti", "0.5"], ["Nb", "0.5"]]); expect(buildWorkspaceCalculation(recipe("tinbaln")).result?.idealCrystalComposition.amounts).toEqual({ Ti: "1", Nb: "1", Al: "1", N: "1" }); });
+  it("uses the exact integer-scaled composition only when grouped-site normalization is enabled", () => {
+    const targetFormula = "(TiVMoNbW1.2Ta0.4)4AlC3";
+    const precursors = ["Ti", "V", "Mo", "Nb", "W", "Ta", "Al", "C"].map((formula) => ({ id: formula.toLowerCase(), name: formula, formula, purityPercent: "100", constraintMode: "solver" as const, fixedValue: "", minimum: "", maximum: "", ratioDenominatorId: "", numeratorRatio: "1", denominatorRatio: "1", molarMassOverride: "", molarMassOverrideSource: "" }));
+    const enabled = buildWorkspaceCalculation({ ...recipe(), targetFormula, normalizeLeadingSiteRatios: true, siteComposition: undefined, precursors });
+    expect(enabled.state).toBe("valid-with-warnings");
+    expect(enabled.result?.idealCrystalComposition.amounts).toEqual({ Al: "7", C: "21", Mo: "5", Nb: "5", Ta: "2", Ti: "5", V: "5", W: "6" });
+    const disabledInput = { ...recipe(), targetFormula, normalizeLeadingSiteRatios: false, siteComposition: undefined, precursors };
+    const disabled = buildWorkspaceCalculation(disabledInput);
+    expect(disabledInput.targetFormula).toBe(targetFormula);
+    expect(disabled.result?.idealCrystalComposition.amounts).toEqual({ Al: "1", C: "3", Mo: "4", Nb: "4", Ta: "1.6", Ti: "4", V: "4", W: "4.8" });
+  });
+  it("keeps ideal C3 separate while solving the exact carbon-deficient C2.7 intended feed", () => {
+    const targetFormula = "(TiVMoTa0.5W1.5)4AlC2.7";
+    const precursors = ["Ti", "V", "Mo", "Ta", "W", "Al", "C"].map((formula) => ({ id: formula.toLowerCase(), name: formula, formula, purityPercent: "100", constraintMode: "solver" as const, fixedValue: "", minimum: "", maximum: "", ratioDenominatorId: "", numeratorRatio: "1", denominatorRatio: "1", molarMassOverride: "", molarMassOverrideSource: "" }));
+    const calculated = buildWorkspaceCalculation({ ...recipe(), targetFormula, normalizeLeadingSiteRatios: true, siteComposition: undefined, precursors });
+    expect(calculated.state).toBe("valid-with-warnings");
+    expect(calculated.result?.idealCrystalComposition.amounts.C).toBe("3");
+    expect(calculated.result?.intendedFeedComposition.amounts.C).toBe("2.7");
+    expect(calculated.result?.adjustedFeedComposition.amounts.C).toBe("2.7");
+    expect(calculated.result?.matrix?.rows.find((row) => row.element === "C")?.requirement).toBe("2.7");
+  });
   it("keeps every built-in example explicitly below lab-approved status", () => { expect(WORKSPACE_PRESETS).toHaveLength(6); expect(WORKSPACE_PRESETS.every((item) => item.validationStatus !== "lab-approved" && item.validationNote.length > 20)).toBe(true); });
   it("records all twenty required reference categories and review fields", () => { expect(SCIENTIFIC_REFERENCE_CASES).toHaveLength(20); expect(new Set(SCIENTIFIC_REFERENCE_CASES.map((item) => item.caseId)).size).toBe(20); for (const item of SCIENTIFIC_REFERENCE_CASES) { expect(item.reviewerStatus).toContain("Provisional"); expect(item.expectedValueSource.length).toBeGreaterThan(10); expect(item.tolerance.length).toBeGreaterThan(10); expect(item.validationClass).not.toBe("laboratory-approved"); } });
 });

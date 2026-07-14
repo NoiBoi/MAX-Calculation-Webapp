@@ -40,6 +40,7 @@ export function stableCanonicalize(value: unknown): string { return JSON.stringi
 export function canonicalizeWorkspaceScientificInput(recipe: WorkspaceRecipeState): string {
   const scientific = {
     targetFormula: recipe.targetFormula,
+    normalizeLeadingSiteRatios: recipe.normalizeLeadingSiteRatios ?? false,
     siteComposition: recipe.siteComposition,
     precursors: [...recipe.precursors].sort((left, right) => left.id.localeCompare(right.id)),
     requestedMassGrams: recipe.requestedMassGrams,

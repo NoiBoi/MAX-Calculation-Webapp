@@ -31,6 +31,14 @@ Element-symbol validity uses the complete IUPAC symbol list and is independent o
 
 Parsing returns only a flat elemental-count map. It never assigns M/A/X sites, structure family, shared-site occupancy, or ideal/feed/realized meaning.
 
+### Explicit leading M-site ratio normalization
+
+`normalizeLeadingSiteRatioGroup` is a separate, opt-in interpretation and does not alter `parseFormula`. It accepts one leading mixed-element group followed immediately by multiplicity 2, 3, or 4 and an unambiguous `AlC...` or `AlN...` remainder with a positive X coefficient. The multiplicity selects the ideal 211, 312, or 413 template only after the caller explicitly enables M-site normalization. Nested groups, vacancies, variables, multiple normalized groups, missing multiplicities, mixed C/N shortcuts, and incompatible remainders are rejected.
+
+For entered ratios `r_i`, ratio sum `R`, and M multiplicity `m`, exact occupied-site fractions are `x_i=r_i/R` and exact formula coefficients are `n_i=m r_i/R`. Both are returned as reduced `ScientificScalar` values. The decimal-only `SiteComposition` receives labeled approximations only where necessary. Terminating intended-feed coefficients such as C2.7 remain exact decimals; non-terminating M vectors use an exactly equivalent common-denominator calculation composition.
+
+The ideal template and intended feed are separate batch inputs. `(TiVMoTa0.5W1.5)4AlC2.7` retains ideal metadata M4AlC3 but sends C2.7 to the pre-solver balance target. The site-occupancy rendering places fractions summing to one inside the group and then applies multiplicity; the expanded rendering contains total per-formula M coefficients and must not receive another multiplier. Original input text is preserved on success and failure. With normalization disabled, the same text retains ordinary grouping semantics.
+
 Canonical serialization defaults to atomic-number order and offers an explicit alphabetical option. This is deterministic infrastructure, not a claim of chemically canonical grouping. It omits coefficients of one and trailing zeros and cannot reconstruct grouping or original token order. The invariant is: parsing a canonical serialization reproduces the same elemental composition exactly.
 
 ## Site composition

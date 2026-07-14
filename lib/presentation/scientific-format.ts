@@ -32,7 +32,7 @@ export function formatRadiusPm(value: string): string {
   catch { return `${value} pm`; }
 }
 
-export function formatDescriptor(value: string, suffix = ""): string {
-  try { return `${new Decimal(value).toSignificantDigits(4).toString()}${suffix}`; }
+export function formatDescriptor(value: string, suffix = "", significantDigits = 4): string {
+  try { return `${new Decimal(value).toSignificantDigits(significantDigits).toString()}${suffix}`; }
   catch { return `${value}${suffix}`; }
 }

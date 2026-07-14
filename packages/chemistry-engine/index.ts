@@ -10,6 +10,7 @@ export * from "./numeric";
 export * from "./scientific-scalar";
 export * from "./periodic-table";
 export * from "./site-composition";
+export * from "./site-ratio-normalization";
 export * from "./balance-matrix";
 export * from "./version";
 export * from "./precursor-solver";

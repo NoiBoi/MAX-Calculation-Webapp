@@ -1,6 +1,7 @@
 import { DEFAULT_ATOMIC_RADIUS_REGISTRY, RADIUS_DESCRIPTOR_DISCLAIMER, calculateSiteRadiusDescriptor, type BatchCalculationResult } from "@max-stoich/chemistry-engine";
 import type { CalculationSnapshot, RecipeRevision, SavedRecipe } from "../persistence/entities";
 import type { WorkspaceRecipeState } from "../workspace/adapter";
+import type { WeighingSortOption } from "../presentation/weighing-sort";
 
 export interface LaboratoryExportContext {
   readonly recipeName: string;
@@ -10,6 +11,13 @@ export interface LaboratoryExportContext {
   readonly inputState: WorkspaceRecipeState;
   readonly result: BatchCalculationResult;
   readonly calculatedAt: string;
+  readonly displaySort?: Readonly<{ selected: WeighingSortOption; precursorIds: readonly string[] }>;
+}
+
+function displayedPrecursors(context: LaboratoryExportContext): BatchCalculationResult["precursors"] {
+  if (!context.displaySort) return context.result.precursors;
+  const byId = new Map(context.result.precursors.map((item) => [item.precursorId, item]));
+  return Object.freeze(context.displaySort.precursorIds.flatMap((id) => { const item = byId.get(id); return item ? [item] : []; }));
 }
 
 function warningsFor(result: BatchCalculationResult, precursorId: string): string {
@@ -18,7 +26,7 @@ function warningsFor(result: BatchCalculationResult, precursorId: string): strin
 
 export function buildWeighingTableTsv(context: LaboratoryExportContext): string {
   const header = ["Precursor", "Formula", "Purity", "Final weighing mass", "Unit"];
-  const rows = context.result.precursors.map((item) => {
+  const rows = displayedPrecursors(context).map((item) => {
     const input = context.inputState.precursors.find((candidate) => candidate.id === item.precursorId);
     return [item.displayName, input?.formula ?? "", item.purity, item.finalRoundedGrossWeighingMassGrams, "g"];
   });
@@ -44,14 +52,14 @@ export function buildLaboratoryCsv(context: LaboratoryExportContext): string {
   const radius = radiusExportState(context.inputState);
   const headers = [
     "recipe_name", "recipe_id", "recipe_revision", "snapshot_id", "input_digest", "output_digest", "target_formula", "batch_mass_g", "batch_basis",
-    "precursor_id", "precursor", "formula", "solver_quantity_exact", "solver_quantity_decimal_approximation", "approximation_precision_digits", "approximation_rounding_mode",
+    "display_sort", "precursor_id", "precursor", "formula", "solver_quantity_exact", "solver_quantity_decimal_approximation", "approximation_precision_digits", "approximation_rounding_mode",
     "purity_fraction", "pre_round_mass_g", "final_mass_g", "realized_moles", "warning_codes", "engine_version", "atomic_weight_data_version", "radius_descriptor_status", "radius_site_datasets_json", "radius_descriptor_results_json", "radius_units", "radius_disclaimer", "calculation_timestamp",
   ];
-  const rows = context.result.precursors.map((item) => {
+  const rows = displayedPrecursors(context).map((item) => {
     const input = context.inputState.precursors.find((candidate) => candidate.id === item.precursorId);
     return [
       context.recipeName, context.recipe?.id, context.revision?.revisionNumber, context.snapshot?.id, context.snapshot?.inputDigest, context.snapshot?.outputDigest,
-      context.inputState.targetFormula, context.result.batch.requestedMassGrams, context.result.batch.basis, item.precursorId, item.displayName, input?.formula,
+      context.inputState.targetFormula, context.result.batch.requestedMassGrams, context.result.batch.basis, context.displaySort?.selected ?? "canonical-engine-order", item.precursorId, item.displayName, input?.formula,
       item.solverMolesPerTargetFormulaMoleExact.canonical, item.solverMolesPerTargetFormulaMoleDecimalApproximation.value,
       item.solverMolesPerTargetFormulaMoleDecimalApproximation.calculationPrecisionSignificantDigits, item.solverMolesPerTargetFormulaMoleDecimalApproximation.roundingMode,
       item.purity, item.preRoundGrossWeighingMassGrams, item.finalRoundedGrossWeighingMassGrams, item.realizedPrecursorMoles, warningsFor(context.result, item.precursorId),
@@ -70,6 +78,7 @@ export function buildLaboratoryJson(context: LaboratoryExportContext): string {
     snapshot: context.snapshot ? { id: context.snapshot.id, inputDigest: context.snapshot.inputDigest, outputDigest: context.snapshot.outputDigest } : null,
     scientificInput: context.inputState,
     scientificResult: context.result,
+    presentation: context.displaySort ? { weighingTableSort: context.displaySort.selected, visiblePrecursorOrder: context.displaySort.precursorIds } : null,
     atomicRadiusDescriptors: { descriptorSchemaVersion: "2.0.0", availabilityStatus: radius.status, siteDatasetSelections: radius.selections, siteModel: context.inputState.siteComposition ?? null, aggregateResults: radius.results, disclaimerVersion: "1.0.0", disclaimer: RADIUS_DESCRIPTOR_DISCLAIMER },
     provenance: { engineVersion: context.result.engineVersion, atomicWeightDataVersion: context.result.dataVersions.atomicWeights, atomicRadiusDatasets: radius.selections.map((selection) => ({ siteId: selection.siteId, datasetId: selection.datasetId, datasetVersion: selection.datasetVersion, datasetDigest: selection.datasetDigest, sourceVerificationStatus: selection.sourceVerificationStatus, labApprovalStatus: selection.labApprovalStatus })), calculationTimestamp: context.calculatedAt },
   }, null, 2);

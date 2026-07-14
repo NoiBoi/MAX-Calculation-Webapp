@@ -34,6 +34,8 @@ At narrower widths, composition/route becomes a collapsible top section above th
 ## Interaction rules
 
 - Valid changes update results immediately; formula paste may debounce no more than 150 ms.
+- A compact `Normalize leading mixed-site ratios` checkbox sits beside the target input. It is off by default and never changes the entered text. When enabled for supported 211/312/413 syntax, an inline preview shows the entered ratio total, requested M multiplicity, percentage occupancy, per-formula coefficient, ideal-versus-feed meaning, selectable site-occupancy and expanded formulas, copy actions, generated explicit site model, and expandable exact fractions. Disabling it immediately restores ordinary formula grouping and prominently shows the entered formula without clearing or integer-scaling it.
+- The common-adjustment grid places `Elemental Al excess` beside a dynamically labeled `Carbon per formula` or `Nitrogen per formula` control, followed by handling loss and balance increment. The X coefficient is synchronized with supported formula text and is the authoritative intended-feed requirement before solving. It shows ideal-template and deficiency/excess help, accepts positive decimals, and is unavailable for ambiguous mixed C/N formulas.
 - Invalid input preserves the last valid result but marks it stale and ties the message to the field.
 - Enter commits and moves to the next logical field; Escape closes only temporary disclosures.
 - Adding an occupant/precursor focuses its first editable field. Removing one focuses the nearest surviving row.
@@ -45,6 +47,8 @@ At narrower widths, composition/route becomes a collapsible top section above th
 ## Implemented calculator layout
 
 The `/workspace` route uses a compact sticky command bar, a target/route input panel, a wider weighing-results panel, and a full-width summary/trace region. At tablet width, inputs stack above results. The result table scrolls inside its panel; the page itself does not require horizontal scrolling.
+
+The weighing table has one compact persisted sort selector for original route order, name, exact numeric final mass, numeric purity, and diagnostic severity in both directions. Sorting is stable presentation-only state: ties return to original route order and stable ID, engine/matrix/solver/snapshot order never changes, copy and user-facing CSV follow the visible order, and JSON scientific structures remain canonical.
 
 Valid inputs calculate synchronously and locally with no Calculate button. Invalid input preserves the last valid output with a persistent `STALE` warning and reduced visual emphasis until valid input returns. Standard/advanced toggling preserves one recipe state. The implemented shortcuts are maintained in `KEYBOARD_SHORTCUTS.md`.
 

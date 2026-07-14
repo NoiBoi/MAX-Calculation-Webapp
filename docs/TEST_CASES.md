@@ -8,6 +8,10 @@ Each scientific reference fixture must contain versioned input, independent expe
 
 Vitest coverage now includes valid/invalid tokenization and parsing, nested fractional grouping, all requested MAX reference formulas, original-versus-canonical text, full-symbol validation independent of atomic data, source-positioned errors, partial diagnostics, deterministic serialization and exact round-trip composition, immutable vector arithmetic, total/relative normalization, exact/tolerance comparison, CIAAW-seed molar masses, contribution reconciliation, interval and user-specified data trace, missing data, fractions, and reproducibility.
 
+Focused grouped-site tests cover `(TiVMoNbW1.2Ta0.4)4AlC3`, `(TiVMoTa0.5W1.5)4AlC2.7`, `(TiNb)2AlN`, `(Ti0.7Nb0.3)2AlN`, and `(TiVNb)3AlC2`; exact occupancy/coefficient sums; exact fractional renderings without a double multiplier; exact C `27/10`; ideal C3 versus intended/solver C2.7; ordinary-parser invariance; common X analysis/replacement; nitride labeling; mixed-C/N rejection; invalid coefficients; original-text preservation; template errors; adapter mode switching; and save/reopen preservation. `SITE-RATIO-001` and `SITE-RATIO-002` cover enabled/disabled displays, synchronized carbon edits, the retained ratio table, valid weighing, sort changes without recalculation, and UI sort restoration.
+
+Presentation tests cover name, exact numeric mass, purity, diagnostic-severity, and original-order sorting in both directions, route-order tie breaking, result immutability, and copied-table visible order. Scientific canonical output is compared before and after every presentation sort.
+
 The accepted molar-mass expectations use the checked-in CIAAW 2024 calculation values. Passing these unit tests validates this milestone only; it does not promote the precursor-route reference placeholders below.
 
 ## Implemented crystallographic site-composition milestone

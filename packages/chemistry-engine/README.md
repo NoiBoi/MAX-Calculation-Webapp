@@ -166,6 +166,12 @@ All fallible functions return a discriminated `success` result with structured, 
 ## Important boundaries
 
 Formula parsing produces only a flat elemental vector. It never infers crystallographic sites, structure family, feed meaning, or realized composition. A valid element symbol may parse even when the selected atomic-weight dataset cannot calculate its molar mass.
+
+### Explicit grouped M-site ratios
+
+`normalizeLeadingSiteRatioGroup(formula, { enabled: true, expectedSite: "M" })` is an opt-in API for a single leading mixed M-site ratio group in 211, 312, or 413 notation. It leaves `parseFormula` unchanged. It returns reduced exact occupancies and per-formula coefficients, selectable site-occupancy and expanded formula strings, a generated ideal site model, separate ideal-template and intended-feed metadata/compositions, parsed remainder, warnings, and trace. `(TiVMoTa0.5W1.5)4AlC2.7` therefore retains ideal M4AlC3 metadata while the solver receives exact C2.7 (`27/10`); no missing carbon is restored. `analyzeMaxXComponent` and `replaceMaxXCoefficient` support synchronized positive-decimal C/N editing for unambiguous standard MAX forms. Mixed C/N and unsupported structures remain explicit errors.
+
+The site-occupancy formula contains fractions summing to one inside the M group and applies the M multiplicity once. The expanded formula already contains total M coefficients and never receives another group multiplier. Terminating compositions cross the batch boundary directly; non-terminating rational compositions use a traced common-denominator equivalent without weakening the exact public result.
 # Atomic-radius registry
 
 `createAtomicRadiusRegistry`, `validateAtomicRadiusDataset`, `assessRadiusDescriptorAvailability`, and `calculateSiteRadiusDescriptor` expose the framework-independent data and calculation layer. The shipped registry has two source-verified screening datasets and one provisional dataset. A flat formula never supplies site assignments; calculations require an explicit `SiteComposition` and per-site dataset.

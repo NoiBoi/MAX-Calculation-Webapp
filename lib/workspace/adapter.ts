@@ -1,6 +1,7 @@
 import {
   ChemistryDecimal,
   calculateBatchRecipe,
+  normalizeLeadingSiteRatioGroup,
   parseFormula,
   type BatchCalculationResult,
   type BatchMassBasis,
@@ -15,6 +16,7 @@ export interface WorkspaceRecipeState {
   readonly transientId: string;
   readonly presetId: string;
   readonly targetFormula: string;
+  readonly normalizeLeadingSiteRatios?: boolean;
   readonly siteComposition?: SiteComposition;
   readonly precursors: readonly WorkspacePrecursorInput[];
   readonly requestedMassGrams: string;
@@ -46,8 +48,10 @@ export function percentDisplayToFraction(value: string): string {
 }
 
 export function buildWorkspaceCalculation(recipe: WorkspaceRecipeState): WorkspaceCalculationState {
-  const parsed = parseFormula(recipe.targetFormula);
-  if (!parsed.success) return { state: "invalid", errors: parsed.errors.map((error) => ({ code: error.code, message: error.message, fieldPath: "targetFormula" })) };
+  const normalized = recipe.normalizeLeadingSiteRatios ? normalizeLeadingSiteRatioGroup(recipe.targetFormula, { enabled: true, expectedSite: "M" }) : undefined;
+  if (normalized && !normalized.success) return { state: "invalid", errors: normalized.errors.map((error) => ({ code: error.code, message: error.message, fieldPath: "targetFormula" })) };
+  const parsed = normalized?.success ? undefined : parseFormula(recipe.targetFormula);
+  if (parsed && !parsed.success) return { state: "invalid", errors: parsed.errors.map((error) => ({ code: error.code, message: error.message, fieldPath: "targetFormula" })) };
   const constraints: SolverPrecursorConstraint[] = [];
   for (const item of recipe.precursors) {
     if (item.constraintMode === "fixed") constraints.push({ schemaVersion: "1.0.0", mode: "fixed", precursorId: item.id, value: item.fixedValue });
@@ -65,7 +69,8 @@ export function buildWorkspaceCalculation(recipe: WorkspaceRecipeState): Workspa
   try {
     const result = calculateBatchRecipe({
       schemaVersion: "1.0.0",
-      idealCrystalComposition: recipe.siteComposition ?? parsed.composition,
+      idealCrystalComposition: normalized?.success ? normalized.value.idealCalculationComposition : recipe.siteComposition ?? parsed!.composition,
+      ...(normalized?.success ? { intendedFeedComposition: normalized.value.calculationComposition } : {}),
       precursors: recipe.precursors.map((item, order) => ({ schemaVersion: "1.0.0", id: item.id, name: item.name, formula: item.formula, order, purity: percentDisplayToFraction(item.purityPercent), ...(item.molarMassOverride.trim() ? { molarMassOverride: { value: item.molarMassOverride, units: "g/mol" as const, source: item.molarMassOverrideSource, reason: "Explicit workspace material override", provenance: "User-entered advanced workspace value" } } : {}) })),
       solverConstraints: constraints,
       solverOptions: { objectives: [{ kind: recipe.objective }] },

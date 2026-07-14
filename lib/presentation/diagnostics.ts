@@ -48,9 +48,11 @@ export function presentDiagnostics(result: BatchCalculationResult): DiagnosticPr
 }
 
 export function precursorStatus(result: BatchCalculationResult, precursorId: string): string {
-  const diagnostics = presentDiagnostics(result); const related = [...diagnostics.blocking, ...diagnostics.action, ...diagnostics.minor].filter((item) => item.precursorIds.includes(precursorId));
+  const diagnostics = presentDiagnostics(result); const related = [...diagnostics.blocking, ...diagnostics.action, ...diagnostics.minor, ...diagnostics.information].filter((item) => item.precursorIds.includes(precursorId));
   if (related.some((item) => item.presentationClass === "blocking")) return "Invalid";
   if (related.some((item) => item.underlyingCodes.includes("SUB_BALANCE_MASS"))) return "Below balance limit";
-  if (related.some((item) => item.presentationClass === "action")) return "Review rounding";
+  if (related.some((item) => item.presentationClass === "action")) return "Action required";
+  if (related.some((item) => item.presentationClass === "minor")) return "Minor advisory";
+  if (related.some((item) => item.presentationClass === "information")) return "Information";
   return "OK";
 }

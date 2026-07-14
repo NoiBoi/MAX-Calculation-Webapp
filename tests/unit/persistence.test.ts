@@ -79,6 +79,17 @@ describe("atomic local repositories", () => {
     expect(integrity.valid, JSON.stringify(integrity.diagnostics)).toBe(true);
   });
 
+  it("preserves a normalized carbon-deficient coefficient when saving and reopening", async () => {
+    const targetFormula = "(TiVMoTa0.5W1.5)4AlC2.7";
+    const input = state({ targetFormula, normalizeLeadingSiteRatios: true, precursors: ["Ti", "V", "Mo", "Ta", "W", "Al", "C"].map((formula) => ({ id: formula.toLowerCase(), name: formula, formula, purityPercent: "100", constraintMode: "solver" as const, fixedValue: "", minimum: "", maximum: "", ratioDenominatorId: "", numeratorRatio: "1", denominatorRatio: "1", molarMassOverride: "", molarMassOverrideSource: "" })) });
+    const repo = repository();
+    const saved = await repo.saveCalculatedRevision({ name: "Carbon-deficient 413", inputState: input, result: result(input) });
+    const reopened = await repo.getRevision(saved.revision.id);
+    expect(reopened?.inputState.targetFormula).toBe(targetFormula);
+    expect(reopened?.inputState.normalizeLeadingSiteRatios).toBe(true);
+    expect((await repo.getSnapshot(saved.snapshot.id))?.result.intendedFeedComposition.amounts.C).toBe("2.7");
+  });
+
   it("rejects invalid calculations and stale concurrent pointers", async () => {
     const repo = repository();
     const invalid = calculateBatchRecipe({ schemaVersion: "1.0.0", idealCrystalComposition: { schemaVersion: "1.0.0", amounts: {} }, precursors: [], batch: { basis: "ideal-product-mass", requestedMassGrams: "10" }, adjustments: [], rounding: { adjustmentId: "r", order: 0, incrementGrams: "0.001", mode: "nearest-half-even", residualToleranceMoles: "0.001", materialityRelativeTolerance: "0.001" } });
