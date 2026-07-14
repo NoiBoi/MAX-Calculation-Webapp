@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f4f6f7;
+  color: #172022;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+.font-mono { overflow-wrap: anywhere; }
+
+@media print {
+  @page { size: auto; margin: 12mm; }
+  body { background: white; color: black; font-size: 10pt; }
+  header, button, select, input, label, fieldset, [aria-label="Command menu"] { display: none !important; }
+  main, main > div, main section { display: block !important; max-width: none !important; box-shadow: none !important; border-color: #777 !important; }
+  main > div > section:first-child { display: none !important; }
+  table { break-inside: avoid; }
+  .print\:hidden { display: none !important; }
+}

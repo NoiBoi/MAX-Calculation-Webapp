@@ -1,0 +1,2 @@
+"use client";
+export default function ComparisonError({ reset }: { error: Error & { digest?: string }; reset: () => void }) { return <main className="p-8"><h1 className="text-xl font-bold">Route comparison could not be displayed</h1><p className="mt-2">Your saved recipes and comparisons remain in local storage. Return to the workspace or retry this view.</p><button className="mt-4 rounded bg-teal-800 px-4 py-2 text-white" onClick={reset}>Retry comparison</button></main>; }

@@ -1,0 +1,51 @@
+# MAX Stoich
+
+MAX Stoich is a local, one-screen MAX-phase precursor calculator. It turns an explicit target and precursor route into auditable final gross weighing masses using the framework-independent chemistry engine.
+
+## Run the calculator
+
+```text
+npm install
+npm run dev
+```
+
+Open `http://localhost:3000/workspace`. Use `npm run check` for type checking, linting, and all unit/scientific tests; use `npm run test:e2e` for browser workflows.
+
+## Current scientific scope
+
+The application supports formula parsing, explicit 211/312/413 site models, exact elemental matrices and constrained precursor solving, three batch-mass bases, elemental and precursor adjustments, molar masses, purity, retained handling loss, yield, final balance rounding, realized composition, residuals, warnings, and a complete trace.
+
+Built-in examples include Ti₂AlN, Ti₃AlC₂, Ti₄AlN₃, Nb₂AlN, explicit Ti/Nb mixed M-site material, and explicit C/N mixed X-site material. Each example shows its validation status. They are synthetic or hand-audited arithmetic fixtures; none is represented as an experimentally preferred or laboratory-approved synthesis route.
+
+The scientific reference registry records 20 required cases and their source, tolerance, and reviewer status. Spreadsheet comparison is manual and documented in `docs/SPREADSHEET_COMPARISON.md`; spreadsheets are not runtime dependencies.
+
+## Current workflow
+
+`/workspace` provides standard and advanced modes, direct route editing, live local calculation, stale-result protection, warnings, final weighing masses, summary, matrix/solver diagnostics, trace, and keyboard shortcuts. Valid working state is recovered automatically after refresh or browser closure.
+
+Use **Save** to create a recipe or a new immutable revision. Autosave protects the working workspace but never silently creates scientific revisions. The Recipes panel opens, renames, duplicates, archives, deletes, and shows revision history. Historical snapshots display the saved engine result exactly; recalculation is a deliberate unsaved action. The Routes panel saves and reapplies immutable precursor-route revisions without retroactively changing recipes.
+
+Current valid results can be copied as tab-delimited weighing rows, exported as tidy UTF-8 CSV or structured JSON, or printed as a preparation sheet. Exact rational solver quantities remain structural in JSON and have separate exact/approximation CSV columns. Stale or invalid working results cannot be exported.
+
+## Comparison, layouts, and local data
+
+Use **Compare routes** to evaluate two to four independently editable precursor scenarios against one locked target. Differences use canonical compositions and existing engine results; summaries do not predict which route will synthesize successfully. A preferred scenario can be saved as an independent recipe or route without changing its source.
+
+**Layouts & data** provides tested layout presets and bounded local user layouts. Layout changes never store or alter scientific state. The same panel creates manifest-backed full backups, previews merge or replace restores, reports conflicts, and imports only MAX Stoich-owned calculation, recipe, route, comparison, or backup JSON. Replace is confirmed and transactionally protected by a safety backup. Tampered, future, malformed, oversized, and arbitrary files are blocked before database writes.
+
+## Local data and offline limitations
+
+Scientific records are stored in IndexedDB in the current browser profile. They are device-, browser-, origin-, and profile-specific: there is no account, cloud sync, or multi-user backup. Clearing site data, using a temporary/private profile, changing origins, or uninstalling the profile can remove access. Create and download a verified backup regularly.
+
+Once a page is loaded, calculation, local persistence, comparison state already loaded in that page, backup generation, and export have no network dependency. This release does not install a service worker, so opening a route that was not already loaded may fail during a fully offline session. Automated browser coverage is Chromium; Firefox and WebKit support is not claimed until configured and run.
+
+To reset during development, close every app tab and remove the site’s stored data (`max-stoich-local`) through the browser’s site-data/developer storage controls. This is destructive and deletes recipes, routes, revisions, snapshots, and recovery state; export needed records first. Migration failures never trigger automatic reset.
+
+Persistence internals and export contracts are documented in `docs/LOCAL_PERSISTENCE_ARCHITECTURE.md`.
+
+Cloud collaboration, descriptors, inventory, cost, phase prediction, and route recommendations are not implemented. Descriptors are visibly unavailable because no laboratory-approved atomic-radius dataset exists.
+
+**Release status: Laboratory validation in progress.** This is not a laboratory-approved system. Approval requires the completed versioned record in `docs/LAB_ACCEPTANCE_RESULTS_TEMPLATE.md`, approved reference cases, and a named reviewer.
+# Atomic-radius data gate
+
+The advanced workspace includes the versioned atomic-radius registry gate. The installed registry has zero approved datasets, so it displays no element radii or aggregate descriptors. To enable a future release, install and locally approve one sourced, versioned, policy-complete, digest-verified definition and add independently reviewed scientific fixtures. Imported approval metadata is never trusted automatically.

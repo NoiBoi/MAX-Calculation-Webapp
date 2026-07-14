@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "1.0.0",
+  "registrySchemaVersion": "1.0.0",
+  "dataVersion": "unselected",
+  "status": "blocked-pending-scientific-review",
+  "defaultDatasetId": null,
+  "sets": [],
+  "requiredApprovalFields": ["datasetId", "datasetVersion", "name", "definition", "primarySource", "editionOrVersion", "units", "coordinationPolicy", "oxidationStatePolicy", "spinStatePolicy", "missingValuePolicy", "reviewer", "reviewDate", "digest", "values"],
+  "note": "No radius values are shipped until one internally consistent definition and source are approved. Different definitions must never be combined, converted, or used to fill missing values silently."
+}

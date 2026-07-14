@@ -1,0 +1,15 @@
+{
+  "name": "@max-stoich/chemistry-engine",
+  "version": "0.6.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./schemas": "./schemas.ts",
+    "./element-data-schema": "./element-data-schema.ts"
+  },
+  "dependencies": {
+    "decimal.js": "^10.6.0",
+    "zod": "^4.0.0"
+  }
+}

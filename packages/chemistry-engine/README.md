@@ -1,0 +1,173 @@
+# Chemistry Engine
+
+Framework-independent MAX Stoich scientific functions. This package has no React, Next.js, storage, or network dependency.
+
+## Implemented public API
+
+```ts
+import {
+  DEFAULT_ELEMENT_DATA,
+  calculateAtomicFractions,
+  calculateMassFractions,
+  calculateMolarMass,
+  parseFormula,
+  serializeComposition,
+} from "@max-stoich/chemistry-engine";
+
+const parsed = parseFormula("(Ti0.5Nb0.5)2AlN");
+if (parsed.success) {
+  // { Ti: "1", Nb: "1", Al: "1", N: "1" }
+  parsed.composition.amounts;
+
+  // Atomic-number order; grouping is intentionally not reconstructed.
+  serializeComposition(parsed.composition);
+  calculateAtomicFractions(parsed.composition);
+  calculateMolarMass(parsed.composition, DEFAULT_ELEMENT_DATA);
+  calculateMassFractions(parsed.composition, DEFAULT_ELEMENT_DATA);
+}
+```
+
+Composition utilities include `createComposition`, `addCompositions`, `multiplyComposition`, `totalAtomCount`, `normalizeCompositionToTotal`, `normalizeCompositionRelativeTo`, `compositionsEqualExact`, and `compositionsEqualWithinTolerance`.
+
+Explicit crystallographic site APIs include `createStandardMaxComposition`, `createCustomSiteComposition`, `validateSiteComposition`, `normalizeSiteComposition`, `siteCompositionToElementalComposition`, and `renderSiteComposition`.
+
+```ts
+const siteModel = createStandardMaxComposition("211", {
+  M: { occupants: [{ element: "Ti", fraction: "0.5" }, { element: "Nb", fraction: "0.5" }] },
+  A: { occupants: [{ element: "Al", fraction: "1" }] },
+  X: { occupants: [{ element: "N", fraction: "1" }] },
+}, { compositionRole: "ideal-crystal" });
+
+if (siteModel.success) {
+  renderSiteComposition(siteModel.value.composition); // (Ti0.5Nb0.5)2AlN
+  siteCompositionToElementalComposition(siteModel.value.composition);
+}
+```
+
+Creation is strict by default. `normalizeOccupants` and `normalizeAll` must be selected explicitly and return warnings plus a normalization trace. Vacancy is never hidden; rendering uses `□` plus metadata/warnings. Locks are preserved metadata and do not change scientific arithmetic.
+
+### Deterministic elemental balance matrices
+
+`buildElementBalanceMatrix` accepts a canonical elemental composition or validated site composition plus versioned precursor definitions. Each precursor provides a stable ID, display name, optional order, and either a formula, elemental composition, or both. Dual representations must agree exactly.
+
+```ts
+import { analyzeBalanceMatrix, buildElementBalanceMatrix, parseFormula, solvePrecursorBalance } from "@max-stoich/chemistry-engine";
+
+const target = parseFormula("Ti2AlN");
+if (target.success) {
+  const built = buildElementBalanceMatrix(target.composition, [
+    { schemaVersion: "1.0.0", id: "tin", name: "TiN", formula: "TiN" },
+    { schemaVersion: "1.0.0", id: "ti", name: "Ti", formula: "Ti" },
+    { schemaVersion: "1.0.0", id: "al", name: "Al", formula: "Al" },
+  ]);
+  if (built.success) {
+    // Rows N, Al, Ti; columns al, ti, tin
+    built.value.requiredElementMatrix; // [["0","0","1"],["1","0","0"],["0","1","1"]]
+    built.value.requirementVector; // ["1", "1", "2"] per target formula unit
+    built.value.analysis.matrixRank; // 3
+    built.value.analysis.augmentedMatrixRank; // 3
+    analyzeBalanceMatrix(built.value); // same standalone exact analysis
+  }
+}
+```
+
+Rows use atomic-number order. Columns use ascending explicit order then stable ID; unordered columns follow ordered columns. Elements introduced only by precursors are preserved in `precursorOnlyElementMatrix`, warned about, and excluded from the default target-only rank calculation. Missing target sources remain as zero rows with blocking diagnostics.
+
+Rank analysis converts canonical finite decimals to normalized `BigInt` fractions and uses deterministic left-to-right, top-to-bottom rational Gauss-Jordan elimination. No JavaScript `number`, tolerance, or rounding participates. Exact near-but-nonzero differences therefore remain independent; a numerical near-dependence advisory is not included yet. The elimination performs roughly cubic rational work for square matrices, while numerator/denominator bit size may grow with coefficient digit count. This release imposes no artificial dimension or digit cap; callers should keep inputs at ordinary laboratory scale. Tested representative sizes are 4 × 5, 9 × 12, and 15 × 20, with no worker or cache required.
+
+`canonicalizeBalanceMatrix` produces the same byte string for equivalent scientific inputs regardless of object order, precursor input order, trailing zeros, or formula-versus-composition representation. Display names and original formula text stay available in column metadata but do not change that scientific serialization.
+
+The matrix API itself only constructs and diagnoses `A x = b`; solving is a separate API layer below.
+
+### Exact constrained precursor solving
+
+`solvePrecursorBalance` now solves matrix quantities in `mol precursor / mol target formula`. It does not calculate grams.
+
+```ts
+const matrixResult = buildElementBalanceMatrix(target.composition, [
+  { schemaVersion: "1.0.0", id: "al", name: "Al", formula: "Al" },
+  { schemaVersion: "1.0.0", id: "n", name: "N", formula: "N" },
+  { schemaVersion: "1.0.0", id: "ti", name: "Ti", formula: "Ti" },
+]);
+
+if (matrixResult.success) {
+  const solved = solvePrecursorBalance(matrixResult.value);
+  solved.status; // exact-unique
+  solved.quantitiesByPrecursorId; // { al: "1", n: "1", ti: "2" } for Ti2AlN
+  solved.elementalResiduals; // one independently verified zero residual per target element
+}
+```
+
+An underdetermined example can explicitly minimize total precursor formula-unit quantity:
+
+```ts
+solvePrecursorBalance(matrix, [], {
+  objectives: [{ kind: "minimize-total-quantity" }],
+});
+```
+
+Fixed, bounded, and ratio constraints are simultaneous:
+
+```ts
+solvePrecursorBalance(matrix, [
+  { schemaVersion: "1.0.0", mode: "fixed", precursorId: "al", value: "1" },
+  { schemaVersion: "1.0.0", mode: "bounded", precursorId: "ti", minimum: "0", maximum: "3" },
+  {
+    schemaVersion: "1.0.0",
+    mode: "ratio",
+    numeratorPrecursorId: "ti",
+    denominatorPrecursorId: "tin",
+    numeratorRatio: "2",
+    denominatorRatio: "1",
+  },
+]);
+```
+
+Failures retain precise classifications such as `infeasible-linear`, `infeasible-nonnegative`, and `infeasible-constraints`, with structured explanations. Use `validatePrecursorConstraints` for input checks, `verifyPrecursorSolution` for independent residual/bound/ratio verification, and `canonicalizePrecursorSolution` for byte-stable scientific snapshots.
+
+The internal backend uses normalized `BigInt` fractions and deterministic vertex enumeration; no numerical dependency or binary floating-point result is authoritative. Objectives are applied in explicit order, then ties lexicographically minimize the stable ordered quantity vector. The default limit is 250,000 examined candidates. Representative 4 × 5, 9 × 12, and 15 × 20 systems are tested; a highly combinatorial system returns a structured limit failure instead of hanging. Exact non-terminating results use reduced notation such as `1/3`.
+
+Known solver limitations: exact active-precursor cardinality minimization is deferred and rejected as unsupported, strict closed-system mode is absent, and no numerical conditioning advisory is provided. The solver does not establish reaction feasibility, phase formation, yield, or experimental suitability.
+
+### Batch scaling and final weighing masses
+
+`calculateBatchRecipe` composes the existing composition, matrix, solver, and molar-mass APIs into one immutable result. The input explicitly chooses ideal-product, recovered-product, or final-precursor-mixture mass basis. Only recovered-product basis uses expected yield.
+
+```ts
+const target = parseFormula("Ti2AlN");
+if (target.success) {
+  const recipe = calculateBatchRecipe({
+    schemaVersion: "1.0.0",
+    idealCrystalComposition: target.composition,
+    precursors: [
+      { schemaVersion: "1.0.0", id: "ti", name: "Titanium", formula: "Ti" },
+      { schemaVersion: "1.0.0", id: "al", name: "Aluminum", formula: "Al", purity: "0.995" },
+      { schemaVersion: "1.0.0", id: "n", name: "Nitrogen", formula: "N" },
+    ],
+    batch: { basis: "ideal-product-mass", requestedMassGrams: "10" },
+    adjustments: [
+      { schemaVersion: "1.0.0", id: "al-extra", type: "elemental-excess", stage: "pre-solver", element: "Al", fraction: "0.05", order: 0, source: "user" },
+      { schemaVersion: "1.0.0", id: "transfer", type: "handling-loss", stage: "mass-domain", label: "Transfer", fraction: "0.02", scope: "all", order: 0, source: "user" },
+    ],
+    rounding: { adjustmentId: "round", order: 0, incrementGrams: "0.001", mode: "nearest-half-even", residualToleranceMoles: "0.00001", materialityRelativeTolerance: "0.001" },
+  });
+  recipe.precursors; // final masses, retained masses, realized moles, provenance
+  recipe.realizedElements; // signed residual and tolerance result per element
+  recipe.trace; // resolved stage-by-stage explanation
+}
+```
+
+Elemental adjustments change the requirement and trigger a solve. Precursor-specific adjustments apply after that solve and intentionally do not re-solve. Purity is division by `(0,1]`; handling loss is division by retained fraction `(1-L)`; final balance rounding is the only mass rounding step. Realized moles use final gross mass times purity divided by molar mass, while expected retained gross mass is reported separately. `canonicalizeBatchCalculation` supports stable scientific snapshots and `verifyBatchCalculation` independently checks totals and residual consistency.
+
+Molar-mass overrides require g/mol, source, reason, and provenance and remain visible in output and warnings. Unsupported nonlinear adjustments and unsupported bases return structured statuses. No route is claimed experimentally valid, and the engine does not predict reactions, phases, or actual yield.
+
+All fallible functions return a discriminated `success` result with structured, stable error codes. Finite inputs and mass-domain serialized outputs are decimal strings. Exact solver quantities additionally use `ScientificScalar`, a discriminated finite-decimal/rational object with reduced numerator and denominator. `approximateScientificScalar` creates a labeled 50-digit-context, 34-significant-digit, round-half-even approximation without replacing the exact value. Returned compositions, scalar objects, arrays, records, warnings, and trace entries are frozen.
+
+## Important boundaries
+
+Formula parsing produces only a flat elemental vector. It never infers crystallographic sites, structure family, feed meaning, or realized composition. A valid element symbol may parse even when the selected atomic-weight dataset cannot calculate its molar mass.
+# Atomic-radius registry
+
+`createAtomicRadiusRegistry`, `validateAtomicRadiusDataset`, and `assessRadiusDescriptorAvailability` expose the framework-independent data gate. The shipped registry is empty, so descriptor arithmetic is not implemented or called. A flat formula never supplies site assignments; pass an explicit `SiteComposition` only after a reviewed dataset is installed.
+
+Future overrides must match the selected definition and include a reason, source or measurement basis, label, and revision date. Vacancies will be excluded—not assigned radius zero—and any missing occupied value will block the site aggregate. Atomic-size mismatch is always a screening descriptor, never a prediction of stress, strain, stability, or synthesis success.

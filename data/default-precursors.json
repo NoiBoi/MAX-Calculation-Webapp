@@ -1,0 +1,6 @@
+{
+  "schemaVersion": "1.0.0",
+  "dataVersion": "0.1.0",
+  "precursors": [],
+  "note": "Precursor and lot defaults require laboratory review; no supplier, purity, particle size, or route assumption is preloaded."
+}
