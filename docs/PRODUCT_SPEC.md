@@ -127,4 +127,8 @@ The direct `Aluminum per formula` value has one authoritative workspace field. C
 
 Normal and comparison weighing summaries report the final intended precursor molar quantity in `mol precursor / mol target formula` and final weighing mass. Exact solver rationals remain exact; compact decimals are presentation only, and a post-solver precursor adjustment exposes both solver and final intended quantities.
 
+Advanced weighing summaries optionally add per-explicit-site atomic-radius provenance and descriptors. Ordinary summaries omit this material. The advanced view reports dataset definition/version, vacancy, mean/minimum/maximum/range/weighted standard deviation/mismatch, resolved occupants, missing values, and overrides without inferring sites or renormalizing around missing values.
+
+Recipe save offers `Save`, `Save and start blank`, and `Save and open copy`. Post-save navigation occurs only after persistence readback. An opened copy retains the complete scientific setup and radius configuration but has a new unsaved identity; structured experimental notes and revision notes are not copied.
+
 Saved recipes have separate structured notes with stable IDs, category, title, multiline plain-text body, tags, timestamps, optional experiment date/operator, optional revision link, and archive state. Notes are locally searchable by recipe/formula and note content and filterable by category/tag. Adding or editing a note never rewrites a scientific revision or snapshot. Full backups include notes; ordinary weighing exports exclude them by default.

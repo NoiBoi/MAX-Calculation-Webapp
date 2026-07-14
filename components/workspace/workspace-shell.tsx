@@ -338,12 +338,22 @@ export function WorkspaceShell() {
     if (!currentValid) { setStatusMessage("Save unavailable: resolve invalid or infeasible inputs first."); return; }
     setSaveOpen(true);
   };
-  const saveCurrent = async ({ name, revisionNote }: SaveRecipeDialogValue) => {
+  const applyPostSaveAction = (action: SaveRecipeDialogValue["action"], source: Readonly<{ recipeId: string; revisionId: string; name: string }>) => {
+    if (action === "save") return;
+    if (action === "save-and-blank") {
+      const next = blankWorkspaceState(); setRecipe(next, "save-and-blank", "save-and-blank"); setSavedRecipe(undefined); setSavedRevision(undefined); setSavedSnapshot(undefined); setHistoricalSnapshot(undefined); setDuplicationSource(undefined); history.clear(); setHistoryVersion((value) => value + 1);
+      setStatusMessage(`Saved ${source.name}. Started a new blank calculation.`); requestAnimationFrame(() => formulaRef.current?.focus()); return;
+    }
+    const next = { ...structuredClone(recipe), transientId: `copy-${crypto.randomUUID()}`, presetId: "custom" };
+    setRecipe(next, "save-and-copy", "save-and-copy"); setSavedRecipe(undefined); setSavedRevision(undefined); setSavedSnapshot(undefined); setHistoricalSnapshot(undefined); setDuplicationSource({ recipeId: source.recipeId, revisionId: source.revisionId, name: source.name }); history.clear(); setHistoryVersion((value) => value + 1);
+    setStatusMessage(`Saved ${source.name}. Opened an unsaved scientific copy. Structured experimental notes were not copied.`); requestAnimationFrame(() => formulaRef.current?.focus());
+  };
+  const saveCurrent = async ({ name, revisionNote, action }: SaveRecipeDialogValue) => {
     if (!currentValid) throw new Error("Resolve invalid or infeasible inputs before saving.");
     if (savedRecipe && !scientificInputChanged) {
       if (name !== savedRecipe.name) await repositories.renameRecipe(savedRecipe.id, name);
       const renamed = await repositories.getRecipe(savedRecipe.id); if (!renamed) throw new Error("The renamed recipe could not be read back from local storage.");
-      setSavedRecipe(renamed); setUnsavedChanges(false); await refreshLibraries(); setStatusMessage(name === savedRecipe.name ? "No scientific or metadata changes to save." : `Renamed recipe to ${renamed.name}; revision ${renamed.currentRevisionNumber} was not rewritten.`); return;
+      setSavedRecipe(renamed); setUnsavedChanges(false); await refreshLibraries(); setStatusMessage(name === savedRecipe.name ? "No scientific or metadata changes to save." : `Renamed recipe to ${renamed.name}; revision ${renamed.currentRevisionNumber} was not rewritten.`); applyPostSaveAction(action, { recipeId: renamed.id, revisionId: renamed.currentRevisionId, name: renamed.name }); return;
     }
     try {
       const bundle = await repositories.saveCalculatedRevision({
@@ -364,6 +374,7 @@ export function WorkspaceShell() {
       await repositories.saveRecovery({ schemaVersion: LOCAL_SCHEMA_VERSION, id: "current", committedRecipe: recipe, mode, activePanel: "none", inputPanelCollapsed: false, baseRecipeId: bundle.recipe.id, baseRevisionId: bundle.revision.id, savedAsRecipe: true, unsavedChanges: false, committedEditSequence: editSequence.current, updatedAt: new Date().toISOString() });
       await refreshLibraries();
       setStatusMessage(`Saved ${bundle.recipe.name}, revision ${bundle.revision.revisionNumber}`);
+      applyPostSaveAction(action, { recipeId: bundle.recipe.id, revisionId: bundle.revision.id, name: bundle.recipe.name });
     } catch (error) { setStatusMessage(`Save failed: ${error instanceof Error ? error.message : "unknown error"}`); throw error; }
   };
   const openNotes = async (item: SavedRecipe, trigger: HTMLElement) => { notesTriggerRef.current = trigger; setNotesRecipe(item); setNotesRevisions(await repositories.listRevisions(item.id)); setNotesOpen(true); };

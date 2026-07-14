@@ -173,5 +173,10 @@ Engine and adapter fixtures cover coefficients 1, 1.2, 2.2, and 0.9; direct matr
 - `AL-RESET-001`: direct aluminum feed survives carbon/precursor edits, autofill, mode/layout changes, save/reopen, and refresh recovery; helper tests cover compatible Al-target changes and intentional removal for no-Al targets.
 - `PRECURSOR-NAV-001`: Alt-arrow navigation selects adjacent formula inputs at both boundaries, while reorder buttons preserve row identity/metadata and move focus with the row.
 - `SUMMARY-MOLAR-001`: calculator and comparison summaries derive final intended `mol precursor / mol target formula` values from engine results, retain exact rational detail, and include quantities in copy and print output.
+- `COMPARE-CONSISTENCY-001`: comparison scenarios use the calculator result-table vocabulary and expose the same advanced solver/radius hierarchy without coupling scenario validity.
+- `SUMMARY-RADIUS-001`: ordinary summaries omit radius information; advanced summaries show only configured explicit-site descriptors and copy their provenance.
+- `SAVE-ACTIONS-001`: every post-save action waits for persistence; blank clears identity/science while copy preserves science and reports that structured notes were not copied.
+- `PRINT-CALCULATOR-001`: print media exposes a dense calculation sheet with table, versions, and signature while hiding application chrome.
+- `PRINT-COMPARISON-001`: a two-scenario comparison renders a dedicated two-column print grid and overview rather than printing the interactive workspace.
 - `PANEL-DISMISS-001` and `DEFAULT-ROUTE-001`: outside/Escape dismissal with focus restoration, calculator landing at `/`, and labeled demo navigation at `/demo`.
 - `NOTES-001`: multiline category/tag/date/revision-linked records remain searchable after reopen. Repository fixtures additionally cover edit, archive, deletion, body/title/category/tag search, snapshot immutability, recipe deletion cascade, backup/restore, conflict remapping, safe text storage, and exclusion from ordinary weighing export.

@@ -9,6 +9,10 @@
 
 * { box-sizing: border-box; }
 body { margin: 0; }
+.comparison-workspace { display: flex; flex-direction: column; }
+.comparison-workspace > header { order: 1; }
+.comparison-workspace > .comparison-mode-bar { order: 2; }
+.comparison-workspace > :not(header):not(.comparison-mode-bar) { order: 3; }
 .font-mono { overflow-wrap: anywhere; }
 
 button, a[href] {
@@ -27,11 +31,28 @@ button[aria-pressed="true"] { box-shadow: inset 0 0 0 1px currentColor; }
   header, button, select, input, label, fieldset, [aria-label="Command menu"] { display: none !important; }
   main, main > div, main section { display: block !important; max-width: none !important; box-shadow: none !important; border-color: #777 !important; }
   main > div > section:first-child { display: none !important; }
-  table { break-inside: avoid; }
+  table { width: 100%; border-collapse: collapse; }
+  thead { display: table-header-group; }
+  tr, .weighing-summary-card h2, .summary-radius article { break-inside: avoid; }
   .print\:hidden { display: none !important; }
   body:has(.weighing-summary-dialog[open]) main > *:not(.weighing-summary-dialog) { display: none !important; }
   .weighing-summary-dialog[open] { position: static !important; display: block !important; width: auto !important; max-width: none !important; max-height: none !important; overflow: visible !important; border: 0 !important; padding: 0 !important; }
   .weighing-summary-dialog::backdrop, .summary-control { display: none !important; }
-  .weighing-summary-print-root { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0 !important; }
-  .weighing-summary-card { break-inside: avoid; box-shadow: none !important; }
+  .comparison-print-overview { display: block !important; margin-bottom: 5mm; border-bottom: 1px solid #333; padding-bottom: 2mm; font-size: 9pt; }
+  .weighing-summary-print-root { display: block !important; padding: 0 !important; }
+  .weighing-summary-print-root[data-summary-count="2"] { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6mm !important; }
+  .weighing-summary-card { break-inside: auto; margin-bottom: 6mm; border: 1px solid #333 !important; border-radius: 0 !important; padding: 4mm !important; box-shadow: none !important; font-size: 9pt; }
+  .weighing-summary-card h2 { font-size: 13pt !important; }
+  .weighing-summary-card [aria-label^="Adjusted intended feed formula"] { font-size: 12pt !important; overflow-wrap: anywhere; }
+  .summary-weighing-table { margin-top: 3mm !important; font-size: 9pt !important; }
+  .summary-weighing-table th, .summary-weighing-table td { padding: 1.5mm 1mm !important; overflow-wrap: anywhere; }
+  .summary-weighing-table td:nth-child(5), .summary-weighing-table tfoot td { font-size: 12pt !important; white-space: nowrap; }
+  .summary-weighing-table tfoot th { font-size: 11pt !important; }
+  .summary-radius { margin-top: 3mm !important; padding-top: 2mm !important; }
+  .summary-radius article { margin-top: 2mm !important; }
+  .summary-radius article > p { font-size: 8.5pt !important; }
+  .radius-detail-table { display: none !important; }
+  .weighing-summary-card:not(:first-child) .radius-disclaimer { display: none !important; }
+  .summary-signature { margin-top: 3mm !important; }
+  .summary-dataset-warning { margin: 0 0 3mm !important; padding: 2mm !important; }
 }

@@ -129,6 +129,9 @@ Blocking and action-required issues expand by default; minor advisories and calc
 
 - `View weighing summary` is prominent beside the result export actions and is enabled only for a current valid result or an explicitly opened historical snapshot.
 - Summary dialogs use semantic headings and tables, restore focus on close, close with Escape, remain usable at 200% zoom, and provide plain-text copy and clean print actions.
+- Calculator and comparison summaries share the same formula, purity, molar-ratio, mass, status, warning, and provenance presentation. Advanced radius content is an explicit opt-in for screen, copy, and print.
+- Print defaults to a compact 9–11 pt laboratory layout with 10–14 mm margins, repeated table headers, non-splitting rows, wrapped formulas, an operator signature line, and no navigation, form controls, empty states, raw matrices, or full traces. Two comparison scenarios use columns only when the page remains legible; larger sets flow as compact scenario sections.
+- The Save button submits with Enter. Its adjacent arrow menu exposes `Save and start blank` and `Save and open copy`; all save actions are disabled while persistence is pending and Escape closes only when no save is pending.
 - Comparison opens with no placeholder scenarios and exposes `Add saved recipes`, `Add current recipe`, and `Add blank scenario` actions.
 - The saved-recipe picker supports search, checkbox multi-selection, select-all-visible, clear, duplicate indication, and current revision metadata. Recipes with different targets are allowed and remain independent.
 - A successful comparison save is reported only after persistence readback. Failure leaves the working comparison unchanged and provides an actionable message.
