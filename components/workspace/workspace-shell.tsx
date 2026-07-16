@@ -28,6 +28,8 @@ import { CalculationVerificationDialog } from "@/components/verification/calcula
 import { buildCalculationVerification } from "@/lib/presentation/calculation-verification";
 import { FIELD_LABELS, applyFeedDefaultsToNewTemplate, createDefaultUserSettings, displaySettingsForMode, type LocalUserSettings, type WeighingResultField } from "@/lib/settings/user-settings";
 import { createPrintJob, launchPrintJob } from "@/lib/print/print-model";
+import { classifyStartupError, loadStartupData, repairRecoveryRecord, type StartupFailure } from "@/lib/persistence/startup-recovery";
+import { StartupRecoveryScreen } from "@/components/workspace/startup-recovery-screen";
 
 const WEIGHING_SORT_STORAGE_KEY = "max-stoich.weighing-sort.v1";
 
@@ -119,6 +121,8 @@ export function WorkspaceShell() {
   const [selectedPrintRecipeIds, setSelectedPrintRecipeIds] = useState<readonly string[]>([]);
   const [statusMessage, setStatusMessage] = useState("Opening local workspace…");
   const [recoveryReady, setRecoveryReady] = useState(false);
+  const [startupFailure, setStartupFailure] = useState<StartupFailure>();
+  const [startupPending, setStartupPending] = useState(true);
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const [duplicationSource, setDuplicationSource] = useState<Readonly<{ recipeId: string; revisionId: string; name: string }>>();
   const [historyVersion, setHistoryVersion] = useState(0);
@@ -147,6 +151,7 @@ export function WorkspaceShell() {
   const panelTriggerRef = useRef<HTMLElement>(null);
   const panelLayerRef = useRef<HTMLElement>(null);
   const notesTriggerRef = useRef<HTMLElement>(null);
+  const startupStarted = useRef(false);
   const calculation = useMemo(() => buildWorkspaceCalculation(recipe), [recipe]);
   const suggestionTarget = useMemo(() => resolveWorkspaceTarget(recipe), [recipe]);
   const builtInSuggestions = useMemo(() => suggestionTarget ? suggestPrecursorRoutes(suggestionTarget, DEFAULT_PRECURSOR_REGISTRY) : undefined, [suggestionTarget]);
@@ -223,46 +228,66 @@ export function WorkspaceShell() {
     const timer = window.setTimeout(() => setLastValid(calculation.result), 0);
     return () => window.clearTimeout(timer);
   }, [calculation, currentValid]);
-  useEffect(() => {
-    let active = true;
-    void (async () => {
-      try {
-        await repositories.database.open();
-        let settings = await repositories.getSettings();
-        const legacySort = window.localStorage.getItem(WEIGHING_SORT_STORAGE_KEY);
-        if (settings.resultDisplay.weighingSort === "original" && WEIGHING_SORT_OPTIONS.some((item) => item.value === legacySort) && legacySort !== "original") { settings = { ...settings, resultDisplay: { ...settings.resultDisplay, weighingSort: legacySort as WeighingSortOption } }; await repositories.saveSettings(settings); }
-        window.localStorage.removeItem(WEIGHING_SORT_STORAGE_KEY);
-        if (active) { setUserSettings(settings); setWeighingSort(settings.resultDisplay.weighingSort); }
-        const integrity = await repositories.checkStartupIntegrity();
-        if (!active) return;
-        if (!integrity.valid) setStatusMessage(`Local data needs attention: ${integrity.diagnostics[0]?.message ?? "integrity check failed"}`);
-        const recovery = await repositories.loadRecovery();
-        if (recovery && active) {
-          const migratedRecovery = migrateWorkspaceAluminumInput(recovery.committedRecipe);
-          setRecipeState(migratedRecovery);
-          committedValidRecipe.current = migratedRecovery;
-          setMode(recovery.mode);
-          setUnsavedChanges(recovery.unsavedChanges);
-          editSequence.current = recovery.committedEditSequence;
-          if (recovery.baseRecipeId && recovery.baseRevisionId) {
-            const [baseRecipe, baseRevision] = await Promise.all([repositories.getRecipe(recovery.baseRecipeId), repositories.getRevision(recovery.baseRevisionId)]);
-            if (baseRecipe && baseRevision && active) {
-              const baseSnapshot = await repositories.getSnapshot(baseRevision.snapshotId);
-              setSavedRecipe(baseRecipe); setSavedRevision(baseRevision);
-              if (baseSnapshot) { setSavedSnapshot(baseSnapshot); if (!recovery.unsavedChanges) setHistoricalSnapshot(baseSnapshot); }
-            }
+  const initializeWorkspace = useCallback(async (options: Readonly<{ skipRecovery?: boolean }> = {}) => {
+    setStartupPending(true); setStartupFailure(undefined); setRecoveryReady(false);
+    try {
+      const startup = await loadStartupData(repositories, options);
+      let settings = startup.settings;
+      const legacySort = window.localStorage.getItem(WEIGHING_SORT_STORAGE_KEY);
+      if (settings.resultDisplay.weighingSort === "original" && WEIGHING_SORT_OPTIONS.some((item) => item.value === legacySort) && legacySort !== "original") { settings = { ...settings, resultDisplay: { ...settings.resultDisplay, weighingSort: legacySort as WeighingSortOption } }; await repositories.saveSettings(settings); }
+      window.localStorage.removeItem(WEIGHING_SORT_STORAGE_KEY);
+      setUserSettings(settings); setWeighingSort(settings.resultDisplay.weighingSort);
+      const recovery = startup.recovery;
+      if (recovery) {
+        const migratedRecovery = migrateWorkspaceAluminumInput(recovery.committedRecipe);
+        setRecipeState(migratedRecovery); committedValidRecipe.current = migratedRecovery; setMode(recovery.mode); setUnsavedChanges(recovery.unsavedChanges); editSequence.current = recovery.committedEditSequence;
+        if (recovery.baseRecipeId && recovery.baseRevisionId) {
+          const [baseRecipe, baseRevision] = await Promise.all([repositories.getRecipe(recovery.baseRecipeId), repositories.getRevision(recovery.baseRevisionId)]);
+          if (baseRecipe && baseRevision) {
+            const baseSnapshot = await repositories.getSnapshot(baseRevision.snapshotId);
+            setSavedRecipe(baseRecipe); setSavedRevision(baseRevision);
+            if (baseSnapshot) { setSavedSnapshot(baseSnapshot); if (!recovery.unsavedChanges) setHistoricalSnapshot(baseSnapshot); }
           }
-          setStatusMessage(recovery.unsavedChanges ? "Recovered unsaved workspace" : "Recovered saved workspace");
-        } else if (active && integrity.valid) setStatusMessage("Local workspace ready");
-        await refreshLibraries();
-      } catch (error) {
-        if (active) setStatusMessage(`Local recovery is blocked: ${error instanceof Error ? error.message : "database migration failed"}. Your database was not reset.`);
-      } finally {
-        if (active) setRecoveryReady(true);
+        }
+        setStatusMessage(recovery.unsavedChanges ? "Recovered unsaved workspace" : "Recovered saved workspace");
+      } else {
+        const blank = blankWorkspaceState(settings);
+        setRecipeState(blank); committedValidRecipe.current = blank; setSavedRecipe(undefined); setSavedRevision(undefined); setSavedSnapshot(undefined); setHistoricalSnapshot(undefined); setUnsavedChanges(false);
+        setStatusMessage(startup.settingsWarning ?? (options.skipRecovery ? "Opened a blank calculator without restoring the last workspace" : "Local workspace ready"));
       }
-    })();
-    return () => { active = false; };
+      await refreshLibraries();
+      setRecoveryReady(true);
+    } catch (error) {
+      setStartupFailure(classifyStartupError(error));
+    } finally {
+      setStartupPending(false);
+    }
   }, [refreshLibraries, repositories]);
+  useEffect(() => {
+    if (startupStarted.current) return;
+    startupStarted.current = true;
+    void Promise.resolve().then(() => initializeWorkspace());
+  }, [initializeWorkspace]);
+  const exportStartupDiagnostic = async () => {
+    try { downloadText(`max-stoich-diagnostic-${new Date().toISOString().slice(0, 10)}.json`, await repositories.exportRawBackup(), "application/json;charset=utf-8"); }
+    catch (error) { setStartupFailure(classifyStartupError(error)); }
+  };
+  const repairStartup = async () => {
+    setStartupPending(true);
+    try { await repositories.database.open(); await repairRecoveryRecord(repositories); await initializeWorkspace(); }
+    catch (error) { setStartupFailure(classifyStartupError(error)); setStartupPending(false); }
+  };
+  const resetStartupRecovery = async () => {
+    setStartupPending(true);
+    try { await repositories.database.open(); await repositories.clearRecovery(); await initializeWorkspace({ skipRecovery: true }); }
+    catch (error) { setStartupFailure(classifyStartupError(error)); setStartupPending(false); }
+  };
+  const fullStartupReset = async () => {
+    if (!window.confirm("Delete all local MAX Stoich recipes, revisions, snapshots, notes, routes, comparisons, settings, and recovery data on this browser? This cannot be undone unless you exported a backup.")) return;
+    setStartupPending(true);
+    try { await repositories.deleteDatabase(); await initializeWorkspace({ skipRecovery: true }); }
+    catch (error) { setStartupFailure(classifyStartupError(error)); setStartupPending(false); }
+  };
   useEffect(() => {
     if (!recoveryReady || weighingSort === userSettings.resultDisplay.weighingSort) return;
     const next = { ...userSettings, resultDisplay: { ...userSettings.resultDisplay, weighingSort } };
@@ -582,6 +607,8 @@ export function WorkspaceShell() {
     } catch { return undefined; }
   })() : undefined;
 
+  if (startupFailure) return <StartupRecoveryScreen failure={startupFailure} pending={startupPending} onExport={() => void exportStartupDiagnostic()} onFullReset={() => void fullStartupReset()} onOpenBlank={() => void initializeWorkspace({ skipRecovery: true })} onRepair={() => void repairStartup()} onResetRecovery={() => void resetStartupRecovery()} onRetry={() => void initializeWorkspace()} />;
+  if (startupPending && !recoveryReady) return <main className="min-h-screen bg-slate-100 p-8 text-slate-950"><p className="font-semibold">Opening local workspace…</p></main>;
   return <main className="min-h-screen bg-slate-100 text-slate-950" onKeyDown={primaryNavigation}>
     <header className="sticky top-0 z-20 flex min-h-16 flex-nowrap items-center gap-2 border-b border-slate-300 bg-white px-3 py-2 shadow-sm" data-testid="primary-command-bar">
       <Link aria-label="MAX Stoich calculator" className="shrink-0 text-base font-bold tracking-tight text-slate-950 sm:text-lg" href="/"><SiteBrand /></Link>

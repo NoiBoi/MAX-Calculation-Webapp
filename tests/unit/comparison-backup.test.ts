@@ -11,6 +11,7 @@ import { buildWorkspaceCalculation } from "../../lib/workspace/adapter";
 import { BUILT_IN_LAYOUTS } from "../../lib/layouts/layouts";
 import { canonicalRadiusDatasetContent, type AtomicRadiusDataset } from "../../packages/chemistry-engine/radius-data";
 import { sha256Hex, stableCanonicalize } from "../../lib/persistence/canonical";
+import { buildComparisonAnalysis, precursorMatrixTsv, signedDifference } from "../../lib/comparison/analysis";
 
 const repositories: LocalDataRepositories[] = [];
 function state(patch: Partial<WorkspaceRecipeState> = {}): WorkspaceRecipeState { return { transientId: "compare-test", presetId: "custom", targetFormula: "Ti2AlN", precursors: ["Ti", "Al", "N"].map((formula) => ({ id: formula.toLowerCase(), name: formula, formula, purityPercent: "100", constraintMode: "solver" as const, fixedValue: "", minimum: "", maximum: "", ratioDenominatorId: "", numeratorRatio: "1", denominatorRatio: "1", molarMassOverride: "", molarMassOverrideSource: "" })), requestedMassGrams: "10", basis: "ideal-product-mass", expectedYieldPercent: "80", aluminumPerFormula: "1", precursorExcessId: "", precursorExcessPercent: "0", handlingLossPercent: "0", balanceIncrementGrams: "0.001", roundingMode: "nearest-half-even", practicalMinimumMassGrams: "0.001", objective: "deterministic-feasible", ...patch }; }
@@ -20,6 +21,26 @@ function comparison(input = state()) { let workspace = createComparisonWorkspace
 afterEach(async () => { while (repositories.length) await repositories.pop()!.deleteDatabase(); });
 
 describe("route comparison model and deterministic differences", () => {
+  it("changes baseline differences and common-batch presentation without mutating recipes", () => {
+    let workspace = comparison();
+    const second = workspace.scenarios[1]!;
+    workspace = updateScenario(workspace, second.id, (input) => ({ ...input, requestedMassGrams: "20" }));
+    const original = structuredClone(workspace.scenarios);
+    const normalized = buildComparisonAnalysis(workspace.scenarios, second.id, { kind: "common-batch", targetMassGrams: "5" });
+    expect(normalized.baselineId).toBe(second.id);
+    expect(normalized.scenarios.every((item) => item.inputState.requestedMassGrams === "5")).toBe(true);
+    expect(workspace.scenarios).toEqual(original);
+    expect(signedDifference("6", "5")).toEqual({ value: "+1", percent: "+20%" });
+  });
+
+  it("exports an aligned matrix with missing and exact rational values", () => {
+    let workspace = comparison();
+    const second = workspace.scenarios[1]!;
+    workspace = updateScenario(workspace, second.id, (input) => ({ ...input, precursors: input.precursors.filter((item) => item.id !== "n") }));
+    const analysis = buildComparisonAnalysis(workspace.scenarios, workspace.scenarios[0]!.id, { kind: "original" });
+    expect(precursorMatrixTsv(analysis, "presence")).toContain("Missing");
+    expect(precursorMatrixTsv(analysis, "molar-ratio")).toContain("Ti");
+  });
   it("opens as an empty workspace without placeholder scenarios", () => {
     expect(createComparisonWorkspace().scenarios).toEqual([]);
   });

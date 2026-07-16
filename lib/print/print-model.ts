@@ -29,8 +29,12 @@ export interface PrintablePage {
 function entrySize(entry: PrintableRecipeEntry, settings: PrintSettings): number {
   if (entry.unavailable) return 2;
   const summary = entry.summary;
+  const visibleColumns = ["precursorName", "precursorFormula", "molarRatio", "purity", "molarMass", "atomicRadius"].filter((field) => settings.fields[field as keyof typeof settings.fields]).length;
   return summary.precursors.length
     + Math.ceil(summary.adjustedFeedFormula.length / 36)
+    + Math.max(0, visibleColumns - 3)
+    + (settings.formulaStyle === "all-formulas" ? 3 : settings.formulaStyle === "target-and-adjusted" ? 1 : 0)
+    + (settings.verificationDetail === "compact-table" ? 2 : settings.fields.arithmeticVerificationStatus ? 1 : 0)
     + (settings.fields.actionRequiredWarnings ? summary.actionRequiredMessages.length : 0)
     + (settings.fields.minorAdvisories && settings.warningDetail !== "action-required-only" ? summary.minorAdvisoryMessages.length : 0)
     + (settings.fields.notes && settings.notesMode !== "none" ? 2 : 0);
@@ -39,7 +43,8 @@ function entrySize(entry: PrintableRecipeEntry, settings: PrintSettings): number
 /** Deterministic packing policy: oversized recipes receive a full page. */
 export function paginatePrintableRecipes(job: PrintJob): readonly PrintablePage[] {
   const configured = job.singleRecipeDetailed ? 1 : job.settings.recipesPerPage;
-  const regionCapacity = configured === 1 ? 22 : configured === 2 ? 10 : configured === 4 ? 6 : 4;
+  const orientationBonus = job.settings.orientation === "landscape" ? 1 : 0;
+  const regionCapacity = (configured === 1 ? 24 : configured === 2 ? 13 : configured === 4 ? 9 : 6) + orientationBonus;
   const pages: PrintablePage[] = [];
   let pending: PrintableRecipeEntry[] = [];
   const flush = () => { if (pending.length) { pages.push({ index: pages.length + 1, entries: pending }); pending = []; } };

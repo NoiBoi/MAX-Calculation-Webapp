@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { paginatePrintableRecipes, readPrintJob, type PrintJob, type PrintableRecipeEntry } from "@/lib/print/print-model";
 import { CreatorCredit } from "@/components/site/creator-credit";
@@ -21,7 +21,7 @@ function FormulaBlock({ entry, job }: { entry: Extract<PrintableRecipeEntry, { s
   </div>;
 }
 
-function RecipeCard({ entry, job }: { entry: PrintableRecipeEntry; job: PrintJob }) {
+export function RecipeCard({ entry, job }: { entry: PrintableRecipeEntry; job: PrintJob }) {
   if (entry.unavailable) return <article className="print-recipe unavailable"><h2>{entry.unavailable.title}</h2><p>{entry.unavailable.sourceStatus} · {entry.unavailable.validationStatus}</p><strong>No valid weighing result</strong><p>{entry.unavailable.reason}</p></article>;
   const { summary } = entry, { fields } = job.settings;
   const warnings = [...(fields.actionRequiredWarnings ? summary.actionRequiredMessages : []), ...(fields.minorAdvisories && job.settings.warningDetail !== "action-required-only" ? summary.minorAdvisoryMessages : [])];
@@ -38,28 +38,39 @@ function RecipeCard({ entry, job }: { entry: PrintableRecipeEntry; job: PrintJob
   </article>;
 }
 
+export function PrintDocument({ job, ready = true, preview = false }: { job: PrintJob; ready?: boolean; preview?: boolean }) {
+  const pages = useMemo(() => job ? paginatePrintableRecipes(job) : [], [job]);
+  const configured = job.singleRecipeDetailed ? 1 : job.settings.recipesPerPage;
+  const size = job.settings.paperSize === "letter" ? "Letter" : "A4";
+  return <main className={`dedicated-print-root${preview ? " print-document-preview" : ""}`} data-density={job.settings.density} data-orientation={job.settings.orientation} data-paper-size={job.settings.paperSize} data-print-ready={ready ? "true" : "false"} data-print-settings-version={job.schemaVersion} data-recipes-per-page={configured}>
+    {!preview && <style>{`@page { size: ${size} ${job.settings.orientation}; margin: 9mm; }`}</style>}
+    {pages.map((page) => <section className={`print-page print-grid-${page.entries.length} configured-${configured}`} data-page-index={process.env.NODE_ENV === "production" ? undefined : page.index} data-packing-reason={process.env.NODE_ENV === "production" ? undefined : page.notice ?? "configured-capacity"} key={page.index}>
+      <div className="print-page-header">{job.settings.showApplicationName && <strong className="page-app"><SiteBrand variant="print" /></strong>}<span>{job.title}</span></div>
+      {page.notice && <p className="packing-notice">{page.notice}</p>}
+      <div className="print-recipe-grid">{page.entries.map((entry, index) => <div className="print-recipe-region" data-region-index={process.env.NODE_ENV === "production" ? undefined : index + 1} key={entry.id}><RecipeCard entry={entry} job={job} /></div>)}</div>
+      <div className="print-page-footer"><CreatorCredit className="print-credit" /><div className="page-meta">{job.settings.showPrintDate && <span>{new Date(job.createdAt).toLocaleDateString()}</span>}{job.settings.showPageNumbers && <span>Page {page.index} of {pages.length}</span>}</div></div>
+    </section>)}
+  </main>;
+}
+
 export function PrintRoot() {
   const search = useSearchParams(), id = search.get("job") ?? "";
-  const [job] = useState<PrintJob | undefined>(() => readPrintJob(id));
+  const [job, setJob] = useState<PrintJob>();
+  const [loaded, setLoaded] = useState(false);
   const [ready, setReady] = useState(false);
-  const pages = useMemo(() => job ? paginatePrintableRecipes(job) : [], [job]);
+  const readAttempted = useRef("");
+  useEffect(() => {
+    if (readAttempted.current === id) return;
+    readAttempted.current = id;
+    void Promise.resolve().then(() => { setJob(readPrintJob(id)); setLoaded(true); });
+  }, [id]);
   useEffect(() => {
     if (!job) return;
     let active = true;
     void document.fonts.ready.then(() => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))).then(() => { if (!active) return; setReady(true); document.documentElement.dataset.printReady = "true"; window.print(); });
-    const close = () => window.close(); window.addEventListener("afterprint", close);
-    return () => { active = false; window.removeEventListener("afterprint", close); };
+    return () => { active = false; };
   }, [job]);
+  if (!loaded) return <main className="print-error"><p>Preparing print content…</p></main>;
   if (!job) return <main className="print-error"><h1>Print content unavailable</h1><p>The print job expired or could not be read. Return to the calculator and try Print again.</p></main>;
-  const configured = job.singleRecipeDetailed ? 1 : job.settings.recipesPerPage;
-  const size = job.settings.paperSize === "letter" ? "Letter" : "A4";
-  return <main className="dedicated-print-root" data-density={job.settings.density} data-orientation={job.settings.orientation} data-paper-size={job.settings.paperSize} data-print-ready={ready ? "true" : "false"} data-recipes-per-page={configured}>
-    <style>{`@page { size: ${size} ${job.settings.orientation}; margin: 9mm; }`}</style>
-    {pages.map((page) => <section className={`print-page print-grid-${page.entries.length} configured-${configured}`} key={page.index}>
-      <div className="print-page-header">{job.settings.showApplicationName && <strong className="page-app"><SiteBrand variant="print" /></strong>}<span>{job.title}</span></div>
-      {page.notice && <p className="packing-notice">{page.notice}</p>}
-      <div className="print-recipe-grid">{page.entries.map((entry) => <RecipeCard entry={entry} job={job} key={entry.id} />)}</div>
-      <div className="print-page-footer"><CreatorCredit className="print-credit" /><div className="page-meta">{job.settings.showPrintDate && <span>{new Date(job.createdAt).toLocaleDateString()}</span>}{job.settings.showPageNumbers && <span>Page {page.index} of {pages.length}</span>}</div></div>
-    </section>)}
-  </main>;
+  return <PrintDocument job={job} ready={ready} />;
 }

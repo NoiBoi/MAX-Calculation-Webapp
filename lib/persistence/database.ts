@@ -23,6 +23,7 @@ export class MaxStoichDatabase extends Dexie {
 
   constructor(name = "max-stoich-local") {
     super(name);
+    this.on("versionchange", () => this.close());
     this.version(1).stores({ recipes: "&id,name,updatedAt,archived,currentRevisionNumber", recipeRevisions: "&id,[recipeId+revisionNumber],recipeId", snapshots: "&id,recipeId,recipeRevisionId", routes: "&id,name,updatedAt,archived", routeRevisions: "&id,[routeId+revisionNumber],routeId", recentCalculations: "&snapshotId,lastOpenedAt,recipeId", recovery: "&id", migrations: "&id" });
     this.version(2).stores({ recipes: "&id,name,targetFormula,updatedAt,archived,currentRevisionNumber,validationStatus", recipeRevisions: "&id,[recipeId+revisionNumber],recipeId", snapshots: "&id,recipeId,recipeRevisionId,createdAt", routes: "&id,name,updatedAt,archived,validationStatus", routeRevisions: "&id,[routeId+revisionNumber],routeId", recentCalculations: "&snapshotId,lastOpenedAt,recipeId", recovery: "&id", migrations: "&id" }).upgrade(async (transaction) => {
       await transaction.table("recipes").toCollection().modify((record: Record<string, unknown>) => Object.assign(record, migrateRecord(record, 1, 2)));

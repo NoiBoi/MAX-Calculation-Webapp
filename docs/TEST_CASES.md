@@ -227,3 +227,11 @@ Repository tests cover defaults, save/reopen, independent 211/312/413 values, di
 - `PRINT-TEXT-001`, `PRINT-4-UP-TEXT-001`, and `PRINT-6-UP-TEXT-001`: title, row, final-mass, and total font floors are measured at 100%; formulas do not clip and long recipes receive a full page without transform scaling.
 - Creator credit is present with the correct `mailto:` link and Anasori Lab line in Light, Dark, and Midnight. The fixed site instance is hidden in print media and the dedicated print document supplies an in-flow footer credit.
 - `BRAND-001`: the transparent mark appears in site chrome, remains unchanged in Light, inverts in Dark/Midnight, and the opaque supplied variant is exposed through the browser-tab icon metadata. Print removes the dark-theme inversion.
+# Focused print, comparison, and recovery regressions
+
+- Live preview renders the shared `PrintDocument` with the current draft settings.
+- Partial four- and six-up pages contain exactly the supplied entries; no placeholders are synthesized.
+- Dense entries account for visible columns and receive a full-page fallback.
+- Baseline-relative signed differences and common-batch recalculation preserve original scenario inputs.
+- Retry initialization can be invoked repeatedly after closing the database.
+- Corrupt recovery is classified separately, safe-open skips it without deletion, repair removes malformed transient state, and recovery reset preserves saved tables.

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DEFAULT_ATOMIC_RADIUS_REGISTRY } from "@max-stoich/chemistry-engine";
 import type { LocalDataRepositories } from "@/lib/persistence/repositories";
 import {
@@ -10,6 +10,9 @@ import {
 import type { Mode } from "@/lib/persistence/workspace-types";
 import { useTheme } from "@/components/theme/theme-provider";
 import type { AppearancePreference } from "@/lib/theme/theme";
+import { PrintDocument } from "@/components/print/print-root";
+import { createPrintJob, launchPrintJob, type PrintableRecipeEntry } from "@/lib/print/print-model";
+import type { WeighingSummary } from "@/lib/presentation/weighing-summary";
 
 function Preview({ mode, display, datasetId }: { mode: Mode; display: WeighingResultDisplaySettings; datasetId: string }) {
   const fields = display.columnOrder.filter((field) => display.visibleFields.includes(field));
@@ -29,11 +32,20 @@ function DisplayEditor({ mode, value, onChange }: { mode: Mode; value: WeighingR
 
 const REQUIRED_PRINT_FIELDS = new Set<PrintField>(["recipeName", "adjustedFeedFormula", "finalMass", "totalMass"]);
 
+function syntheticSummary(index: number): WeighingSummary {
+  const formulas = ["Ti", "Al", "C", "TiC"];
+  return {
+    title: `Representative carbide ${index + 1}`, sourceStatus: "Synthetic print preview", adjustedFeedFormula: "(TiVNbMo)4AlC2.7", targetFormula: "(TiVNbMo)4AlC3", idealFormula: "(TiVNbMo)4AlC3", intendedFeedFormula: "(TiVNbMo)4AlC2.7", realizedFormula: "(TiVNbMo)4AlC2.6998",
+    batchMass: "5.000", batchBasis: "ideal-product-mass", totalMass: "5.184", unit: "g", actionRequiredMessages: index === 0 ? ["Review the carbon-deficient intended feed before weighing."] : [], minorAdvisoryMessages: ["Representative advisory for layout testing."], engineVersion: "preview", atomicWeightDataVersion: "preview", radiusSites: [{ siteId: "M", siteLabel: "M site", datasetName: "Representative radius data", datasetDefinition: "metallic radius", datasetVersion: "preview", vacancyFraction: "0", available: true, mismatchPercent: "4.2", missingElements: [], occupants: [] }],
+    verificationSummary: { statusLabel: "Arithmetic verification: verified", targetFormulaMoles: "0.0123", largestElementalResidual: "C 0.000001 mol", atomicDataVersion: "preview" }, isHistorical: false, isStale: false,
+    precursors: formulas.map((formula, row) => ({ id: `${index}-${formula}`, displayName: formula, formula, molarQuantity: row === 3 ? "1/3" : "1", solverMolarQuantity: row === 3 ? "0.333333333333" : "1", solverMolarQuantityExact: row === 3 ? "1/3" : "1", hasPostSolverAdjustment: false, finalMass: ["1.245", "0.702", "0.468", "2.769"][row]!, purityPercent: row === 3 ? "99.5" : "100", molarMass: ["47.867", "26.9815385", "12.011", "59.878"][row]!, atomicRadius: row === 0 ? "147 pm · metallic" : "Not applicable", unit: "g", status: "OK" })),
+  };
+}
+
 function PrintPreview({ value }: { value: PrintSettings }) {
-  const grid = value.recipesPerPage >= 4 || value.orientation === "landscape" ? "grid-cols-2" : "grid-cols-1";
-  return <div aria-label={`${value.recipesPerPage} recipes per page print preview`} className={`print-settings-preview configured-${value.recipesPerPage} mx-auto mt-4 grid content-between items-start max-w-4xl gap-2 border-2 border-slate-500 bg-white p-3 shadow ${value.orientation === "landscape" ? "aspect-[11/8.5]" : "aspect-[8.5/11]"} ${grid}`}>
-    {Array.from({ length: value.recipesPerPage }, (_, index) => <article className="print-preview-recipe min-h-0 self-start overflow-hidden rounded border p-2" key={index}><strong className="preview-title block">HE carbide {index + 1}</strong><span className="preview-formula font-mono">(TiVNbMo)4AlC3</span><div className="mt-1 border-t pt-1"><div>Ti <strong className="preview-mass float-right">1.245 g</strong></div><div>Al <strong className="preview-mass float-right">0.702 g</strong></div><div>C <strong className="preview-mass float-right">0.468 g</strong></div></div><strong className="preview-total mt-1 block text-right">Total 2.415 g</strong></article>)}
-  </div>;
+  const job = useMemo(() => createPrintJob({ kind: "library", title: "Live settings preview", singleRecipeDetailed: false, settings: value, entries: Array.from({ length: value.recipesPerPage }, (_, index): PrintableRecipeEntry => ({ id: `preview-${index}`, summary: syntheticSummary(index) })) }), [value]);
+  const label = `${value.paperSize === "letter" ? "US Letter" : "A4"} · ${value.orientation === "portrait" ? "Portrait" : "Landscape"} · ${value.recipesPerPage} recipes per page · ${value.density.replace("-", " ")}`;
+  return <div className="mt-4"><div className="flex flex-wrap items-center justify-between gap-2"><strong>{label}</strong><button className="rounded border px-3 py-2 text-sm font-semibold" onClick={() => launchPrintJob(job)} type="button">Print this preview</button></div><div aria-label={`${value.recipesPerPage} recipes per page print preview`} className="print-settings-preview mt-3 overflow-auto rounded border bg-slate-200 p-3"><PrintDocument job={job} preview /></div></div>;
 }
 
 function PrintSettingsEditor({ value, onChange }: { value: PrintSettings; onChange: (value: PrintSettings) => void }) {
@@ -52,7 +64,7 @@ function PrintSettingsEditor({ value, onChange }: { value: PrintSettings; onChan
     </div>
     <fieldset className="mt-5"><legend className="font-semibold">Printed fields</legend><p className="text-xs text-slate-600">Required identity, feed, weighing mass, and total fields are locked on.</p><div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{(Object.keys(PRINT_FIELD_LABELS) as PrintField[]).map((field) => { const required = REQUIRED_PRINT_FIELDS.has(field) || (field === "precursorName" && !value.fields.precursorFormula) || (field === "precursorFormula" && !value.fields.precursorName); return <label className="flex items-center gap-2 rounded border p-2 text-sm" key={field}><input checked={value.fields[field]} disabled={required} onChange={(event) => setField(field, event.target.checked)} type="checkbox" />{PRINT_FIELD_LABELS[field]}{required && <span className="text-xs text-slate-500">required</span>}</label>; })}</div></fieldset>
     <fieldset className="mt-5"><legend className="font-semibold">Page metadata</legend><div className="mt-2 flex flex-wrap gap-4">{([["showPageNumbers", "Page numbers"], ["showPrintDate", "Print date"], ["showApplicationName", "Application name"], ["repeatTableHeaders", "Repeat table headers"]] as const).map(([field, label]) => <label className="flex items-center gap-2 text-sm" key={field}><input checked={value[field]} onChange={(event) => onChange({ ...value, [field]: event.target.checked })} type="checkbox" />{label}</label>)}</div></fieldset>
-    <div className="mt-5"><h4 className="font-semibold">Synthetic print preview</h4><p className="text-xs text-slate-600">No chemistry calculation is run. The tabs also select the packing density.</p><div className="mt-2 flex gap-2" role="tablist" aria-label="Recipes per page preview">{([2, 4, 6] as const).map((count) => <button aria-selected={value.recipesPerPage === count} className={`rounded border px-3 py-2 text-sm ${value.recipesPerPage === count ? "bg-slate-900 text-white" : ""}`} key={count} onClick={() => onChange({ ...value, recipesPerPage: count, density: count === 2 ? "comfortable" : count === 4 ? "compact" : "ultra-compact" })} role="tab" type="button">{count} per page</button>)}</div><PrintPreview value={value} /></div>
+    <div className="mt-5"><h4 className="font-semibold">Live print preview</h4><p className="text-xs text-slate-600">This is the same page component, printable model, field logic, typography, and paginator used by the dedicated print view. No chemistry calculation is run.</p><div className="mt-2 flex gap-2" role="tablist" aria-label="Recipes per page preview">{([2, 4, 6] as const).map((count) => <button aria-selected={value.recipesPerPage === count} className={`rounded border px-3 py-2 text-sm ${value.recipesPerPage === count ? "bg-slate-900 text-white" : ""}`} key={count} onClick={() => onChange({ ...value, recipesPerPage: count, density: count === 2 ? "comfortable" : count === 4 ? "compact" : "ultra-compact" })} role="tab" type="button">{count} per page</button>)}</div><PrintPreview value={value} /></div>
   </section>;
 }
 

@@ -153,3 +153,6 @@ Print settings are local presentation state, not recipe input. Required fields r
 # Appearance system
 
 MAX Stoich provides Light, neutral Dark, black Midnight, and System appearance modes without changing chemistry, saved recipes, exports, or snapshots. A compact global control toggles Light/Dark and opens the four-choice menu; Settings exposes the same authoritative preference. System follows live operating-system changes and never resolves to Midnight. Semantic background, border, text, accent, status, focus, shadow, and overlay tokens preserve the teal identity and warning hierarchy. Midnight uses line-oriented near-black structure with minimal shadows. Print remains a larger-type white-paper presentation regardless of application appearance.
+# Reliability and analysis additions
+
+Print Settings provides a live, production-accurate page preview. Route comparison supports a selectable baseline, summary metrics, signed differences, aligned precursor matrices, original or common-batch display, and copy/CSV output. Startup failures use a dedicated recovery surface with real Retry and non-destructive safe-open, repair, export, and recovery-reset actions.

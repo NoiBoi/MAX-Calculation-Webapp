@@ -33,4 +33,17 @@ describe("deterministic print pagination", () => {
     const job = createPrintJob({ kind: "recipe", title: "One", singleRecipeDetailed: true, settings: { ...createRecommendedPrintSettings(), recipesPerPage: 6 }, entries: entries(1) });
     expect(paginatePrintableRecipes(job)).toHaveLength(1); expect(job.settings.recipesPerPage).toBe(6);
   });
+
+  it("does not create placeholder entries for partial four- and six-up pages", () => {
+    const four = createPrintJob({ kind: "library", title: "Three", singleRecipeDetailed: false, settings: { ...createRecommendedPrintSettings(), recipesPerPage: 4, density: "compact" }, entries: entries(3, 2) });
+    const six = createPrintJob({ kind: "library", title: "Five", singleRecipeDetailed: false, settings: { ...createRecommendedPrintSettings(), recipesPerPage: 6, density: "ultra-compact" }, entries: entries(5, 2) });
+    expect(paginatePrintableRecipes(four)).toEqual([{ index: 1, entries: four.entries }]);
+    expect(paginatePrintableRecipes(six)).toEqual([{ index: 1, entries: six.entries }]);
+  });
+
+  it("accounts for visible scientific columns when assigning long recipes a larger region", () => {
+    const settings = createRecommendedPrintSettings();
+    const dense = { ...settings, recipesPerPage: 6 as const, density: "ultra-compact" as const, fields: { ...settings.fields, molarMass: true, atomicRadius: true, purity: true, molarRatio: true }, formulaStyle: "all-formulas" as const, verificationDetail: "compact-table" as const };
+    expect(paginatePrintableRecipes(createPrintJob({ kind: "library", title: "Dense", singleRecipeDetailed: false, settings: dense, entries: entries(1, 7) }))[0]?.notice).toContain("full page");
+  });
 });

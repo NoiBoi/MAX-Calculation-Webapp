@@ -49,3 +49,16 @@ Full backup manifests include settings counts and digests. Verified pre-settings
 User-settings record schema `2.0.0` added nested Print settings without changing IndexedDB database version 8 or scientific tables. Schema `3.0.0` added `light | dark | system`; schema `4.0.0` adds explicit `midnight`. Reading schemas `1.0.0` through `3.0.0` supplies missing defaults and persists the migrated record; existing `dark` remains revised neutral Dark and is never converted to Midnight. Integrity scans validate the migrated form and future schemas remain rejected. Appearance defaults to System and never enters recipe revisions, snapshots, comparison scientific input, canonical output digests, CSV, or recipe JSON.
 
 IndexedDB remains authoritative. Because it cannot be read synchronously before first paint, successful settings reads/writes/restores maintain a derived `max-stoich-appearance` localStorage bootstrap mirror. The root initialization script reads only that value, resolves System through `prefers-color-scheme`, and sets `data-theme` before hydration. React then reconciles from the settings repository and live media-query changes. Reset writes the System default; verified backup and restore include the authoritative appearance field.
+# Startup retry and safe recovery
+
+Workspace initialization is an explicit repeatable operation, not a cached promise. Every Retry closes the current Dexie connection, reopens IndexedDB, reruns idempotent upgrades, reloads settings, checks scientific-record pointers, validates recovery, reloads libraries, and only then enters the calculator.
+
+Failures are classified as IndexedDB unavailable, quota exceeded, upgrade blocked, migration failed, recovery corrupt, settings corrupt, scientific-record corrupt, or unknown. A blocked upgrade tells the user to close other MAX Stoich tabs; existing connections close on `versionchange`.
+
+Recovery actions have strict safety boundaries:
+
+- Open without restoring skips the recovery record and opens a blank calculator. It preserves saved scientific records and readable settings.
+- Repair validates and migrates the editable recipe, removes malformed transient UI state, and rebuilds derived calculation state. It never rewrites immutable snapshots.
+- Reset recoverable workspace deletes only the current recovery record.
+- Diagnostic export attempts a raw local backup without exposing contents on screen.
+- Full reset is confirmed separately and deletes every local database table.

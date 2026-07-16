@@ -240,23 +240,11 @@ main.min-h-screen > header > a[href="/workspace"]:first-child::before { width: 1
 .dedicated-print-root[data-paper-size="a4"][data-orientation="portrait"] { --print-page-width: 192mm; --print-page-height: 279mm; --print-page-ratio: 210 / 297; }
 .dedicated-print-root[data-paper-size="a4"][data-orientation="landscape"] { --print-page-width: 279mm; --print-page-height: 192mm; --print-page-ratio: 297 / 210; }
 .print-settings-preview,
-:is([data-theme="dark"], [data-theme="midnight"]) .print-settings-preview { color-scheme: light; background: #fff !important; color: #0f172a !important; }
-:is([data-theme="dark"], [data-theme="midnight"]) .print-settings-preview article { background: #fff !important; color: #0f172a !important; border-color: #64748b !important; }
-.print-settings-preview .print-preview-recipe { font-size: 10pt; }
-.print-settings-preview .preview-title { font-size: 15pt; line-height: 1.1; }
-.print-settings-preview .preview-formula { font-size: 13pt; overflow-wrap: anywhere; }
-.print-settings-preview .preview-mass { font-size: 12.5pt; }
-.print-settings-preview .preview-total { font-size: 16pt; }
-.print-settings-preview.configured-4 .print-preview-recipe { font-size: 9pt; }
-.print-settings-preview.configured-4 .preview-title { font-size: 12pt; }
-.print-settings-preview.configured-4 .preview-formula { font-size: 10.5pt; }
-.print-settings-preview.configured-4 .preview-mass { font-size: 11pt; }
-.print-settings-preview.configured-4 .preview-total { font-size: 13pt; }
-.print-settings-preview.configured-6 .print-preview-recipe { font-size: 8.5pt; }
-.print-settings-preview.configured-6 .preview-title { font-size: 10.5pt; }
-.print-settings-preview.configured-6 .preview-formula { font-size: 9.25pt; }
-.print-settings-preview.configured-6 .preview-mass { font-size: 10pt; }
-.print-settings-preview.configured-6 .preview-total { font-size: 11.5pt; }
+:is([data-theme="dark"], [data-theme="midnight"]) .print-settings-preview { color-scheme: light; color: #0f172a !important; }
+.print-settings-preview .dedicated-print-root,
+.print-settings-preview .dedicated-print-root * { color: #111827 !important; border-color: #334155 !important; }
+.print-document-preview { width: min(100%, 980px); padding: 8px; }
+.print-document-preview .print-page { margin-bottom: 8px; }
 .print-page { display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; box-sizing: border-box; width: min(100%, 1100px); aspect-ratio: var(--print-page-ratio); margin: 0 auto 18px; gap: 2.5mm; background: white; padding: 5mm; box-shadow: 0 2px 12px #0002; break-after: page; page-break-after: always; }
 .print-page:last-child { break-after: auto; }
 .print-page:last-child { page-break-after: auto; }
@@ -268,10 +256,16 @@ main.min-h-screen > header > a[href="/workspace"]:first-child::before { width: 1
 [data-orientation="landscape"] .configured-2 .print-recipe-grid,
 .configured-4 .print-recipe-grid,
 .configured-6 .print-recipe-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.configured-2:not(.print-grid-1) .print-recipe-grid,
-.configured-4:not(.print-grid-1) .print-recipe-grid,
-.configured-6:not(.print-grid-1) .print-recipe-grid { align-content: space-between; }
+.configured-2.print-grid-2 .print-recipe-grid,
+.configured-4.print-grid-4 .print-recipe-grid,
+.configured-6.print-grid-6 .print-recipe-grid { align-content: space-between; }
+.configured-4.print-grid-3 .print-recipe-grid,
+.configured-6.print-grid-3 .print-recipe-grid,
+.configured-6.print-grid-4 .print-recipe-grid,
+.configured-6.print-grid-5 .print-recipe-grid { align-content: start; }
+.configured-6[data-orientation="landscape"] .print-recipe-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .print-grid-1 .print-recipe-grid { grid-template-columns: 1fr; }
+.print-recipe-region { min-width: 0; align-self: start; }
 .print-recipe { min-width: 0; align-self: start; break-inside: avoid; page-break-inside: avoid; border: 1px solid #334155; padding: 2mm; font-size: 10pt; }
 .print-recipe h2 { margin: 0; font-size: 15pt; line-height: 1.1; }
 .print-recipe header p, .print-recipe footer { margin: .6mm 0 0; font-size: 9pt; }
