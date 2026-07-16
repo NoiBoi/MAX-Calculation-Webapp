@@ -249,7 +249,7 @@ export function WorkspaceShell() {
             if (baseSnapshot) { setSavedSnapshot(baseSnapshot); if (!recovery.unsavedChanges) setHistoricalSnapshot(baseSnapshot); }
           }
         }
-        setStatusMessage(recovery.unsavedChanges ? "Recovered unsaved workspace" : "Recovered saved workspace");
+        setStatusMessage(startup.settingsWarning ?? (recovery.unsavedChanges ? "Recovered unsaved workspace" : "Recovered saved workspace"));
       } else {
         const blank = blankWorkspaceState(settings);
         setRecipeState(blank); committedValidRecipe.current = blank; setSavedRecipe(undefined); setSavedRevision(undefined); setSavedSnapshot(undefined); setHistoricalSnapshot(undefined); setUnsavedChanges(false);

@@ -1,5 +1,6 @@
 import type { WeighingSummary } from "../presentation/weighing-summary";
 import type { PrintSettings } from "../settings/user-settings";
+import type { ComparisonAnalysis, MatrixDisplayMode } from "../comparison/analysis";
 
 export const PRINT_JOB_SCHEMA_VERSION = "1.0.0" as const;
 export const PRINT_JOB_STORAGE_PREFIX = "max-stoich.print-job.";
@@ -18,6 +19,11 @@ export interface PrintJob {
   readonly singleRecipeDetailed: boolean;
   readonly settings: PrintSettings;
   readonly entries: readonly PrintableRecipeEntry[];
+  readonly comparisonContent?: Readonly<{
+    mode: "full-recipes" | "overview-only" | "precursor-matrix" | "overview-plus-compact-recipes";
+    analysis: ComparisonAnalysis;
+    matrixMode: MatrixDisplayMode;
+  }>;
 }
 
 export interface PrintablePage {
@@ -69,7 +75,7 @@ export function createPrintJob(input: Omit<PrintJob, "schemaVersion" | "id" | "c
 }
 
 export function launchPrintJob(job: PrintJob): void {
-  if (!job.entries.length) throw new Error("No printable recipe or scenario is available.");
+  if (!job.entries.length && !job.comparisonContent) throw new Error("No printable recipe or scenario is available.");
   const key = `${PRINT_JOB_STORAGE_PREFIX}${job.id}`;
   window.localStorage.setItem(key, JSON.stringify(job));
   const popup = window.open(`/print?job=${encodeURIComponent(job.id)}`, `max-stoich-print-${job.id}`, "popup,width=1100,height=850");

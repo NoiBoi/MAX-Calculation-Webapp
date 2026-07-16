@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { paginatePrintableRecipes, readPrintJob, type PrintJob, type PrintableRecipeEntry } from "@/lib/print/print-model";
 import { CreatorCredit } from "@/components/site/creator-credit";
 import { SiteBrand } from "@/components/site/site-brand";
+import { signedDifference } from "@/lib/comparison/analysis";
 
 function WrappedFormula({ value }: { value: string }) {
   const parts = value.split(/(?=[A-Z])/u);
@@ -38,13 +39,31 @@ export function RecipeCard({ entry, job }: { entry: PrintableRecipeEntry; job: P
   </article>;
 }
 
+function ComparisonAnalysisPage({ job }: { job: PrintJob }) {
+  const content = job.comparisonContent;
+  if (!content) return null;
+  const { analysis, matrixMode } = content;
+  const baseline = analysis.difference.summaries.find((item) => item.scenarioId === analysis.baselineId);
+  return <section className="print-page print-comparison-analysis-page" data-page-index={process.env.NODE_ENV === "production" ? undefined : 1}>
+    <div className="print-page-header">{job.settings.showApplicationName && <strong className="page-app"><SiteBrand variant="print" /></strong>}<span>{job.title}</span></div>
+    <div className="print-comparison-analysis">
+      <h1>{content.mode === "precursor-matrix" ? "Precursor matrix" : "Comparison overview"}</h1>
+      <p><strong>{analysis.representationLabel}</strong> · Baseline: {analysis.scenarios.find((item) => item.id === analysis.baselineId)?.name ?? "Unavailable"}</p>
+      {content.mode !== "precursor-matrix" && <table><thead><tr><th>Scenario</th><th>Target formula</th><th>Target batch</th><th>Total weighing</th><th>Difference</th><th>Precursors</th><th>Warnings</th><th>Validation</th></tr></thead><tbody>{analysis.scenarios.map((scenario) => { const summary = analysis.difference.summaries.find((item) => item.scenarioId === scenario.id); const delta = signedDifference(summary?.totalMassGrams, baseline?.totalMassGrams); return <tr key={scenario.id}><th>{scenario.name}{scenario.id === analysis.baselineId && " · Baseline"}</th><td>{scenario.inputState.targetFormula}</td><td>{scenario.inputState.requestedMassGrams} g</td><td>{summary?.totalMassGrams ? `${summary.totalMassGrams} g` : "Unavailable"}</td><td>{scenario.id === analysis.baselineId ? "Baseline" : delta.value ? `${delta.value} g${delta.percent ? ` (${delta.percent})` : ""}` : "Unavailable"}</td><td>{scenario.inputState.precursors.length}</td><td>{summary?.warningCodes.length ?? "—"}</td><td>{scenario.validationStatus}</td></tr>; })}</tbody></table>}
+      {content.mode === "precursor-matrix" && <table><thead><tr><th>Precursor</th>{analysis.scenarios.map((scenario) => <th key={scenario.id}>{scenario.name}{scenario.id === analysis.baselineId && " · Baseline"}</th>)}</tr></thead><tbody>{analysis.difference.rows.map((row) => { const baselineCell = row.cells[analysis.baselineId]; return <tr key={row.key}><th>{Object.values(row.cells).find(Boolean)?.formula ?? row.key}</th>{analysis.scenarios.map((scenario) => { const cell = row.cells[scenario.id]; const value = !cell ? "Missing" : !cell.finalMassGrams ? "Unavailable" : matrixMode === "presence" ? (Number(cell.finalMassGrams) === 0 ? "Zero" : "Present") : matrixMode === "molar-ratio" ? cell.solverQuantityExact ?? "Unavailable" : matrixMode === "difference-from-baseline" ? (scenario.id === analysis.baselineId ? "Baseline" : signedDifference(cell.finalMassGrams, baselineCell?.finalMassGrams).value ?? "Unavailable") : `${cell.finalMassGrams} g`; return <td key={scenario.id}>{value}</td>; })}</tr>; })}</tbody></table>}
+    </div>
+    <div className="print-page-footer"><CreatorCredit className="print-credit" /><div className="page-meta">{job.settings.showPrintDate && <span>{new Date(job.createdAt).toLocaleDateString()}</span>}<span>Comparison analysis</span></div></div>
+  </section>;
+}
+
 export function PrintDocument({ job, ready = true, preview = false }: { job: PrintJob; ready?: boolean; preview?: boolean }) {
   const pages = useMemo(() => job ? paginatePrintableRecipes(job) : [], [job]);
   const configured = job.singleRecipeDetailed ? 1 : job.settings.recipesPerPage;
   const size = job.settings.paperSize === "letter" ? "Letter" : "A4";
   return <main className={`dedicated-print-root${preview ? " print-document-preview" : ""}`} data-density={job.settings.density} data-orientation={job.settings.orientation} data-paper-size={job.settings.paperSize} data-print-ready={ready ? "true" : "false"} data-print-settings-version={job.schemaVersion} data-recipes-per-page={configured}>
     {!preview && <style>{`@page { size: ${size} ${job.settings.orientation}; margin: 9mm; }`}</style>}
-    {pages.map((page) => <section className={`print-page print-grid-${page.entries.length} configured-${configured}`} data-page-index={process.env.NODE_ENV === "production" ? undefined : page.index} data-packing-reason={process.env.NODE_ENV === "production" ? undefined : page.notice ?? "configured-capacity"} key={page.index}>
+    {job.comparisonContent && job.comparisonContent.mode !== "full-recipes" && <ComparisonAnalysisPage job={job} />}
+    {pages.map((page) => <section className={`print-page print-grid-${page.entries.length} configured-${configured}`} data-page-index={process.env.NODE_ENV === "production" ? undefined : page.index + (job.comparisonContent && job.comparisonContent.mode !== "full-recipes" ? 1 : 0)} data-packing-reason={process.env.NODE_ENV === "production" ? undefined : page.notice ?? "configured-capacity"} key={page.index}>
       <div className="print-page-header">{job.settings.showApplicationName && <strong className="page-app"><SiteBrand variant="print" /></strong>}<span>{job.title}</span></div>
       {page.notice && <p className="packing-notice">{page.notice}</p>}
       <div className="print-recipe-grid">{page.entries.map((entry, index) => <div className="print-recipe-region" data-region-index={process.env.NODE_ENV === "production" ? undefined : index + 1} key={entry.id}><RecipeCard entry={entry} job={job} /></div>)}</div>

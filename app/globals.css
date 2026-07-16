@@ -287,6 +287,12 @@ main.min-h-screen > header > a[href="/workspace"]:first-child::before { width: 1
 .print-credit a { color: inherit; text-decoration: none; }
 .page-meta { display: flex; flex: none; gap: 4mm; justify-content: flex-end; }
 .packing-notice { margin: 0; padding: .8mm; border: .3mm solid #92400e; background: #fef3c7; font-size: 9pt; }
+.print-comparison-analysis { min-height: 0; overflow: hidden; }
+.print-comparison-analysis h1 { margin: 0 0 1mm; font-size: 15pt; }
+.print-comparison-analysis > p { margin: 0 0 2mm; font-size: 9pt; }
+.print-comparison-analysis table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+.print-comparison-analysis th, .print-comparison-analysis td { border: .3mm solid #64748b; padding: 1mm; text-align: left; overflow-wrap: anywhere; }
+.print-comparison-analysis td:not(:nth-child(2)) { font-variant-numeric: tabular-nums; }
 .configured-4 .print-recipe { font-size: 9pt; padding: 1.5mm; }
 .configured-4 .print-recipe h2 { font-size: 12pt; }
 .configured-4 .print-formulas p { font-size: 9.5pt; }

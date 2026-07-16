@@ -235,3 +235,6 @@ Repository tests cover defaults, save/reopen, independent 211/312/413 values, di
 - Baseline-relative signed differences and common-batch recalculation preserve original scenario inputs.
 - Retry initialization can be invoked repeatedly after closing the database.
 - Corrupt recovery is classified separately, safe-open skips it without deletion, repair removes malformed transient state, and recovery reset preserves saved tables.
+- Browser workflows cover live unsaved print changes, corrupt-recovery Retry and repair, safe blank-open preservation, comparison baseline/common-batch behavior, scenario sorting/hiding, CSV export, and overview-only printing.
+- `RECOVERY-SETTINGS-001`: an unsupported settings record cannot crash startup, saved recipes remain available, and the workspace reports that session defaults are in use.
+- Representative PDF and PNG artifacts cover Letter/A4, portrait/landscape, long recipes, three-of-four partial packing, and five-of-six partial packing.

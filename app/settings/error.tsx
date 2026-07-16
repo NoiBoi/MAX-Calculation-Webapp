@@ -1,2 +1,3 @@
 "use client";
-export default function SettingsError({ reset }: { error: Error & { digest?: string }; reset: () => void }) { return <main className="p-8"><h1 className="text-xl font-bold">Data management could not be displayed</h1><p className="mt-2">No local records were automatically cleared or restored. Retry after checking available browser storage.</p><button className="mt-4 rounded bg-teal-800 px-4 py-2 text-white" onClick={reset}>Retry data management</button></main>; }
+import { ApplicationRecoveryPanel } from "@/components/error-recovery/application-recovery-panel";
+export default function SettingsError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) { return <ApplicationRecoveryPanel error={error} reset={reset} title="Data management could not be displayed" />; }

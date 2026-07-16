@@ -10,3 +10,7 @@ Comparison analysis has four presentations: recipe cards, summary metrics, basel
 The original-batch representation uses each stored input mass. Common-batch representation clones scenario inputs, substitutes the temporary target mass, and safely recalculates through the existing workspace adapter. It does not mutate or persist the saved recipes. Matrix cells distinguish missing precursors, unavailable calculations, zero quantities, and present quantities; modes include final mass, exact solver molar ratio, presence, and mass difference from baseline.
 
 Copy and CSV exports use the currently selected representation. The existing digest-protected JSON comparison export remains the authoritative exact scientific record.
+
+Scenarios may be sorted by saved order, name, total mass, precursor count, warning count, or verification residual. Temporary visibility is held only in component state: hiding a scenario does not remove it from the comparison or change the persisted scenario array.
+
+Comparison printing extends the shared `PrintJob` with an optional immutable analysis payload. Supported contents are full recipes, overview only, precursor matrix, and overview plus compact recipes. Overview and matrix pages use the same dedicated print root, page geometry, typography, metadata, readiness signal, and theme-independent print rules as recipe pages.

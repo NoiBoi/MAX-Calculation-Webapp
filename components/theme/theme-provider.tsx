@@ -38,7 +38,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       const bootstrapPreference = preferenceRef.current;
       if (settings.appearance !== bootstrapPreference) await repositories.saveSettings({ ...settings, appearance: bootstrapPreference });
       if (active) acceptPreference(bootstrapPreference);
-    });
+    }).catch(() => { if (active) acceptPreference(preferenceRef.current); });
     const media = window.matchMedia("(prefers-color-scheme: dark)");
     const mediaChanged = () => { if (preferenceRef.current === "system") setResolvedTheme(applyTheme("system")); };
     const externalChanged = (event: Event) => { const next = (event as CustomEvent<unknown>).detail; if (isAppearancePreference(next)) acceptPreference(next); };
@@ -50,8 +50,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const setPreference = useCallback(async (next: AppearancePreference) => {
     userChangedRef.current = true;
     acceptPreference(next); writeAppearanceBootstrap(next);
-    const settings = await repositories.getSettings();
-    if (settings.appearance !== next) await repositories.saveSettings({ ...settings, appearance: next });
+    try { const settings = await repositories.getSettings(); if (settings.appearance !== next) await repositories.saveSettings({ ...settings, appearance: next }); } catch { /* Appearance remains usable even when local settings storage is damaged or unavailable. */ }
   }, [acceptPreference, repositories]);
 
   return <ThemeContext.Provider value={{ preference, resolvedTheme, setPreference }}>{children}</ThemeContext.Provider>;

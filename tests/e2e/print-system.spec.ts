@@ -44,3 +44,13 @@ test("PRINT-CREDIT-001 has one non-overlapping brand and the complete profession
   await openJob(page, printJob(4, "letter", 3, "landscape")); await page.emulateMedia({ media: "print" }); await expect(page.getByText("MAX Stoich", { exact: true })).toHaveCount(1); const credit = page.locator(".print-credit"); await expect(credit).toContainText("Built by Matthew Deng"); await expect(credit).toContainText("deng301@purdue.edu for inquiries"); await expect(credit).toContainText("Built for the Anasori Lab"); await expect(credit.getByRole("link", { name: "deng301@purdue.edu for inquiries" })).toHaveAttribute("href", "mailto:deng301@purdue.edu");
   expect(await page.locator(".print-page").evaluate((printPage) => { const nodes = [...printPage.querySelectorAll<HTMLElement>(".page-app, .print-page-header > span, .print-credit, .page-meta, .print-recipe")]; const rects = nodes.map((node) => node.getBoundingClientRect()); return !rects.some((rect, index) => rects.slice(index + 1).some((other) => rect.left < other.right - .5 && rect.right > other.left + .5 && rect.top < other.bottom - .5 && rect.bottom > other.top + .5)); })).toBe(true);
 });
+
+for (const [configured, actual] of [[4, 3], [6, 5]] as const) test(`PRINT-PARTIAL-${actual}-OF-${configured} does not reserve placeholder cards`, async ({ page }, testInfo) => {
+  const job = printJob(configured, "letter", 2, "portrait"); job.entries = job.entries.slice(0, actual); await openJob(page, job);
+  await expect(page.locator(".print-recipe")).toHaveCount(actual); await expect(page.locator(".print-recipe-region")).toHaveCount(actual); await expect(page.locator(".print-page")).toHaveCount(1);
+  const metrics = await page.locator(".print-recipe-grid").evaluate((grid) => ({ children: grid.children.length, scrollHeight: grid.scrollHeight, clientHeight: grid.clientHeight }));
+  expect(metrics.children).toBe(actual); expect(metrics.scrollHeight).toBeLessThanOrEqual(metrics.clientHeight + 1);
+  await page.screenshot({ fullPage: true, path: testInfo.outputPath(`${actual}-of-${configured}-partial.png`) });
+  const pdf = await page.pdf({ format: "Letter", path: testInfo.outputPath(`${actual}-of-${configured}-partial.pdf`), printBackground: true, preferCSSPageSize: true });
+  expect(pdf.byteLength).toBeGreaterThan(10_000);
+});

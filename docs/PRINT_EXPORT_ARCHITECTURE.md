@@ -30,3 +30,5 @@ The Settings live preview and `/print` route render the same `PrintDocument`, `R
 Recipes-per-page is a maximum. The paginator estimates content using precursor rows, formula display, visible scientific columns, warning/note detail, and verification detail. An oversized entry receives a full page with an explicit packing reason. Partial pages contain no placeholder records. Full layouts use two stacked regions in portrait two-up, two columns in landscape two-up, 2 x 2 for four-up, and 2 x 3 portrait / 3 x 2 landscape for six-up.
 
 Development builds expose page, region, settings-version, and packing-reason data attributes. Production print output omits those diagnostic values.
+
+Comparison analysis is another presentation carried by the same print job. Overview-only and matrix jobs may contain no recipe entries; the analysis payload is sufficient to create a valid dedicated print document. Overview-plus-compact-recipes prints the analysis page followed by six-up compact recipe pages.
