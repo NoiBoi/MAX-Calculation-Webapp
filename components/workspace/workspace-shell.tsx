@@ -12,6 +12,7 @@ import { createOwnedRecordExport } from "@/lib/persistence/backup";
 import type { Mode } from "@/lib/persistence/workspace-types";
 import { RecipeCommandHistory } from "@/lib/workspace/history";
 import { AtomicRadiusPanel } from "@/components/descriptor-panel/atomic-radius-panel";
+import { SiteBrand } from "@/components/site/site-brand";
 import { presentDiagnostics, precursorStatus } from "@/lib/presentation/diagnostics";
 import { formatDescriptor, formatMassForBalance, formatMoles, formatPercent } from "@/lib/presentation/scientific-format";
 import { sortWeighingPrecursors, WEIGHING_SORT_OPTIONS, type WeighingSortOption } from "@/lib/presentation/weighing-sort";
@@ -583,7 +584,7 @@ export function WorkspaceShell() {
 
   return <main className="min-h-screen bg-slate-100 text-slate-950" onKeyDown={primaryNavigation}>
     <header className="sticky top-0 z-20 flex min-h-16 flex-nowrap items-center gap-2 border-b border-slate-300 bg-white px-3 py-2 shadow-sm" data-testid="primary-command-bar">
-      <Link className="shrink-0 text-base font-bold tracking-tight text-slate-950 sm:text-lg" href="/">MAX Stoich</Link>
+      <Link aria-label="MAX Stoich calculator" className="shrink-0 text-base font-bold tracking-tight text-slate-950 sm:text-lg" href="/"><SiteBrand /></Link>
       <div className="min-w-0 flex-1 border-l border-slate-300 pl-3">
         <p className="truncate text-sm font-semibold" title={currentIdentity}>{currentIdentity}</p>
         <p aria-live="polite" className="truncate text-xs text-slate-600" data-recovery-ready={recoveryReady}>{identityStatus} · {statusMessage}</p>

@@ -143,6 +143,15 @@ button[aria-pressed="true"] { box-shadow: inset 0 0 0 1px currentColor; }
 .theme-menu-item[aria-checked="true"] { color: var(--accent); font-weight: 700; }
 .creator-credit { position: fixed; bottom: .75rem; left: 50%; z-index: 40; display: flex; max-width: calc(100vw - 6rem); translate: -50% 0; flex-wrap: wrap; justify-content: center; gap: .15rem .4rem; border: 1px solid var(--border-subtle); border-radius: 999px; background: var(--background-elevated); color: var(--text-muted); padding: .35rem .65rem; box-shadow: var(--shadow-panel); font-size: .72rem; line-height: 1.2; text-align: center; }
 .creator-credit a { color: var(--text-secondary); text-decoration: underline; text-underline-offset: 2px; }
+.site-brand { display: inline-flex; align-items: center; gap: .45rem; white-space: nowrap; }
+.site-logo { display: block; width: 1.75rem; height: 1.75rem; object-fit: contain; transition: filter .15s ease; }
+.site-brand-print { gap: 1.2mm; }
+.site-brand-print .site-logo { width: 4.5mm; height: 4.5mm; }
+:is([data-theme="dark"], [data-theme="midnight"]) .site-logo { filter: invert(1); }
+.comparison-workspace > header a[href="/workspace"]:first-child,
+main.min-h-screen > header > a[href="/workspace"]:first-child { display: inline-flex; align-items: center; gap: .35rem; }
+.comparison-workspace > header a[href="/workspace"]:first-child::before,
+main.min-h-screen > header > a[href="/workspace"]:first-child::before { width: 1.35rem; height: 1.35rem; flex: none; background: currentColor; content: ""; mask: url("/brand/max-stoich-logo.svg") center / contain no-repeat; }
 
 /* Existing utility colors are mapped centrally onto the semantic palette. */
 :is([data-theme="dark"], [data-theme="midnight"]) .bg-white,

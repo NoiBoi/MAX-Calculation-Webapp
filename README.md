@@ -15,6 +15,8 @@ Open `http://localhost:3000/`; the primary calculator is the landing page and `/
 
 Appearance supports Light, neutral-charcoal Dark, black Midnight, and System from one compact control fixed at the application edge and from Settings. The versioned local settings record is authoritative; a derived local bootstrap value applies `data-theme` before hydration to prevent flashing. System follows live OS changes and resolves only to Light or Dark without replacing the persisted `system` choice. Printed Letter/A4 documents always use the light paper palette with readability-first typography at 100% scale.
 
+The supplied MAX Stoich logo appears in the calculator and print identity. Its transparent variant automatically changes contrast in Dark and Midnight, while the opaque variant is the browser-tab icon.
+
 Every screen includes the unobtrusive creator credit `Built by Matthew Deng · deng301@purdue.edu for inquiries · Built for the Anasori Lab`; the address is a mail link. The fixed screen instance is excluded from print, while dedicated recipe printouts use the same credit in their reserved page footer.
 
 ## Current scientific scope

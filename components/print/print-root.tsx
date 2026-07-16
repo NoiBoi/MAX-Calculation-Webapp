@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { paginatePrintableRecipes, readPrintJob, type PrintJob, type PrintableRecipeEntry } from "@/lib/print/print-model";
 import { CreatorCredit } from "@/components/site/creator-credit";
+import { SiteBrand } from "@/components/site/site-brand";
 
 function WrappedFormula({ value }: { value: string }) {
   const parts = value.split(/(?=[A-Z])/u);
@@ -55,7 +56,7 @@ export function PrintRoot() {
   return <main className="dedicated-print-root" data-density={job.settings.density} data-orientation={job.settings.orientation} data-paper-size={job.settings.paperSize} data-print-ready={ready ? "true" : "false"} data-recipes-per-page={configured}>
     <style>{`@page { size: ${size} ${job.settings.orientation}; margin: 9mm; }`}</style>
     {pages.map((page) => <section className={`print-page print-grid-${page.entries.length} configured-${configured}`} key={page.index}>
-      <div className="print-page-header">{job.settings.showApplicationName && <strong className="page-app">MAX Stoich</strong>}<span>{job.title}</span></div>
+      <div className="print-page-header">{job.settings.showApplicationName && <strong className="page-app"><SiteBrand variant="print" /></strong>}<span>{job.title}</span></div>
       {page.notice && <p className="packing-notice">{page.notice}</p>}
       <div className="print-recipe-grid">{page.entries.map((entry) => <RecipeCard entry={entry} job={job} key={entry.id} />)}</div>
       <div className="print-page-footer"><CreatorCredit className="print-credit" /><div className="page-meta">{job.settings.showPrintDate && <span>{new Date(job.createdAt).toLocaleDateString()}</span>}{job.settings.showPageNumbers && <span>Page {page.index} of {pages.length}</span>}</div></div>
