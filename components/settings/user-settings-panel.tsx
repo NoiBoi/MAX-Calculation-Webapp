@@ -30,9 +30,9 @@ function DisplayEditor({ mode, value, onChange }: { mode: Mode; value: WeighingR
 const REQUIRED_PRINT_FIELDS = new Set<PrintField>(["recipeName", "adjustedFeedFormula", "finalMass", "totalMass"]);
 
 function PrintPreview({ value }: { value: PrintSettings }) {
-  const grid = value.recipesPerPage === 4 ? "grid-cols-2 grid-rows-2" : value.recipesPerPage === 6 ? "grid-cols-2 grid-rows-3" : value.orientation === "landscape" ? "grid-cols-2" : "grid-rows-2";
-  return <div aria-label={`${value.recipesPerPage} recipes per page print preview`} className={`print-settings-preview configured-${value.recipesPerPage} mx-auto mt-4 grid max-w-4xl gap-2 border-2 border-slate-500 bg-white p-3 shadow ${value.orientation === "landscape" ? "aspect-[11/8.5]" : "aspect-[8.5/11]"} ${grid}`}>
-    {Array.from({ length: value.recipesPerPage }, (_, index) => <article className="print-preview-recipe min-h-0 overflow-hidden rounded border p-2" key={index}><strong className="preview-title block">HE carbide {index + 1}</strong><span className="preview-formula font-mono">(TiVNbMo)4AlC3</span><div className="mt-1 border-t pt-1"><div>Ti <strong className="preview-mass float-right">1.245 g</strong></div><div>Al <strong className="preview-mass float-right">0.702 g</strong></div><div>C <strong className="preview-mass float-right">0.468 g</strong></div></div><strong className="preview-total mt-1 block text-right">Total 2.415 g</strong></article>)}
+  const grid = value.recipesPerPage >= 4 || value.orientation === "landscape" ? "grid-cols-2" : "grid-cols-1";
+  return <div aria-label={`${value.recipesPerPage} recipes per page print preview`} className={`print-settings-preview configured-${value.recipesPerPage} mx-auto mt-4 grid content-between items-start max-w-4xl gap-2 border-2 border-slate-500 bg-white p-3 shadow ${value.orientation === "landscape" ? "aspect-[11/8.5]" : "aspect-[8.5/11]"} ${grid}`}>
+    {Array.from({ length: value.recipesPerPage }, (_, index) => <article className="print-preview-recipe min-h-0 self-start overflow-hidden rounded border p-2" key={index}><strong className="preview-title block">HE carbide {index + 1}</strong><span className="preview-formula font-mono">(TiVNbMo)4AlC3</span><div className="mt-1 border-t pt-1"><div>Ti <strong className="preview-mass float-right">1.245 g</strong></div><div>Al <strong className="preview-mass float-right">0.702 g</strong></div><div>C <strong className="preview-mass float-right">0.468 g</strong></div></div><strong className="preview-total mt-1 block text-right">Total 2.415 g</strong></article>)}
   </div>;
 }
 

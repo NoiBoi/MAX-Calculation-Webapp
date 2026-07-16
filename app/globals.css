@@ -141,7 +141,7 @@ button[aria-pressed="true"] { box-shadow: inset 0 0 0 1px currentColor; }
 .theme-menu-item { display: grid; width: 100%; grid-template-columns: 1.5rem 1fr 1rem; gap: .35rem; align-items: center; padding: .7rem .75rem; text-align: left; }
 .theme-menu-item:hover, .theme-menu-item:focus-visible { background: var(--background-hover); }
 .theme-menu-item[aria-checked="true"] { color: var(--accent); font-weight: 700; }
-.creator-credit { position: fixed; bottom: .75rem; left: 50%; z-index: 40; translate: -50% 0; border: 1px solid var(--border-subtle); border-radius: 999px; background: var(--background-elevated); color: var(--text-muted); padding: .35rem .65rem; box-shadow: var(--shadow-panel); font-size: .72rem; line-height: 1.2; white-space: nowrap; }
+.creator-credit { position: fixed; bottom: .75rem; left: 50%; z-index: 40; display: flex; max-width: calc(100vw - 6rem); translate: -50% 0; flex-wrap: wrap; justify-content: center; gap: .15rem .4rem; border: 1px solid var(--border-subtle); border-radius: 999px; background: var(--background-elevated); color: var(--text-muted); padding: .35rem .65rem; box-shadow: var(--shadow-panel); font-size: .72rem; line-height: 1.2; text-align: center; }
 .creator-credit a { color: var(--text-secondary); text-decoration: underline; text-underline-offset: 2px; }
 
 /* Existing utility colors are mapped centrally onto the semantic palette. */
@@ -217,7 +217,19 @@ button[aria-pressed="true"] { box-shadow: inset 0 0 0 1px currentColor; }
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
 }
 
-.dedicated-print-root { color-scheme: light; background: #eef2f4; color: #111827; padding: 16px; }
+.dedicated-print-root {
+  --weighing-results-font: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  color-scheme: light;
+  background: #eef2f4;
+  color: #111827;
+  padding: 16px;
+  font-family: var(--weighing-results-font);
+  font-variant-numeric: tabular-nums;
+}
+.dedicated-print-root[data-paper-size="letter"][data-orientation="portrait"] { --print-page-width: 197.9mm; --print-page-height: 261.4mm; --print-page-ratio: 215.9 / 279.4; }
+.dedicated-print-root[data-paper-size="letter"][data-orientation="landscape"] { --print-page-width: 261.4mm; --print-page-height: 197.9mm; --print-page-ratio: 279.4 / 215.9; }
+.dedicated-print-root[data-paper-size="a4"][data-orientation="portrait"] { --print-page-width: 192mm; --print-page-height: 279mm; --print-page-ratio: 210 / 297; }
+.dedicated-print-root[data-paper-size="a4"][data-orientation="landscape"] { --print-page-width: 279mm; --print-page-height: 192mm; --print-page-ratio: 297 / 210; }
 .print-settings-preview,
 :is([data-theme="dark"], [data-theme="midnight"]) .print-settings-preview { color-scheme: light; background: #fff !important; color: #0f172a !important; }
 :is([data-theme="dark"], [data-theme="midnight"]) .print-settings-preview article { background: #fff !important; color: #0f172a !important; border-color: #64748b !important; }
@@ -236,19 +248,27 @@ button[aria-pressed="true"] { box-shadow: inset 0 0 0 1px currentColor; }
 .print-settings-preview.configured-6 .preview-formula { font-size: 9.25pt; }
 .print-settings-preview.configured-6 .preview-mass { font-size: 10pt; }
 .print-settings-preview.configured-6 .preview-total { font-size: 11.5pt; }
-.print-page { position: relative; display: grid; width: min(100%, 1100px); min-height: 900px; margin: 0 auto 18px; gap: 3mm; background: white; padding: 7mm; box-shadow: 0 2px 12px #0002; break-after: page; }
+.print-page { display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; box-sizing: border-box; width: min(100%, 1100px); aspect-ratio: var(--print-page-ratio); margin: 0 auto 18px; gap: 2.5mm; background: white; padding: 5mm; box-shadow: 0 2px 12px #0002; break-after: page; page-break-after: always; }
 .print-page:last-child { break-after: auto; }
-.print-page.configured-2 { grid-template-columns: 1fr; grid-template-rows: repeat(2, minmax(0, 1fr)); }
-.print-page.configured-2.print-grid-1 { grid-template-rows: 1fr; }
-.print-page.configured-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); }
-.print-page.configured-6 { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(0, 1fr)); }
-.print-page[data-orientation="landscape"] { min-height: 700px; }
-.print-recipe { min-width: 0; overflow: hidden; border: 1px solid #334155; padding: 2mm; font-size: 10pt; }
+.print-page:last-child { page-break-after: auto; }
+.print-page-header { display: flex; min-width: 0; align-items: baseline; justify-content: space-between; gap: 4mm; border-bottom: .4mm solid #334155; padding-bottom: 1mm; font-size: 8.5pt; }
+.print-page-header > span { min-width: 0; overflow-wrap: anywhere; text-align: right; }
+.page-app { flex: none; font-size: 11pt; font-weight: 800; }
+.print-recipe-grid { display: grid; min-height: 0; align-content: start; align-items: start; gap: 3mm; }
+.configured-2 .print-recipe-grid { grid-template-columns: 1fr; }
+[data-orientation="landscape"] .configured-2 .print-recipe-grid,
+.configured-4 .print-recipe-grid,
+.configured-6 .print-recipe-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.configured-2:not(.print-grid-1) .print-recipe-grid,
+.configured-4:not(.print-grid-1) .print-recipe-grid,
+.configured-6:not(.print-grid-1) .print-recipe-grid { align-content: space-between; }
+.print-grid-1 .print-recipe-grid { grid-template-columns: 1fr; }
+.print-recipe { min-width: 0; align-self: start; break-inside: avoid; page-break-inside: avoid; border: 1px solid #334155; padding: 2mm; font-size: 10pt; }
 .print-recipe h2 { margin: 0; font-size: 15pt; line-height: 1.1; }
 .print-recipe header p, .print-recipe footer { margin: .6mm 0 0; font-size: 9pt; }
 .print-formulas { margin-top: 1mm; }
 .print-formulas p { display: flex; gap: 1.5mm; justify-content: space-between; margin: .3mm 0; font-size: 11pt; }
-.print-formulas strong { max-width: 72%; overflow-wrap: anywhere; font-family: ui-monospace, monospace; text-align: right; }
+.print-formulas strong { max-width: 72%; overflow-wrap: anywhere; font-family: inherit; text-align: right; }
 .print-formulas .adjusted { font-size: 13pt; }
 .print-recipe .batch { margin: 1mm 0; font-size: 10pt; }
 .print-recipe table { width: 100%; border-collapse: collapse; font-size: 10pt; }
@@ -259,9 +279,11 @@ button[aria-pressed="true"] { box-shadow: inset 0 0 0 1px currentColor; }
 .print-recipe .verification, .print-recipe .warnings, .print-recipe .radius { margin: 1mm 0 0; font-size: 9pt; }
 .print-recipe .warnings ul { margin: .5mm 0 0; padding-left: 4mm; }
 .signatures { display: grid; grid-template-columns: 1fr 1fr; gap: 2mm; margin-top: 2mm; font-size: 9pt; }
-.page-meta { position: absolute; right: 7mm; bottom: 2mm; left: 7mm; display: flex; justify-content: space-between; font-size: 9pt; }
-.page-app { position: absolute; top: 1.5mm; right: 7mm; font-size: 9pt; }
-.packing-notice { grid-column: 1 / -1; margin: 0; padding: .8mm; background: #fef3c7; font-size: 9pt; }
+.print-page-footer { display: flex; min-width: 0; align-items: flex-end; justify-content: space-between; gap: 3mm; border-top: .3mm solid #64748b; padding-top: 1mm; font-size: 7.5pt; }
+.print-credit { display: flex; min-width: 0; flex-wrap: wrap; gap: .1rem .35rem; }
+.print-credit a { color: inherit; text-decoration: none; }
+.page-meta { display: flex; flex: none; gap: 4mm; justify-content: flex-end; }
+.packing-notice { margin: 0; padding: .8mm; border: .3mm solid #92400e; background: #fef3c7; font-size: 9pt; }
 .configured-4 .print-recipe { font-size: 9pt; padding: 1.5mm; }
 .configured-4 .print-recipe h2 { font-size: 12pt; }
 .configured-4 .print-formulas p { font-size: 9.5pt; }
@@ -278,6 +300,9 @@ button[aria-pressed="true"] { box-shadow: inset 0 0 0 1px currentColor; }
 .configured-6 .print-recipe .mass { font-size: 10pt; }
 .configured-6 .print-recipe tfoot .mass { font-size: 11.5pt; }
 .configured-6 .print-recipe .verification, .configured-6 .print-recipe .warnings, .configured-6 .print-recipe footer { display: none; }
+.configured-6.print-grid-1 .print-recipe .verification,
+.configured-6.print-grid-1 .print-recipe .warnings,
+.configured-6.print-grid-1 .print-recipe footer { display: block; }
 
 @media print {
   @page { size: auto; margin: 12mm; }
@@ -288,11 +313,26 @@ button[aria-pressed="true"] { box-shadow: inset 0 0 0 1px currentColor; }
   .creator-credit { display: none !important; }
   body:has(.dedicated-print-root) { margin: 0; }
   body:has(.dedicated-print-root) > :not(.dedicated-print-root) { display: none !important; }
-  .dedicated-print-root { padding: 0 !important; background: white !important; }
-  .dedicated-print-root .print-page { width: auto; min-height: 0; height: calc(100vh - 18mm); margin: 0; padding: 0; box-shadow: none; }
-  header, button, select, input, label, fieldset, [aria-label="Command menu"] { display: none !important; }
-  main, main > div, main section { display: block !important; max-width: none !important; box-shadow: none !important; border-color: #777 !important; }
-  main > div > section:first-child { display: none !important; }
+  .dedicated-print-root { padding: 0 !important; background: white !important; color: #111827 !important; }
+  .dedicated-print-root,
+  .dedicated-print-root * { color: #111827 !important; border-color: #334155 !important; box-shadow: none !important; filter: none !important; opacity: 1 !important; text-shadow: none !important; }
+  .dedicated-print-root .print-page { display: grid !important; width: var(--print-page-width); min-height: var(--print-page-height); height: var(--print-page-height); margin: 0; background: white !important; }
+  .dedicated-print-root .print-recipe-grid { display: grid !important; }
+  .dedicated-print-root .print-recipe { display: block !important; break-inside: avoid-page !important; page-break-inside: avoid !important; background: white !important; }
+  .dedicated-print-root .print-page-header,
+  .dedicated-print-root .print-page-footer { display: flex !important; background: white !important; }
+  .dedicated-print-root .packing-notice { background: white !important; }
+  body:not(:has(.dedicated-print-root)) header,
+  body:not(:has(.dedicated-print-root)) button,
+  body:not(:has(.dedicated-print-root)) select,
+  body:not(:has(.dedicated-print-root)) input,
+  body:not(:has(.dedicated-print-root)) label,
+  body:not(:has(.dedicated-print-root)) fieldset,
+  body:not(:has(.dedicated-print-root)) [aria-label="Command menu"] { display: none !important; }
+  body:not(:has(.dedicated-print-root)) main,
+  body:not(:has(.dedicated-print-root)) main > div,
+  body:not(:has(.dedicated-print-root)) main section { display: block !important; max-width: none !important; box-shadow: none !important; border-color: #777 !important; }
+  body:not(:has(.dedicated-print-root)) main > div > section:first-child { display: none !important; }
   table { width: 100%; border-collapse: collapse; }
   thead { display: table-header-group; }
   tr, .weighing-summary-card h2, .summary-radius article { break-inside: avoid; }

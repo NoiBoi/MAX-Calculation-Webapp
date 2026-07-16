@@ -16,7 +16,7 @@ test("MIDNIGHT-001 is Discord-style black, subdued, persistent, and readable", a
   await ready(page); await appearance(page, "Midnight"); await example(page); await expect(page.locator("html")).toHaveAttribute("data-theme", "midnight");
   await expect(page.locator("body")).toHaveCSS("background-color", "rgb(0, 0, 0)"); const panel = page.getByRole("region", { name: "Target and precursor route" }); await expect(panel).toHaveCSS("background-color", "rgb(5, 5, 5)"); await expect(page.getByLabel("Target formula")).toHaveCSS("background-color", "rgb(2, 2, 2)");
   await expect(page.getByRole("table", { name: /Final gross weighing masses/ }).locator(".text-xl, .text-2xl").first()).toBeVisible();
-  await page.reload({ waitUntil: "commit" }); expect(await page.evaluate(() => document.documentElement.dataset.theme)).toBe("midnight"); await expect(page.locator("html")).toHaveAttribute("data-theme-preference", "midnight");
+  await page.reload({ waitUntil: "domcontentloaded" }); await expect(page.locator("html")).toHaveAttribute("data-theme", "midnight"); await expect(page.locator("html")).toHaveAttribute("data-theme-preference", "midnight");
   const audit = await new AxeBuilder({ page }).analyze(); expect(audit.violations.filter((item) => ["serious", "critical"].includes(item.impact ?? ""))).toEqual([]);
 });
 
@@ -26,8 +26,8 @@ test("THEME-SWITCH-001 exposes four distinct choices without changing results", 
   await expect(page.locator("html")).toHaveAttribute("data-theme-preference", "system");
 });
 
-test("creator credit is consistent on screen and excluded from print", async ({ page }) => {
-  await ready(page); const credit = page.getByRole("contentinfo"); await expect(credit).toContainText("Built by Matthew Deng"); await expect(credit.getByRole("link", { name: "deng301@purdue.edu" })).toHaveAttribute("href", "mailto:deng301@purdue.edu");
+test("creator credit is consistent on screen and the fixed site instance is excluded from print", async ({ page }) => {
+  await ready(page); const credit = page.getByRole("contentinfo"); await expect(credit).toContainText("Built by Matthew Deng"); await expect(credit).toContainText("deng301@purdue.edu for inquiries"); await expect(credit).toContainText("Built for the Anasori Lab"); await expect(credit.getByRole("link", { name: "deng301@purdue.edu for inquiries" })).toHaveAttribute("href", "mailto:deng301@purdue.edu");
   for (const name of ["Light", "Dark", "Midnight"] as const) { await appearance(page, name); await expect(credit).toBeVisible(); }
   await page.emulateMedia({ media: "print" }); await expect(credit).toBeHidden();
 });

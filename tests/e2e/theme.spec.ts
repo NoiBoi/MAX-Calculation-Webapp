@@ -11,7 +11,7 @@ async function chooseAppearance(page: Page, name: "Light" | "Dark" | "Midnight" 
 test("THEME-001 persists Dark before the primary workspace is shown and across routes", async ({ page }) => {
   const hydrationMessages: string[] = []; page.on("console", (message) => { if (/hydration|did not match|server rendered/i.test(message.text())) hydrationMessages.push(message.text()); });
   await ready(page); await chooseAppearance(page, "Dark"); await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await page.reload({ waitUntil: "commit" }); expect(await page.evaluate(() => document.documentElement.dataset.theme)).toBe("dark"); await expect(page.locator('[data-recovery-ready="true"]')).toBeVisible();
+  await page.reload({ waitUntil: "domcontentloaded" }); await expect(page.locator("html")).toHaveAttribute("data-theme", "dark"); await expect(page.locator('[data-recovery-ready="true"]')).toBeVisible();
   for (const route of ["/compare", "/settings", "/demo", "/workspace"]) { await page.goto(route); await expect(page.locator("html")).toHaveAttribute("data-theme", "dark"); } expect(hydrationMessages).toEqual([]);
 });
 

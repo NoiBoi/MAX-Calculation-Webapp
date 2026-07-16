@@ -209,8 +209,10 @@ Repository tests cover defaults, save/reopen, independent 211/312/413 values, di
 - Engine regressions cover Sc/Y, transition and refractory metals, Ru/Rh/Pd, Re/Os/Ir/Pt, Si/Ge/B, supported lanthanides, explicit N/O policy, unavailable Tc mass, registered precedence, duplicate prevention, determinism, and search-limit bypass.
 - `VERIFY-PLACEMENT-001`: prove the top area has no verification action, bottom Calculation details pairs verification with trace, and close restores focus.
 - `PRINT-SETTINGS-001`: persist A4, landscape, four-up, field toggles, and required-field protection across refresh and backup/restore.
-- `PRINT-LETTER-{2,4,6}-UP` and `PRINT-A4-{2,4,6}-UP`: assert one page, region count, readable masses, no clipping, no transform, and no print-root controls at 100% scale.
-- `PRINT-LONG-001`: promote a fourteen-row recipe to a full page, report fallback, then resume configured packing without reordering.
+- `PRINT-{LETTER,A4}-{PORTRAIT,LANDSCAPE}-{2,4,6}-UP`: assert one page, intrinsic-height cards, readable masses, no clipping, no card/reserved-region overlap, no internal page break, no transform, a valid PDF, and no print-root controls at 100% scale.
+- `PRINT-LONG-001`: promote a long-name, long-formula, warning-bearing fourteen-row recipe with additional columns to a full-width page region, keep it inside the printable page, report fallback, then resume configured packing without reordering.
+- `PRINT-THEME-001`: assert identical white, opaque, shadowless output with dark text/rules in Light, Dark, and Midnight and exact reuse of the weighing-result monospace/tabular-numeral typography.
+- `PRINT-CREDIT-001`: assert one non-overlapping brand plus the creator, inquiry email, and Anasori Lab credit in the reserved page footer.
 # Appearance fixtures
 
 - `THEME-001`: Dark persists through refresh and calculator, comparison, Settings, and tutorial routes; the pre-hydration root already reports Dark.
@@ -223,4 +225,4 @@ Repository tests cover defaults, save/reopen, independent 211/312/413 values, di
 - `MIDNIGHT-001`: explicit Midnight uses black/near-black surfaces, lower structural contrast, no startup flash, persistence, readable scientific values, and a serious/critical accessibility audit.
 - `THEME-SWITCH-001`: all four choices are distinct, System resolves only to Light/Dark, and weighing values remain unchanged.
 - `PRINT-TEXT-001`, `PRINT-4-UP-TEXT-001`, and `PRINT-6-UP-TEXT-001`: title, row, final-mass, and total font floors are measured at 100%; formulas do not clip and long recipes receive a full page without transform scaling.
-- Creator credit is present with the correct `mailto:` link in Light, Dark, and Midnight and hidden in print media.
+- Creator credit is present with the correct `mailto:` link and Anasori Lab line in Light, Dark, and Midnight. The fixed site instance is hidden in print media and the dedicated print document supplies an in-flow footer credit.
