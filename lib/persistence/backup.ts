@@ -3,6 +3,7 @@ import type { WorkspaceRecipeState } from "../workspace/adapter";
 import { canonicalizeWorkspaceScientificInput, hasValidRationals, hasValidScientificNumbers, invalidScientificNumberPath, sha256Hex, stableCanonicalize } from "./canonical";
 import { DATABASE_VERSION, type MaxStoichDatabase } from "./database";
 import type { CalculationSnapshot, ComparisonWorkspace, MigrationMetadata, RecentCalculation, RecipeNote, RecipeRevision, RouteRevision, SavedRecipe, SavedRoute, StoredAtomicRadiusDataset, WorkspaceLayout } from "./entities";
+import { createDefaultUserSettings, migrateUserSettings, type LocalUserSettings } from "../settings/user-settings";
 import type { LocalDataRepositories } from "./repositories";
 
 export const BACKUP_SCHEMA_VERSION = "1.0.0" as const;
@@ -10,11 +11,12 @@ export const MAX_IMPORT_BYTES = 10 * 1024 * 1024;
 export const MAX_IMPORT_RECORDS = 5_000;
 export const MAX_IMPORT_DEPTH = 40;
 export const MAX_IMPORT_STRING_LENGTH = 100_000;
-type TableName = "recipes" | "recipeRevisions" | "snapshots" | "routes" | "routeRevisions" | "recentCalculations" | "comparisons" | "layouts" | "radiusDatasets" | "recipeNotes" | "migrations";
-type LegacyTableName = Exclude<TableName, "radiusDatasets" | "recipeNotes">;
-type PreNotesTableName = Exclude<TableName, "recipeNotes">;
+type TableName = "recipes" | "recipeRevisions" | "snapshots" | "routes" | "routeRevisions" | "recentCalculations" | "comparisons" | "layouts" | "radiusDatasets" | "recipeNotes" | "userSettings" | "migrations";
+type LegacyTableName = Exclude<TableName, "radiusDatasets" | "recipeNotes" | "userSettings">;
+type PreNotesTableName = Exclude<TableName, "recipeNotes" | "userSettings">;
+type PreSettingsTableName = Exclude<TableName, "userSettings">;
 
-export interface BackupRecords { readonly recipes: readonly SavedRecipe[]; readonly recipeRevisions: readonly RecipeRevision[]; readonly snapshots: readonly CalculationSnapshot[]; readonly routes: readonly SavedRoute[]; readonly routeRevisions: readonly RouteRevision[]; readonly recentCalculations: readonly RecentCalculation[]; readonly comparisons: readonly ComparisonWorkspace[]; readonly layouts: readonly WorkspaceLayout[]; readonly radiusDatasets: readonly StoredAtomicRadiusDataset[]; readonly recipeNotes: readonly RecipeNote[]; readonly migrations: readonly MigrationMetadata[] }
+export interface BackupRecords { readonly recipes: readonly SavedRecipe[]; readonly recipeRevisions: readonly RecipeRevision[]; readonly snapshots: readonly CalculationSnapshot[]; readonly routes: readonly SavedRoute[]; readonly routeRevisions: readonly RouteRevision[]; readonly recentCalculations: readonly RecentCalculation[]; readonly comparisons: readonly ComparisonWorkspace[]; readonly layouts: readonly WorkspaceLayout[]; readonly radiusDatasets: readonly StoredAtomicRadiusDataset[]; readonly recipeNotes: readonly RecipeNote[]; readonly userSettings: readonly LocalUserSettings[]; readonly migrations: readonly MigrationMetadata[] }
 export interface BackupManifest { readonly counts: Readonly<Record<TableName, number>>; readonly recordDigests: Readonly<Record<TableName, Readonly<Record<string, string>>>>; readonly datasetVersions: readonly string[]; readonly manifestDigest: string }
 export interface MaxStoichBackup { readonly backupSchemaVersion: typeof BACKUP_SCHEMA_VERSION; readonly recordType: "max-stoich-local-backup"; readonly applicationVersion: string; readonly databaseVersion: typeof DATABASE_VERSION; readonly createdAt: string; readonly records: BackupRecords; readonly manifest: BackupManifest }
 export interface ImportDiagnostic { readonly code: string; readonly severity: "error" | "warning"; readonly path: string; readonly message: string; readonly blocking: boolean }
@@ -23,9 +25,10 @@ export interface BackupPreview { readonly valid: boolean; readonly diagnostics: 
 export type RestoreMode = "preview" | "merge" | "replace";
 export type ConflictResolution = "keep-local" | "import-as-new";
 
-const tableNames: readonly TableName[] = ["recipes", "recipeRevisions", "snapshots", "routes", "routeRevisions", "recentCalculations", "comparisons", "layouts", "radiusDatasets", "recipeNotes", "migrations"];
+const tableNames: readonly TableName[] = ["recipes", "recipeRevisions", "snapshots", "routes", "routeRevisions", "recentCalculations", "comparisons", "layouts", "radiusDatasets", "recipeNotes", "userSettings", "migrations"];
 const legacyTableNames: readonly LegacyTableName[] = ["recipes", "recipeRevisions", "snapshots", "routes", "routeRevisions", "recentCalculations", "comparisons", "layouts", "migrations"];
 const preNotesTableNames: readonly PreNotesTableName[] = ["recipes", "recipeRevisions", "snapshots", "routes", "routeRevisions", "recentCalculations", "comparisons", "layouts", "radiusDatasets", "migrations"];
+const preSettingsTableNames: readonly PreSettingsTableName[] = ["recipes", "recipeRevisions", "snapshots", "routes", "routeRevisions", "recentCalculations", "comparisons", "layouts", "radiusDatasets", "recipeNotes", "migrations"];
 const idFor = (table: TableName, value: unknown): string => table === "recentCalculations" ? String((value as RecentCalculation).snapshotId) : String((value as { id: string }).id);
 
 function resultMatchesCanonical(result: BatchCalculationResult, canonical: string): boolean {
@@ -46,8 +49,8 @@ function inspectLimits(value: unknown, diagnostics: ImportDiagnostic[], path = "
 }
 
 async function readRecords(database: MaxStoichDatabase): Promise<BackupRecords> {
-  const [recipes, recipeRevisions, snapshots, routes, routeRevisions, recentCalculations, comparisons, layouts, radiusDatasets, recipeNotes, migrations] = await Promise.all([database.recipes.toArray(), database.recipeRevisions.toArray(), database.snapshots.toArray(), database.routes.toArray(), database.routeRevisions.toArray(), database.recentCalculations.toArray(), database.comparisons.toArray(), database.layouts.toArray(), database.radiusDatasets.toArray(), database.recipeNotes.toArray(), database.migrations.toArray()]);
-  return { recipes, recipeRevisions, snapshots, routes, routeRevisions, recentCalculations, comparisons, layouts, radiusDatasets, recipeNotes, migrations };
+  const [recipes, recipeRevisions, snapshots, routes, routeRevisions, recentCalculations, comparisons, layouts, radiusDatasets, recipeNotes, userSettings, migrations] = await Promise.all([database.recipes.toArray(), database.recipeRevisions.toArray(), database.snapshots.toArray(), database.routes.toArray(), database.routeRevisions.toArray(), database.recentCalculations.toArray(), database.comparisons.toArray(), database.layouts.toArray(), database.radiusDatasets.toArray(), database.recipeNotes.toArray(), database.userSettings.toArray(), database.migrations.toArray()]);
+  return { recipes, recipeRevisions, snapshots, routes, routeRevisions, recentCalculations, comparisons, layouts, radiusDatasets, recipeNotes, userSettings, migrations };
 }
 
 async function manifestFor(records: BackupRecords, versions: Readonly<{ applicationVersion: string; databaseVersion: number }> = { applicationVersion: ENGINE_VERSION, databaseVersion: DATABASE_VERSION }): Promise<BackupManifest> {
@@ -59,7 +62,7 @@ async function manifestFor(records: BackupRecords, versions: Readonly<{ applicat
   return { counts, recordDigests, datasetVersions, manifestDigest };
 }
 
-async function legacyManifestFor(records: Omit<BackupRecords, "radiusDatasets" | "recipeNotes">, versions: Readonly<{ applicationVersion: string; databaseVersion: number }>): Promise<Readonly<{ counts: Record<LegacyTableName, number>; recordDigests: Record<LegacyTableName, Record<string, string>>; datasetVersions: readonly string[]; manifestDigest: string }>> {
+async function legacyManifestFor(records: Omit<BackupRecords, "radiusDatasets" | "recipeNotes" | "userSettings">, versions: Readonly<{ applicationVersion: string; databaseVersion: number }>): Promise<Readonly<{ counts: Record<LegacyTableName, number>; recordDigests: Record<LegacyTableName, Record<string, string>>; datasetVersions: readonly string[]; manifestDigest: string }>> {
   const counts = Object.fromEntries(legacyTableNames.map((table) => [table, records[table].length])) as Record<LegacyTableName, number>;
   const recordDigests = {} as Record<LegacyTableName, Record<string, string>>;
   for (const table of legacyTableNames) recordDigests[table] = Object.fromEntries(await Promise.all(records[table].map(async (record) => [idFor(table, record), await sha256Hex(stableCanonicalize(record))])));
@@ -68,10 +71,19 @@ async function legacyManifestFor(records: Omit<BackupRecords, "radiusDatasets" |
   return { counts, recordDigests, datasetVersions, manifestDigest };
 }
 
-async function preNotesManifestFor(records: Omit<BackupRecords, "recipeNotes">, versions: Readonly<{ applicationVersion: string; databaseVersion: number }>): Promise<Readonly<{ counts: Record<PreNotesTableName, number>; recordDigests: Record<PreNotesTableName, Record<string, string>>; datasetVersions: readonly string[]; manifestDigest: string }>> {
+async function preNotesManifestFor(records: Omit<BackupRecords, "recipeNotes" | "userSettings">, versions: Readonly<{ applicationVersion: string; databaseVersion: number }>): Promise<Readonly<{ counts: Record<PreNotesTableName, number>; recordDigests: Record<PreNotesTableName, Record<string, string>>; datasetVersions: readonly string[]; manifestDigest: string }>> {
   const counts = Object.fromEntries(preNotesTableNames.map((table) => [table, records[table].length])) as Record<PreNotesTableName, number>;
   const recordDigests = {} as Record<PreNotesTableName, Record<string, string>>;
   for (const table of preNotesTableNames) recordDigests[table] = Object.fromEntries(await Promise.all(records[table].map(async (record) => [idFor(table, record), await sha256Hex(stableCanonicalize(record))])));
+  const datasetVersions = [...new Set([...records.snapshots.map((item) => `atomic-weights:${item.atomicWeightDataVersion}`), ...records.radiusDatasets.map((item) => `atomic-radii:${item.datasetId}@${item.datasetVersion}`)])].sort();
+  const manifestDigest = await sha256Hex(stableCanonicalize({ counts, recordDigests, datasetVersions, backupSchemaVersion: BACKUP_SCHEMA_VERSION, databaseVersion: versions.databaseVersion, applicationVersion: versions.applicationVersion }));
+  return { counts, recordDigests, datasetVersions, manifestDigest };
+}
+
+async function preSettingsManifestFor(records: Omit<BackupRecords, "userSettings">, versions: Readonly<{ applicationVersion: string; databaseVersion: number }>): Promise<Readonly<{ counts: Record<PreSettingsTableName, number>; recordDigests: Record<PreSettingsTableName, Record<string, string>>; datasetVersions: readonly string[]; manifestDigest: string }>> {
+  const counts = Object.fromEntries(preSettingsTableNames.map((table) => [table, records[table].length])) as Record<PreSettingsTableName, number>;
+  const recordDigests = {} as Record<PreSettingsTableName, Record<string, string>>;
+  for (const table of preSettingsTableNames) recordDigests[table] = Object.fromEntries(await Promise.all(records[table].map(async (record) => [idFor(table, record), await sha256Hex(stableCanonicalize(record))])));
   const datasetVersions = [...new Set([...records.snapshots.map((item) => `atomic-weights:${item.atomicWeightDataVersion}`), ...records.radiusDatasets.map((item) => `atomic-radii:${item.datasetId}@${item.datasetVersion}`)])].sort();
   const manifestDigest = await sha256Hex(stableCanonicalize({ counts, recordDigests, datasetVersions, backupSchemaVersion: BACKUP_SCHEMA_VERSION, databaseVersion: versions.databaseVersion, applicationVersion: versions.applicationVersion }));
   return { counts, recordDigests, datasetVersions, manifestDigest };
@@ -98,18 +110,25 @@ async function parseBackupText(text: string): Promise<Readonly<{ backup?: MaxSto
   if (diagnostics.some((item) => item.blocking)) return { diagnostics };
   const missingRadiusData = !Array.isArray((backup.records as Partial<BackupRecords>).radiusDatasets);
   const missingNotes = !Array.isArray((backup.records as Partial<BackupRecords>).recipeNotes);
+  const missingSettings = !Array.isArray((backup.records as Partial<BackupRecords>).userSettings);
   let legacyVerified = false;
   if (missingRadiusData) {
-    const legacyRecords = backup.records as unknown as Omit<BackupRecords, "radiusDatasets" | "recipeNotes">;
+    const legacyRecords = backup.records as unknown as Omit<BackupRecords, "radiusDatasets" | "recipeNotes" | "userSettings">;
     const expected = await legacyManifestFor(legacyRecords, { applicationVersion: backup.applicationVersion, databaseVersion: backup.databaseVersion });
     if (stableCanonicalize(expected.counts) !== stableCanonicalize(backup.manifest.counts) || expected.manifestDigest !== backup.manifest.manifestDigest || stableCanonicalize(expected.recordDigests) !== stableCanonicalize(backup.manifest.recordDigests)) diagnostics.push({ code: "BACKUP_DIGEST_MISMATCH", severity: "error", path: "$.manifest", message: "Legacy backup manifest or record digest verification failed.", blocking: true });
-    backup = { ...backup, records: { ...legacyRecords, radiusDatasets: [], recipeNotes: [] } };
+    backup = { ...backup, records: { ...legacyRecords, radiusDatasets: [], recipeNotes: [], userSettings: [createDefaultUserSettings(backup.createdAt)] } };
     legacyVerified = true;
   } else if (missingNotes) {
-    const legacyRecords = backup.records as unknown as Omit<BackupRecords, "recipeNotes">;
+    const legacyRecords = backup.records as unknown as Omit<BackupRecords, "recipeNotes" | "userSettings">;
     const expected = await preNotesManifestFor(legacyRecords, { applicationVersion: backup.applicationVersion, databaseVersion: backup.databaseVersion });
     if (stableCanonicalize(expected.counts) !== stableCanonicalize(backup.manifest.counts) || expected.manifestDigest !== backup.manifest.manifestDigest || stableCanonicalize(expected.recordDigests) !== stableCanonicalize(backup.manifest.recordDigests)) diagnostics.push({ code: "BACKUP_DIGEST_MISMATCH", severity: "error", path: "$.manifest", message: "Pre-notes backup manifest or record digest verification failed.", blocking: true });
-    backup = { ...backup, records: { ...legacyRecords, recipeNotes: [] } };
+    backup = { ...backup, records: { ...legacyRecords, recipeNotes: [], userSettings: [createDefaultUserSettings(backup.createdAt)] } };
+    legacyVerified = true;
+  } else if (missingSettings) {
+    const legacyRecords = backup.records as unknown as Omit<BackupRecords, "userSettings">;
+    const expected = await preSettingsManifestFor(legacyRecords, { applicationVersion: backup.applicationVersion, databaseVersion: backup.databaseVersion });
+    if (stableCanonicalize(expected.counts) !== stableCanonicalize(backup.manifest.counts) || expected.manifestDigest !== backup.manifest.manifestDigest || stableCanonicalize(expected.recordDigests) !== stableCanonicalize(backup.manifest.recordDigests)) diagnostics.push({ code: "BACKUP_DIGEST_MISMATCH", severity: "error", path: "$.manifest", message: "Pre-settings backup manifest or record digest verification failed.", blocking: true });
+    backup = { ...backup, records: { ...legacyRecords, userSettings: [createDefaultUserSettings(backup.createdAt)] } };
     legacyVerified = true;
   }
   const count = tableNames.reduce((sum, table) => sum + (backup.records[table]?.length ?? 0), 0);
@@ -144,6 +163,7 @@ async function parseBackupText(text: string): Promise<Readonly<{ backup?: MaxSto
       if (digest !== record.digest || validation.diagnostics.some((item) => item.code === "RADIUS_DATASET_DIGEST_MISMATCH")) diagnostics.push({ code: "RADIUS_DATASET_DIGEST_MISMATCH", severity: "error", path: `$.records.radiusDatasets.${record.id}`, message: "An atomic-radius dataset digest is invalid.", blocking: true });
       if (record.datasetId !== record.dataset.datasetId || record.datasetVersion !== record.dataset.datasetVersion) diagnostics.push({ code: "RADIUS_DATASET_IDENTITY_MISMATCH", severity: "error", path: `$.records.radiusDatasets.${record.id}`, message: "Stored radius-dataset identity does not match its payload.", blocking: true });
     }
+    for (const settings of backup.records.userSettings) { try { migrateUserSettings(settings); } catch (error) { diagnostics.push({ code: "INVALID_USER_SETTINGS", severity: "error", path: `$.records.userSettings.${settings.id}`, message: error instanceof Error ? error.message : "User settings are invalid.", blocking: true }); } }
   }
   return { backup, diagnostics };
 }

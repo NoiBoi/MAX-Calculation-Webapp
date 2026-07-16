@@ -189,3 +189,7 @@ Future overrides must match the selected definition and include a reason, source
 Element schema `2.0.0` distinguishes a valid element from atomic-weight availability. The CIAAW-derived `2024.2.0` registry has all 118 symbols; molar mass returns `MISSING_ATOMIC_WEIGHT` only when a valid record lacks an authoritative calculation value.
 
 Radius schema/descriptor schema `2.0.0` installs separate Teatum metallic, Cordero covalent, and provisional Rahm neutral-isodensity datasets. `calculateSiteRadiusDescriptor` uses Decimal mean/variance/square root/mismatch arithmetic on one explicit site and one explicit dataset; vacancies are excluded and missing values block aggregates. `source-verified` permits exploratory screening but is independent of `lab-approved`.
+
+# Elemental precursor fallback policy
+
+`elementPrecursorEligibility(symbol)` separates formula validity, calculation-weight availability, and fallback permission. Suggestions preserve explicit registry precedence, generate at most one synthetic identity per missing eligible solid element, and evaluate a direct all-element route before candidate/search limits. N/O, halogens, noble gases, special physical forms, highly radioactive/synthetic elements, and mass-unavailable records are never silently generated. Diagnostics distinguish explicit-source requirements, policy disallowance, atomic-data unavailability, solver rejection, and search limits. Generated identities contain no purity, supplier, stock, particle size, hazards, or laboratory claim.

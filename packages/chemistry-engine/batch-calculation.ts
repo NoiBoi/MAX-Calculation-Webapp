@@ -2,6 +2,7 @@ import type { ElementDataSet } from "./element-data-schema";
 import { DEFAULT_ELEMENT_DATA } from "./default-element-data";
 import { buildElementBalanceMatrix, type ElementBalanceMatrix } from "./balance-matrix";
 import { calculateMolarMass } from "./molar-mass";
+import type { MolarMassContribution } from "./schemas";
 import { normalizeCompositionToTotal, type ElementalComposition } from "./composition";
 import {
   RATIONAL_ONE,
@@ -73,6 +74,10 @@ export interface BatchPrecursorResult {
   readonly molarMassGramsPerMole: string;
   readonly molarMassSource: "element-data" | "override";
   readonly molarMassOverride?: MolarMassOverride;
+  readonly atomicWeightDatasetTitle: string;
+  readonly atomicWeightDatasetVersion: string;
+  readonly atomicWeightCalculationValuePolicy: string;
+  readonly molarMassContributions: readonly MolarMassContribution[];
   readonly pureRequiredMassGrams: string;
   readonly purity: string;
   readonly puritySource: "declared" | "assumed-default";
@@ -89,6 +94,7 @@ export interface BatchPrecursorResult {
   readonly pureEquivalentFinalMassGrams: string;
   readonly realizedPrecursorMoles: string;
   readonly realizedMinusIntendedMoles: string;
+  readonly relativeRealizedMolesDifference: string;
   readonly traceStepCodes: readonly string[];
 }
 
@@ -270,7 +276,7 @@ export function calculateBatchRecipe(input: BatchRecipeInput): BatchCalculationR
   const idealMassResult = calculateMolarMass(ideal, data);
   if (!idealMassResult.success) { idealMassResult.errors.forEach((item) => errors.push(diag({ code: item.code, severity: "error", blocking: true, fieldPath: "idealCrystalComposition", message: item.message }))); return failureResult(input, ideal, intended, adjusted, "calculation-failure", errors, warnings, traces, defaults, data.dataVersion, matrix, solver); }
   const idealMolarMass = parseExactRational(idealMassResult.value.totalMolarMass);
-  const precursorMolarMass = new Map<string, { value: ExactRational; source: "element-data" | "override"; override?: MolarMassOverride }>();
+  const precursorMolarMass = new Map<string, { value: ExactRational; source: "element-data" | "override"; override?: MolarMassOverride; contributions: readonly MolarMassContribution[] }>();
   const purities = new Map<string, { value: ExactRational; source: "declared" | "assumed-default" }>();
   for (const column of matrix.columns) {
     const material = input.precursors.find((item) => item.id === column.precursorId)!;
@@ -278,13 +284,13 @@ export function calculateBatchRecipe(input: BatchRecipeInput): BatchCalculationR
       const override = material.molarMassOverride;
       const value = override.units === "g/mol" ? decimal(override.value, `precursors.${material.id}.molarMassOverride.value`, errors, "positive") : undefined;
       if (override.units !== "g/mol") errors.push(diag({ code: "INVALID_MOLAR_MASS_OVERRIDE", severity: "error", blocking: true, fieldPath: `precursors.${material.id}.molarMassOverride.units`, message: "Molar-mass overrides must use g/mol." }));
-      if (value && override.source && override.reason && override.provenance) precursorMolarMass.set(material.id, { value, source: "override", override });
+      if (value && override.source && override.reason && override.provenance) precursorMolarMass.set(material.id, { value, source: "override", override, contributions: Object.freeze([]) });
       else if (value) errors.push(diag({ code: "INVALID_MOLAR_MASS_OVERRIDE", severity: "error", blocking: true, fieldPath: `precursors.${material.id}.molarMassOverride`, message: "Override source, reason, and provenance are required." }));
       if (value && override.source && override.reason && override.provenance) warnings.push(diag({ code: "MOLAR_MASS_OVERRIDE_USED", severity: "warning", blocking: false, fieldPath: `precursors.${material.id}.molarMassOverride`, message: `Explicit molar-mass override ${out(value)} g/mol used for precursor "${material.name}" from ${override.source}.`, precursorIds: [material.id] }));
     } else {
       const calculated = calculateMolarMass(column.composition, data);
       if (!calculated.success) calculated.errors.forEach((item) => errors.push(diag({ code: item.code, severity: "error", blocking: true, fieldPath: `precursors.${material.id}`, message: item.message, precursorIds: [material.id] })));
-      else { precursorMolarMass.set(material.id, { value: parseExactRational(calculated.value.totalMolarMass), source: "element-data" }); calculated.value.warnings.forEach((item) => warnings.push(diag({ code: item.code, severity: "warning", blocking: false, fieldPath: `precursors.${material.id}.molarMass`, message: item.message, precursorIds: [material.id], element: item.element }))); }
+      else { precursorMolarMass.set(material.id, { value: parseExactRational(calculated.value.totalMolarMass), source: "element-data", contributions: calculated.value.contributions }); calculated.value.warnings.forEach((item) => warnings.push(diag({ code: item.code, severity: "warning", blocking: false, fieldPath: `precursors.${material.id}.molarMass`, message: item.message, precursorIds: [material.id], element: item.element }))); }
     }
     if (material.purity === undefined) { purities.set(material.id, { value: RATIONAL_ONE, source: "assumed-default" }); defaults.push(Object.freeze({ fieldPath: `precursors.${material.id}.purity`, value: "1", reason: "No purity was supplied; chemically pure precursor assumed explicitly." })); }
     else {
@@ -373,6 +379,8 @@ export function calculateBatchRecipe(input: BatchRecipeInput): BatchCalculationR
     const retainedGross = multiplyRational(finalMass, retentionById.get(id)!);
     const pureEquivalent = multiplyRational(finalMass, purity.value);
     const realizedMoles = divideRational(pureEquivalent, molar.value);
+    const realizedDifference = subtractRational(realizedMoles, adjustedMoles);
+    const relativeRealizedDifference = adjustedMoles.numerator === 0n ? RATIONAL_ZERO : divideRational(realizedDifference, adjustedMoles);
     preRoundMoles.set(id, adjustedMoles);
     finalMoles.set(id, realizedMoles);
     preRoundMasses.set(id, running);
@@ -381,7 +389,7 @@ export function calculateBatchRecipe(input: BatchRecipeInput): BatchCalculationR
     if (minimumMass && compareRational(finalMass, minimumMass) < 0) warnings.push(diag({ code: "SUB_BALANCE_MASS", severity: "warning", blocking: false, fieldPath: `precursors.${id}.finalRoundedGrossWeighingMassGrams`, message: `Required mass for precursor "${column.displayName}" is ${out(finalMass)} g, below the configured practical weighing threshold of ${out(minimumMass)} g.`, precursorIds: [id], suggestedAction: "Increase batch size or use a suitable microbalance." }));
     if (compareRational(purity.value, RATIONAL_ONE) < 0 && compareRational(grossPurity, pureMass) < 0) errors.push(diag({ code: "PURITY_MASS_INVARIANT_FAILED", severity: "error", blocking: true, fieldPath: `precursors.${id}.purity`, message: "Lower purity unexpectedly reduced gross mass." }));
     const traceCodes = ["SOLVER_SCALAR_CONVERTED_FOR_MASS_DOMAIN", "SOLVER_QUANTITIES_SCALED", "PURE_MASS_CALCULATED", "PURITY_CORRECTION_APPLIED", ...lossSteps.map(() => "HANDLING_LOSS_APPLIED"), "FINAL_WEIGHING_ROUNDED", "REALIZED_PRECURSOR_MOLES_RECONSTRUCTED"];
-    precursorResults.push(Object.freeze({ precursorId: id, displayName: column.displayName, columnIndex: column.index, solverMolesPerTargetFormulaMole: rationalToString(solverPerFormula), solverMolesPerTargetFormulaMoleExact: exactSolverQuantity, solverMolesPerTargetFormulaMoleDecimalApproximation: solverQuantityApproximation, nominalScaledMoles: out(nominal), postSolverAdjustedMoles: out(adjustedMoles), precursorAdjustmentIds: array(precursorAdjustmentIds.get(id)!), molarMassGramsPerMole: out(molar.value), molarMassSource: molar.source, ...(molar.override ? { molarMassOverride: Object.freeze({ ...molar.override }) } : {}), pureRequiredMassGrams: out(pureMass), purity: out(purity.value), puritySource: purity.source, grossMassAfterPurityGrams: out(grossPurity), handlingLossSteps: array(lossSteps), totalRetainedFraction: out(retentionById.get(id)!), preRoundGrossWeighingMassGrams: out(running), finalRoundedGrossWeighingMassGrams: out(finalMass), roundingIncrementGrams: out(increment), roundingMode: input.rounding.mode, roundingDeltaGrams: out(delta), relativeRoundingDelta: out(relativeDelta), expectedRetainedGrossMassGrams: out(retainedGross), pureEquivalentFinalMassGrams: out(pureEquivalent), realizedPrecursorMoles: out(realizedMoles), realizedMinusIntendedMoles: out(subtractRational(realizedMoles, adjustedMoles)), traceStepCodes: array(traceCodes) }));
+    precursorResults.push(Object.freeze({ precursorId: id, displayName: column.displayName, columnIndex: column.index, solverMolesPerTargetFormulaMole: rationalToString(solverPerFormula), solverMolesPerTargetFormulaMoleExact: exactSolverQuantity, solverMolesPerTargetFormulaMoleDecimalApproximation: solverQuantityApproximation, nominalScaledMoles: out(nominal), postSolverAdjustedMoles: out(adjustedMoles), precursorAdjustmentIds: array(precursorAdjustmentIds.get(id)!), molarMassGramsPerMole: out(molar.value), molarMassSource: molar.source, ...(molar.override ? { molarMassOverride: Object.freeze({ ...molar.override }) } : {}), atomicWeightDatasetTitle: data.title, atomicWeightDatasetVersion: data.dataVersion, atomicWeightCalculationValuePolicy: data.calculationValuePolicyDescription, molarMassContributions: array(molar.contributions), pureRequiredMassGrams: out(pureMass), purity: out(purity.value), puritySource: purity.source, grossMassAfterPurityGrams: out(grossPurity), handlingLossSteps: array(lossSteps), totalRetainedFraction: out(retentionById.get(id)!), preRoundGrossWeighingMassGrams: out(running), finalRoundedGrossWeighingMassGrams: out(finalMass), roundingIncrementGrams: out(increment), roundingMode: input.rounding.mode, roundingDeltaGrams: out(delta), relativeRoundingDelta: out(relativeDelta), expectedRetainedGrossMassGrams: out(retainedGross), pureEquivalentFinalMassGrams: out(pureEquivalent), realizedPrecursorMoles: out(realizedMoles), realizedMinusIntendedMoles: out(realizedDifference), relativeRealizedMolesDifference: out(relativeRealizedDifference), traceStepCodes: array(traceCodes) }));
   }
   if (errors.length > 0) return failureResult(input, ideal, intended, adjusted, "calculation-failure", errors, warnings, traces, defaults, data.dataVersion, matrix, solver);
   traces.push(trace({ stepCode: "SOLVER_QUANTITIES_SCALED", description: "Formula-relative solver quantities scaled by target formula moles." }), trace({ stepCode: "PURE_MASSES_CALCULATED", description: "Pure precursor masses calculated from adjusted moles and selected molar masses.", equation: "pureMass=n*M", units: { mass: "g", amount: "mol", molarMass: "g/mol" } }), trace({ stepCode: "PURITY_CORRECTIONS_APPLIED", description: "Declared or explicitly defaulted purity corrections applied.", equation: "grossMass=pureMass/purity" }), trace({ stepCode: "FINAL_WEIGHING_ROUNDING_APPLIED", adjustmentId: input.rounding.adjustmentId, adjustmentType: "final-weighing-rounding", stage: "final-rounding", resolvedOrder: input.rounding.order, description: "Final gross weighing masses rounded once to the explicit balance increment.", equation: "finalMass=round_mode(preRoundMass/increment)*increment", parameters: { incrementGrams: out(increment), mode: input.rounding.mode }, source: "user" }), trace({ stepCode: "REALIZED_PRECURSOR_MOLES_RECONSTRUCTED", description: "Realized precursor moles reconstructed from final gross masses, purity, and molar mass; expected retained gross mass remains separately reported.", equation: "n_realized=finalGrossMass*purity/molarMass" }));

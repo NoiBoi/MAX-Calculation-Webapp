@@ -197,6 +197,15 @@ describe("batch calculation pipeline", () => {
     expect(result.warnings.map((item) => item.code)).toContain("IMPURITY_COMPOSITION_UNMODELED");
   });
 
+  it("preserves atomic-weight contributions and relative reverse-verification differences", () => {
+    const result = calculateBatchRecipe(baseInput({ precursors: [{ schemaVersion: "1.0.0", id: "li", name: "Li", formula: "Li" }], batch: { basis: "ideal-product-mass", requestedMassGrams: "1.005" }, rounding: { adjustmentId: "round", order: 0, incrementGrams: "0.1", mode: "nearest-half-even", residualToleranceMoles: "1", materialityRelativeTolerance: "1" } }));
+    const precursor = result.precursors[0]!;
+    expect(precursor.atomicWeightDatasetVersion).toBe(result.dataVersions.atomicWeights);
+    expect(precursor.atomicWeightDatasetTitle).toContain("CIAAW");
+    expect(precursor.molarMassContributions).toEqual([expect.objectContaining({ element: "Li", coefficient: "1", atomicWeightGramsPerMole: "6.94", contributionGramsPerMole: "6.94" })]);
+    expect(precursor.relativeRealizedMolesDifference).toBe("-0.004975124378109452736318407960199005");
+  });
+
   it("uses retained-fraction handling loss and applies losses sequentially", () => {
     const one = calculateBatchRecipe(baseInput({ adjustments: [loss("transfer", "0.02")] }));
     expect(one.precursors[0]?.preRoundGrossWeighingMassGrams).toBe("10.20408163265306122448979591836735");

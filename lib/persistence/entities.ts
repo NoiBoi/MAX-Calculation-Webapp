@@ -3,8 +3,8 @@ import type { Mode } from "./workspace-types";
 import type { WorkspaceRecipeState } from "../workspace/adapter";
 import type { ValidationStatus, WorkspacePrecursorInput } from "../workspace/presets";
 
-export const LOCAL_SCHEMA_VERSION = "7.0.0" as const;
-export type LocalSchemaVersion = "2.0.0" | "3.0.0" | "4.0.0" | "5.0.0" | "6.0.0" | typeof LOCAL_SCHEMA_VERSION;
+export const LOCAL_SCHEMA_VERSION = "8.0.0" as const;
+export type LocalSchemaVersion = "2.0.0" | "3.0.0" | "4.0.0" | "5.0.0" | "6.0.0" | "7.0.0" | typeof LOCAL_SCHEMA_VERSION;
 export type PersistedValidationStatus = ValidationStatus | "deprecated";
 
 export interface SavedRecipe {

@@ -185,9 +185,9 @@ test("UX-EXPORT copy, CSV, JSON, print, and stale safety", async ({ page, contex
   const jsonDownload = page.waitForEvent("download");
   await page.getByRole("button", { name: "JSON", exact: true }).click();
   expect((await jsonDownload).suggestedFilename()).toBe("Ti2AlN-unsaved-calculation.json");
-  await page.evaluate(() => { window.print = () => { document.body.dataset.printInvoked = "true"; }; });
-  await page.getByRole("button", { name: "Print", exact: true }).click();
-  await expect(page.locator("body")).toHaveAttribute("data-print-invoked", "true");
+  await context.addInitScript(() => { window.print = () => { document.documentElement.dataset.printInvoked = "true"; }; });
+  const printPopup = page.waitForEvent("popup"); await page.getByRole("button", { name: "Print", exact: true }).click(); const printPage = await printPopup;
+  await expect(printPage.locator('.dedicated-print-root[data-print-ready="true"]')).toBeVisible(); await expect(printPage.locator(".dedicated-print-root")).toHaveAttribute("data-recipes-per-page", "1"); await expect(printPage.getByRole("heading", { name: /AlN example/ })).toBeVisible(); await expect(printPage.locator(".dedicated-print-root").getByRole("button")).toHaveCount(0); await printPage.close();
   await page.locator("#precursor-formula-ti").fill("Ti(");
   await expect(page.getByRole("button", { name: "Copy table" })).toBeDisabled();
   await expect(page.getByRole("button", { name: "CSV", exact: true })).toBeDisabled();

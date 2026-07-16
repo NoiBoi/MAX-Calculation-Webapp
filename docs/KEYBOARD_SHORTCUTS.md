@@ -26,3 +26,5 @@ CSV, JSON, and print remain command-menu actions to avoid browser-reserved short
 # Comparison and data management
 
 Comparison, layouts, backup, restore, import, and recipe notes use normal Tab/Shift+Tab navigation, native controls, and Enter/Space activation. Plain arrow keys inside formula fields remain text-editing keys; route navigation requires Alt. In the Save dialog, Enter submits from ordinary controls but not from the multiline revision-note field. No pointer-only resize or hidden shortcut is implemented. Other workspace shortcuts do not fire while focus is in an editable control.
+
+Settings use native labeled inputs, checkboxes, selects, and explicit `Up`/`Down` column-order buttons. There is no settings-only shortcut and no drag-only operation. Enter on the Save dialog uses the locally configured default post-save action; the split menu remains keyboard accessible and retains all actions.

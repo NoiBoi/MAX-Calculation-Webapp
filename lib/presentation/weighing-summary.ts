@@ -14,6 +14,8 @@ export interface WeighingSummaryPrecursor {
   readonly hasPostSolverAdjustment: boolean;
   readonly finalMass: string;
   readonly purityPercent: string;
+  readonly molarMass: string;
+  readonly atomicRadius: string;
   readonly unit: "g";
   readonly status: string;
 }
@@ -33,16 +35,22 @@ export interface WeighingSummary {
   readonly title: string;
   readonly sourceStatus: string;
   readonly adjustedFeedFormula: string;
+  readonly targetFormula: string;
+  readonly idealFormula: string;
+  readonly intendedFeedFormula: string;
+  readonly realizedFormula: string;
   readonly batchMass: string;
   readonly batchBasis: string;
   readonly precursors: readonly WeighingSummaryPrecursor[];
   readonly totalMass: string;
   readonly unit: "g";
   readonly actionRequiredMessages: readonly string[];
+  readonly minorAdvisoryMessages: readonly string[];
   readonly engineVersion: string;
   readonly atomicWeightDataVersion: string;
   readonly radiusSites: readonly WeighingSummaryRadiusSite[];
   readonly radiusDisclaimer?: string;
+  readonly verificationSummary: Readonly<{ statusLabel: string; targetFormulaMoles: string; largestElementalResidual: string; atomicDataVersion: string }>;
   readonly validationStatus?: string;
   readonly isHistorical: boolean;
   readonly isStale: boolean;
@@ -66,11 +74,14 @@ export function buildWeighingSummary(input: Readonly<{
   validationStatus?: string;
   isHistorical?: boolean;
   isStale?: boolean;
+  atomicRadiusDatasetId?: string;
 }>): WeighingSummary {
   const definitionById = new Map(input.inputState.precursors.map((item) => [item.id, item]));
   const resultById = new Map(input.result.precursors.map((item) => [item.precursorId, item]));
   const order = input.orderedPrecursorIds ?? input.result.precursors.map((item) => item.precursorId);
   const diagnostics = presentDiagnostics(input.result);
+  const largestVerificationResidual = [...input.result.realizedElements].sort((left, right) => Number(right.absoluteResidualMoles) - Number(left.absoluteResidualMoles))[0];
+  const verificationStatusLabel = input.isStale ? "Arithmetic verification unavailable — stale result" : input.result.realizedElements.some((row) => !row.passesTolerance) ? "Arithmetic verification: review required" : input.result.realizedElements.every((row) => row.signedResidualMoles === "0") && input.result.precursors.every((row) => row.realizedMinusIntendedMoles === "0") ? "Arithmetic verification: verified exactly" : "Arithmetic verification: within weighing tolerance";
   const radiusSites = input.inputState.siteComposition && input.inputState.radiusDescriptorConfig?.enabled ? input.inputState.radiusDescriptorConfig.siteDatasets.flatMap((selection) => {
     const site = input.inputState.siteComposition!.sites.find((item) => item.id === selection.siteId);
     const dataset = DEFAULT_ATOMIC_RADIUS_REGISTRY.usableDatasets.find((item) => item.datasetId === selection.datasetId && item.datasetVersion === selection.datasetVersion && item.digest === selection.datasetDigest);
@@ -90,6 +101,10 @@ export function buildWeighingSummary(input: Readonly<{
     title: input.title,
     sourceStatus: input.sourceStatus,
     adjustedFeedFormula: formatAdjustedFeedFormula(input.result.adjustedFeedComposition.amounts, input.inputState.targetFormula),
+    targetFormula: input.inputState.targetFormula,
+    idealFormula: formatAdjustedFeedFormula(input.result.idealCrystalComposition.amounts, input.inputState.targetFormula),
+    intendedFeedFormula: formatAdjustedFeedFormula(input.result.intendedFeedComposition.amounts, input.inputState.targetFormula),
+    realizedFormula: formatAdjustedFeedFormula(input.result.realizedComposition.amounts, input.inputState.targetFormula),
     batchMass: formatMassForBalance(input.result.batch.requestedMassGrams, input.inputState.balanceIncrementGrams),
     batchBasis: input.result.batch.basis,
     precursors: order.flatMap((id) => {
@@ -98,15 +113,20 @@ export function buildWeighingSummary(input: Readonly<{
       const adjusted = result.precursorAdjustmentIds.length > 0;
       const solverMolarQuantity = conciseMolar(result.solverMolesPerTargetFormulaMoleDecimalApproximation.value);
       const finalMolarQuantity = adjusted ? conciseMolar(new ChemistryDecimal(result.postSolverAdjustedMoles).dividedBy(input.result.batch.targetFormulaMoles).toString()) : solverMolarQuantity;
-      return [{ id, displayName: result.displayName, formula: definition?.formula ?? result.displayName, molarQuantity: finalMolarQuantity, ...(!adjusted ? { molarQuantityExact: result.solverMolesPerTargetFormulaMoleExact.canonical } : {}), solverMolarQuantity, solverMolarQuantityExact: result.solverMolesPerTargetFormulaMoleExact.canonical, hasPostSolverAdjustment: adjusted, finalMass: formatMassForBalance(result.finalRoundedGrossWeighingMassGrams, input.inputState.balanceIncrementGrams), purityPercent: new ChemistryDecimal(result.purity).times(100).toString(), unit: "g" as const, status: precursorStatus(input.result, id) }];
+      const radiusDataset = DEFAULT_ATOMIC_RADIUS_REGISTRY.usableDatasets.find((item) => item.datasetId === input.atomicRadiusDatasetId);
+      const elemental = result.molarMassContributions.length === 1 && result.molarMassContributions[0]?.coefficient === "1";
+      const radius = elemental && radiusDataset ? radiusDataset.values.find((item) => item.element === result.molarMassContributions[0]!.element && item.defaultForPolicy) : undefined;
+      return [{ id, displayName: result.displayName, formula: definition?.formula ?? result.displayName, molarQuantity: finalMolarQuantity, ...(!adjusted ? { molarQuantityExact: result.solverMolesPerTargetFormulaMoleExact.canonical } : {}), solverMolarQuantity, solverMolarQuantityExact: result.solverMolesPerTargetFormulaMoleExact.canonical, hasPostSolverAdjustment: adjusted, finalMass: formatMassForBalance(result.finalRoundedGrossWeighingMassGrams, input.inputState.balanceIncrementGrams), purityPercent: new ChemistryDecimal(result.purity).times(100).toString(), molarMass: result.molarMassGramsPerMole, atomicRadius: !elemental ? "N/A" : radius ? `${radius.radiusPm} pm · ${radiusDataset!.definition}` : "N/A", unit: "g" as const, status: precursorStatus(input.result, id) }];
     }),
     totalMass: formatMassForBalance(input.result.batch.finalRoundedTotalWeighingMassGrams, input.inputState.balanceIncrementGrams),
     unit: "g",
     actionRequiredMessages: [...diagnostics.blocking, ...diagnostics.action].map((item) => item.message),
+    minorAdvisoryMessages: diagnostics.minor.map((item) => item.message),
     engineVersion: input.result.engineVersion,
     atomicWeightDataVersion: input.result.dataVersions.atomicWeights,
     radiusSites,
     ...(radiusSites.length ? { radiusDisclaimer: RADIUS_DESCRIPTOR_DISCLAIMER } : {}),
+    verificationSummary: { statusLabel: verificationStatusLabel, targetFormulaMoles: input.result.batch.targetFormulaMoles, largestElementalResidual: largestVerificationResidual ? `${largestVerificationResidual.element} ${largestVerificationResidual.signedResidualMoles} mol` : "None", atomicDataVersion: input.result.dataVersions.atomicWeights },
     ...(input.validationStatus ? { validationStatus: input.validationStatus } : {}),
     isHistorical: input.isHistorical ?? false,
     isStale: input.isStale ?? false,

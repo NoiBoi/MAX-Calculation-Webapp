@@ -132,3 +132,24 @@ Advanced weighing summaries optionally add per-explicit-site atomic-radius prove
 Recipe save offers `Save`, `Save and start blank`, and `Save and open copy`. Post-save navigation occurs only after persistence readback. An opened copy retains the complete scientific setup and radius configuration but has a new unsaved identity; structured experimental notes and revision notes are not copied.
 
 Saved recipes have separate structured notes with stable IDs, category, title, multiline plain-text body, tags, timestamps, optional experiment date/operator, optional revision link, and archive state. Notes are locally searchable by recipe/formula and note content and filterable by category/tag. Adding or editing a note never rewrites a scientific revision or snapshot. Full backups include notes; ordinary weighing exports exclude them by default.
+
+## Calculation verification
+
+Every current valid result, and every explicitly opened valid historical snapshot, offers `Verify calculations` in the bottom Calculation details row beside `Open calculation trace`, after results and summary content. It audits target formula moles, exact solver quantity, adjusted precursor moles, engine molar mass and provenance, purity/loss stages, rounding, reverse-calculated realized moles, formula reconciliation, and signed elemental residuals. Comparison uses the same bottom paired controls; an invalid scenario never hides a valid one.
+
+Labels begin with `Arithmetic verification` and are limited to exact, within weighing tolerance, minor rounding differences, review required, or unavailable. They never mean experimental validation. Feed, purity, yield, loss, override, balance, and rounding values are classified as user-entered, route-default, system-default, or dataset-derived assumptions. Measured outcomes remain separate notes.
+
+## Local user settings
+
+The dedicated `/settings` route owns one versioned local user-settings record. New compatible calculations start from Al `1` and carbide template coefficients 211=`1`, 312=`2`, and 413=`3` unless changed locally. Precedence is historical/saved recipe, explicit saved route or built-in example, user default, then system fallback. Defaults never rewrite active work or immutable snapshots; mixed C/N targets and nitrides do not receive a simplified carbon default.
+
+The default save action is `Save`; users may select `Save and start blank` or `Save and open copy` while retaining all split-menu choices. Standard and Advanced weighing columns have independent visibility/order. Final mass is mandatory, at least one identity field is mandatory, and Advanced retains status or warnings. Elemental-radius cells use one selected source-verified dataset, show units and definition, never average compounds, and remain non-blocking when unavailable.
+
+## Precursor fallback and printing
+
+Suggestion evaluates registered routes and a deterministic direct elemental identity route for eligible ordinary solid elements with usable atomic-weight values. Eligibility distinguishes `allowed`, `requires-explicit-registration`, and `disallowed`. N, O, halogens, noble gases, misleading physical forms, highly radioactive/synthetic elements, and records without a calculation mass never receive an invented elemental powder. Generic candidates infer no purity, supplier, lot, particle size, stock, hazards, or laboratory suitability.
+
+Print settings are local presentation state, not recipe input. Required fields retain recipe identity, adjusted feed, precursor identity, final mass, and total. Letter and A4 support 2/4/6-up packing at 100% scale. Calculator results use detailed one-up; comparison and selected-library recipes preserve visible order. Invalid scenarios show identity and blocking reason without masses. Oversized recipes receive a full page and notice.
+# Appearance system
+
+MAX Stoich provides Light, neutral Dark, black Midnight, and System appearance modes without changing chemistry, saved recipes, exports, or snapshots. A compact global control toggles Light/Dark and opens the four-choice menu; Settings exposes the same authoritative preference. System follows live operating-system changes and never resolves to Midnight. Semantic background, border, text, accent, status, focus, shadow, and overlay tokens preserve the teal identity and warning hierarchy. Midnight uses line-oriented near-black structure with minimal shadows. Print remains a larger-type white-paper presentation regardless of application appearance.

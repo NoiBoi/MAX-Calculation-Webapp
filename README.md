@@ -13,6 +13,10 @@ npm run dev
 
 Open `http://localhost:3000/`; the primary calculator is the landing page and `/workspace` remains a compatible direct link. The feature demo and tutorial is a clearly secondary development reference at `/demo`. Use `npm run check` for type checking, linting, and all unit/scientific tests; use `npm run test:e2e` for browser workflows.
 
+Appearance supports Light, neutral-charcoal Dark, black Midnight, and System from one compact control fixed at the application edge and from Settings. The versioned local settings record is authoritative; a derived local bootstrap value applies `data-theme` before hydration to prevent flashing. System follows live OS changes and resolves only to Light or Dark without replacing the persisted `system` choice. Printed Letter/A4 documents always use the light paper palette with readability-first typography at 100% scale.
+
+Every screen includes the unobtrusive creator credit `Built by Matthew Deng · deng301@purdue.edu`; the address is a mail link and the credit is excluded from print.
+
 ## Current scientific scope
 
 The application supports formula parsing, explicit 211/312/413 site models, exact elemental matrices and constrained precursor solving, three batch-mass bases, elemental and precursor adjustments, molar masses, purity, retained handling loss, yield, final balance rounding, realized composition, residuals, warnings, and a complete trace.
@@ -55,3 +59,11 @@ Atomic data now include all 118 element symbols from CIAAW 2024 (84 usable stand
 # Atomic-radius data gate
 
 The advanced workspace includes versioned per-site radius selection. Source-verified Teatum and Cordero datasets can produce explicitly labeled screening descriptors; the provisional Rahm dataset cannot. No dataset is laboratory approved, and imported trust is never accepted automatically.
+
+`Verify calculations` is in the bottom Calculation details row beside `Open calculation trace`. It audits each precursor from exact solver quantity through molar mass, purity, handling loss, balance rounding, and reverse-calculated realized moles. It reconciles target elements from final rounded masses, separates precursor-only elements, shows atomic-weight contributions and assumption sources, and compares ideal, intended, adjusted, and realized formulas. Comparison can verify one or all scenarios independently.
+
+These labels mean arithmetic verification only. A realized formula reconstructed from weighing inputs does not verify reaction yield, phase formation, volatilization, side products, furnace behavior, or measured product composition.
+
+The `/settings` page stores local starting and display preferences in versioned IndexedDB. It supports Al and 211/312/413 carbon defaults, the main Save/Enter post-save action, independent Standard/Advanced result columns and order, and an optional elemental-radius column with dataset provenance. Defaults apply only to new compatible calculations; saved recipes, routes, examples, historical snapshots, nitrides, and mixed C/N targets retain explicit values. Full backups include settings, while ordinary recipe exports do not.
+
+Settings is directly available in the calculator command bar. Print settings persist Letter/A4, portrait/landscape, 2/4/6 recipes per page, density, formula/warning/note detail, protected fields, verification metadata, signatures, and page metadata. Calculator, comparison, history, and library printing use a dedicated `/print` document; oversized recipes receive a full page instead of global scaling.

@@ -66,3 +66,19 @@ Define Supabase sync/auth/permissions/revision adapters only after local FUR val
 # Atomic-radius infrastructure milestone
 
 Registry infrastructure is superseded by schema 2: three definition-separated datasets, source-verification/lab-approval split, Decimal descriptor arithmetic, per-site selectors, missing-value blocking, schema-5 immutable provenance, importer/spot-check fixtures, and screening disclaimers are implemented. Laboratory approval remains pending and is not implied.
+
+# Calculation verification and reconciliation milestone
+
+Engineering implementation is complete: engine-backed precursor conversion, purity/loss/rounding stages, reverse realized moles, elemental/formula reconciliation, atomic-weight contributions, assumption classification, comparison isolation, advanced-summary integration, exact JSON/CSV data, and compact Letter/A4 print output. Arithmetic verification is explicitly separate from measured outcomes and never claims phase or reaction validation. Historical snapshots without the additive fields remain readable with unavailable detail labeled. Independent scientific review and laboratory acceptance remain the next gate.
+
+# Local user-settings milestone
+
+Engineering implementation adds a versioned schema-8 IndexedDB settings record, documented feed-default precedence, configurable post-save action, independent Standard/Advanced weighing fields and order, required-column protections, synthetic previews, optional provenance-bearing elemental-radius cells, scoped resets, and verified backup/restore. Settings remain local presentation/starting preferences and never rewrite recipes or snapshots.
+
+# Focused calculation-control, precursor-coverage, and print milestone
+
+Engineering implementation moves verification to the bottom Calculation details row beside trace, adds metadata-driven elemental precursor eligibility and a direct search-limit-bypassing HE route, migrates local user settings to record schema `2.0.0` with print preferences, and routes calculator/comparison/history/library printing through a shared dedicated state. Letter/A4 2/4/6-up and long-recipe fallback are covered at 100% scale. Solver mathematics, scientific persistence schemas, comparison models, and radius calculations are unchanged.
+
+The focused appearance milestone migrates user settings to `3.0.0`, adds one Light/Dark/System authority with a pre-hydration bootstrap mirror, introduces semantic palette tokens and a compact global control, and forces print-safe light rendering. It is presentation-only: chemistry, recipe revisioning, comparison calculations, snapshots, and canonical exports remain unchanged.
+
+The palette/print refinement migrates settings to `4.0.0`, replaces blue-tinted Dark neutrals with charcoal, adds explicit Discord-style black Midnight, preserves System as Light/Dark only, raises print typography for 2/4/6-up sheets, lowers print packing capacities, and adds formula-boundary wrapping. The global creator credit is screen-only. No scientific or pagination architecture is replaced.

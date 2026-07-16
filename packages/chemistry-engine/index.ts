@@ -15,6 +15,7 @@ export * from "./balance-matrix";
 export * from "./version";
 export * from "./precursor-solver";
 export * from "./precursor-suggestions";
+export * from "./element-precursor-eligibility";
 export * from "./batch-calculation";
 export * from "./descriptors";
 

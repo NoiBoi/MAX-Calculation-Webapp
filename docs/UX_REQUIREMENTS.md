@@ -71,6 +71,7 @@ Two calculation columns share a locked composition header. Differences in route,
 ## Accessibility
 
 - WCAG 2.2 AA contrast and focus appearance.
+- Light, neutral Dark, black Midnight, and System use one persistent preference. The compact appearance control is keyboard and screen-reader accessible, System reacts to OS changes but never chooses Midnight, reduced motion suppresses transitions, and every dialog/panel/table inherits semantic theme tokens. Midnight relies on thin borders and typography rather than large filled contrast. Startup applies the root theme before primary UI paint; print always uses a larger-type light paper palette at 100% scale.
 - Every input has a persistent accessible label and unit association.
 - Tables use real headers, captions, and row warning descriptions.
 - Status and warning regions use appropriate live-region politeness.
@@ -135,3 +136,28 @@ Blocking and action-required issues expand by default; minor advisories and calc
 - Comparison opens with no placeholder scenarios and exposes `Add saved recipes`, `Add current recipe`, and `Add blank scenario` actions.
 - The saved-recipe picker supports search, checkbox multi-selection, select-all-visible, clear, duplicate indication, and current revision metadata. Recipes with different targets are allowed and remain independent.
 - A successful comparison save is reported only after persistence readback. Failure leaves the working comparison unchanged and provides an actionable message.
+
+## Verification workflow
+
+- `Verify calculations` is a secondary audit action in the bottom Calculation details row beside the matching `Open calculation trace` control. It is absent from primary results actions and restores focus after close.
+- Default values are concise; exact quantities and atomic-weight contributions are disclosed per precursor.
+- Positive and negative differences are explicitly labeled `excess` and `deficiency`; precursor-only elements have a separate table.
+- Invalid or stale current work has no usable verification. Comparison keeps valid and unavailable scenarios independently visible and supports one-scenario and all-scenario actions.
+- Advanced weighing summary contains only status, target formula moles, largest residual, atomic-data version, and direction to the full view.
+- Print removes controls and full trace while retaining compact conversion, reconciliation, assumptions, status, and the experimental-limitations disclaimer.
+
+## Local settings interaction
+
+- Settings are organized as Formula and feed defaults, Save behavior, Weighing-results display, and Data/reset on `/settings`.
+- Scientific inputs use associated labels, positive-decimal validation, ideal-template helpers, and explicit precedence text.
+- Standard and Advanced column checkboxes and labeled Up/Down buttons are keyboard accessible and have independent synthetic previews. Drag-and-drop is not required.
+- Final mass cannot be hidden; Precursor or Formula must remain; Advanced must retain Status or Warning indicator. Invalid configurations are blocked with actionable text.
+- Display settings affect the active calculator after navigation without recalculation. Feed defaults affect only newly created compatible calculations. Reset-all requires confirmation and never deletes scientific records or layouts.
+- The route and weighing table remain usable at 200% zoom through wrapping controls and horizontal table scrolling.
+
+## Print interaction
+
+- Settings is directly visible in the calculator command bar. Print settings provide Letter/A4, orientation, 2/4/6-up packing, field toggles, formula/warning/note modes, verification detail, signatures, and page metadata with a synthetic preview.
+- Recipe/scenario identity, adjusted feed, precursor identity, final mass, and total mass cannot be hidden.
+- Print validates content, builds the shared model, opens `/print`, waits for fonts/layout, marks `data-print-ready="true"`, and invokes the browser dialog. Pop-up failure leaves the workspace unchanged.
+- Dedicated print state excludes application controls and trace. Short 2/4/6 layouts use readable physical type without scaling; long recipes receive a full page with a notice.

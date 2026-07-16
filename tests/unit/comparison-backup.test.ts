@@ -109,7 +109,7 @@ describe("route comparison model and deterministic differences", () => {
     const repository = repo(); const workspace = comparison();
     await repository.saveComparison(workspace);
     const opened = await repository.getComparison(workspace.id);
-    expect(opened).toEqual({ ...workspace, schemaVersion: "7.0.0", updatedAt: opened?.updatedAt });
+    expect(opened).toEqual({ ...workspace, schemaVersion: "8.0.0", updatedAt: opened?.updatedAt });
     expect((await repository.checkIntegrity()).valid).toBe(true);
   });
 

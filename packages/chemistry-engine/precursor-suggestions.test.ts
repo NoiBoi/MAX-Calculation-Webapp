@@ -52,9 +52,39 @@ describe("deterministic precursor suggestions", () => {
     expect(first.diagnostics.some((item) => item.code === "CANDIDATE_SEARCH_LIMIT_REACHED")).toBe(true);
   });
 
-  it("reports a required element absent from the registry without invalidating the target", () => {
-    const result = suggestPrecursorRoutes(target("Zr2AlC"), registry);
+  it.each([
+    "(ScTiVCrMnFeCoNiZr)4AlC3",
+    "(YTiZrNbMoHfTaWRe)4AlC3",
+    "(RuRhPdOsIrPt)4AlC3",
+    "(TiSiGeB)4AlC3",
+    "(LaCeNdSmGd)4AlC3",
+  ])("builds a deterministic direct elemental route for supported solid elements in %s", (formula) => {
+    const first = suggestPrecursorRoutes(target(formula), registry, [], { maximumCandidatePrecursors: 2, maximumSearchCandidates: 1 });
+    const second = suggestPrecursorRoutes(target(formula), registry, [], { maximumCandidatePrecursors: 2, maximumSearchCandidates: 1 });
+    expect(first).toEqual(second);
+    expect(first.suggestions[0]).toMatchObject({ name: "Generic direct elemental route \u00b7 Not laboratory validated", sourceType: "elemental-fallback" });
+    expect(first.suggestions[0]!.precursors).toHaveLength(Object.keys(target(formula).amounts).length);
+    expect(first.suggestions[0]!.precursors.every((item) => item.defaultPurityPercent === undefined)).toBe(true);
+  });
+
+  it("uses an explicit registered elemental precursor instead of duplicating it", () => {
+    const result = suggestPrecursorRoutes(target("Zr2AlC"), [...registry, p("stock-zr", "Zr")]);
+    const direct = result.suggestions.find((item) => item.sourceType === "elemental-fallback")!;
+    expect(direct.precursorIds).toContain("stock-zr");
+    expect(direct.precursorIds).not.toContain("generic-element-zr");
+    expect(new Set(direct.precursorIds).size).toBe(direct.precursorIds.length);
+  });
+
+  it.each([["Ti2AlN", "N"], ["Ti2AlO", "O"]])("requires an explicit compound or registered source for %s", (formula, element) => {
+    const withoutExplicit = registry.filter((item) => item.formula !== element && !item.formula?.includes(element));
+    const result = suggestPrecursorRoutes(target(formula), withoutExplicit);
     expect(result.suggestions).toEqual([]);
-    expect(result.diagnostics).toEqual(expect.arrayContaining([expect.objectContaining({ code: "REQUIRED_ELEMENT_ABSENT_FROM_PRECURSOR_REGISTRY", element: "Zr" }), expect.objectContaining({ code: "NO_CANDIDATE_ROUTE_FOUND" })]));
+    expect(result.diagnostics).toEqual(expect.arrayContaining([expect.objectContaining({ code: "ELEMENT_REQUIRES_EXPLICIT_PRECURSOR", element })]));
+  });
+
+  it("distinguishes a valid element with unavailable atomic-weight data", () => {
+    const result = suggestPrecursorRoutes(target("Tc2AlC"), registry);
+    expect(result.suggestions).toEqual([]);
+    expect(result.diagnostics).toEqual(expect.arrayContaining([expect.objectContaining({ code: "ATOMIC_WEIGHT_UNAVAILABLE", element: "Tc" })]));
   });
 });

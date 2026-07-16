@@ -180,3 +180,47 @@ Engine and adapter fixtures cover coefficients 1, 1.2, 2.2, and 0.9; direct matr
 - `PRINT-COMPARISON-001`: a two-scenario comparison renders a dedicated two-column print grid and overview rather than printing the interactive workspace.
 - `PANEL-DISMISS-001` and `DEFAULT-ROUTE-001`: outside/Escape dismissal with focus restoration, calculator landing at `/`, and labeled demo navigation at `/demo`.
 - `NOTES-001`: multiline category/tag/date/revision-linked records remain searchable after reopen. Repository fixtures additionally cover edit, archive, deletion, body/title/category/tag search, snapshot immutability, recipe deletion cascade, backup/restore, conflict remapping, safe text storage, and exclusion from ordinary weighing export.
+
+## Calculation verification fixtures
+
+Unit coverage proves engine-sourced mole-to-mass, purity, sequential loss, final rounding, reverse realized moles, signed elemental reconciliation, precursor-only separation, atomic contribution totals, override provenance, exact JSON preservation, historical fallback, assumption classification, and 5/50/500 g linear pre-round scaling.
+
+- `VERIFY-001`: audit precursor conversion, provenance, reverse moles, and exact disclosure.
+- `VERIFY-002`: inspect required/supplied values, signed relative residuals, and largest residual after rounding.
+- `VERIFY-003`: show purity and loss equations separately and reverse from final mass.
+- `VERIFY-004`: confirm 5, 50, and 500 g inputs scale intended moles and pre-round masses by 1, 10, and 100.
+- `VERIFY-005`: verify two comparison scenarios, invalidate one, and retain the other's verification.
+- `VERIFY-006`: generate compact normal Letter and A4 verification PDFs.
+
+## Local user-settings fixtures
+
+Repository tests cover defaults, save/reopen, independent 211/312/413 values, display independence/order, required-field validation, future-schema rejection, reset isolation, backup inclusion, verified restore, and non-mutation of canonical scientific input. Migration coverage verifies schema 8 initialization without rewriting prior records.
+
+- `SETTINGS-001`: persist feed, save-action, and Standard column changes across refresh.
+- `SETTINGS-002`: apply Al and template-specific carbon defaults only to new pure-carbide templates; preserve explicit examples, nitrides, and mixed C/N targets.
+- `SETTINGS-003`: use the configured action for the main Save/Enter while retaining all three split-menu actions.
+- `SETTINGS-004`: apply Standard visibility independently without changing calculation availability.
+- `SETTINGS-005`: show selected elemental radius/provenance for Ti, `Not applicable` for TiC, and preserve separate Standard settings.
+- `SETTINGS-006`: reset display/all settings while preserving recipes, routes, snapshots, notes, and layouts.
+
+## Precursor coverage, verification placement, and print fixtures
+
+- `PRECURSOR-COVERAGE-001`: apply an eleven-element direct route containing Sc, Cr, Mn, Fe, Co, Ni, and Zr; verify full coverage, calculation, and undo.
+- Engine regressions cover Sc/Y, transition and refractory metals, Ru/Rh/Pd, Re/Os/Ir/Pt, Si/Ge/B, supported lanthanides, explicit N/O policy, unavailable Tc mass, registered precedence, duplicate prevention, determinism, and search-limit bypass.
+- `VERIFY-PLACEMENT-001`: prove the top area has no verification action, bottom Calculation details pairs verification with trace, and close restores focus.
+- `PRINT-SETTINGS-001`: persist A4, landscape, four-up, field toggles, and required-field protection across refresh and backup/restore.
+- `PRINT-LETTER-{2,4,6}-UP` and `PRINT-A4-{2,4,6}-UP`: assert one page, region count, readable masses, no clipping, no transform, and no print-root controls at 100% scale.
+- `PRINT-LONG-001`: promote a fourteen-row recipe to a full page, report fallback, then resume configured packing without reordering.
+# Appearance fixtures
+
+- `THEME-001`: Dark persists through refresh and calculator, comparison, Settings, and tutorial routes; the pre-hydration root already reports Dark.
+- `THEME-002`: System resolves and reacts to emulated Light/Dark preferences while explicit Light/Dark ignore OS changes and preserve their persisted value.
+- `THEME-003`: compact control, More panel, Save dialog, trace, and Settings remain themed and operable.
+- `THEME-004`: theme changes preserve displayed scientific values, export availability, and unsaved/saved semantics.
+- `THEME-005`: printing from Dark uses a white dedicated page while the application remains Dark.
+- Appearance migration, repository reopen, backup/restore, resolution, and invalid preference behavior have focused unit coverage.
+- `THEME-PALETTE-001`: revised Dark page, panel, and input surfaces are neutral charcoal without blue-dominant neutral values.
+- `MIDNIGHT-001`: explicit Midnight uses black/near-black surfaces, lower structural contrast, no startup flash, persistence, readable scientific values, and a serious/critical accessibility audit.
+- `THEME-SWITCH-001`: all four choices are distinct, System resolves only to Light/Dark, and weighing values remain unchanged.
+- `PRINT-TEXT-001`, `PRINT-4-UP-TEXT-001`, and `PRINT-6-UP-TEXT-001`: title, row, final-mass, and total font floors are measured at 100%; formulas do not clip and long recipes receive a full page without transform scaling.
+- Creator credit is present with the correct `mailto:` link in Light, Dark, and Midnight and hidden in print media.

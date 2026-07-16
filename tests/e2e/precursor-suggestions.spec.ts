@@ -40,3 +40,9 @@ test("PRECURSOR-SUGGEST-004 autofill confirms before replacing a non-empty route
   page.once("dialog", async (dialog) => { expect(dialog.message()).toContain("Replace the current 1 precursor"); await dialog.dismiss(); });
   await page.getByRole("button", { name: "Autofill best candidate" }).click(); await expect(page.locator('[id^="precursor-formula-"]')).toHaveCount(1); await expect(page.locator('[id^="precursor-formula-"]')).toHaveValue("Ti");
 });
+
+test("PRECURSOR-COVERAGE-001 direct elemental fallback handles a large high-entropy target", async ({ page }) => {
+  await ready(page); const clear = page.getByRole("button", { name: "Clear all precursors" }); if (await clear.isEnabled()) { page.once("dialog", (dialog) => dialog.accept()); await clear.click(); } await page.getByLabel("Target formula").fill("(ScTiVCrMnFeCoNiZr)4AlC3");
+  await page.getByRole("button", { name: "Suggest precursors" }).click(); const panel = page.getByRole("region", { name: "Suggested precursors" }); await expect(panel.getByText(/Generic direct elemental route/)).toBeVisible(); await expect(panel.getByText(/absent from the registered precursor inventory/)).toHaveCount(0);
+  const direct = panel.getByRole("article").filter({ hasText: "Generic direct elemental route" }); await direct.getByRole("button", { name: "Use this route" }).click(); await expect(page.locator("[data-precursor-formula]")).toHaveCount(11); await expect(page.getByRole("table", { name: /Final gross weighing masses/ })).toBeVisible(); await page.getByRole("button", { name: "Undo" }).click();
+});

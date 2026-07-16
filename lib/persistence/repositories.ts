@@ -31,6 +31,8 @@ import {
   type StoredAtomicRadiusDataset,
 } from "./entities";
 import { BUILT_IN_LAYOUTS, validateLayout } from "../layouts/layouts";
+import { createDefaultUserSettings, migrateUserSettings, validateUserSettings, type LocalUserSettings } from "../settings/user-settings";
+import { writeAppearanceBootstrap } from "../theme/theme";
 
 export class PersistenceConflictError extends Error {
   constructor(message = "This recipe changed in another tab. Reopen it before saving another revision.") {
@@ -93,6 +95,12 @@ export interface RouteRepository {
   listRouteRevisions(routeId: string): Promise<readonly RouteRevision[]>;
 }
 
+export interface UserSettingsRepository {
+  getSettings(): Promise<LocalUserSettings>;
+  saveSettings(settings: LocalUserSettings): Promise<void>;
+  resetSettings(): Promise<LocalUserSettings>;
+}
+
 function id(prefix: string): string {
   const value = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`;
   return `${prefix}-${value}`;
@@ -133,7 +141,7 @@ export interface SaveRouteRevisionRequest {
   readonly inputState: WorkspaceRecipeState;
 }
 
-export class LocalDataRepositories implements RecipeRepository, RouteRepository {
+export class LocalDataRepositories implements RecipeRepository, RouteRepository, UserSettingsRepository {
   constructor(readonly database = new MaxStoichDatabase()) {}
 
   async saveCalculatedRevision(request: SaveCalculatedRevisionRequest): Promise<SavedRevisionBundle> {
@@ -398,6 +406,18 @@ export class LocalDataRepositories implements RecipeRepository, RouteRepository 
   }
   async resetDefaultLayout(): Promise<void> { await this.database.layouts.toCollection().modify({ isDefault: false }); }
 
+  async getSettings(): Promise<LocalUserSettings> {
+    const stored = await this.database.userSettings.get("local-user-settings");
+    if (stored) { const migrated = migrateUserSettings(stored); if (stored.schemaVersion !== migrated.schemaVersion) await this.database.userSettings.put(clone(migrated)); return migrated; }
+    const defaults = createDefaultUserSettings(); await this.database.userSettings.put(defaults); return clone(defaults);
+  }
+  async saveSettings(settings: LocalUserSettings): Promise<void> {
+    const normalized = migrateUserSettings({ ...settings, updatedAt: new Date().toISOString() });
+    const errors = validateUserSettings(normalized); if (errors.length) throw new Error(errors.join(" "));
+    await this.database.userSettings.put(clone(normalized)); writeAppearanceBootstrap(normalized.appearance);
+  }
+  async resetSettings(): Promise<LocalUserSettings> { const defaults = createDefaultUserSettings(); await this.database.userSettings.put(defaults); writeAppearanceBootstrap(defaults.appearance); return clone(defaults); }
+
   async installRadiusDataset(dataset: AtomicRadiusDataset, localTrust: StoredAtomicRadiusDataset["localTrust"] = "imported-unverified"): Promise<StoredAtomicRadiusDataset> {
     const digest = await sha256Hex(stableCanonicalize(canonicalRadiusDatasetContent(dataset)));
     const validation = validateAtomicRadiusDataset(dataset, digest);
@@ -435,8 +455,8 @@ export class LocalDataRepositories implements RecipeRepository, RouteRepository 
 
   async checkIntegrity(): Promise<IntegrityResult> {
     const diagnostics: IntegrityDiagnostic[] = [];
-    const [recipes, revisions, snapshots, routes, routeRevisions, comparisons, layouts, radiusDatasets, recipeNotes] = await Promise.all([
-      this.database.recipes.toArray(), this.database.recipeRevisions.toArray(), this.database.snapshots.toArray(), this.database.routes.toArray(), this.database.routeRevisions.toArray(), this.database.comparisons.toArray(), this.database.layouts.toArray(), this.database.radiusDatasets.toArray(), this.database.recipeNotes.toArray(),
+    const [recipes, revisions, snapshots, routes, routeRevisions, comparisons, layouts, radiusDatasets, recipeNotes, userSettings] = await Promise.all([
+      this.database.recipes.toArray(), this.database.recipeRevisions.toArray(), this.database.snapshots.toArray(), this.database.routes.toArray(), this.database.routeRevisions.toArray(), this.database.comparisons.toArray(), this.database.layouts.toArray(), this.database.radiusDatasets.toArray(), this.database.recipeNotes.toArray(), this.database.userSettings.toArray(),
     ]);
     const revisionsById = new Map(revisions.map((item) => [item.id, item]));
     const snapshotsById = new Map(snapshots.map((item) => [item.id, item]));
@@ -462,14 +482,15 @@ export class LocalDataRepositories implements RecipeRepository, RouteRepository 
     }
     for (const layout of layouts) for (const message of validateLayout(layout)) diagnostics.push({ code: "INVALID_LAYOUT", severity: "warning", recordType: "layout", recordId: layout.id, message, blocking: false });
     for (const record of radiusDatasets) { const digest = await sha256Hex(stableCanonicalize(canonicalRadiusDatasetContent(record.dataset))); const validation = validateAtomicRadiusDataset(record.dataset, digest); if (digest !== record.digest || validation.diagnostics.some((item) => item.code === "RADIUS_DATASET_DIGEST_MISMATCH")) diagnostics.push({ code: "RADIUS_DATASET_DIGEST_MISMATCH", severity: "error", recordType: "radius-dataset", recordId: record.id, message: "The installed radius dataset digest is invalid.", blocking: true }); }
+    for (const settings of userSettings) { try { for (const message of validateUserSettings(migrateUserSettings(settings))) diagnostics.push({ code: "INVALID_USER_SETTINGS", severity: "error", recordType: "user-settings", recordId: settings.id, message, blocking: true }); } catch (error) { diagnostics.push({ code: "INVALID_USER_SETTINGS", severity: "error", recordType: "user-settings", recordId: settings.id, message: error instanceof Error ? error.message : "User settings are invalid.", blocking: true }); } }
     return { valid: diagnostics.every((item) => !item.blocking), diagnostics };
   }
 
   async exportRawBackup(): Promise<string> {
-    const [recipes, recipeRevisions, snapshots, routes, routeRevisions, recentCalculations, recovery, migrations, comparisons, layouts, radiusDatasets, recipeNotes] = await Promise.all([
-      this.database.recipes.toArray(), this.database.recipeRevisions.toArray(), this.database.snapshots.toArray(), this.database.routes.toArray(), this.database.routeRevisions.toArray(), this.database.recentCalculations.toArray(), this.database.recovery.toArray(), this.database.migrations.toArray(), this.database.comparisons.toArray(), this.database.layouts.toArray(), this.database.radiusDatasets.toArray(), this.database.recipeNotes.toArray(),
+    const [recipes, recipeRevisions, snapshots, routes, routeRevisions, recentCalculations, recovery, migrations, comparisons, layouts, radiusDatasets, recipeNotes, userSettings] = await Promise.all([
+      this.database.recipes.toArray(), this.database.recipeRevisions.toArray(), this.database.snapshots.toArray(), this.database.routes.toArray(), this.database.routeRevisions.toArray(), this.database.recentCalculations.toArray(), this.database.recovery.toArray(), this.database.migrations.toArray(), this.database.comparisons.toArray(), this.database.layouts.toArray(), this.database.radiusDatasets.toArray(), this.database.recipeNotes.toArray(), this.database.userSettings.toArray(),
     ]);
-    return JSON.stringify({ schemaVersion: LOCAL_SCHEMA_VERSION, exportedAt: new Date().toISOString(), recipes, recipeRevisions, snapshots, routes, routeRevisions, recentCalculations, recovery, migrations, comparisons, layouts, radiusDatasets, recipeNotes }, null, 2);
+    return JSON.stringify({ schemaVersion: LOCAL_SCHEMA_VERSION, exportedAt: new Date().toISOString(), recipes, recipeRevisions, snapshots, routes, routeRevisions, recentCalculations, recovery, migrations, comparisons, layouts, radiusDatasets, recipeNotes, userSettings }, null, 2);
   }
 
   close(): void { this.database.close(); }

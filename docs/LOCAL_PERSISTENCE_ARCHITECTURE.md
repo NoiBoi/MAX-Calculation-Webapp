@@ -39,3 +39,13 @@ Comparison assembly is an in-memory working operation. Empty and one-scenario wo
 # Save post-actions
 
 Save post-actions are transactionally ordered: validate and persist, read the saved record back, then transition the workspace. `Save and start blank` constructs a new blank transient workspace while retaining UI preferences. `Save and open copy` constructs a new transient identity from the just-saved scientific input and records duplication provenance. Notes remain attached to their source recipe/revision and revision-note text is never promoted into the copy.
+
+# Schema 8 local user settings
+
+Database version 8 adds one `userSettings` table keyed by `local-user-settings`. `UserSettingsRepository` is the authoritative reader/writer/reset boundary. Missing records are initialized from documented defaults; unsupported future settings schemas are rejected. The 7→8 migration adds settings without modifying recipe revisions, snapshots, routes, layouts, or notes. The earlier localStorage weighing-sort preference is imported once into the settings record when applicable.
+
+Full backup manifests include settings counts and digests. Verified pre-settings backups retain their historical manifest verification and receive documented defaults during migration. Replace restore restores settings; merge follows the selected conflict policy. Resetting settings never clears other tables.
+
+User-settings record schema `2.0.0` added nested Print settings without changing IndexedDB database version 8 or scientific tables. Schema `3.0.0` added `light | dark | system`; schema `4.0.0` adds explicit `midnight`. Reading schemas `1.0.0` through `3.0.0` supplies missing defaults and persists the migrated record; existing `dark` remains revised neutral Dark and is never converted to Midnight. Integrity scans validate the migrated form and future schemas remain rejected. Appearance defaults to System and never enters recipe revisions, snapshots, comparison scientific input, canonical output digests, CSV, or recipe JSON.
+
+IndexedDB remains authoritative. Because it cannot be read synchronously before first paint, successful settings reads/writes/restores maintain a derived `max-stoich-appearance` localStorage bootstrap mirror. The root initialization script reads only that value, resolves System through `prefers-color-scheme`, and sets `data-theme` before hydration. React then reconciles from the settings repository and live media-query changes. Reset writes the System default; verified backup and restore include the authoritative appearance field.

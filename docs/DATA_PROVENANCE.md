@@ -66,3 +66,11 @@ Historical schema-5 snapshots store the atomic-weight version/digest and, per ex
 # Atomic-radius registry gate (schema 2.0.0)
 
 The installed registry contains three separate datasets and has a source-verified screening default. Validation requires pm units, positive decimals, real symbols, qualifier-aware uniqueness, complete source/policy/coverage metadata, and an independently verified SHA-256 digest. Imported trust is downgraded to `unverified-import`. Overrides require element, matching definition, reason, source/measurement basis, label, and revision date.
+
+# Settings provenance boundary
+
+User settings select starting values and presentation; they are not scientific evidence or measured material data. The elemental-radius weighing column resolves only a single-element precursor against the explicitly selected source-verified dataset and displays pm units, definition, dataset/version provenance, or `No value`. Compound precursors are `Not applicable`; no mean radius is inferred. Settings are excluded from scientific snapshot digests and ordinary calculation exports but included in verified full backups.
+
+# Elemental precursor eligibility
+
+Generic elemental fallback is a deterministic formula identity, not a material recommendation. Eligibility uses the valid element registry, CIAAW calculation-value availability, and explicit exclusions. Allowed identities carry `synthetic` validation and no purity, supplier, stock, lot, powder size, hazards, or suitability. N/O/halogens/noble gases and misleading physical forms require explicit registration; highly radioactive/synthetic elements are disallowed; a valid element without a usable weight receives `ATOMIC_WEIGHT_UNAVAILABLE`, not an inventory error. Compound candidates come only from built-in or saved records.

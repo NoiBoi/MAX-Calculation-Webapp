@@ -221,3 +221,11 @@ Implemented screening calculations use `r_mean=sum(c_i r_i)`, `range=max(r_i)-mi
 The equations above are now implemented for explicit sites and source-verified screening datasets. Occupant fractions are normalized over occupied atoms, vacancy is excluded, multiplicity does not affect site statistics, and any missing or qualifier-ambiguous occupant blocks every aggregate without omission. One explicit dataset is selected per site; definitions are never combined into a global mismatch number. Flat formulas never assign M/A/X sites.
 
 Scientific residual calculation/tolerance remains unchanged. Presentation policy `1.0.0` separately considers relative residual and practical rounding context: below 0.1% defaults to minor, 0.1–1% remains minor unless a material balance decision is affected, and above 1% defaults to action required. These are UI defaults, not chemistry acceptance limits.
+
+## Arithmetic verification and reconciliation
+
+Calculation verification exposes the ordered batch pipeline. For precursor amount `n`, molar mass `M`, purity fraction `q`, retained fraction `r_i`, pre-round mass `m_pre`, balance increment `d`, and final mass `m_final`: `m_pure = n M`; `m_after_purity = m_pure / q`; each loss step is `m_i = m_(i-1) / r_i`, where `r_i = 1 - L_i`; `m_final = round_mode(m_pre / d) d`; and `n_realized = m_final q / M`.
+
+The precursor difference is `n_realized - n_intended`. Elemental reconciliation uses `delta_e = b_realized,e - b_adjusted,e`, where `b_realized` is reconstructed from final rounded precursor masses, declared purities, selected molar masses, and precursor compositions. Precursor-only elements are reported separately and are not target residuals. Exact engine strings remain authoritative; concise UI values are presentation only. Atomic-weight contribution rows reuse the engine molar-mass result.
+
+This is arithmetic verification. A normalized realized formula reconstructed from weighed precursor amounts does not establish reaction completion, yield, phase formation, volatilization, side products, furnace behavior, or measured product composition.

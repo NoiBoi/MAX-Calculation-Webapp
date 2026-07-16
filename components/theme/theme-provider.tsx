@@ -1,0 +1,62 @@
+"use client";
+
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { LocalDataRepositories } from "@/lib/persistence/repositories";
+import { APPEARANCE_BOOTSTRAP_KEY, APPEARANCE_CHANGE_EVENT, isAppearancePreference, resolveTheme, writeAppearanceBootstrap, type AppearancePreference, type ResolvedTheme } from "@/lib/theme/theme";
+
+type ThemeContextValue = Readonly<{ preference: AppearancePreference; resolvedTheme: ResolvedTheme; setPreference: (preference: AppearancePreference) => Promise<void> }>;
+const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
+
+function systemDark(): boolean { return window.matchMedia("(prefers-color-scheme: dark)").matches; }
+function applyTheme(preference: AppearancePreference): ResolvedTheme {
+  const resolved = resolveTheme(preference, systemDark());
+  document.documentElement.dataset.theme = resolved;
+  document.documentElement.dataset.themePreference = preference;
+  document.documentElement.style.colorScheme = resolved === "light" ? "light" : "dark";
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", resolved === "midnight" ? "#000000" : resolved === "dark" ? "#181a1d" : "#f4f6f7");
+  return resolved;
+}
+
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const initial = typeof document === "undefined" ? "system" : isAppearancePreference(document.documentElement.dataset.themePreference) ? document.documentElement.dataset.themePreference : "system";
+  const [preference, setPreferenceState] = useState<AppearancePreference>(initial);
+  const preferenceRef = useRef<AppearancePreference>(initial);
+  const userChangedRef = useRef(false);
+  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() => typeof document !== "undefined" && document.documentElement.dataset.theme === "dark" ? "dark" : "light");
+  const repositories = useMemo(() => new LocalDataRepositories(), []);
+
+  useLayoutEffect(() => { applyTheme(preferenceRef.current); }, []);
+
+  const acceptPreference = useCallback((next: AppearancePreference) => {
+    preferenceRef.current = next; setPreferenceState(next); setResolvedTheme(applyTheme(next));
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    void repositories.getSettings().then(async (settings) => {
+      if (!active || userChangedRef.current) return;
+      const bootstrapPreference = preferenceRef.current;
+      if (settings.appearance !== bootstrapPreference) await repositories.saveSettings({ ...settings, appearance: bootstrapPreference });
+      if (active) acceptPreference(bootstrapPreference);
+    });
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const mediaChanged = () => { if (preferenceRef.current === "system") setResolvedTheme(applyTheme("system")); };
+    const externalChanged = (event: Event) => { const next = (event as CustomEvent<unknown>).detail; if (isAppearancePreference(next)) acceptPreference(next); };
+    const storageChanged = (event: StorageEvent) => { if (event.key === APPEARANCE_BOOTSTRAP_KEY && isAppearancePreference(event.newValue)) acceptPreference(event.newValue); };
+    media.addEventListener("change", mediaChanged); window.addEventListener(APPEARANCE_CHANGE_EVENT, externalChanged); window.addEventListener("storage", storageChanged);
+    return () => { active = false; media.removeEventListener("change", mediaChanged); window.removeEventListener(APPEARANCE_CHANGE_EVENT, externalChanged); window.removeEventListener("storage", storageChanged); repositories.close(); };
+  }, [acceptPreference, repositories]);
+
+  const setPreference = useCallback(async (next: AppearancePreference) => {
+    userChangedRef.current = true;
+    acceptPreference(next); writeAppearanceBootstrap(next);
+    const settings = await repositories.getSettings();
+    if (settings.appearance !== next) await repositories.saveSettings({ ...settings, appearance: next });
+  }, [acceptPreference, repositories]);
+
+  return <ThemeContext.Provider value={{ preference, resolvedTheme, setPreference }}>{children}</ThemeContext.Provider>;
+}
+
+export function useTheme(): ThemeContextValue {
+  const value = useContext(ThemeContext); if (!value) throw new Error("useTheme must be used within ThemeProvider."); return value;
+}
