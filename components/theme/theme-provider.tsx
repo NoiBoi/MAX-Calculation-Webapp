@@ -18,14 +18,25 @@ function applyTheme(preference: AppearancePreference): ResolvedTheme {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const initial = typeof document === "undefined" ? "system" : isAppearancePreference(document.documentElement.dataset.themePreference) ? document.documentElement.dataset.themePreference : "system";
+  // The server and the first client render must be identical. The pre-hydration
+  // script has already painted the stored theme on <html>; React adopts that
+  // value in the layout effect instead of reading browser state during render.
+  const initial: AppearancePreference = "system";
   const [preference, setPreferenceState] = useState<AppearancePreference>(initial);
   const preferenceRef = useRef<AppearancePreference>(initial);
   const userChangedRef = useRef(false);
-  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() => typeof document !== "undefined" && document.documentElement.dataset.theme === "dark" ? "dark" : "light");
+  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>("light");
   const repositories = useMemo(() => new LocalDataRepositories(), []);
 
-  useLayoutEffect(() => { applyTheme(preferenceRef.current); }, []);
+  useLayoutEffect(() => {
+    let active = true;
+    const bootstrapped = document.documentElement.dataset.themePreference;
+    const next = isAppearancePreference(bootstrapped) ? bootstrapped : "system";
+    preferenceRef.current = next;
+    const resolved = applyTheme(next);
+    queueMicrotask(() => { if (active) { setPreferenceState(next); setResolvedTheme(resolved); } });
+    return () => { active = false; };
+  }, []);
 
   const acceptPreference = useCallback((next: AppearancePreference) => {
     preferenceRef.current = next; setPreferenceState(next); setResolvedTheme(applyTheme(next));

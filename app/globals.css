@@ -34,6 +34,21 @@
   --focus-ring: #0d9488;
   --shadow-panel: 0 2px 10px #0f172a1f;
   --overlay-backdrop: #02061799;
+  --font-body: 1rem;
+  --font-supporting: .875rem;
+  --font-input: 1rem;
+  --font-button: .9375rem;
+  --font-section-heading: 1.125rem;
+  --font-page-title: 1.25rem;
+  --font-formula: 1.05rem;
+  --font-table: .875rem;
+  --toolbar-height: 4rem;
+  --control-height: 2.5rem;
+  --panel-padding: 1rem;
+  --layout-gap: 1rem;
+  --workspace-max-width: 1500px;
+  --comparison-max-width: 1600px;
+  --settings-max-width: 1300px;
   background: var(--background-page);
   color: var(--text-primary);
 }
@@ -109,7 +124,8 @@
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--background-page); color: var(--text-primary); }
+html { font-size: clamp(16px, calc(14.3px + .09vw), 18px); }
+body { margin: 0; background: var(--background-page); color: var(--text-primary); font-size: var(--font-body); }
 input, select, textarea { border-color: var(--border-default); background: var(--background-input); color: var(--text-primary); }
 input::placeholder, textarea::placeholder { color: var(--text-muted); opacity: 1; }
 option { background: var(--background-elevated); color: var(--text-primary); }
@@ -144,14 +160,69 @@ button[aria-pressed="true"] { box-shadow: inset 0 0 0 1px currentColor; }
 .creator-credit { position: fixed; bottom: .75rem; left: 50%; z-index: 40; display: flex; max-width: calc(100vw - 6rem); translate: -50% 0; flex-wrap: wrap; justify-content: center; gap: .15rem .4rem; border: 1px solid var(--border-subtle); border-radius: 999px; background: var(--background-elevated); color: var(--text-muted); padding: .35rem .65rem; box-shadow: var(--shadow-panel); font-size: .72rem; line-height: 1.2; text-align: center; }
 .creator-credit a { color: var(--text-secondary); text-decoration: underline; text-underline-offset: 2px; }
 .site-brand { display: inline-flex; align-items: center; gap: .45rem; white-space: nowrap; }
-.site-logo { display: block; width: 1.75rem; height: 1.75rem; object-fit: contain; transition: filter .15s ease; }
+.site-logo { display: block; width: 1.95rem; height: 1.95rem; object-fit: contain; }
+.site-brand-navigation { font-size: 1.08rem; }
+.site-brand-navigation .site-logo { flex: none; }
+.comparison-brand-link, a[aria-label="MAX Stoich calculator"] { min-height: 2.75rem; align-items: center; padding-inline: .15rem; }
 .site-brand-print { gap: 1.2mm; }
 .site-brand-print .site-logo { width: 4.5mm; height: 4.5mm; }
 :is([data-theme="dark"], [data-theme="midnight"]) .site-logo { filter: invert(1); }
-.comparison-workspace > header a[href="/workspace"]:first-child,
-main.min-h-screen > header > a[href="/workspace"]:first-child { display: inline-flex; align-items: center; gap: .35rem; }
-.comparison-workspace > header a[href="/workspace"]:first-child::before,
-main.min-h-screen > header > a[href="/workspace"]:first-child::before { width: 1.35rem; height: 1.35rem; flex: none; background: currentColor; content: ""; mask: url("/brand/max-stoich-logo.svg") center / contain no-repeat; }
+.comparison-brand-link, .settings-brand-link { display: inline-flex; min-height: 2.75rem; align-items: center; gap: .45rem; color: var(--text-primary); }
+
+/* Responsive application sizing. Print output uses physical units below and is unaffected. */
+.comparison-workspace > [aria-label="Comparison identity"],
+.comparison-workspace > [aria-label="Comparison analysis controls"],
+.comparison-workspace > .mx-auto.max-w-\[1600px\],
+.comparison-workspace > div.mx-auto.grid { width: min(calc(100% - 2rem), var(--comparison-max-width)); max-width: var(--comparison-max-width); }
+.comparison-workspace > [aria-label="Comparison identity"] { margin-top: var(--layout-gap); border-radius: .7rem .7rem 0 0; box-shadow: var(--shadow-panel); }
+.comparison-workspace > [aria-label="Comparison identity"] label { display: grid; min-width: min(100%, 24rem); gap: .3rem; }
+.comparison-workspace > [aria-label="Comparison identity"] label input { width: 100%; min-height: var(--control-height); margin-left: 0; padding-inline: .75rem; }
+.comparison-workspace > [aria-label="Comparison identity"] > select { min-width: min(100%, 20rem); min-height: var(--control-height); padding-inline: .75rem; }
+.comparison-workspace > [aria-label="Comparison analysis controls"] { border-radius: 0 0 .7rem .7rem; }
+.comparison-workspace > section.max-w-2xl { margin-top: clamp(2rem, 8vh, 7rem); border-style: solid; border-color: var(--border-default); }
+.comparison-command-bar { min-height: var(--toolbar-height); padding-inline: clamp(.75rem, 1.2vw, 2rem); }
+.comparison-primary-actions { padding-left: .5rem; border-left: 1px solid var(--border-subtle); }
+.comparison-secondary-actions { color: var(--text-secondary); }
+.comparison-status { color: var(--text-secondary); }
+.comparison-mode-bar { min-height: 2.75rem; align-items: center; }
+.comparison-workspace [aria-label="Comparison view"] { width: fit-content; padding: .2rem; border: 1px solid var(--border-subtle); border-radius: .6rem; background: var(--background-hover); }
+.comparison-workspace [aria-label="Comparison view"] button { border-color: transparent; }
+.comparison-workspace [aria-label$=" scenario"] { min-width: 0; border-color: var(--border-subtle); }
+.comparison-workspace [aria-label$=" scenario"] table { font-size: var(--font-table); }
+.comparison-workspace [aria-label$=" scenario"] input,
+.comparison-workspace [aria-label$=" scenario"] select { min-height: var(--control-height); font-size: var(--font-input); }
+:is([data-theme="dark"], [data-theme="midnight"]) .comparison-workspace .bg-blue-50,
+:is([data-theme="dark"], [data-theme="midnight"]) .comparison-workspace .bg-blue-100 { background: var(--background-hover) !important; border-color: var(--border-default) !important; color: var(--text-primary) !important; }
+[data-theme="midnight"] .comparison-workspace [aria-label$=" scenario"],
+[data-theme="midnight"] .comparison-workspace > [aria-label="Comparison identity"],
+[data-theme="midnight"] .comparison-workspace > [aria-label="Comparison analysis controls"] { background: var(--background-panel) !important; box-shadow: none !important; border-color: var(--border-subtle) !important; }
+main.min-h-screen > header.sticky + div.mx-auto.grid,
+main.min-h-screen > .mx-auto.max-w-\[1500px\] { width: min(calc(100% - 2rem), var(--workspace-max-width)); max-width: var(--workspace-max-width); gap: var(--layout-gap); }
+main.min-h-screen > header:not(.sticky) + div.mx-auto.grid { width: min(calc(100% - 2rem), var(--settings-max-width)); max-width: var(--settings-max-width); gap: var(--layout-gap); }
+main.min-h-screen > header:not(.sticky) + div.mx-auto.grid > section { padding: var(--panel-padding); }
+
+@media (min-width: 2200px) and (min-height: 1100px) {
+  :root { --font-supporting: .9rem; --font-input: 1.02rem; --font-button: 1rem; --font-section-heading: 1.2rem; --font-page-title: 1.35rem; --font-formula: 1.12rem; --font-table: .92rem; --toolbar-height: 4.25rem; --control-height: 2.65rem; --panel-padding: 1.2rem; --layout-gap: 1.2rem; --workspace-max-width: 2100px; --comparison-max-width: 2200px; --settings-max-width: 1900px; }
+  .min-h-screen button, .min-h-screen select { font-size: var(--font-button); }
+  .min-h-screen input, .min-h-screen textarea { font-size: var(--font-input); }
+  .min-h-screen table { font-size: var(--font-table); }
+  .min-h-screen h1 { font-size: var(--font-page-title); }
+  .min-h-screen h2, .min-h-screen h3 { line-height: 1.25; }
+  main.min-h-screen > header:not(.sticky) + div.mx-auto.grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); }
+  .comparison-workspace > div.mx-auto.grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (min-width: 3200px) and (min-height: 1700px) {
+  :root { --font-supporting: .94rem; --font-input: 1.06rem; --font-button: 1.04rem; --font-section-heading: 1.28rem; --font-page-title: 1.48rem; --font-formula: 1.2rem; --font-table: .98rem; --toolbar-height: 4.5rem; --control-height: 2.8rem; --panel-padding: 1.35rem; --layout-gap: 1.35rem; --workspace-max-width: 2700px; --comparison-max-width: 2750px; --settings-max-width: 2400px; }
+  .comparison-workspace > div.mx-auto.grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  dialog { max-width: min(82vw, 110rem); }
+}
+
+@media (max-width: 900px) {
+  html { font-size: 16px; }
+  .comparison-primary-actions, .comparison-secondary-actions { width: 100%; padding-left: 0; border-left: 0; }
+  .comparison-command-bar h1 { margin-right: auto; }
+}
 
 /* Existing utility colors are mapped centrally onto the semantic palette. */
 :is([data-theme="dark"], [data-theme="midnight"]) .bg-white,

@@ -166,6 +166,12 @@ Blocking and action-required issues expand by default; minor advisories and calc
 
 - Retry must visibly enter a pending state and perform a new database initialization attempt.
 - Destructive reset is never the first or only recovery action.
+- Application-level failures retain non-destructive actions even if the calculator never mounts: Retry, skip the last workspace, reset settings only, and explicit emergency export.
+- Settings-only reset states that saved scientific records are preserved; full reset requires a separate confirmation.
 - The print preview uses the actual print page and responds to unsaved Settings edits immediately.
 - Comparison baseline and common-batch controls are labeled presentation-only.
 - Difference displays use signed text and labels in addition to color.
+- At 2560 x 1440 and 3840 x 2160, text and controls scale progressively beyond their 1080p values while line lengths remain bounded. At 1366 x 768 through 1920 x 1080, the established compact density is retained.
+- Workspace maximum widths are approximately 2100 px at 2K and 2700 px at 4K; comparison and Settings have route-appropriate bounds and use additional width for parallel content.
+- Calculator, comparison, and Settings use the shared `SiteBrand`; Dark and Midnight apply the same neutral high-contrast treatment on every route.
+- Comparison groups primary add/save actions separately from secondary actions, presents identity and analysis controls coherently, and keeps its view selector distinct from Standard/Advanced.

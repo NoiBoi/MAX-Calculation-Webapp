@@ -237,4 +237,8 @@ Repository tests cover defaults, save/reopen, independent 211/312/413 values, di
 - Corrupt recovery is classified separately, safe-open skips it without deletion, repair removes malformed transient state, and recovery reset preserves saved tables.
 - Browser workflows cover live unsaved print changes, corrupt-recovery Retry and repair, safe blank-open preservation, comparison baseline/common-batch behavior, scenario sorting/hiding, CSV export, and overview-only printing.
 - `RECOVERY-SETTINGS-001`: an unsupported settings record cannot crash startup, saved recipes remain available, and the workspace reports that session defaults are in use.
+- `DISPLAY-2K-001`: 2560 x 1440 increases root typography and control height, provides two readable comparison scenarios, keeps Settings readable, and has no horizontal overflow.
+- `DISPLAY-4K-001`: 3840 x 2160 uses the 4K token tier and bounded 2700/2400 px workspace and Settings widths without a global transform.
+- `LOGO-THEME-001`: calculator, comparison, and Settings use the same enlarged brand asset and final theme filter in Light, Dark, and Midnight with no hydration warning.
+- `COMPARE-POLISH-001`: grouped toolbar actions, deliberate empty state, comparison-view tabs, and the separate Standard/Advanced control remain operable.
 - Representative PDF and PNG artifacts cover Letter/A4, portrait/landscape, long recipes, three-of-four partial packing, and five-of-six partial packing.

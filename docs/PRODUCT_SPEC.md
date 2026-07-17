@@ -143,6 +143,8 @@ Labels begin with `Arithmetic verification` and are limited to exact, within wei
 
 The dedicated `/settings` route owns one versioned local user-settings record. New compatible calculations start from Al `1` and carbide template coefficients 211=`1`, 312=`2`, and 413=`3` unless changed locally. Precedence is historical/saved recipe, explicit saved route or built-in example, user default, then system fallback. Defaults never rewrite active work or immutable snapshots; mixed C/N targets and nitrides do not receive a simplified carbon default.
 
+Screen presentation supports laptop, 1080p, 2K, ultrawide, and 4K viewport classes through progressive semantic sizing tokens and bounded content widths. Large displays increase readable typography, controls, tables, and meaningful parallel layout without changing scientific state or using transformed scaling. Calculator, comparison, and Settings navigation share one themed brand component.
+
 The default save action is `Save`; users may select `Save and start blank` or `Save and open copy` while retaining all split-menu choices. Standard and Advanced weighing columns have independent visibility/order. Final mass is mandatory, at least one identity field is mandatory, and Advanced retains status or warnings. Elemental-radius cells use one selected source-verified dataset, show units and definition, never average compounds, and remain non-blocking when unavailable.
 
 ## Precursor fallback and printing

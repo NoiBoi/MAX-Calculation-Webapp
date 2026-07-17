@@ -60,5 +60,8 @@ Recovery actions have strict safety boundaries:
 - Open without restoring skips the recovery record and opens a blank calculator. It preserves saved scientific records and readable settings.
 - Repair validates and migrates the editable recipe, removes malformed transient UI state, and rebuilds derived calculation state. It never rewrites immutable snapshots.
 - Reset recoverable workspace deletes only the current recovery record.
+- Reset settings only deletes the versioned `userSettings` record and appearance bootstrap. It preserves recipes, revisions, snapshots, notes, routes, comparisons, layouts, and recovery input.
 - Diagnostic export attempts a raw local backup without exposing contents on screen.
-- Full reset is confirmed separately and deletes every local database table.
+- Route and global error boundaries expose raw IndexedDB recovery actions so a failure before the workspace mounts cannot trap the user behind a reload-only Retry button.
+- Emergency backup export is explicit and may include local record contents; the on-screen technical disclosure contains only error metadata.
+- Full reset is confirmed separately, names the lost record categories, and deletes every local database table.
