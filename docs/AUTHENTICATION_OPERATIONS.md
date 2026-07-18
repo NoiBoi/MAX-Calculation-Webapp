@@ -5,9 +5,10 @@
 MAXCalc production is invitation-only. Both controls are required:
 
 - `NEXT_PUBLIC_AUTH_SIGNUPS_ENABLED=false` hides application signup affordances.
-- Supabase Auth `enable_signup=false` and `auth.email.enable_signup=false` reject direct provider signup.
+- Supabase Auth `enable_signup=false` rejects public registration.
+- Supabase Auth `auth.email.enable_signup=true` keeps email/password login available to invited and administrator-created users. The global signup policy still blocks new public accounts.
 
-Run `npm run security:auth-provider` with `.env.local` configured before each release. The command reads the public Supabase Auth settings endpoint, transmits no credentials beyond the public anon key, creates no user, and fails when application and provider policies differ.
+Run `npm run security:auth-provider` with `.env.local` configured before each release. The command reads the public Supabase Auth settings endpoint, transmits no credentials beyond the public anon key, creates no user, and fails when application and provider policies differ or when email/password login is disabled.
 
 Production uses `https://maxcalc.vercel.app` as Site URL. Allowed callbacks are the production callback and explicit localhost development callbacks. Preview authentication is disabled unless an exact preview callback is deliberately added.
 
@@ -31,4 +32,3 @@ SMTP secrets must never use `NEXT_PUBLIC_`, enter Vercel preview logs, or be inc
 ## Abuse controls
 
 Supabase Auth rate limits login, signup, token refresh, verification, and email delivery. MAXCalc does not implement a competing password limiter. Application routes additionally require same-origin JSON requests, enforce bounded payloads, validate schemas, and return non-enumerating authentication errors.
-
