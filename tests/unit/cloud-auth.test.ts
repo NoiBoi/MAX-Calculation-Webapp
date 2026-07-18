@@ -77,6 +77,10 @@ describe("safe authentication redirects", () => {
 });
 
 describe("local data ownership boundary", () => {
+  it("does not evaluate window storage while server rendering", () => {
+    expect(() => getOrCreateInstallationId()).toThrow(/browser storage context/);
+  });
+
   it("creates a stable anonymous installation identity without changing it on repeat reads", () => {
     const records = new Map<string, string>();
     const storage = {

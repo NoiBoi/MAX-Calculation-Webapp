@@ -9,6 +9,7 @@ import { validateRevisionAndSnapshot } from "@/lib/cloud/validation";
 import { formatAdjustedFeedFormula } from "@/lib/presentation/weighing-summary";
 import { labRoleSchema, publishLabRequestSchema, retentionDaysSchema } from "@/lib/labs/validation";
 import type { LabAuditEvent, LabInvitationSummary, LabLibraryEntry, LabLibraryVersion, LabMembership, LabPublicationNote, LabSummary, LabSyncPayload, PublishLabRequest } from "@/lib/labs/types";
+import { validateJsonRequestHeaders } from "@/lib/security/request-guards";
 
 export const dynamic = "force-dynamic";
 type Client = SupabaseClient<Database>;
@@ -16,6 +17,7 @@ const json = (value: unknown): Json => JSON.parse(JSON.stringify(value)) as Json
 const fail = (status: number, code: string, message: string) => NextResponse.json({ code, message }, { status });
 const digest = (value: string) => createHash("sha256").update(value).digest("hex");
 const safeRequestId = () => `lab-${crypto.randomUUID()}`;
+const MAX_LAB_REQUEST_BYTES = 10 * 1024 * 1024;
 
 async function auth(): Promise<{ client: Client; userId: string } | null> {
   const client = await createSupabaseServerClient();
@@ -133,6 +135,8 @@ export async function GET(request: NextRequest) {
 
 const actionSchema = z.object({ action: z.string().min(1) }).passthrough();
 export async function POST(request: NextRequest) {
+  const headerFailure = validateJsonRequestHeaders(request.headers, MAX_LAB_REQUEST_BYTES);
+  if (headerFailure) return fail(headerFailure.status, headerFailure.code, headerFailure.message);
   const origin = request.headers.get("origin");
   if (origin && origin !== request.nextUrl.origin) return fail(403, "CROSS_ORIGIN_REQUEST", "Cross-origin lab requests are not allowed.");
   const authenticated = await auth();

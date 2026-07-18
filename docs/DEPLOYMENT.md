@@ -16,6 +16,7 @@ Vercel runs the Next.js application, route handlers, Server Components, and root
    - the corresponding Vercel preview pattern only if previews should authenticate;
    - `http://localhost:3000/auth/callback` for local development.
 4. For the initial invitation-only release, disable public user signup in Supabase Auth. Keep `NEXT_PUBLIC_AUTH_SIGNUPS_ENABLED=false`.
+   Run `npm run security:auth-provider` and treat any application/provider mismatch as a release blocker.
 5. Invite or administratively create test users through Supabase.
 6. Configure custom SMTP before relying on invitations or password recovery in production.
 7. Use disposable users to run the RLS isolation test.
@@ -69,5 +70,8 @@ npm run start
 - Configure a production mail provider and application-level invitation delivery before relying on lab invitations; the development UI returns a one-time secure link for manual delivery.
 - Confirm Light, Dark, and Midnight authentication surfaces.
 - Confirm Vercel logs and browser network payloads contain no passwords or service-role credentials.
+- Run `npm run security:scan` after the production build.
+- Follow `PRODUCTION_VALIDATION_5A.md` for target classification and production destructive-test refusal.
+- Follow `ROLLBACK_5A.md`; applied database migrations use a reviewed forward-fix policy rather than an assumed automatic rollback.
 
 If Supabase is unavailable, the correct degraded state is signed out/local-only—not the scientific workspace recovery screen.

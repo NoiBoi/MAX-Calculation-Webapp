@@ -23,6 +23,8 @@ Copy `.env.example` to `.env.local` and configure `NEXT_PUBLIC_SUPABASE_URL` and
 
 See `docs/CLOUD_AUTH_ARCHITECTURE.md`, `docs/CLOUD_SYNC_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/BACKUP_AND_RESTORE.md`, `docs/SECURITY.md`, and `docs/DEPLOYMENT.md` for sessions, synchronization phases, conflict behavior, schema/RLS, backup boundaries, Supabase setup, and Vercel configuration.
 
+Release-candidate hardening uses `v1.0.0-rc.1`. Run `npm run release:baseline`, `npm run security:auth-provider`, and `npm run validate:rc` before deployed validation. Environment-aware browser testing and destructive-test safeguards are documented in `docs/PRODUCTION_VALIDATION_5A.md`; current release-gate evidence and unresolved blockers are recorded in `docs/RELEASE_GATE_5A.md`.
+
 Appearance supports Light, neutral-charcoal Dark, black Midnight, and System from one compact control fixed at the application edge and from Settings. The versioned local settings record is authoritative; a derived local bootstrap value applies `data-theme` before hydration to prevent flashing. System follows live OS changes and resolves only to Light or Dark without replacing the persisted `system` choice. Printed Letter/A4 documents always use the light paper palette with readability-first typography at 100% scale.
 
 The supplied MAX Stoich logo appears in the calculator and print identity. Its transparent variant automatically changes contrast in Dark and Midnight, while the opaque variant is the browser-tab icon.

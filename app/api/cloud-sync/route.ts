@@ -16,9 +16,11 @@ import type {
 import { CloudPayloadValidationError, parseCloudWriteOperations } from "@/lib/cloud/validation";
 import type { ComparisonWorkspace, RecipeNote } from "@/lib/persistence/entities";
 import type { LocalUserSettings } from "@/lib/settings/user-settings";
+import { validateJsonRequestHeaders } from "@/lib/security/request-guards";
 
 export const dynamic = "force-dynamic";
 const MAX_PULL_ROWS = 1_000;
+const MAX_SYNC_REQUEST_BYTES = 25 * 1024 * 1024;
 const IDENTITY_PAGE_SIZE = 500;
 const MAX_IDENTITY_ROWS = 20_000;
 type Client = SupabaseClient<Database>;
@@ -467,6 +469,8 @@ async function applyOperation(client: Client, userId: string, operation: CloudWr
 }
 
 export async function POST(request: NextRequest) {
+  const headerFailure = validateJsonRequestHeaders(request.headers, MAX_SYNC_REQUEST_BYTES);
+  if (headerFailure) return statusError(headerFailure.status, headerFailure.code, headerFailure.message);
   const origin = request.headers.get("origin");
   if (origin && origin !== request.nextUrl.origin) {
     return statusError(403, "CROSS_ORIGIN_REQUEST", "Cross-origin synchronization requests are not allowed.");

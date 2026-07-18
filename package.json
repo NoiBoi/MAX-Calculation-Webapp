@@ -1,6 +1,6 @@
 {
   "name": "max-stoich",
-  "version": "0.6.1",
+  "version": "1.0.0-rc.1",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -14,6 +14,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:deployed": "playwright test tests/e2e/hardening-deployed.spec.ts",
+    "release:baseline": "tsx scripts/hardening/release-baseline.ts",
+    "security:scan": "tsx scripts/hardening/scan-browser-secrets.ts",
+    "security:auth-provider": "tsx --env-file=.env.local scripts/hardening/check-auth-provider.ts",
+    "validate:rc": "npm run check && npm run build && npm run security:scan",
     "data:atomic-weights": "tsx scripts/data-ingest/import-ciaaw-atomic-weights.ts",
     "data:radii": "tsx scripts/data-ingest/import-teatum-metallic-radii.ts && tsx scripts/data-ingest/import-cordero-covalent-radii.ts && tsx scripts/data-ingest/import-rahm-atomic-radii.ts",
     "check": "npm run typecheck && npm run lint && npm run test"

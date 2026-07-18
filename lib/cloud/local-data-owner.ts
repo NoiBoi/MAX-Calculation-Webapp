@@ -6,11 +6,13 @@ export const INSTALLATION_ID_KEY = "max-stoich-installation-id";
 export const ANONYMOUS_DATABASE_NAME = "max-stoich-local";
 export const ACCOUNT_DATABASE_PREFIX = "max-stoich-local-account-";
 
-export function getOrCreateInstallationId(storage: Pick<Storage, "getItem" | "setItem"> = window.localStorage): string {
-  const existing = storage.getItem(INSTALLATION_ID_KEY);
+export function getOrCreateInstallationId(storage?: Pick<Storage, "getItem" | "setItem">): string {
+  const resolvedStorage = storage ?? (typeof window !== "undefined" ? window.localStorage : undefined);
+  if (!resolvedStorage) throw new Error("An installation ID can be created only in a browser storage context.");
+  const existing = resolvedStorage.getItem(INSTALLATION_ID_KEY);
   if (existing) return existing;
   const created = crypto.randomUUID();
-  storage.setItem(INSTALLATION_ID_KEY, created);
+  resolvedStorage.setItem(INSTALLATION_ID_KEY, created);
   return created;
 }
 

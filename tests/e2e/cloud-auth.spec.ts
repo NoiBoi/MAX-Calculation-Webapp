@@ -1,6 +1,9 @@
 import { expect, test } from "@playwright/test";
 
+const exerciseUnconfiguredCloud = process.env.TEST_CLOUD_UNCONFIGURED === "true";
+
 test("AUTH-004 missing cloud configuration preserves the local calculator", async ({ page }) => {
+  test.skip(!exerciseUnconfiguredCloud, "Set TEST_CLOUD_UNCONFIGURED=true and launch the application without Supabase variables.");
   await page.goto("/workspace");
   await expect(page.locator('[data-recovery-ready="true"]')).toBeVisible();
   const controls = await page.evaluate(() => {
@@ -23,6 +26,7 @@ test("AUTH-004 missing cloud configuration preserves the local calculator", asyn
 });
 
 test("authentication routes remain usable and theme-stable without cloud configuration", async ({ page }) => {
+  test.skip(!exerciseUnconfiguredCloud, "Set TEST_CLOUD_UNCONFIGURED=true and launch the application without Supabase variables.");
   await page.goto("/workspace");
   await page.getByRole("button", { name: "Open appearance menu" }).click();
   await page.getByRole("menuitemradio", { name: "Midnight" }).click();

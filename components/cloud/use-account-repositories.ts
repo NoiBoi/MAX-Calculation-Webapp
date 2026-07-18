@@ -10,7 +10,11 @@ export function useAccountRepositories(): LocalDataRepositories {
   const { user } = useAuth();
   const ownerId = user?.id;
   return useMemo(
-    () => new LocalDataRepositories(new MaxStoichDatabase(databaseNameForOwner(ownerId)), ownerId, ownerId ? getOrCreateInstallationId() : undefined),
+    () => new LocalDataRepositories(
+      new MaxStoichDatabase(databaseNameForOwner(ownerId)),
+      ownerId,
+      ownerId ? (typeof window === "undefined" ? "server-render" : getOrCreateInstallationId()) : undefined,
+    ),
     [ownerId],
   );
 }

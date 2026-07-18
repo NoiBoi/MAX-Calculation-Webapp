@@ -60,3 +60,6 @@ Migration `202607170004_private_lab_libraries.sql` forces RLS on invitations, en
 - Review Supabase Auth rate-limit and abuse-protection settings for the deployment.
 - Apply migrations before enabling account UI in production.
 - Never place test passwords, service-role keys, or access tokens in source control, browser storage, screenshots, or test artifacts.
+- Cloud mutation routes require same-origin `application/json` requests and reject declared oversized payloads before parsing. Schema validators still enforce actual serialized size and per-record limits when `Content-Length` is absent.
+- The production response policy sets CSP, frame denial, MIME sniffing prevention, referrer and permissions restrictions, HSTS, and non-public caching with no-store or mandatory revalidation for account, lab, Auth callback, and API surfaces.
+- `npm run security:scan` inspects built browser assets for the service-role identifier and any configured service-role value. It never prints the value.

@@ -4,7 +4,7 @@ test("private lab library requires authentication without blocking the local cal
   await page.goto("/labs");
   await expect(page.getByRole("heading", { name: "Private lab libraries" })).toBeVisible();
   await expect(page.getByText("Sign in to access authorized lab libraries.")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Sign in" })).toHaveAttribute("href", "/login?next=/labs");
+  await expect(page.getByRole("main").getByRole("link", { name: "Sign in" })).toHaveAttribute("href", "/login?next=/labs");
   await page.goto("/workspace");
   await expect(page.locator('[data-recovery-ready="true"]')).toBeVisible();
 });

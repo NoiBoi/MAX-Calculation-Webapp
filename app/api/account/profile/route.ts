@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { validateJsonRequestHeaders } from "@/lib/security/request-guards";
 
 function sameOrigin(request: NextRequest): boolean {
   const origin = request.headers.get("origin");
@@ -7,6 +8,8 @@ function sameOrigin(request: NextRequest): boolean {
 }
 
 export async function POST(request: NextRequest) {
+  const headerFailure = validateJsonRequestHeaders(request.headers, 16 * 1024);
+  if (headerFailure) return NextResponse.json({ message: headerFailure.message, code: headerFailure.code }, { status: headerFailure.status });
   if (!sameOrigin(request)) return NextResponse.json({ message: "Cross-origin profile updates are not allowed." }, { status: 403 });
   const client = await createSupabaseServerClient();
   if (!client) return NextResponse.json({ message: "Cloud accounts are not configured." }, { status: 503 });
