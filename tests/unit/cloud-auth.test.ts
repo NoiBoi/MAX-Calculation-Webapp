@@ -14,6 +14,13 @@ const supabaseMocks = vi.hoisted(() => ({
 vi.mock("@supabase/ssr", () => supabaseMocks);
 
 describe("Supabase public configuration", () => {
+  it("uses statically referenced public variables in the browser bundle", () => {
+    const browserSource = readFileSync(resolve(process.cwd(), "lib/supabase/browser.ts"), "utf8");
+    expect(browserSource).toContain("NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL");
+    expect(browserSource).toContain("NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY");
+    expect(browserSource).not.toContain("getSupabasePublicConfig();");
+  });
+
   it("reports each missing public value without leaking any key", () => {
     const both = getSupabasePublicConfig({});
     expect(both).toMatchObject({ configured: false, missing: ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY"] });
