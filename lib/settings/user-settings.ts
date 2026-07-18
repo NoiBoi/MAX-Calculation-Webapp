@@ -4,7 +4,7 @@ import type { WorkspaceRecipeState } from "@/lib/workspace/adapter";
 import type { WeighingSortOption } from "@/lib/presentation/weighing-sort";
 import { isAppearancePreference, type AppearancePreference } from "../theme/theme";
 
-export const USER_SETTINGS_SCHEMA_VERSION = "4.0.0" as const;
+export const USER_SETTINGS_SCHEMA_VERSION = "5.0.0" as const;
 export const USER_SETTINGS_ID = "local-user-settings" as const;
 
 export const WEIGHING_RESULT_FIELDS = [
@@ -41,6 +41,30 @@ export interface WeighingResultDisplaySettings {
   readonly columnOrder: readonly WeighingResultField[];
 }
 
+export interface CloudSyncPreferences {
+  readonly automaticSync: boolean;
+  readonly syncOnStartup: boolean;
+  readonly syncAfterLocalChanges: boolean;
+  readonly syncOnReconnect: boolean;
+  readonly syncOnFocus: boolean;
+  readonly remoteChangeNotifications: boolean;
+  readonly routineSuccessNotifications: boolean;
+  readonly paused: boolean;
+}
+
+export function createDefaultCloudSyncPreferences(): CloudSyncPreferences {
+  return {
+    automaticSync: true,
+    syncOnStartup: true,
+    syncAfterLocalChanges: true,
+    syncOnReconnect: true,
+    syncOnFocus: true,
+    remoteChangeNotifications: true,
+    routineSuccessNotifications: false,
+    paused: false,
+  };
+}
+
 export interface LocalUserSettings {
   readonly id: typeof USER_SETTINGS_ID;
   readonly schemaVersion: typeof USER_SETTINGS_SCHEMA_VERSION;
@@ -49,7 +73,22 @@ export interface LocalUserSettings {
   readonly saveBehavior: Readonly<{ defaultPostSaveAction: DefaultSaveAction }>;
   readonly resultDisplay: Readonly<{ standard: WeighingResultDisplaySettings; advanced: WeighingResultDisplaySettings; atomicRadiusDatasetId: string; weighingSort: WeighingSortOption }>;
   readonly print: PrintSettings;
+  readonly cloudSync: CloudSyncPreferences;
   readonly updatedAt: string;
+}
+
+/** Stable cloud payload; excludes only the local modification timestamp. */
+export function stableSettingsPayload(settings: LocalUserSettings): Omit<LocalUserSettings, "updatedAt"> {
+  return {
+    id: settings.id,
+    schemaVersion: settings.schemaVersion,
+    appearance: settings.appearance,
+    feedDefaults: settings.feedDefaults,
+    saveBehavior: settings.saveBehavior,
+    resultDisplay: settings.resultDisplay,
+    print: settings.print,
+    cloudSync: settings.cloudSync,
+  };
 }
 
 export const FIELD_LABELS: Readonly<Record<WeighingResultField, string>> = {
@@ -84,7 +123,7 @@ export function createDefaultUserSettings(now = new Date().toISOString()): Local
       standard: { visibleFields: ["precursor-name", "formula", "purity", "final-mass", "status"], columnOrder: STANDARD_ORDER },
       advanced: { visibleFields: ["precursor-name", "formula", "purity", "final-intended-molar-ratio", "molar-mass", "final-mass", "realized-moles", "status"], columnOrder: ADVANCED_ORDER },
       atomicRadiusDatasetId: "teatum-metallic-cn12", weighingSort: "original",
-    }, print: createRecommendedPrintSettings(), updatedAt: now,
+    }, print: createRecommendedPrintSettings(), cloudSync: createDefaultCloudSyncPreferences(), updatedAt: now,
   };
 }
 
@@ -113,6 +152,7 @@ export function validateUserSettings(value: LocalUserSettings): readonly string[
   if (!["letter", "a4"].includes(value.print.paperSize) || !["portrait", "landscape"].includes(value.print.orientation) || ![2, 4, 6].includes(value.print.recipesPerPage)) errors.push("Print paper, orientation, or recipes-per-page value is unsupported.");
   if (!value.print.fields.recipeName || !value.print.fields.adjustedFeedFormula || (!value.print.fields.precursorName && !value.print.fields.precursorFormula) || !value.print.fields.finalMass || !value.print.fields.totalMass) errors.push("Print settings must retain recipe identity, adjusted feed, precursor identity, final mass, and total mass.");
   if (value.print.notesMode === "none" && value.print.fields.notes) errors.push("Turn off the Notes field or select a notes inclusion mode.");
+  if (!value.cloudSync || Object.values(value.cloudSync).some((item) => typeof item !== "boolean")) errors.push("Cloud synchronization preferences are invalid.");
   return errors;
 }
 
@@ -120,13 +160,14 @@ export function migrateUserSettings(input: unknown, now = new Date().toISOString
   const defaults = createDefaultUserSettings(now);
   if (!input || typeof input !== "object") return defaults;
   const source = input as Partial<LocalUserSettings> & { schemaVersion?: string };
-  if (![USER_SETTINGS_SCHEMA_VERSION, "3.0.0", "2.0.0", "1.0.0"].includes(String(source.schemaVersion))) throw new Error(`Unsupported future user-settings schema ${String(source.schemaVersion)}.`);
+  if (![USER_SETTINGS_SCHEMA_VERSION, "4.0.0", "3.0.0", "2.0.0", "1.0.0"].includes(String(source.schemaVersion))) throw new Error(`Unsupported future user-settings schema ${String(source.schemaVersion)}.`);
   const candidate: LocalUserSettings = {
     ...defaults, ...source, id: USER_SETTINGS_ID, schemaVersion: USER_SETTINGS_SCHEMA_VERSION,
     feedDefaults: { ...defaults.feedDefaults, ...source.feedDefaults, carbonPerFormula: { ...defaults.feedDefaults.carbonPerFormula, ...source.feedDefaults?.carbonPerFormula } },
     saveBehavior: { ...defaults.saveBehavior, ...source.saveBehavior },
     resultDisplay: { ...defaults.resultDisplay, ...source.resultDisplay, standard: { ...defaults.resultDisplay.standard, ...source.resultDisplay?.standard }, advanced: { ...defaults.resultDisplay.advanced, ...source.resultDisplay?.advanced } },
     print: { ...defaults.print, ...source.print, fields: { ...defaults.print.fields, ...source.print?.fields } }, updatedAt: source.updatedAt ?? now,
+    cloudSync: { ...defaults.cloudSync, ...source.cloudSync },
   };
   const errors = validateUserSettings(candidate); if (errors.length) throw new Error(errors.join(" ")); return candidate;
 }

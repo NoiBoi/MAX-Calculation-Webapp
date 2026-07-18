@@ -33,6 +33,8 @@ import {
 import { BUILT_IN_LAYOUTS, validateLayout } from "../layouts/layouts";
 import { createDefaultUserSettings, migrateUserSettings, validateUserSettings, type LocalUserSettings } from "../settings/user-settings";
 import { writeAppearanceBootstrap } from "../theme/theme";
+import { LocalSyncRepository } from "../cloud/local-sync-repository";
+import type { LabCopyProvenance } from "../labs/types";
 
 export class PersistenceConflictError extends Error {
   constructor(message = "This recipe changed in another tab. Reopen it before saving another revision.") {
@@ -53,6 +55,7 @@ export interface SaveCalculatedRevisionRequest {
   readonly result: BatchCalculationResult;
   readonly duplicatedFromRecipeId?: string;
   readonly duplicatedFromRevisionId?: string;
+  readonly copiedFromLab?: LabCopyProvenance;
   /** Test-only failure point used to prove transaction rollback. */
   readonly failAfterSnapshotWrite?: boolean;
 }
@@ -142,7 +145,10 @@ export interface SaveRouteRevisionRequest {
 }
 
 export class LocalDataRepositories implements RecipeRepository, RouteRepository, UserSettingsRepository {
-  constructor(readonly database = new MaxStoichDatabase()) {}
+  readonly sync?: LocalSyncRepository;
+  constructor(readonly database = new MaxStoichDatabase(), readonly ownerId?: string, readonly installationId?: string) {
+    this.sync = ownerId ? new LocalSyncRepository(database, ownerId, installationId) : undefined;
+  }
 
   async saveCalculatedRevision(request: SaveCalculatedRevisionRequest): Promise<SavedRevisionBundle> {
     if (!validCalculatedResult(request.result)) throw new Error("A current, feasible calculation is required before saving a scientific revision.");
@@ -153,7 +159,7 @@ export class LocalDataRepositories implements RecipeRepository, RouteRepository,
     const revisionId = id("revision");
     const snapshotId = id("snapshot");
 
-    return this.database.transaction("rw", this.database.recipes, this.database.recipeRevisions, this.database.snapshots, this.database.recentCalculations, async () => {
+    return this.database.transaction("rw", [this.database.recipes, this.database.recipeRevisions, this.database.snapshots, this.database.recentCalculations, this.database.cloudSyncRecords, this.database.cloudSyncOutbox], async () => {
       const existing = await this.database.recipes.get(recipeId);
       if (existing && request.expectedCurrentRevisionNumber !== undefined && existing.currentRevisionNumber !== request.expectedCurrentRevisionNumber) throw new PersistenceConflictError();
       if (!existing && request.recipeId) throw new PersistenceConflictError("The recipe no longer exists.");
@@ -173,6 +179,7 @@ export class LocalDataRepositories implements RecipeRepository, RouteRepository,
         tags: request.tags ? [...request.tags] : existing?.tags ?? [],
         ...(existing?.duplicatedFromRecipeId || request.duplicatedFromRecipeId ? { duplicatedFromRecipeId: existing?.duplicatedFromRecipeId ?? request.duplicatedFromRecipeId } : {}),
         ...(existing?.duplicatedFromRevisionId || request.duplicatedFromRevisionId ? { duplicatedFromRevisionId: existing?.duplicatedFromRevisionId ?? request.duplicatedFromRevisionId } : {}),
+        ...(existing?.copiedFromLab || request.copiedFromLab ? { copiedFromLab: clone(existing?.copiedFromLab ?? request.copiedFromLab!) } : {}),
       };
       const revision: RecipeRevision = {
         schemaVersion: LOCAL_SCHEMA_VERSION,
@@ -239,6 +246,10 @@ export class LocalDataRepositories implements RecipeRepository, RouteRepository,
       });
       const staleRecentKeys = await this.database.recentCalculations.orderBy("lastOpenedAt").reverse().offset(50).primaryKeys();
       if (staleRecentKeys.length) await this.database.recentCalculations.bulkDelete(staleRecentKeys);
+      if (this.sync) {
+        await this.sync.markPending("recipe", recipe.id);
+        await this.sync.markPending("recipe-revision", revision.id);
+      }
       return { recipe, revision, snapshot };
     });
   }
@@ -254,11 +265,28 @@ export class LocalDataRepositories implements RecipeRepository, RouteRepository,
   async renameRecipe(recipeId: string, name: string): Promise<void> {
     const trimmed = name.trim();
     if (!trimmed) throw new Error("Recipe name is required.");
-    await this.database.recipes.update(recipeId, { name: trimmed, updatedAt: new Date().toISOString() });
+    await this.database.transaction("rw", this.database.recipes, this.database.cloudSyncRecords, this.database.cloudSyncOutbox, async () => {
+      await this.database.recipes.update(recipeId, { name: trimmed, updatedAt: new Date().toISOString() });
+      if (this.sync) await this.sync.markPending("recipe", recipeId);
+    });
   }
-  async setRecipeArchived(recipeId: string, archived: boolean): Promise<void> { await this.database.recipes.update(recipeId, { archived, updatedAt: new Date().toISOString() }); }
+  async setRecipeArchived(recipeId: string, archived: boolean): Promise<void> {
+    await this.database.transaction("rw", this.database.recipes, this.database.cloudSyncRecords, this.database.cloudSyncOutbox, async () => {
+      await this.database.recipes.update(recipeId, { archived, updatedAt: new Date().toISOString() });
+      if (this.sync) await this.sync.markPending("recipe", recipeId);
+    });
+  }
   async deleteRecipePermanently(recipeId: string): Promise<void> {
-    await this.database.transaction("rw", this.database.recipes, this.database.recipeRevisions, this.database.snapshots, this.database.recentCalculations, this.database.recipeNotes, async () => {
+    const syncRecord = await this.sync?.getMetadata("recipe", recipeId);
+    if (syncRecord?.cloudVersion !== undefined) {
+      await this.database.transaction("rw", this.database.recipes, this.database.cloudSyncRecords, this.database.cloudSyncOutbox, async () => {
+        await this.database.recipes.update(recipeId, { archived: true, updatedAt: new Date().toISOString() });
+        await this.sync!.markPendingDelete("recipe", recipeId);
+      });
+      return;
+    }
+    const localRevisionIds = (await this.database.recipeRevisions.where("recipeId").equals(recipeId).primaryKeys()).map(String);
+    await this.database.transaction("rw", [this.database.recipes, this.database.recipeRevisions, this.database.snapshots, this.database.recentCalculations, this.database.recipeNotes, this.database.cloudSyncRecords, this.database.cloudSyncOutbox], async () => {
       await Promise.all([
         this.database.recipes.delete(recipeId),
         this.database.recipeRevisions.where("recipeId").equals(recipeId).delete(),
@@ -266,6 +294,12 @@ export class LocalDataRepositories implements RecipeRepository, RouteRepository,
         this.database.recentCalculations.where("recipeId").equals(recipeId).delete(),
         this.database.recipeNotes.where("recipeId").equals(recipeId).delete(),
       ]);
+      if (this.sync) {
+        const metadata = await this.sync.listMetadata();
+        const revisionIds = new Set(localRevisionIds);
+        await this.database.cloudSyncRecords.bulkDelete(metadata.filter((item) => item.recordId === recipeId || (item.recordType === "recipe-revision" && revisionIds.has(item.recordId))).map((item) => item.id));
+        await this.database.cloudSyncOutbox.bulkDelete((await this.sync.listOutbox()).filter((item) => item.recordId === recipeId || (item.recordType === "recipe-revision" && revisionIds.has(item.recordId))).map((item) => item.id));
+      }
     });
   }
 
@@ -282,7 +316,11 @@ export class LocalDataRepositories implements RecipeRepository, RouteRepository,
     const now = new Date().toISOString(); const existing = request.id ? await this.database.recipeNotes.get(request.id) : undefined;
     if (request.id && (!existing || existing.recipeId !== request.recipeId)) throw new Error("The note no longer exists.");
     const note: RecipeNote = { schemaVersion: LOCAL_SCHEMA_VERSION, id: existing?.id ?? id("note"), recipeId: request.recipeId, ...(request.recipeRevisionId ? { recipeRevisionId: request.recipeRevisionId } : {}), category, title, body, tags, createdAt: existing?.createdAt ?? now, updatedAt: now, ...(request.experimentDate?.trim() ? { experimentDate: request.experimentDate.trim() } : {}), ...(request.operator?.trim() ? { operator: request.operator.trim() } : {}), archived: existing?.archived ?? false };
-    await this.database.recipeNotes.put(note); return clone(note);
+    await this.database.transaction("rw", this.database.recipeNotes, this.database.cloudSyncRecords, this.database.cloudSyncOutbox, async () => {
+      await this.database.recipeNotes.put(note);
+      if (this.sync) await this.sync.markPending("recipe-note", note.id);
+    });
+    return clone(note);
   }
   async listRecipeNotes(recipeId?: string, includeArchived = false): Promise<readonly RecipeNote[]> {
     const values = recipeId ? await this.database.recipeNotes.where("recipeId").equals(recipeId).toArray() : await this.database.recipeNotes.toArray();
@@ -293,8 +331,27 @@ export class LocalDataRepositories implements RecipeRepository, RouteRepository,
     const recipes = new Map((await this.database.recipes.toArray()).map((item) => [item.id, item]));
     return notes.filter((note) => (!filters.category || note.category === filters.category) && (!filters.tag || note.tags.some((tag) => tag.toLowerCase() === filters.tag!.toLowerCase())) && (!needle || (() => { const recipe = recipes.get(note.recipeId); return `${recipe?.name ?? ""} ${recipe?.targetFormula ?? ""} ${note.title} ${note.body} ${note.category} ${note.tags.join(" ")}`.toLowerCase().includes(needle); })()));
   }
-  async setRecipeNoteArchived(noteId: string, archived: boolean): Promise<void> { await this.database.recipeNotes.update(noteId, { archived, updatedAt: new Date().toISOString() }); }
-  async deleteRecipeNote(noteId: string): Promise<void> { await this.database.recipeNotes.delete(noteId); }
+  async setRecipeNoteArchived(noteId: string, archived: boolean): Promise<void> {
+    await this.database.transaction("rw", this.database.recipeNotes, this.database.cloudSyncRecords, this.database.cloudSyncOutbox, async () => {
+      await this.database.recipeNotes.update(noteId, { archived, updatedAt: new Date().toISOString() });
+      if (this.sync) await this.sync.markPending("recipe-note", noteId);
+    });
+  }
+  async deleteRecipeNote(noteId: string): Promise<void> {
+    const syncRecord = await this.sync?.getMetadata("recipe-note", noteId);
+    await this.database.transaction("rw", this.database.recipeNotes, this.database.cloudSyncRecords, this.database.cloudSyncOutbox, async () => {
+      if (syncRecord?.cloudVersion !== undefined) {
+        await this.database.recipeNotes.update(noteId, { archived: true, updatedAt: new Date().toISOString() });
+        await this.sync!.markPendingDelete("recipe-note", noteId);
+      } else {
+        await this.database.recipeNotes.delete(noteId);
+        if (syncRecord) {
+          await this.database.cloudSyncRecords.delete(syncRecord.id);
+          await this.sync!.removeOutbox("recipe-note", noteId);
+        }
+      }
+    });
+  }
 
   async duplicateRecipe(sourceRecipeId: string, sourceRevisionId?: string): Promise<Readonly<{ name: string; inputState: WorkspaceRecipeState; sourceRecipeId: string; sourceRevisionId: string }>> {
     const recipe = await this.database.recipes.get(sourceRecipeId);
@@ -380,11 +437,24 @@ export class LocalDataRepositories implements RecipeRepository, RouteRepository,
 
   async saveComparison(workspace: ComparisonWorkspace): Promise<void> {
     if (workspace.scenarios.length < 2 || workspace.scenarios.length > 4) throw new Error("A comparison requires two to four scenarios.");
-    await this.database.comparisons.put(clone({ ...workspace, schemaVersion: LOCAL_SCHEMA_VERSION, updatedAt: new Date().toISOString() }));
+    await this.database.transaction("rw", this.database.comparisons, this.database.cloudSyncRecords, this.database.cloudSyncOutbox, async () => {
+      await this.database.comparisons.put(clone({ ...workspace, schemaVersion: LOCAL_SCHEMA_VERSION, updatedAt: new Date().toISOString() }));
+      if (this.sync) await this.sync.markPending("comparison", workspace.id);
+    });
   }
   async getComparison(id: string): Promise<ComparisonWorkspace | undefined> { return this.database.comparisons.get(id); }
   async listComparisons(): Promise<readonly ComparisonWorkspace[]> { return this.database.comparisons.orderBy("updatedAt").reverse().toArray(); }
-  async deleteComparison(id: string): Promise<void> { await this.database.comparisons.delete(id); }
+  async deleteComparison(id: string): Promise<void> {
+    const syncRecord = await this.sync?.getMetadata("comparison", id);
+    await this.database.transaction("rw", this.database.comparisons, this.database.cloudSyncRecords, this.database.cloudSyncOutbox, async () => {
+      await this.database.comparisons.delete(id);
+      if (syncRecord?.cloudVersion !== undefined) await this.sync!.markPendingDelete("comparison", id);
+      else if (syncRecord) {
+        await this.database.cloudSyncRecords.delete(syncRecord.id);
+        await this.sync!.removeOutbox("comparison", id);
+      }
+    });
+  }
 
   async listLayouts(): Promise<readonly WorkspaceLayout[]> {
     const userLayouts = (await this.database.layouts.orderBy("updatedAt").reverse().toArray()).filter((item) => validateLayout(item).length === 0 && item.layoutSchemaVersion === "1.0.0");
@@ -414,9 +484,21 @@ export class LocalDataRepositories implements RecipeRepository, RouteRepository,
   async saveSettings(settings: LocalUserSettings): Promise<void> {
     const normalized = migrateUserSettings({ ...settings, updatedAt: new Date().toISOString() });
     const errors = validateUserSettings(normalized); if (errors.length) throw new Error(errors.join(" "));
-    await this.database.userSettings.put(clone(normalized)); writeAppearanceBootstrap(normalized.appearance);
+    await this.database.transaction("rw", this.database.userSettings, this.database.cloudSyncRecords, this.database.cloudSyncOutbox, async () => {
+      await this.database.userSettings.put(clone(normalized));
+      if (this.sync) await this.sync.markPending("user-settings", normalized.id);
+    });
+    writeAppearanceBootstrap(normalized.appearance);
   }
-  async resetSettings(): Promise<LocalUserSettings> { const defaults = createDefaultUserSettings(); await this.database.userSettings.put(defaults); writeAppearanceBootstrap(defaults.appearance); return clone(defaults); }
+  async resetSettings(): Promise<LocalUserSettings> {
+    const defaults = createDefaultUserSettings();
+    await this.database.transaction("rw", this.database.userSettings, this.database.cloudSyncRecords, this.database.cloudSyncOutbox, async () => {
+      await this.database.userSettings.put(defaults);
+      if (this.sync) await this.sync.markPending("user-settings", defaults.id);
+    });
+    writeAppearanceBootstrap(defaults.appearance);
+    return clone(defaults);
+  }
 
   async installRadiusDataset(dataset: AtomicRadiusDataset, localTrust: StoredAtomicRadiusDataset["localTrust"] = "imported-unverified"): Promise<StoredAtomicRadiusDataset> {
     const digest = await sha256Hex(stableCanonicalize(canonicalRadiusDatasetContent(dataset)));

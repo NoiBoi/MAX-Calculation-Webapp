@@ -1,8 +1,8 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { LocalDataRepositories } from "@/lib/persistence/repositories";
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { APPEARANCE_BOOTSTRAP_KEY, APPEARANCE_CHANGE_EVENT, isAppearancePreference, resolveTheme, writeAppearanceBootstrap, type AppearancePreference, type ResolvedTheme } from "@/lib/theme/theme";
+import { useAccountRepositories } from "@/components/cloud/use-account-repositories";
 
 type ThemeContextValue = Readonly<{ preference: AppearancePreference; resolvedTheme: ResolvedTheme; setPreference: (preference: AppearancePreference) => Promise<void> }>;
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
@@ -26,7 +26,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const preferenceRef = useRef<AppearancePreference>(initial);
   const userChangedRef = useRef(false);
   const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>("light");
-  const repositories = useMemo(() => new LocalDataRepositories(), []);
+  const repositories = useAccountRepositories();
 
   useLayoutEffect(() => {
     let active = true;

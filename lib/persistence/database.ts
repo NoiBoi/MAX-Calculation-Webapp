@@ -3,8 +3,10 @@ import type { CalculationSnapshot, ComparisonWorkspace, MigrationMetadata, Recen
 import type { LocalUserSettings } from "../settings/user-settings";
 import { createDefaultUserSettings } from "../settings/user-settings";
 import { migrateEditableWorkspaceInput, migrateRecord } from "./migrations";
+import type { LocalDeviceRecord, LocalSyncConflict, LocalSyncMetadata, LocalSyncSession, QuarantinedCloudRecord, SyncCoordinatorLease, SyncOutboxOperation } from "../cloud/sync-types";
+import type { LabAuditEvent, LabLibraryEntry, LabLibraryVersion, LabMembership, LabPublicationNote, LabSummary, LabSyncSession } from "../labs/types";
 
-export const DATABASE_VERSION = 8;
+export const DATABASE_VERSION = 11;
 
 export class MaxStoichDatabase extends Dexie {
   recipes!: Table<SavedRecipe, string>;
@@ -20,6 +22,20 @@ export class MaxStoichDatabase extends Dexie {
   radiusDatasets!: Table<StoredAtomicRadiusDataset, string>;
   recipeNotes!: Table<RecipeNote, string>;
   userSettings!: Table<LocalUserSettings, string>;
+  cloudSyncRecords!: Table<LocalSyncMetadata, string>;
+  cloudSyncSessions!: Table<LocalSyncSession, string>;
+  cloudConflicts!: Table<LocalSyncConflict, string>;
+  cloudQuarantine!: Table<QuarantinedCloudRecord, string>;
+  cloudDevices!: Table<LocalDeviceRecord, string>;
+  cloudSyncOutbox!: Table<SyncOutboxOperation, string>;
+  cloudSyncLeases!: Table<SyncCoordinatorLease, string>;
+  labCaches!: Table<LabSummary, string>;
+  labMemberships!: Table<LabMembership, string>;
+  labEntries!: Table<LabLibraryEntry, string>;
+  labVersions!: Table<LabLibraryVersion, string>;
+  labPublicationNotes!: Table<LabPublicationNote, string>;
+  labAuditEvents!: Table<LabAuditEvent, string>;
+  labSyncSessions!: Table<LabSyncSession, string>;
 
   constructor(name = "max-stoich-local") {
     super(name);
@@ -58,6 +74,112 @@ export class MaxStoichDatabase extends Dexie {
       for (const tableName of ["recipes", "routes", "recentCalculations", "recovery", "migrations", "comparisons", "layouts", "radiusDatasets", "recipeNotes"]) await transaction.table(tableName).toCollection().modify((record: Record<string, unknown>) => Object.assign(record, migrateRecord(record, 7, 8)));
       await transaction.table("userSettings").put(createDefaultUserSettings());
       await transaction.table("migrations").put({ schemaVersion: "8.0.0", id: "7-to-8-local-user-settings", fromVersion: 7, toVersion: 8, appliedAt: new Date().toISOString(), status: "complete" });
+    });
+    this.version(9).stores({
+      recipes: "&id,name,targetFormula,updatedAt,archived,currentRevisionNumber,validationStatus",
+      recipeRevisions: "&id,[recipeId+revisionNumber],recipeId",
+      snapshots: "&id,recipeId,recipeRevisionId,createdAt",
+      routes: "&id,name,updatedAt,archived,validationStatus",
+      routeRevisions: "&id,[routeId+revisionNumber],routeId",
+      recentCalculations: "&snapshotId,lastOpenedAt,recipeId",
+      recovery: "&id",
+      migrations: "&id",
+      comparisons: "&id,name,updatedAt,validationStatus",
+      layouts: "&id,name,kind,isDefault,builtIn,updatedAt",
+      radiusDatasets: "&id,&[datasetId+datasetVersion],datasetId,datasetVersion,localTrust,updatedAt",
+      recipeNotes: "&id,recipeId,recipeRevisionId,category,updatedAt,archived,*tags",
+      userSettings: "&id,updatedAt",
+      cloudSyncRecords: "&id,ownerId,[ownerId+cloudState],[ownerId+recordType],recordId,cloudId",
+      cloudSyncSessions: "&ownerId,lastSuccessfulSyncAt",
+      cloudConflicts: "&id,ownerId,[ownerId+status],[ownerId+recordType],recordId",
+      cloudQuarantine: "&id,ownerId,[ownerId+recordType],receivedAt",
+      cloudDevices: "&ownerId,installationId",
+    }).upgrade(async (transaction) => {
+      for (const tableName of ["recipes", "routes", "recentCalculations", "recovery", "migrations", "comparisons", "layouts", "radiusDatasets", "recipeNotes"]) {
+        await transaction.table(tableName).toCollection().modify((record: Record<string, unknown>) => Object.assign(record, migrateRecord(record, 8, 9)));
+      }
+      await transaction.table("migrations").put({ schemaVersion: "9.0.0", id: "8-to-9-explicit-cloud-sync", fromVersion: 8, toVersion: 9, appliedAt: new Date().toISOString(), status: "complete" });
+    });
+    this.version(10).stores({
+      recipes: "&id,name,targetFormula,updatedAt,archived,currentRevisionNumber,validationStatus",
+      recipeRevisions: "&id,[recipeId+revisionNumber],recipeId",
+      snapshots: "&id,recipeId,recipeRevisionId,createdAt",
+      routes: "&id,name,updatedAt,archived,validationStatus",
+      routeRevisions: "&id,[routeId+revisionNumber],routeId",
+      recentCalculations: "&snapshotId,lastOpenedAt,recipeId",
+      recovery: "&id",
+      migrations: "&id",
+      comparisons: "&id,name,updatedAt,validationStatus",
+      layouts: "&id,name,kind,isDefault,builtIn,updatedAt",
+      radiusDatasets: "&id,&[datasetId+datasetVersion],datasetId,datasetVersion,localTrust,updatedAt",
+      recipeNotes: "&id,recipeId,recipeRevisionId,category,updatedAt,archived,*tags",
+      userSettings: "&id,updatedAt",
+      cloudSyncRecords: "&id,ownerId,[ownerId+cloudState],[ownerId+recordType],recordId,cloudId",
+      cloudSyncSessions: "&ownerId,lastSuccessfulSyncAt",
+      cloudConflicts: "&id,ownerId,[ownerId+status],[ownerId+recordType],recordId",
+      cloudQuarantine: "&id,ownerId,[ownerId+recordType],receivedAt",
+      cloudDevices: "&ownerId,installationId",
+      cloudSyncOutbox: "&id,ownerId,[ownerId+state],[ownerId+recordType],recordId,nextAttemptAt,idempotencyKey",
+      cloudSyncLeases: "&ownerId,installationId,tabId,expiresAt",
+    }).upgrade(async (transaction) => {
+      for (const tableName of ["recipes", "routes", "recentCalculations", "recovery", "migrations", "comparisons", "layouts", "radiusDatasets", "recipeNotes"]) {
+        await transaction.table(tableName).toCollection().modify((record: Record<string, unknown>) => Object.assign(record, migrateRecord(record, 9, 10)));
+      }
+      await transaction.table("userSettings").toCollection().modify((record: Record<string, unknown>) => Object.assign(record, createDefaultUserSettings(String(record.updatedAt ?? new Date().toISOString())), record, { schemaVersion: "5.0.0", cloudSync: { ...createDefaultUserSettings().cloudSync, ...(record.cloudSync as object | undefined) } }));
+      const metadata = await transaction.table("cloudSyncRecords").toArray() as LocalSyncMetadata[];
+      const now = new Date().toISOString();
+      for (const item of metadata.filter((record) => record.cloudState === "pending-upload" || record.cloudState === "pending-delete")) {
+        await transaction.table("cloudSyncOutbox").put({
+          id: `${item.ownerId}:${item.recordType}:${item.recordId}`,
+          ownerId: item.ownerId,
+          installationId: item.sourceDeviceId ?? "pre-v10-device",
+          recordType: item.recordType,
+          recordId: item.recordId,
+          operation: item.cloudState === "pending-delete" ? "soft-delete" : item.cloudVersion === undefined ? "create" : "update",
+          idempotencyKey: `${item.ownerId}:${item.recordType}:${item.recordId}:v10-migration`,
+          payloadVersion: "1.0.0",
+          ...(item.cloudVersion !== undefined ? { expectedCloudVersion: item.cloudVersion } : {}),
+          state: "pending",
+          attemptCount: 0,
+          createdAt: now,
+          updatedAt: now,
+        } satisfies SyncOutboxOperation);
+      }
+      await transaction.table("migrations").put({ schemaVersion: "10.0.0", id: "9-to-10-durable-automatic-sync-outbox", fromVersion: 9, toVersion: 10, appliedAt: now, status: "complete" });
+    });
+    this.version(11).stores({
+      recipes: "&id,name,targetFormula,updatedAt,archived,currentRevisionNumber,validationStatus",
+      recipeRevisions: "&id,[recipeId+revisionNumber],recipeId",
+      snapshots: "&id,recipeId,recipeRevisionId,createdAt",
+      routes: "&id,name,updatedAt,archived,validationStatus",
+      routeRevisions: "&id,[routeId+revisionNumber],routeId",
+      recentCalculations: "&snapshotId,lastOpenedAt,recipeId",
+      recovery: "&id",
+      migrations: "&id",
+      comparisons: "&id,name,updatedAt,validationStatus",
+      layouts: "&id,name,kind,isDefault,builtIn,updatedAt",
+      radiusDatasets: "&id,&[datasetId+datasetVersion],datasetId,datasetVersion,localTrust,updatedAt",
+      recipeNotes: "&id,recipeId,recipeRevisionId,category,updatedAt,archived,*tags",
+      userSettings: "&id,updatedAt",
+      cloudSyncRecords: "&id,ownerId,[ownerId+cloudState],[ownerId+recordType],recordId,cloudId",
+      cloudSyncSessions: "&ownerId,lastSuccessfulSyncAt",
+      cloudConflicts: "&id,ownerId,[ownerId+status],[ownerId+recordType],recordId",
+      cloudQuarantine: "&id,ownerId,[ownerId+recordType],receivedAt",
+      cloudDevices: "&ownerId,installationId",
+      cloudSyncOutbox: "&id,ownerId,[ownerId+state],[ownerId+recordType],recordId,nextAttemptAt,idempotencyKey",
+      cloudSyncLeases: "&ownerId,installationId,tabId,expiresAt",
+      labCaches: "&id,name,role,updatedAt",
+      labMemberships: "&id,labId,userId,[labId+status],role",
+      labEntries: "&id,labId,[labId+visibilityStatus],updatedAt,syncSequence",
+      labVersions: "&id,labId,entryId,[entryId+versionNumber],syncSequence",
+      labPublicationNotes: "&id,labId,entryId,publicationVersionId,syncSequence",
+      labAuditEvents: "&id,labId,eventType,occurredAt,syncSequence",
+      labSyncSessions: "&id,ownerId,labId,lastSuccessfulSyncAt",
+    }).upgrade(async (transaction) => {
+      // Version 11 adds an independently namespaced lab cache. Existing
+      // personal records, especially immutable revisions and snapshots, do not
+      // need rewriting merely because new object stores were introduced.
+      await transaction.table("migrations").put({ schemaVersion: "11.0.0", id: "10-to-11-private-lab-library-cache", fromVersion: 10, toVersion: 11, appliedAt: new Date().toISOString(), status: "complete" });
     });
   }
 }

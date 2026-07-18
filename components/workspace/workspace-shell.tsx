@@ -7,7 +7,6 @@ import { buildWorkspaceCalculation, formatComposition, resolveWorkspaceTarget, t
 import { getWorkspacePreset, WORKSPACE_PRESETS, type WorkspacePrecursorInput } from "@/lib/workspace/presets";
 import { buildLaboratoryCsv, buildLaboratoryJson, buildWeighingTableTsv, downloadText, safeExportFilename } from "@/lib/export/laboratory-export";
 import { LOCAL_SCHEMA_VERSION, type CalculationSnapshot, type RecipeNote, type RecipeRevision, type RouteRevision, type SavedRecipe, type SavedRoute, type WorkspaceLayout } from "@/lib/persistence/entities";
-import { LocalDataRepositories } from "@/lib/persistence/repositories";
 import { createOwnedRecordExport } from "@/lib/persistence/backup";
 import type { Mode } from "@/lib/persistence/workspace-types";
 import { RecipeCommandHistory } from "@/lib/workspace/history";
@@ -30,6 +29,9 @@ import { FIELD_LABELS, applyFeedDefaultsToNewTemplate, createDefaultUserSettings
 import { createPrintJob, launchPrintJob } from "@/lib/print/print-model";
 import { classifyStartupError, loadStartupData, repairRecoveryRecord, type StartupFailure } from "@/lib/persistence/startup-recovery";
 import { StartupRecoveryScreen } from "@/components/workspace/startup-recovery-screen";
+import { useAccountRepositories } from "@/components/cloud/use-account-repositories";
+import { PublishToLabDialog } from "@/components/labs/publish-to-lab-dialog";
+import type { LabLibraryEntry, LabSummary } from "@/lib/labs/types";
 
 const WEIGHING_SORT_STORAGE_KEY = "max-stoich.weighing-sort.v1";
 
@@ -131,12 +133,17 @@ export function WorkspaceShell() {
   const [verificationOpen, setVerificationOpen] = useState(false);
   const [saveOpen, setSaveOpen] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
+  const [publishOpen, setPublishOpen] = useState(false);
+  const [publishSource, setPublishSource] = useState<Readonly<{ recipe: SavedRecipe; revision: RecipeRevision; snapshot: CalculationSnapshot; notes: readonly RecipeNote[] }>>();
+  const [labCaches, setLabCaches] = useState<readonly LabSummary[]>([]);
+  const [labEntries, setLabEntries] = useState<readonly LabLibraryEntry[]>([]);
   const [notesRecipe, setNotesRecipe] = useState<SavedRecipe>();
+  const [remoteUpdateAvailable, setRemoteUpdateAvailable] = useState<SavedRecipe>();
   const [notesRevisions, setNotesRevisions] = useState<readonly RecipeRevision[]>([]);
   const [libraryNotes, setLibraryNotes] = useState<readonly RecipeNote[]>([]);
   const [suggestionResult, setSuggestionResult] = useState<PrecursorSuggestionResult>();
   const [dismissedCoverageFormula, setDismissedCoverageFormula] = useState<string>();
-  const repositories = useMemo(() => new LocalDataRepositories(), []);
+  const repositories = useAccountRepositories();
   const [history] = useState(() => new RecipeCommandHistory(150, 500));
   const committedValidRecipe = useRef(recipe);
   const editSequence = useRef(0);
@@ -210,6 +217,22 @@ export function WorkspaceShell() {
     setActiveLayout((current) => current ?? nextLayouts.find((item) => item.isDefault) ?? nextLayouts[0]);
   }, [repositories]);
 
+  useEffect(() => {
+    const cloudChanged = () => {
+      void refreshLibraries().then(async () => {
+        if (!savedRecipe) return;
+        const latest = await repositories.getRecipe(savedRecipe.id);
+        if (!latest || latest.currentRevisionId === savedRecipe.currentRevisionId) return;
+        setRemoteUpdateAvailable(latest);
+        setStatusMessage(unsavedChanges
+          ? "A newer cloud revision was downloaded. Your unsaved work remains open; reopen the saved recipe when you are ready to review it."
+          : "A newer cloud revision is available. Your current view was not replaced; reopen the saved recipe to review it.");
+      });
+    };
+    window.addEventListener("max-stoich:cloud-data-changed", cloudChanged);
+    return () => window.removeEventListener("max-stoich:cloud-data-changed", cloudChanged);
+  }, [refreshLibraries, repositories, savedRecipe, unsavedChanges]);
+
   const setRecipe = (next: WorkspaceRecipeState, type = "edit", groupKey?: string) => {
     history.record(type, groupKey ?? document.activeElement?.id ?? type, recipe, next);
     setHistoryVersion((value) => value + 1);
@@ -257,6 +280,7 @@ export function WorkspaceShell() {
       }
       await refreshLibraries();
       setRecoveryReady(true);
+      window.dispatchEvent(new CustomEvent("max-stoich:local-startup-ready"));
     } catch (error) {
       setStartupFailure(classifyStartupError(error));
     } finally {
@@ -430,6 +454,13 @@ export function WorkspaceShell() {
     } catch (error) { setStatusMessage(`Save failed: ${error instanceof Error ? error.message : "unknown error"}`); throw error; }
   };
   const openNotes = async (item: SavedRecipe, trigger: HTMLElement) => { notesTriggerRef.current = trigger; setNotesRecipe(item); setNotesRevisions(await repositories.listRevisions(item.id)); setNotesOpen(true); };
+  const openPublish = async (item: SavedRecipe, revisionId = item.currentRevisionId) => {
+    const revision = await repositories.getRevision(revisionId);
+    const snapshot = revision ? await repositories.getSnapshot(revision.snapshotId) : undefined;
+    if (!revision || !snapshot) { setStatusMessage("The immutable revision or calculation snapshot is unavailable."); return; }
+    const [notes, labs, entries] = await Promise.all([repositories.listRecipeNotes(item.id, true), repositories.database.labCaches.toArray(), repositories.database.labEntries.toArray()]);
+    setPublishSource({ recipe: item, revision, snapshot, notes }); setLabCaches(labs); setLabEntries(entries); setPublishOpen(true);
+  };
   const newRecipe = () => {
     const next = blankWorkspaceState(userSettings);
     setRecipe(next, "new-recipe", "new-recipe");
@@ -625,9 +656,12 @@ export function WorkspaceShell() {
       <button className="min-h-10 shrink-0 rounded-md bg-teal-900 px-3 text-sm font-semibold text-white disabled:bg-slate-600" disabled={!currentValid} onClick={openSaveDialog} ref={saveButtonRef}>Save</button>
       <div className="hidden shrink-0 md:flex"><button aria-label="Undo" className="min-h-10 rounded-l-md border px-2 disabled:text-slate-400" disabled={!canUndo} onClick={undo}>↶</button><button aria-label="Redo" className="min-h-10 rounded-r-md border border-l-0 px-2 disabled:text-slate-400" disabled={!canRedo} onClick={redo}>↷</button></div>
       <Link className="hidden min-h-10 shrink-0 rounded-md border px-3 py-2 text-sm font-medium lg:block" href="/compare">Compare</Link>
+      <button className="hidden min-h-10 shrink-0 rounded-md border px-3 py-2 text-sm font-medium xl:block disabled:text-slate-400" disabled={!savedRecipe||!savedRevision||!savedSnapshot} onClick={()=>savedRecipe&&void openPublish(savedRecipe,savedRevision?.id)}>Publish to lab</button>
       <Link className="min-h-10 shrink-0 rounded-md border px-3 py-2 text-sm font-medium" href="/settings">Settings</Link>
       <button aria-expanded={commandOpen} aria-label="More actions and commands" className="min-h-10 shrink-0 rounded-md border border-slate-400 px-3 text-sm font-medium hover:bg-slate-100" onClick={() => { setActivePanel("none"); setCommandOpen((current) => !current); }} ref={moreButtonRef}>More <span aria-hidden="true">•••</span></button>
     </header>
+
+    {remoteUpdateAvailable && <section aria-live="polite" className="mx-auto mt-3 flex w-[min(100%-1.5rem,1480px)] flex-wrap items-center gap-3 rounded border border-blue-400 bg-blue-50 p-3 text-sm"><p className="mr-auto font-medium">{unsavedChanges ? "A newer cloud revision was downloaded. Your unsaved work remains open." : "A newer cloud revision is available. Your current view was not replaced."}</p><button className="rounded border border-blue-500 bg-white px-3 py-2 font-semibold" onClick={() => { if (unsavedChanges && !window.confirm("Open the downloaded revision and replace the unsaved workspace? Save or duplicate first if you need to preserve these edits.")) return; const latest = remoteUpdateAvailable; setRemoteUpdateAvailable(undefined); void openRecipe(latest); }} type="button">Open newer revision</button><button className="rounded border px-3 py-2" onClick={() => setRemoteUpdateAvailable(undefined)} type="button">Keep viewing current</button></section>}
 
     {commandOpen && <section aria-label="More actions" className="fixed right-3 top-16 z-30 max-h-[82vh] w-[min(22rem,calc(100vw-1.5rem))] overflow-auto rounded-lg border border-slate-400 bg-white p-4 shadow-xl" ref={commandLayerRef}><div className="flex items-center justify-between"><h2 className="font-semibold">More actions</h2><button aria-label="Close more actions" className="min-h-8 min-w-8 rounded border" onClick={() => setCommandOpen(false)}>×</button></div><div className="mt-3 grid gap-2">
       <label className="text-xs font-semibold uppercase tracking-wide text-slate-600" htmlFor="template-picker">Start or reset<select className="mt-1 min-h-10 w-full rounded border border-slate-400 bg-white px-2 text-sm font-normal normal-case tracking-normal" id="template-picker" onChange={(event) => { choosePreset(event.target.value); setCommandOpen(false); }} value=""><option disabled value="">Choose…</option><option value="blank">New blank calculation</option><optgroup label="New carbide templates"><option value="generic-211">New 211 carbide</option><option value="generic-312">New 312 carbide</option><option value="generic-413">New 413 carbide</option></optgroup><optgroup label="Built-in examples">{WORKSPACE_PRESETS.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</optgroup></select></label>
@@ -640,6 +674,7 @@ export function WorkspaceShell() {
       <button className="rounded border p-2 text-left" onClick={(event) => { panelTriggerRef.current = moreButtonRef.current ?? event.currentTarget; setActivePanel("recipes"); setCommandOpen(false); void refreshLibraries(); }}>Open recipe library</button>
       <button className="rounded border p-2 text-left" onClick={(event) => { panelTriggerRef.current = moreButtonRef.current ?? event.currentTarget; setActivePanel("routes"); setCommandOpen(false); void refreshLibraries(); }}>Apply or save route</button>
       {savedRecipe && <button className="rounded border p-2 text-left" onClick={(event) => { void openNotes(savedRecipe, event.currentTarget); setCommandOpen(false); }}>Recipe notes</button>}
+      <button className="rounded border p-2 text-left disabled:text-slate-400" disabled={!savedRecipe||!savedRevision||!savedSnapshot} onClick={()=>{setCommandOpen(false);if(savedRecipe)void openPublish(savedRecipe,savedRevision?.id);}}>Publish saved revision to lab</button>
       <button className="rounded border p-2 text-left disabled:text-slate-400" disabled={(!currentValid && !historicalSnapshot) || !displayed} onClick={() => { void copyWeighingTable(); setCommandOpen(false); }}>Copy weighing table <span className="text-xs">Ctrl+Alt+C</span></button>
       <button className="rounded border p-2 text-left disabled:text-slate-400" disabled={(!currentValid && !historicalSnapshot) || !displayed} onClick={() => { exportFile("csv"); setCommandOpen(false); }}>Export CSV</button>
       <button className="rounded border p-2 text-left disabled:text-slate-400" disabled={(!currentValid && !historicalSnapshot) || !displayed} onClick={() => { exportFile("json"); setCommandOpen(false); }}>Export JSON</button>
@@ -653,7 +688,7 @@ export function WorkspaceShell() {
       {activePanel === "recipes" && recipes.length > 0 && <section aria-label="Print selected recipes" className="mt-3 rounded border bg-slate-50 p-3"><label className="text-sm font-semibold">Recipes to print<select aria-label="Recipes to print" className="mt-1 min-h-24 w-full rounded border bg-white p-2 text-sm" multiple onChange={(event) => setSelectedPrintRecipeIds(Array.from(event.currentTarget.selectedOptions, (option) => option.value))} value={[...selectedPrintRecipeIds]}>{recipes.map((item) => <option key={item.id} value={item.id}>{item.name} · revision {item.currentRevisionNumber}</option>)}</select></label><p className="mt-1 text-xs">Use Ctrl or Command to select multiple recipes. The configured 2/4/6-up layout is applied in this visible list order.</p><button className="mt-2 w-full rounded border border-slate-500 px-3 py-2 font-semibold disabled:text-slate-400" disabled={!selectedPrintRecipeIds.length} onClick={() => void printSelectedRecipes()}>Print selected recipes</button></section>}
       {activePanel === "recipes" && <div className="mt-4 space-y-3">{recipes.filter((item) => { const notes = libraryNotes.filter((note) => note.recipeId === item.id); return `${item.name} ${item.targetFormula} ${item.validationStatus} ${notes.map((note) => `${note.title} ${note.body} ${note.category} ${note.tags.join(" ")}`).join(" ")}`.toLowerCase().includes(librarySearch.toLowerCase()); }).map((item) => { const noteMatches = libraryNotes.filter((note) => note.recipeId === item.id && (!librarySearch || `${note.title} ${note.body} ${note.category} ${note.tags.join(" ")}`.toLowerCase().includes(librarySearch.toLowerCase()))); return <article className="rounded border p-3" key={item.id}><div className="flex items-start justify-between gap-2"><div><input aria-label={`Recipe name for ${item.targetFormula}`} className="w-full rounded border px-1 font-semibold" defaultValue={item.name} onBlur={(event) => { if (event.target.value !== item.name) void repositories.renameRecipe(item.id, event.target.value).then(refreshLibraries); }} /><p className="mt-1 font-mono text-sm">{item.targetFormula}</p><p className="text-xs">Revision {item.currentRevisionNumber} · {item.validationStatus} · {new Date(item.updatedAt).toLocaleString()}</p><p className="text-xs">{noteMatches.length} matching note{noteMatches.length === 1 ? "" : "s"}</p></div><button className="rounded bg-teal-800 px-3 py-2 text-sm text-white" onClick={() => void openRecipe(item)}>Open</button></div><div className="mt-3 flex flex-wrap gap-2"><button className="rounded border px-2 py-1 text-sm" onClick={() => void duplicateSaved(item)}>Duplicate</button><button className="rounded border px-2 py-1 text-sm" onClick={(event) => void openNotes(item, event.currentTarget)}>Notes</button><button className="rounded border px-2 py-1 text-sm" onClick={() => void repositories.listRevisions(item.id).then((values) => { setSavedRecipe(item); setRevisions([...values].sort((a, b) => b.revisionNumber - a.revisionNumber)); setActivePanel("revisions"); })}>History</button><button className="rounded border px-2 py-1 text-sm" onClick={() => void repositories.setRecipeArchived(item.id, true).then(refreshLibraries)}>Archive</button><button className="rounded border border-red-300 px-2 py-1 text-sm text-red-800" onClick={() => { if (window.confirm(`Permanently delete ${item.name} and every revision, snapshot, and note? This cannot be undone.`)) void repositories.deleteRecipePermanently(item.id).then(refreshLibraries); }}>Delete…</button></div></article>; })}{recipes.length === 0 && <p className="text-sm text-slate-600">No saved recipes yet. Save the current valid calculation to create revision 1.</p>}</div>}
       {activePanel === "routes" && <div className="mt-4"><button className="w-full rounded bg-teal-800 p-2 font-semibold text-white" onClick={() => void saveRoute()}>Save current precursor setup as route</button><div className="mt-3 space-y-3">{routes.filter((item) => `${item.name} ${item.validationStatus}`.toLowerCase().includes(librarySearch.toLowerCase())).map((item) => <article className="rounded border p-3" key={item.id}><h3 className="font-semibold">{item.name}</h3><p className="text-xs">Revision {item.currentRevisionNumber} · {item.validationStatus}</p><div className="mt-2 flex flex-wrap gap-2"><button className="rounded bg-teal-800 px-3 py-1 text-sm text-white" onClick={() => void applyRoute(item)}>Apply copy</button><button className="rounded border px-2 py-1 text-sm" onClick={() => void duplicateRoute(item)}>Duplicate</button><button className="rounded border px-2 py-1 text-sm" onClick={() => void exportRoute(item)}>Export JSON</button><button className="rounded border px-2 py-1 text-sm" onClick={() => void repositories.saveRouteRevision({ routeId: item.id, expectedCurrentRevisionNumber: item.currentRevisionNumber, name: item.name, inputState: recipe }).then(async (saved) => { await refreshLibraries(); setStatusMessage(`Saved ${saved.route.name} route revision ${saved.revision.revisionNumber}`); })}>Update from current</button><button className="rounded border px-2 py-1 text-sm" onClick={() => void repositories.listRouteRevisions(item.id).then((values) => { setRouteRevisions([...values].sort((a, b) => b.revisionNumber - a.revisionNumber)); setStatusMessage(`${item.name} has ${values.length} immutable route revision(s).`); })}>View revisions</button><button className="rounded border px-2 py-1 text-sm" onClick={() => void repositories.setRouteArchived(item.id, true).then(refreshLibraries)}>Archive</button></div>{routeRevisions.some((revision) => revision.routeId === item.id) && <ol className="mt-2 border-t pt-2 text-xs">{routeRevisions.filter((revision) => revision.routeId === item.id).map((revision) => <li key={revision.id}>Revision {revision.revisionNumber} · {new Date(revision.createdAt).toLocaleString()} · digest {revision.canonicalDigest.slice(0, 12)}…</li>)}</ol>}</article>)}</div></div>}
-      {activePanel === "revisions" && <div className="mt-4 space-y-3">{revisions.map((revision) => <article className="rounded border p-3" key={revision.id}><h3 className="font-semibold">Revision {revision.revisionNumber}</h3><p className="text-xs">{new Date(revision.createdAt).toLocaleString()} · engine {revision.engineVersion}</p><p className="mt-1 text-sm">{revision.revisionNote || "No revision note"}</p><div className="mt-2 flex gap-2"><button className="rounded bg-teal-800 px-3 py-1 text-sm text-white" onClick={() => savedRecipe && void openRecipe(savedRecipe, revision.id)}>Open snapshot</button><button className="rounded border px-3 py-1 text-sm" onClick={() => savedRecipe && void duplicateSaved(savedRecipe, revision.id)}>Duplicate from revision</button></div></article>)}</div>}
+      {activePanel === "revisions" && <div className="mt-4 space-y-3">{revisions.map((revision) => <article className="rounded border p-3" key={revision.id}><h3 className="font-semibold">Revision {revision.revisionNumber}</h3><p className="text-xs">{new Date(revision.createdAt).toLocaleString()} · engine {revision.engineVersion}</p><p className="mt-1 text-sm">{revision.revisionNote || "No revision note"}</p><div className="mt-2 flex flex-wrap gap-2"><button className="rounded bg-teal-800 px-3 py-1 text-sm text-white" onClick={() => savedRecipe && void openRecipe(savedRecipe, revision.id)}>Open snapshot</button><button className="rounded border px-3 py-1 text-sm" onClick={() => savedRecipe && void duplicateSaved(savedRecipe, revision.id)}>Duplicate from revision</button><button className="rounded border px-3 py-1 text-sm" onClick={() => savedRecipe && void openPublish(savedRecipe, revision.id)}>Publish this revision</button></div></article>)}</div>}
     </aside>}
 
     <div className={`mx-auto grid max-w-[1500px] gap-4 ${activeLayout?.density === "compact" ? "p-2 xl:grid-cols-[minmax(0,1fr)_20rem]" : "p-4 xl:grid-cols-[var(--workspace-input)_minmax(0,1fr)]"}`} data-layout={activeLayout?.id ?? "builtin-simple-calculator"} style={{ "--workspace-input": `${activeLayout?.inputWidthPercent ?? 40}%` } as CSSProperties}>
@@ -718,6 +753,7 @@ export function WorkspaceShell() {
     {displayed && <section aria-labelledby="print-radius-heading" className="hidden mx-auto mb-6 max-w-[1500px] border-y border-slate-300 bg-white p-4 text-sm print:block"><h2 className="font-semibold" id="print-radius-heading">Site-radius screening descriptors</h2><p>{recipe.radiusDescriptorConfig ? "Per-site dataset selections, resolved values, trust status, and descriptor results are preserved with this calculation snapshot and its JSON/CSV export." : "No site-radius descriptor configuration is attached to this calculation."}</p><p>Screening descriptor only; not a direct prediction of physical stress, lattice strain, phase stability, or synthesis success.</p></section>}
     <SaveRecipeDialog currentRevisionNumber={savedRecipe?.currentRevisionNumber} defaultAction={userSettings.saveBehavior.defaultPostSaveAction} initialName={savedRecipe?.name ?? (duplicationSource ? `Copy of ${duplicationSource.name}` : `${recipe.targetFormula || "Untitled"} recipe`)} onClose={() => setSaveOpen(false)} onSave={saveCurrent} open={saveOpen} returnFocusRef={saveButtonRef} scientificChanged={scientificInputChanged} validationStatus={savedRecipe?.validationStatus ?? activePreset?.validationStatus ?? "synthetic"} />
     <RecipeNotesDialog onClose={() => setNotesOpen(false)} open={notesOpen} recipe={notesRecipe} repositories={repositories} returnFocusRef={notesTriggerRef} revisions={notesRevisions} />
+    <PublishToLabDialog entries={labEntries} labs={labCaches} notes={publishSource?.notes ?? []} onClose={() => setPublishOpen(false)} onPublished={setStatusMessage} open={publishOpen} recipe={publishSource?.recipe} revision={publishSource?.revision} snapshot={publishSource?.snapshot} />
     <WeighingSummaryDialog entries={weighingSummary ? [{ summary: weighingSummary }] : []} onClose={() => setSummaryOpen(false)} onOpenVerification={() => { setSummaryOpen(false); setVerificationOpen(true); }} onPrint={printCurrent} onStatus={setStatusMessage} open={summaryOpen && Boolean(weighingSummary)} title="Weighing summary" />
     <CalculationVerificationDialog entries={calculationVerification ? [{ verification: calculationVerification }] : []} onAddMeasuredOutcomeNote={savedRecipe ? () => { setVerificationOpen(false); void openNotes(savedRecipe, document.activeElement as HTMLElement); } : undefined} onClose={() => { setVerificationOpen(false); requestAnimationFrame(() => verificationButtonRef.current?.focus()); }} onStatus={setStatusMessage} open={verificationOpen && Boolean(calculationVerification)} title="Calculation verification" />
   </main>;

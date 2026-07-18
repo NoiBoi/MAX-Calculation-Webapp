@@ -119,6 +119,24 @@ The calculator provides a large, paper-friendly weighing summary built only from
 
 Recipe comparison starts empty. Users explicitly add saved recipe revisions, the current unsaved calculator state, or a blank scenario. Saved-recipe import supports multiple selections and preserves every scenario's independent target, site model, adjustments, and route even when the targets differ scientifically. A working comparison may temporarily contain one scenario, while persistence requires two to four. Comparison summaries preserve scenario order and keep invalid scenarios visible without presenting masses as usable.
 
+# Cloud accounts milestone
+
+Supabase authentication is an optional identity layer. Signed-out operation retains all local calculator functionality. Invitation-only is the production default; provider configuration enforces signup policy while the application flag controls the visible form. Login, confirmation, reset, session refresh, account status, display-name management, and sign-out use provider APIs and cookie-backed sessions.
+
+Cloud identity and local scientific data are separate. Signing in does not upload or assign IndexedDB records, and signing out does not delete or hide them. The initial Postgres schema contains only private profiles and lab/membership authorization foundations with RLS. Recipe synchronization, cross-device recovery, cloud backup, lab recipe sharing, realtime, and conflict resolution are explicitly outside this milestone.
+
+# Account cloud-storage milestone
+
+Milestone 2 adds private, account-scoped cloud copies of recipes and every immutable revision/snapshot, structured recipe notes, comparisons, user settings, and lightweight device metadata. Milestone 3 keeps local IndexedDB as the working store and adds a durable transactional outbox plus automatic foreground synchronization. `Sync now` remains available and invokes the same validated pull/merge/upload engine.
+
+Anonymous, User A, and User B data are physically separated into distinct local databases. Signing in never uploads anonymous work. A first-upload review lists local records, validation failures, and likely duplicates, and requires explicit record selection and confirmation. Users may instead keep data local only or defer the decision.
+
+Synchronization downloads first, validates each remote record independently, merges against the last synchronized base, then uploads pending local changes with optimistic versions. Deterministic conflicts are saved for recipe metadata, notes, comparisons, settings, deletion/edit races, or immutable revision identity disagreement. Unsupported or future remote records are quarantined without blocking unrelated valid records. Conflict resolution offers keep local, keep cloud, and keep both where duplication preserves scientific history.
+
+Cloud unavailability never blocks calculation or local save. Offline changes remain pending and retry with bounded jitter after reconnect while a signed-in page is open. Startup, committed local mutations, reconnect, throttled focus, and account-filtered Realtime hints schedule incremental passes. Realtime never supplies canonical local data. Signing out stops the coordinator and preserves account cache by default. A separately confirmed cache-removal action removes only fully synchronized cloud-downloaded copies and never removes anonymous, pending, local-only, conflicted, or failed work.
+
+Routes, precursor libraries, lab sharing, realtime collaboration, closed-tab service-worker synchronization, merge-by-last-write-wins, and destructive cleanup of unsynchronized records remain out of scope.
+
 # Calculator workflow and recipe records (schema 7)
 
 `/` opens the production calculator directly; `/workspace` remains supported and `/demo` contains the secondary feature tutorial/development reference. The compact Save dialog separates recipe metadata from scientific history: editable naming alone renames the recipe pointer, while changed canonical scientific input creates the next immutable revision and optional concise revision note. No saved state is reported before the repository transaction succeeds.
@@ -158,3 +176,7 @@ MAX Stoich provides Light, neutral Dark, black Midnight, and System appearance m
 # Reliability and analysis additions
 
 Print Settings provides a live, production-accurate page preview. Route comparison supports a selectable baseline, summary metrics, signed differences, aligned precursor matrices, original or common-batch display, and copy/CSV output. Startup failures use a dedicated recovery surface with real Retry and non-destructive safe-open, repair, export, and recovery-reset actions.
+
+# Controlled private lab libraries
+
+Lab libraries are opt-in shared repositories for signed-in accounts. Admins manage membership, invitations, settings, audit export, and retention; members may publish immutable personal recipe revisions and archive entries they created; viewers read, copy, and compare. Publication never happens from joining or syncing. Each lab version preserves scientific input, snapshot, engine/data provenance, formulas, verification status, warnings, publisher, timestamp, digest, and only explicitly selected note snapshots. Lab content is read-only offline, and personal copies are independent records.

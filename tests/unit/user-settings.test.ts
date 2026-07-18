@@ -64,6 +64,12 @@ describe("local user settings", () => {
     expect(migrateUserSettings({ ...createDefaultUserSettings(), appearance: "midnight" }).appearance).toBe("midnight");
   });
 
+  it("migrates schema 4 settings to safe automatic-sync defaults", () => {
+    const legacy = { ...createDefaultUserSettings(), schemaVersion: "4.0.0" };
+    delete (legacy as { cloudSync?: unknown }).cloudSync;
+    expect(migrateUserSettings(legacy).cloudSync).toMatchObject({ automaticSync: true, syncAfterLocalChanges: true, syncOnReconnect: true, paused: false });
+  });
+
   it("rejects unsupported future settings schemas and reset changes only settings", async () => {
     expect(() => migrateUserSettings({ ...createDefaultUserSettings(), schemaVersion: "99.0.0" })).toThrow(/Unsupported future/);
     const repo = repository(); const defaults = await repo.getSettings(); await repo.saveSettings({ ...defaults, saveBehavior: { defaultPostSaveAction: "save-and-blank" } }); await repo.database.layouts.put({ schemaVersion: "8.0.0", layoutSchemaVersion: "1.0.0", id: "layout-test", name: "Keep", kind: "calculator", builtIn: false, isDefault: false, density: "comfortable", inputWidthPercent: 40, visibleColumns: ["formula", "final-mass", "status"], summaryExpanded: false, tracePlacement: "below", createdAt: "2026-01-01T00:00:00.000Z", updatedAt: "2026-01-01T00:00:00.000Z" });

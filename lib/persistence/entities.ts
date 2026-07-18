@@ -2,9 +2,10 @@ import type { AtomicRadiusDataset, BatchCalculationResult, RadiusDescriptorConfi
 import type { Mode } from "./workspace-types";
 import type { WorkspaceRecipeState } from "../workspace/adapter";
 import type { ValidationStatus, WorkspacePrecursorInput } from "../workspace/presets";
+import type { LabCopyProvenance } from "../labs/types";
 
-export const LOCAL_SCHEMA_VERSION = "8.0.0" as const;
-export type LocalSchemaVersion = "2.0.0" | "3.0.0" | "4.0.0" | "5.0.0" | "6.0.0" | "7.0.0" | typeof LOCAL_SCHEMA_VERSION;
+export const LOCAL_SCHEMA_VERSION = "11.0.0" as const;
+export type LocalSchemaVersion = "2.0.0" | "3.0.0" | "4.0.0" | "5.0.0" | "6.0.0" | "7.0.0" | "8.0.0" | "9.0.0" | "10.0.0" | typeof LOCAL_SCHEMA_VERSION;
 export type PersistedValidationStatus = ValidationStatus | "deprecated";
 
 export interface SavedRecipe {
@@ -22,6 +23,7 @@ export interface SavedRecipe {
   readonly tags: readonly string[];
   readonly duplicatedFromRecipeId?: string;
   readonly duplicatedFromRevisionId?: string;
+  readonly copiedFromLab?: LabCopyProvenance;
 }
 
 export interface RecipeRevision {
@@ -151,7 +153,7 @@ export interface IntegrityDiagnostic { readonly code: string; readonly severity:
 export interface IntegrityResult { readonly valid: boolean; readonly diagnostics: readonly IntegrityDiagnostic[] }
 
 export type ComparisonMetric = "total-mass" | "active-precursors" | "largest-residual" | "warning-count" | "introduced-elements" | "mass-closeness";
-export interface ComparisonScenarioSource { readonly kind: "working-recipe" | "saved-recipe" | "saved-route" | "built-in" | "duplicate" | "empty"; readonly recipeId?: string; readonly recipeRevisionId?: string; readonly routeId?: string; readonly routeRevisionId?: string; readonly scenarioId?: string }
+export interface ComparisonScenarioSource { readonly kind: "working-recipe" | "saved-recipe" | "saved-route" | "lab-library" | "built-in" | "duplicate" | "empty"; readonly recipeId?: string; readonly recipeRevisionId?: string; readonly routeId?: string; readonly routeRevisionId?: string; readonly scenarioId?: string; readonly labId?: string; readonly labName?: string; readonly labEntryId?: string; readonly labEntryTitle?: string; readonly labVersionId?: string; readonly labVersionNumber?: number; readonly labPublisherName?: string; readonly labPublishedAt?: string }
 export interface ComparisonHistoricalCalculation { readonly canonicalInput: string; readonly canonicalOutput: string; readonly inputDigest: string; readonly outputDigest: string; readonly engineVersion: string; readonly atomicWeightDataVersion: string; readonly calculatedAt: string; readonly result: BatchCalculationResult }
 export interface ComparisonScenario { readonly id: string; readonly name: string; readonly source: ComparisonScenarioSource; readonly inputState: WorkspaceRecipeState; readonly validationStatus: PersistedValidationStatus; readonly historical?: ComparisonHistoricalCalculation }
 export interface ComparisonWorkspace {

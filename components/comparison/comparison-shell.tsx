@@ -8,7 +8,7 @@ import { addComparisonScenario, calculateComparison, createComparisonWorkspace, 
 import { canonicalizeWorkspaceScientificInput, sha256Hex, stableCanonicalize } from "@/lib/persistence/canonical";
 import { createOwnedRecordExport } from "@/lib/persistence/backup";
 import { downloadText, safeExportFilename } from "@/lib/export/laboratory-export";
-import { LocalDataRepositories } from "@/lib/persistence/repositories";
+import { useAccountRepositories } from "@/components/cloud/use-account-repositories";
 import type { ComparisonScenario, ComparisonWorkspace, RecipeRevision, SavedRecipe, SavedRoute, WorkspaceRecoveryState } from "@/lib/persistence/entities";
 import type { WorkspaceCalculationState, WorkspaceRecipeState } from "@/lib/workspace/adapter";
 import { buildWorkspaceCalculation } from "@/lib/workspace/adapter";
@@ -56,7 +56,7 @@ function RecipePicker({ open, candidates, existing, capacity, onClose, onAdd }: 
 }
 
 export function ComparisonShell() {
-  const repositories = useMemo(() => new LocalDataRepositories(), []);
+  const repositories = useAccountRepositories();
   const [workspace, setWorkspace] = useState<ComparisonWorkspace>(() => createComparisonWorkspace());
   const [currentRecovery, setCurrentRecovery] = useState<WorkspaceRecoveryState>();
   const [savedComparisons, setSavedComparisons] = useState<readonly ComparisonWorkspace[]>([]);
@@ -107,6 +107,26 @@ export function ComparisonShell() {
 
   useEffect(() => { let active = true; void (async () => { await repositories.database.open(); const [recovery, settings] = await Promise.all([repositories.loadRecovery(), repositories.getSettings()]); if (active) { setCurrentRecovery(recovery); setUserSettings(settings); } await refresh(); if (active) setStatus("Comparison ready · no scenarios selected"); })().catch((error) => active && setStatus(`Comparison unavailable: ${error instanceof Error ? error.message : "local database error"}`)); return () => { active = false; }; }, [refresh, repositories]);
 
+  useEffect(() => {
+    const cloudChanged = () => { void refresh().then(() => setStatus("Cloud changes downloaded. Open scenarios remain unchanged; saved recipe and comparison lists were refreshed.")); };
+    window.addEventListener("max-stoich:cloud-data-changed", cloudChanged);
+    return () => window.removeEventListener("max-stoich:cloud-data-changed", cloudChanged);
+  }, [refresh]);
+
+  useEffect(() => {
+    queueMicrotask(() => {
+      const raw = sessionStorage.getItem("max-stoich:lab-comparison-staging");
+      if (!raw) return;
+      sessionStorage.removeItem("max-stoich:lab-comparison-staging");
+      try {
+        const staged = JSON.parse(raw) as Pick<ComparisonScenario, "name" | "inputState" | "validationStatus" | "source">;
+        if (staged.source.kind !== "lab-library" || !staged.source.labId || !staged.source.labVersionId) throw new Error("Invalid lab comparison handoff.");
+        setWorkspace((current) => addComparisonScenario(forkHistoricalComparison(current), migrateWorkspaceAluminumInput(staged.inputState), uniqueName(staged.name, current.scenarios), staged.source, staged.validationStatus));
+        setStatus("Added a read-only lab publication snapshot to comparison. Temporary edits never modify the lab source.");
+      } catch { setStatus("The selected lab publication could not be added to comparison."); }
+    });
+  }, []);
+
   const edit = (scenarioId: string, update: (input: WorkspaceRecipeState) => WorkspaceRecipeState) => setWorkspace((current) => updateScenario(forkHistoricalComparison(current), scenarioId, update));
   const existingRevisionIds = useMemo(() => new Set(workspace.scenarios.flatMap((item) => item.source.recipeRevisionId ? [item.source.recipeRevisionId] : [])), [workspace.scenarios]);
 
@@ -146,7 +166,7 @@ export function ComparisonShell() {
     } catch (error) { setStatus(`Comparison was not saved. ${error instanceof Error ? error.message : "Local storage failed."} Your working scenarios are unchanged.`); }
   };
 
-  const promote = async (scenario: ComparisonScenario) => { const result = validResult(calculations[scenario.id]!); if (!result) { setStatus("Only a valid scenario can be saved as a recipe."); return; } try { const saved = await repositories.saveCalculatedRevision({ name: `${scenario.name} from comparison`, inputState: scenario.inputState, result, revisionNote: `Promoted from comparison ${workspace.name}` }); setStatus(`Saved ${saved.recipe.name}, revision 1`); await refresh(); } catch (error) { setStatus(`Recipe was not saved. ${error instanceof Error ? error.message : "Local storage failed."}`); } };
+  const promote = async (scenario: ComparisonScenario) => { const result = validResult(calculations[scenario.id]!); if (!result) { setStatus("Only a valid scenario can be saved as a recipe."); return; } try { const source = scenario.source; const saved = await repositories.saveCalculatedRevision({ name: `${scenario.name} from comparison`, inputState: scenario.inputState, result, revisionNote: `Promoted from comparison ${workspace.name}`, ...(source.kind === "lab-library" && source.labId && source.labEntryId && source.labVersionId ? { copiedFromLab: { labId: source.labId, labName: source.labName ?? "Private lab", entryId: source.labEntryId, entryTitle: source.labEntryTitle ?? scenario.name, publicationVersionId: source.labVersionId, versionNumber: source.labVersionNumber ?? 1, publisherName: source.labPublisherName ?? "Lab member", publishedAt: source.labPublishedAt ?? new Date().toISOString(), copiedAt: new Date().toISOString() } } : {}) }); setStatus(`Saved ${saved.recipe.name}, revision 1`); await refresh(); } catch (error) { setStatus(`Recipe was not saved. ${error instanceof Error ? error.message : "Local storage failed."}`); } };
   const saveRoute = async (scenario: ComparisonScenario) => { try { await repositories.saveRouteRevision({ name: `${scenario.name} route`, inputState: scenario.inputState, validationStatus: scenario.validationStatus }); setStatus(`Saved ${scenario.name} as an independent route.`); await refresh(); } catch (error) { setStatus(`Route was not saved. ${error instanceof Error ? error.message : "Local storage failed."}`); } };
   const exportComparison = async () => { try { const envelope = await createOwnedRecordExport("max-stoich-comparison-workspace", { comparison: workspace }); downloadText(safeExportFilename(workspace.name, "json"), JSON.stringify(envelope, null, 2), "application/json;charset=utf-8"); setStatus("Exported a digest-protected MAX Stoich comparison record."); } catch (error) { setStatus(`Comparison export failed. ${error instanceof Error ? error.message : "The file could not be created."}`); } };
   const copyAnalysis = async (kind: "overview" | "matrix") => { await navigator.clipboard.writeText(kind === "overview" ? comparisonOverviewTsv(analysis) : precursorMatrixTsv(analysis, matrixMode)); setStatus(`Copied comparison ${kind}.`); };

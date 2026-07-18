@@ -242,3 +242,52 @@ Repository tests cover defaults, save/reopen, independent 211/312/413 values, di
 - `LOGO-THEME-001`: calculator, comparison, and Settings use the same enlarged brand asset and final theme filter in Light, Dark, and Midnight with no hydration warning.
 - `COMPARE-POLISH-001`: grouped toolbar actions, deliberate empty state, comparison-view tabs, and the separate Standard/Advanced control remain operable.
 - Representative PDF and PNG artifacts cover Letter/A4, portrait/landscape, long recipes, three-of-four partial packing, and five-of-six partial packing.
+
+## Cloud account cases
+
+- `AUTH-001`: a disposable invited user signs in, the global control updates, session survives refresh, and identity persists across Calculator, Comparison, Settings, Account, and back.
+- `AUTH-002`: sign-out clears the provider session while preserving a local recipe and signed-out calculator access.
+- `AUTH-003`: reset request uses a neutral response; a valid provider callback establishes recovery state; mismatch, weak password, expired state, and provider rejection remain on auth surfaces.
+- `AUTH-004`: absent cloud variables show a clear setup message while calculator startup, local persistence, comparison, print, backup, and recovery remain available.
+- `AUTH-005`: User A can read/update only the permitted own profile fields; User B cannot read User A's private profile; a nonmember cannot read User A's lab.
+- Unit coverage verifies missing URL/key handling, signup policy, safe redirect rejection, one browser-client instance, no client service-role reference, stable installation identity, distinct account owners, RLS on every application table, minimum grants, and idempotent own-profile bootstrap.
+- Live Supabase browser and two-user RLS checks use disposable external credentials and are skipped when those deployment-test variables are absent; static security-contract tests always run.
+
+## Account cloud-synchronization cases
+
+- `SYNC-001`: User A reviews and explicitly uploads selected local recipes; stable local IDs map to cloud UUIDs and every immutable revision/snapshot is present.
+- `SYNC-002`: User A signs in on Device B, selects `Sync now`, downloads the complete account dataset, then reopens and calculates from the local cache while offline.
+- `SYNC-003`: Devices A and B edit the same mutable recipe metadata from a shared base; synchronization creates one persisted conflict and no silent last-write-wins overwrite.
+- `SYNC-004`: User A cannot read or mutate User B recipes, revisions, notes, comparisons, settings, or device rows through direct table access or the server route.
+- `SYNC-005`: an offline local edit is marked pending, makes no network request until explicit sync, and later uploads without changing the immutable scientific snapshot.
+- `SYNC-006`: a signed-in user can save recipes, notes, comparisons, settings, and backup while Supabase is unavailable; retry preserves and uploads pending work.
+- `SYNC-007`: signing out keeps account cache by default; confirmed removal deletes only fully synchronized cloud-downloaded cache while preserving anonymous and unsynchronized work.
+- Engine-level synchronization tests additionally cover deterministic recipe metadata and scientific-integrity conflicts, `Keep both` identity remapping, `1/3`-style exact scalar preservation through uploaded snapshots, monotonic cursor handling, partial failure, unsupported-version quarantine, idempotent retry, tombstones, and separate User A/User B IndexedDB namespaces.
+- The disposable live suite is conditional on external test credentials and an applied migration. Unit/static tests run without cloud configuration and remain the required local gate.
+
+## Automatic synchronization cases
+
+- `AUTO-SYNC-001`: a committed cloud-eligible local write and its outbox descriptor commit together; repeated mutable edits compact, while immutable revisions remain distinct.
+- `AUTO-SYNC-002`: startup, local change, reconnect, throttled focus, and remote hints schedule the shared incremental engine without overlapping runs.
+- `AUTO-SYNC-003`: retryable network, rate-limit, and server failures retain work and use bounded jitter; validation, authorization, and conflicts wait for user action.
+- `AUTO-SYNC-004`: two tabs acquire only one account lease; a trigger during a pass produces one follow-up and an expired lease permits takeover.
+- `AUTO-SYNC-005`: Realtime events are owner-filtered hints, rapid hints debounce, and canonical records arrive only through the authenticated pull/validation path.
+- `AUTO-SYNC-006`: offline saves remain pending, reconnect resumes, authentication expiry waits for sign-in, and neither condition enters scientific workspace recovery.
+- `AUTO-SYNC-007`: downloaded newer revisions refresh saved libraries without replacing a historical view or unsaved open workspace.
+- `AUTO-SYNC-008`: disabling or pausing automatic sync preserves the queue; manual Sync now retries immediately and Resume schedules a pass.
+- `AUTO-SYNC-009`: restore marks untracked records local-only; only reviewed categories become queued.
+- `AUTO-SYNC-010`: account switch disposes the old coordinator/channel/lease and uses the new owner's physical database, cursor, outbox, and Realtime filter.
+- Unit tests simulate compaction, processing identity, pre-upload deletion, lease exclusion/takeover, debounce, one-follow-up concurrency, bounded jitter, offline retention, and disabled/manual behavior. Existing sync tests cover complete incremental pulls, quarantine, partial write failure, mutable and immutable conflicts, account namespaces, and exact snapshot preservation.
+- Optional live Playwright coverage requires disposable Supabase credentials and applied migrations. It verifies visible automatic controls, pause persistence, Resume, and manual retry; the complete two-device/offline/session/RLS matrix remains a deployment-environment gate.
+
+## Private lab-library cases
+
+- `LAB-001`: joining a lab exposes no personal recipe until its owner explicitly publishes a synchronized immutable revision.
+- `LAB-002`: admin/member/viewer table and RPC access matches the role matrix; a nonmember and removed/suspended member cannot read or mutate lab content.
+- `LAB-003`: invitation tokens are stored only as digests and reject wrong-email, expired, revoked, and reused acceptance.
+- `LAB-004`: publication preserves the exact source revision/snapshot, creates monotonically numbered immutable versions, defaults notes to excluded, and rejects stale entry versions or unacknowledged target changes.
+- `LAB-005`: copying creates independent personal IDs and provenance; direct comparison never mutates the lab version.
+- `LAB-006`: incremental sync preserves authorized offline data; verified full sync removes revoked labs and purged rows without deleting personal copies.
+- `LAB-007`: audit is append-only, excludes scientific/note payloads, and admin export excludes secrets and unrelated personal data.
+- `LAB-008`: archive/restore/hold/unhold/purge observes retention eligibility, last-admin protection, explicit confirmation, and retained audit tombstones.
+- Static unit tests verify schema/RLS/immutability/digest contracts and namespaced cache revocation. Full multi-user and two-device scenarios require a disposable Supabase project with all migrations applied.

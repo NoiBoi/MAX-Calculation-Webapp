@@ -5,12 +5,13 @@ import { APPEARANCE_BOOTSTRAP_KEY } from "@/lib/theme/theme";
 import { DATABASE_VERSION } from "@/lib/persistence/database";
 import { LocalDataRepositories } from "@/lib/persistence/repositories";
 import { classifyStartupError, loadStartupData } from "@/lib/persistence/startup-recovery";
+import { useAuth } from "@/components/auth/auth-provider";
+import { databaseNameForOwner } from "@/lib/cloud/local-data-owner";
+import { MaxStoichDatabase } from "@/lib/persistence/database";
 
-const DATABASE_NAME = "max-stoich-local";
-
-async function openExistingDatabase(): Promise<IDBDatabase> {
+async function openExistingDatabase(databaseName: string): Promise<IDBDatabase> {
   if (!("indexedDB" in window)) throw new Error("IndexedDB is unavailable in this browser context.");
-  const request = indexedDB.open(DATABASE_NAME);
+  const request = indexedDB.open(databaseName);
   return new Promise((resolve, reject) => {
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error ?? new Error("IndexedDB could not be opened."));
@@ -18,8 +19,8 @@ async function openExistingDatabase(): Promise<IDBDatabase> {
   });
 }
 
-async function deleteRecord(storeName: string, key: IDBValidKey): Promise<void> {
-  const database = await openExistingDatabase();
+async function deleteRecord(databaseName: string, storeName: string, key: IDBValidKey): Promise<void> {
+  const database = await openExistingDatabase(databaseName);
   try {
     if (!database.objectStoreNames.contains(storeName)) return;
     await new Promise<void>((resolve, reject) => {
@@ -32,8 +33,8 @@ async function deleteRecord(storeName: string, key: IDBValidKey): Promise<void> 
   } finally { database.close(); }
 }
 
-async function emergencyExport(error: Error & { digest?: string }): Promise<void> {
-  const database = await openExistingDatabase();
+async function emergencyExport(databaseName: string, error: Error & { digest?: string }): Promise<void> {
+  const database = await openExistingDatabase(databaseName);
   try {
     const records: Record<string, unknown> = {};
     for (const storeName of Array.from(database.objectStoreNames)) {
@@ -49,9 +50,9 @@ async function emergencyExport(error: Error & { digest?: string }): Promise<void
   } finally { database.close(); }
 }
 
-async function deleteLocalDatabase(): Promise<void> {
+async function deleteLocalDatabase(databaseName: string): Promise<void> {
   await new Promise<void>((resolve, reject) => {
-    const request = indexedDB.deleteDatabase(DATABASE_NAME);
+    const request = indexedDB.deleteDatabase(databaseName);
     request.onsuccess = () => resolve();
     request.onerror = () => reject(request.error ?? new Error("Local database could not be deleted."));
     request.onblocked = () => reject(new Error("Another MAX Stoich tab is blocking the reset. Close other tabs and try again."));
@@ -59,12 +60,14 @@ async function deleteLocalDatabase(): Promise<void> {
 }
 
 export function ApplicationRecoveryPanel({ error, reset, title = "MAX Stoich encountered a local application error" }: { error: Error & { digest?: string }; reset: () => void; title?: string }) {
+  const { user } = useAuth();
+  const databaseName = databaseNameForOwner(user?.id);
   const [pending, setPending] = useState("");
   const [actionError, setActionError] = useState("");
   const act = async (label: string, action: () => Promise<void>) => { setPending(label); setActionError(""); try { await action(); } catch (reason) { setActionError(reason instanceof Error ? reason.message : "The recovery action failed."); setPending(""); } };
   const reload = () => { reset(); window.location.assign("/workspace"); };
   const retryStartup = async () => {
-    const repositories = new LocalDataRepositories();
+    const repositories = new LocalDataRepositories(new MaxStoichDatabase(databaseName), user?.id);
     try {
       await loadStartupData(repositories);
       reload();
@@ -80,10 +83,10 @@ export function ApplicationRecoveryPanel({ error, reset, title = "MAX Stoich enc
     {pending && <p aria-live="polite" className="mt-3 font-semibold">{pending}…</p>}{actionError && <p aria-live="assertive" className="mt-3 rounded border border-red-400 bg-red-50 p-3 font-semibold">{actionError}</p>}
     <div className="mt-5 flex flex-wrap gap-2">
       <button className="rounded bg-teal-800 px-4 py-2 font-semibold text-white disabled:bg-slate-400" disabled={Boolean(pending)} onClick={() => void act("Retrying local workspace", retryStartup)}>Retry</button>
-      <button className="rounded border px-4 py-2 font-semibold disabled:text-slate-400" disabled={Boolean(pending)} onClick={() => void act("Opening without the last workspace", async () => { await deleteRecord("recovery", "current"); reload(); })}>Open without restoring workspace</button>
-      <button className="rounded border px-4 py-2 font-semibold disabled:text-slate-400" disabled={Boolean(pending)} onClick={() => void act("Resetting local settings", async () => { await deleteRecord("userSettings", "local-user-settings"); localStorage.removeItem(APPEARANCE_BOOTSTRAP_KEY); reload(); })}>Reset settings only</button>
-      <button className="rounded border px-4 py-2 font-semibold disabled:text-slate-400" disabled={Boolean(pending)} onClick={() => void act("Exporting emergency backup", () => emergencyExport(error))}>Export emergency backup</button>
-      <button className="rounded border border-red-400 px-4 py-2 font-semibold text-red-900 disabled:text-slate-400" disabled={Boolean(pending)} onClick={() => { if (!window.confirm("Delete every local MAX Stoich recipe, revision, snapshot, note, route, comparison, setting, and recovery record on this browser? Export an emergency backup first if possible.")) return; void act("Resetting all local application data", async () => { await deleteLocalDatabase(); localStorage.removeItem(APPEARANCE_BOOTSTRAP_KEY); reload(); }); }}>Reset all local data…</button>
+      <button className="rounded border px-4 py-2 font-semibold disabled:text-slate-400" disabled={Boolean(pending)} onClick={() => void act("Opening without the last workspace", async () => { await deleteRecord(databaseName, "recovery", "current"); reload(); })}>Open without restoring workspace</button>
+      <button className="rounded border px-4 py-2 font-semibold disabled:text-slate-400" disabled={Boolean(pending)} onClick={() => void act("Resetting local settings", async () => { await deleteRecord(databaseName, "userSettings", "local-user-settings"); localStorage.removeItem(APPEARANCE_BOOTSTRAP_KEY); reload(); })}>Reset settings only</button>
+      <button className="rounded border px-4 py-2 font-semibold disabled:text-slate-400" disabled={Boolean(pending)} onClick={() => void act("Exporting emergency backup", () => emergencyExport(databaseName, error))}>Export emergency backup</button>
+      <button className="rounded border border-red-400 px-4 py-2 font-semibold text-red-900 disabled:text-slate-400" disabled={Boolean(pending)} onClick={() => { if (!window.confirm("Delete every local MAX Stoich recipe, revision, snapshot, note, route, comparison, setting, and recovery record for this local account scope? Export an emergency backup first if possible.")) return; void act("Resetting all local application data", async () => { await deleteLocalDatabase(databaseName); localStorage.removeItem(APPEARANCE_BOOTSTRAP_KEY); reload(); }); }}>Reset this local data scope…</button>
     </div>
     <p className="mt-4 text-sm">Opening without restore deletes only the unsaved recovery record. Reset settings deletes only the settings record. Both preserve saved recipes and scientific snapshots.</p>
     <details className="mt-5 rounded border p-3"><summary className="cursor-pointer font-semibold">Technical error details</summary><dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2"><div><dt className="font-semibold">Name</dt><dd>{error.name || "Error"}</dd></div><div><dt className="font-semibold">Digest</dt><dd>{error.digest ?? "Unavailable"}</dd></div><div><dt className="font-semibold">Expected database version</dt><dd>{DATABASE_VERSION}</dd></div><div><dt className="font-semibold">Timestamp</dt><dd>{new Date().toISOString()}</dd></div></dl><pre className="mt-3 max-h-64 overflow-auto whitespace-pre-wrap rounded bg-slate-100 p-3 text-xs">{error.message || "No error message was supplied."}{error.stack ? `\n\n${error.stack}` : ""}</pre></details>

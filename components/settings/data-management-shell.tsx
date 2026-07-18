@@ -1,18 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { downloadText, safeExportFilename } from "@/lib/export/laboratory-export";
 import { createLocalBackup, importApplicationCalculation, importOwnedRecord, previewApplicationCalculation, previewBackup, previewOwnedRecord, restoreBackup, serializeBackup, type BackupPreview, type CalculationImportPreview, type ConflictResolution, type MaxStoichBackup, type OwnedRecordImportPreview } from "@/lib/persistence/backup";
 import type { IntegrityResult, WorkspaceLayout } from "@/lib/persistence/entities";
-import { LocalDataRepositories } from "@/lib/persistence/repositories";
+import { useAccountRepositories } from "@/components/cloud/use-account-repositories";
 import { DEFAULT_ATOMIC_RADIUS_REGISTRY, RADIUS_DESCRIPTOR_DISCLAIMER } from "@max-stoich/chemistry-engine";
 import { UserSettingsPanel } from "./user-settings-panel";
 import { writeAppearanceBootstrap } from "@/lib/theme/theme";
 import { SiteBrand } from "@/components/site/site-brand";
 
 export function DataManagementShell() {
-  const repositories = useMemo(() => new LocalDataRepositories(), []);
+  const repositories = useAccountRepositories();
   const [layouts, setLayouts] = useState<readonly WorkspaceLayout[]>([]);
   const [backup, setBackup] = useState<MaxStoichBackup>();
   const [backupPreview, setBackupPreview] = useState<BackupPreview>();
@@ -27,7 +27,7 @@ export function DataManagementShell() {
   useEffect(() => { let active = true; void repositories.database.open().then(refresh).then(async () => { if (navigator.storage?.estimate) setStorage(await navigator.storage.estimate()); if (active) setStatus("Local data ready"); }).catch((error) => active && setStatus(`Data management blocked: ${error instanceof Error ? error.message : "database error"}`)); return () => { active = false; }; }, [refresh, repositories]);
   const createBackup = async () => { const created = await createLocalBackup(repositories.database); setBackup(created); setStatus(`Backup ready · ${created.manifest.counts.snapshots} snapshots · digest ${created.manifest.manifestDigest.slice(0, 12)}…`); };
   const readFile = async (file?: File) => { if (!file) return; const text = await file.text(); setImportText(text); setBackupPreview(undefined); setCalculationPreview(undefined); setRecordPreview(undefined); try { const parsed = JSON.parse(text) as { recordType?: string }; if (parsed.recordType === "max-stoich-local-backup") setBackupPreview(await previewBackup(text, repositories.database)); else if (["max-stoich-saved-recipe", "max-stoich-saved-route", "max-stoich-comparison-workspace"].includes(parsed.recordType ?? "")) setRecordPreview(await previewOwnedRecord(text, repositories.database)); else setCalculationPreview(await previewApplicationCalculation(text)); } catch { setCalculationPreview(await previewApplicationCalculation(text)); } setStatus("Import preview complete; no local records were changed."); };
-  const restore = async (mode: "merge" | "replace") => { if (!backupPreview?.valid) return; if (mode === "replace" && !window.confirm("Replace every local MAX Stoich record with this verified backup? A safety backup will be created first.")) return; const outcome = await restoreBackup(importText, repositories.database, mode, resolution); writeAppearanceBootstrap((await repositories.getSettings()).appearance); await refresh(); setStatus(`${mode === "replace" ? "Replace" : "Merge"} restore complete · safety backup digest ${outcome.safetyBackup?.manifest.manifestDigest.slice(0, 12)}…`); };
+  const restore = async (mode: "merge" | "replace") => { if (!backupPreview?.valid) return; if (mode === "replace" && !window.confirm("Replace every local MAX Stoich record with this verified backup? A safety backup will be created first.")) return; const outcome = await restoreBackup(importText, repositories.database, mode, resolution); const restoredLocalOnly = await repositories.sync?.markUntrackedRecordsLocalOnly("restored") ?? 0; writeAppearanceBootstrap((await repositories.getSettings()).appearance); await refresh(); setStatus(`${mode === "replace" ? "Replace" : "Merge"} restore complete · ${restoredLocalOnly} restored record(s) remain local-only for sync review · safety backup digest ${outcome.safetyBackup?.manifest.manifestDigest.slice(0, 12)}…`); };
   const saveLayout = async (source: WorkspaceLayout) => { const now = new Date().toISOString(); await repositories.saveLayout({ ...source, id: `layout-${crypto.randomUUID()}`, name: `Copy of ${source.name}`, builtIn: false, isDefault: false, createdAt: now, updatedAt: now }); await refresh(); setStatus("Saved a bounded user layout; scientific inputs were unchanged."); };
   const makeDefault = async (layout: WorkspaceLayout) => { const now = new Date().toISOString(); const value = layout.builtIn ? { ...layout, id: `layout-${crypto.randomUUID()}`, name: `My layout · ${layout.name}`, builtIn: false, createdAt: now } : layout; await repositories.saveLayout({ ...value, isDefault: true, updatedAt: now }); await refresh(); setStatus(`${layout.name} is the default local layout.`); };
   const renameLayout = async (layout: WorkspaceLayout, name: string) => { const trimmed = name.trim(); if (!trimmed || layout.builtIn || trimmed === layout.name) return; await repositories.saveLayout({ ...layout, name: trimmed, updatedAt: new Date().toISOString() }); await refresh(); setStatus(`Renamed layout to ${trimmed}.`); };

@@ -52,9 +52,27 @@ Engineering gates: type checking, lint, 295 unit/integration tests, 40 browser t
 
 Run `LAB_ACCEPTANCE_PLAN.md`, have named reviewers verify the atomic-weight policy and radius transcriptions against primary sources, acquire and verify the Rahm supporting information, and record laboratory approval per dataset/version where warranted. Secure shared-backend preparation remains optional and requires explicit authorization.
 
-## 15. Shared backend
+## 15a. Cloud accounts and authorization foundation — engineering implementation complete
 
-Define Supabase sync/auth/permissions/revision adapters only after local FUR validation. Local calculation remains available offline and independent of backend state.
+Implemented optional Supabase email/password authentication, SSR cookie sessions and refresh, safe confirmation/reset callback handling, invitation-only UI policy, account/profile management, an idempotent authenticated profile bootstrap, global account status, versioned `profiles`/`labs`/`lab_members` schema, minimum grants, RLS isolation, and a stable future local/cloud owner discriminator. Signed-out local calculation and every IndexedDB workflow remain available. No local scientific record is uploaded, claimed, hidden, or deleted by authentication.
+
+Engineering validation includes configuration, redirect, client lifecycle, credential-boundary, profile-bootstrap, and RLS contract tests; signed-out browser degradation; optional disposable-account live workflows; production build; and dependency audit. Applying the migration and running two-user RLS verification against the deployment project remain operational release gates.
+
+## 15b. Account-scoped cloud storage and explicit synchronization — engineering implementation complete
+
+Implemented private versioned cloud recipes, immutable revisions/snapshots, notes, comparisons, settings, and device metadata; forced RLS and minimum grants; server-verified ownership; stable local IDs mapped separately to cloud UUIDs; account-partitioned IndexedDB; explicit first-upload review; manual download-merge-upload synchronization; offline pending queues; optimistic versions and tombstones; deterministic conflict records and resolution; quarantine for unsupported remote records; account-scoped cloud backup; cache controls; and documented recovery behavior. Existing local scientific records remain authoritative and unchanged by synchronization bookkeeping.
+
+Closed-tab/service-worker sync, routes, precursor libraries, lab sharing, and administrative collaboration remain out of scope. Realtime subscriptions are change hints only. Applying all cloud migrations and running the disposable two-user RLS/live synchronization suite remain deployment gates.
+
+## 15c. Reliable automatic account synchronization — engineering implementation complete
+
+Implemented schema-10 durable transactional outbox records, mutable-operation compaction, per-mutation idempotency keys, a centralized coordinator that reuses the Milestone 2 engine, startup/local-change/reconnect/focus triggers, bounded jittered retry, pause and trigger settings, IndexedDB cross-tab leases, generic BroadcastChannel coordination, account-filtered Realtime change hints, targeted cache refresh, and open-workspace protection. Automatic work runs only in an open signed-in foreground page; no service worker was added.
+
+## 15d. Controlled private lab libraries — engineering implementation complete
+
+Implemented explicit private-to-lab publication of immutable synchronized revisions, opt-in note snapshots, admin/member/viewer authorization, digest-only expiring invitations, append-only audit, version history, provenance-preserving personal copies, direct lab-version comparison, namespaced offline caches with revocation cleanup, Realtime hints, archive/restore/hold/purge controls, redacted export, and documented retention. Joining a lab never shares personal records.
+
+Applying migration `202607170004_private_lab_libraries.sql`, running disposable multi-user RLS workflows, configuring production invitation email delivery, and laboratory governance approval remain deployment gates. Live collaboration, presence, comments, attachments, public links, inventory, and automatic publishing remain out of scope.
 
 ## Cross-cutting controls
 

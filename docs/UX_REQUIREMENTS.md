@@ -1,5 +1,29 @@
 # UX Requirements
 
+## Optional account behavior
+
+- Keep a compact account control available across Calculator, Comparison, Settings, demo, and account/authentication routes without covering primary actions.
+- Signed-out and cloud-unconfigured states must keep the calculator usable and must never open workspace-recovery UI.
+- Invitation-only mode shows no active public registration form.
+- Login provides semantic email/password controls, password visibility, password-manager autocomplete, keyboard submission, a pending guard, safe return routing, reset access, and a local-calculator exit.
+- Account status distinguishes local-only, pending, synchronizing, synchronized, offline, conflict, and error states without implying laboratory validation.
+- `/account` distinguishes authentication identity, device-local account data, cloud copies, pending work, conflicts, quarantined records, and registered devices.
+- Sign-out defaults to keeping the account's local cache. Removing downloaded cache is separately confirmed and cannot remove pending, local-only, conflicted, failed, or anonymous records.
+- Authentication surfaces reuse the Light, Dark, and Midnight tokens at mobile width and 200% zoom.
+
+## Automatic cloud synchronization
+
+- `Sync now` is available in the global account control and `/account`. The same engine also runs automatically on enabled startup, durable local changes, reconnect, throttled focus, and validated remote-change hints.
+- Automatic sync can be disabled or paused. Pending work remains durable and manual Sync now remains available.
+- The first signed-in upload decision lists selectable recipes, revision counts, notes, comparisons, settings, validation failures, and possible duplicates before any upload. `Keep local only` and `Not now` are non-destructive alternatives.
+- The synchronization sequence is download, validate, merge, upload, then summarize. The summary reports downloaded, uploaded, unchanged, conflicted, quarantined, and failed counts.
+- Conflicts persist until explicitly resolved. The UI shows record type, name or ID, local/cloud update context, reason, and valid `Keep local`, `Keep cloud`, or `Keep both` actions.
+- `Keep both` creates a new stable local identity and remaps its internal recipe/revision/snapshot references; it never mutates either scientific history in place.
+- Cloud-data management supports account-scoped backup, device naming, conflict access, quarantine visibility, and safe downloaded-cache removal.
+- Offline operation retains the complete account cache. A failed request leaves pending state and editable work intact and does not open the workspace-corruption recovery surface.
+- A downloaded newer revision never replaces the open editor. Unsaved work is preserved and the user is prompted to reopen the saved recipe deliberately.
+- Cloud-origin and synchronization metadata are presentation metadata only. They are excluded from chemistry inputs, immutable snapshot digests, calculation output, weighing CSV/JSON, and print.
+
 ## Default workspace
 
 The main workflow is a single desktop screen with a narrow top command bar and three bounded regions. No routine edit opens a new page or modal.
@@ -175,3 +199,11 @@ Blocking and action-required issues expand by default; minor advisories and calc
 - Workspace maximum widths are approximately 2100 px at 2K and 2700 px at 4K; comparison and Settings have route-appropriate bounds and use additional width for parallel content.
 - Calculator, comparison, and Settings use the shared `SiteBrand`; Dark and Midnight apply the same neutral high-contrast treatment on every route.
 - Comparison groups primary add/save actions separately from secondary actions, presents identity and analysis controls coherently, and keeps its view selector distinct from Standard/Advanced.
+
+## Private lab-library interaction
+
+- `/labs` lists only authorized labs and states that personal recipes remain private until explicitly published.
+- Publishing is available only for a saved immutable revision and previews target/adjusted-feed formulas, engine/schema provenance, validation state, warning count, destination, and explicitly selected notes.
+- Lab version history is read-only. Copying creates a new personal recipe; comparison creates a temporary editable scenario and labels the immutable lab source.
+- Admin membership, invitation, audit, export, retention, and purge actions remain distinct from routine library reading. Lab writes are disabled offline with an authorization explanation.
+- Removed membership produces an access-revoked state and clears the lab namespace after verified refresh without deleting personal copies.

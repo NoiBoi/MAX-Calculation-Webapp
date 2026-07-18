@@ -13,6 +13,16 @@ npm run dev
 
 Open `http://localhost:3000/`; the primary calculator is the landing page and `/workspace` remains a compatible direct link. The feature demo and tutorial is a clearly secondary development reference at `/demo`. Use `npm run check` for type checking, linting, and all unit/scientific tests; use `npm run test:e2e` for browser workflows.
 
+## Optional cloud accounts and automatic sync
+
+MAXCalc supports optional Supabase email/password accounts with cookie-backed Next.js sessions. The initial release is invitation-only by default. Signed-out users retain the complete calculator, comparison, notes, settings, backup, print, and recovery workflow.
+
+Authenticated users can synchronize saved recipes with every immutable revision/snapshot, structured notes, saved comparisons, and stable user settings. A durable IndexedDB outbox drives automatic foreground passes after local changes, startup, reconnect, throttled focus, or a remote change hint; **Sync now** uses the same validated engine. First sign-in never uploads anonymous local data: users review categories, validation failures, and potential duplicates before confirmation. Downloaded data is stored in a physically account-scoped IndexedDB cache and remains usable offline. Conflicts preserve both values for review; scientific revision conflicts never use last-write-wins.
+
+Copy `.env.example` to `.env.local` and configure `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Keep `NEXT_PUBLIC_AUTH_SIGNUPS_ENABLED=false` for the initial lab release and also disable public signup in Supabase Auth. Missing cloud variables produce a local-only configuration message rather than crashing the calculator. The reserved `SUPABASE_SERVICE_ROLE_KEY` is not required or used.
+
+See `docs/CLOUD_AUTH_ARCHITECTURE.md`, `docs/CLOUD_SYNC_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/BACKUP_AND_RESTORE.md`, `docs/SECURITY.md`, and `docs/DEPLOYMENT.md` for sessions, synchronization phases, conflict behavior, schema/RLS, backup boundaries, Supabase setup, and Vercel configuration.
+
 Appearance supports Light, neutral-charcoal Dark, black Midnight, and System from one compact control fixed at the application edge and from Settings. The versioned local settings record is authoritative; a derived local bootstrap value applies `data-theme` before hydration to prevent flashing. System follows live OS changes and resolves only to Light or Dark without replacing the persisted `system` choice. Printed Letter/A4 documents always use the light paper palette with readability-first typography at 100% scale.
 
 The supplied MAX Stoich logo appears in the calculator and print identity. Its transparent variant automatically changes contrast in Dark and Midnight, while the opaque variant is the browser-tab icon.
@@ -43,7 +53,7 @@ Use **Compare routes** to evaluate two to four independently editable precursor 
 
 ## Local data and offline limitations
 
-Scientific records are stored in IndexedDB in the current browser profile. They are device-, browser-, origin-, and profile-specific: there is no account, cloud sync, or multi-user backup. Clearing site data, using a temporary/private profile, changing origins, or uninstalling the profile can remove access. Create and download a verified backup regularly.
+Scientific records are stored in IndexedDB in the current browser profile. Anonymous records and each authenticated account use distinct local database namespaces. Clearing site data, using a temporary/private profile, changing origins, or uninstalling the profile can remove local and downloaded caches. Cloud sync is not a portable backup: create and download a verified backup regularly.
 
 Once a page is loaded, calculation, local persistence, comparison state already loaded in that page, backup generation, and export have no network dependency. This release does not install a service worker, so opening a route that was not already loaded may fail during a fully offline session. Automated browser coverage is Chromium; Firefox and WebKit support is not claimed until configured and run.
 
@@ -51,7 +61,7 @@ To reset during development, close every app tab and remove the site’s stored 
 
 Persistence internals and export contracts are documented in `docs/LOCAL_PERSISTENCE_ARCHITECTURE.md`.
 
-Cloud collaboration, descriptors, inventory, cost, phase prediction, and route recommendations are not implemented. Descriptors are visibly unavailable because no laboratory-approved atomic-radius dataset exists.
+Closed-tab/service-worker synchronization, realtime collaboration, lab-shared libraries, precursor-route sync, inventory, cost, phase prediction, and synthesis-route recommendations are not implemented. Realtime database events are change hints only; authoritative data still arrives through the validated pull/merge engine. Atomic-size descriptors remain explicitly labeled screening outputs and are not synthesis predictions.
 
 **Release status: Laboratory validation in progress.** This is not a laboratory-approved system. Approval requires the completed versioned record in `docs/LAB_ACCEPTANCE_RESULTS_TEMPLATE.md`, approved reference cases, and a named reviewer.
 
@@ -74,3 +84,5 @@ Settings is directly available in the calculator command bar. Print settings per
 The local-first calculator includes a production-accurate live print preview, deterministic content-aware multi-recipe packing, baseline-based comparison analysis, and safe recovery surfaces at both workspace and application boundaries. If browser storage cannot open, Retry performs a fresh IndexedDB initialization; blank-open, repair, diagnostic export, settings-only reset, and recovery-only reset preserve saved scientific records. Full local reset remains separately confirmed and destructive.
 
 The application is responsive from laptop through 2K, ultrawide, and 4K fullscreen viewports. Progressive semantic sizing and bounded route widths preserve 1080p compactness while making large-display typography, controls, tables, comparison scenarios, and Settings panels comfortably readable. See `docs/RESPONSIVE_LAYOUT.md`.
+
+Signed-in users may create controlled private lab libraries with admin/member/viewer roles, explicitly publish immutable personal recipe revisions, copy lab snapshots back to independent personal recipes, and compare lab versions without mutating the source. Invitations are expiring and digest-only; shared audit and retention controls are server-authorized. See `docs/PRIVATE_LAB_LIBRARIES.md` and `docs/RETENTION.md`.

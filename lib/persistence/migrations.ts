@@ -66,6 +66,30 @@ export const LOCAL_MIGRATIONS: readonly Migration[] = Object.freeze([
       return { ...(record as Record<string, unknown>), schemaVersion: LOCAL_SCHEMA_VERSION };
     },
   }),
+  Object.freeze({
+    fromVersion: 8,
+    toVersion: 9,
+    migrate(record: unknown): unknown {
+      if (!record || typeof record !== "object") return record;
+      return { ...(record as Record<string, unknown>), schemaVersion: LOCAL_SCHEMA_VERSION };
+    },
+  }),
+  Object.freeze({
+    fromVersion: 9,
+    toVersion: 10,
+    migrate(record: unknown): unknown {
+      if (!record || typeof record !== "object") return record;
+      return { ...(record as Record<string, unknown>), schemaVersion: LOCAL_SCHEMA_VERSION };
+    },
+  }),
+  Object.freeze({
+    fromVersion: 10,
+    toVersion: 11,
+    migrate(record: unknown): unknown {
+      if (!record || typeof record !== "object") return record;
+      return { ...(record as Record<string, unknown>), schemaVersion: LOCAL_SCHEMA_VERSION };
+    },
+  }),
 ]);
 
 export function migrateEditableWorkspaceInput(record: unknown): unknown {

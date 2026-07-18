@@ -11,6 +11,7 @@ import { buildWorkspaceCalculation } from "../../lib/workspace/adapter";
 import { BUILT_IN_LAYOUTS } from "../../lib/layouts/layouts";
 import { canonicalRadiusDatasetContent, type AtomicRadiusDataset } from "../../packages/chemistry-engine/radius-data";
 import { sha256Hex, stableCanonicalize } from "../../lib/persistence/canonical";
+import { LOCAL_SCHEMA_VERSION } from "../../lib/persistence/entities";
 import { buildComparisonAnalysis, precursorMatrixTsv, signedDifference } from "../../lib/comparison/analysis";
 
 const repositories: LocalDataRepositories[] = [];
@@ -130,7 +131,7 @@ describe("route comparison model and deterministic differences", () => {
     const repository = repo(); const workspace = comparison();
     await repository.saveComparison(workspace);
     const opened = await repository.getComparison(workspace.id);
-    expect(opened).toEqual({ ...workspace, schemaVersion: "8.0.0", updatedAt: opened?.updatedAt });
+    expect(opened).toEqual({ ...workspace, schemaVersion: LOCAL_SCHEMA_VERSION, updatedAt: opened?.updatedAt });
     expect((await repository.checkIntegrity()).valid).toBe(true);
   });
 
