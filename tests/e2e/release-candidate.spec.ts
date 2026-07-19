@@ -5,7 +5,7 @@ async function openMore(page: import("@playwright/test").Page) { await page.getB
 async function chooseExample(page: import("@playwright/test").Page, id = "ti2aln") { await openMore(page); await page.getByLabel("Start or reset").selectOption(id); }
 async function openSettings(page: import("@playwright/test").Page) { await openMore(page); await page.getByRole("link", { name: "Layouts, data, backup, and settings" }).click(); }
 async function openCompare(page: import("@playwright/test").Page) { const direct = page.getByRole("link", { name: "Compare", exact: true }); if (await direct.isVisible()) await direct.click(); else { await openMore(page); await page.getByRole("link", { name: "Open route comparison" }).click(); } }
-async function addCurrentPair(page: import("@playwright/test").Page) { await page.locator("header").getByRole("button", { name: "Add current recipe" }).click(); const scenario = page.getByRole("region").filter({ has: page.getByRole("button", { name: "Duplicate" }) }).first(); await scenario.getByRole("button", { name: "Duplicate" }).click(); }
+async function addCurrentPair(page: import("@playwright/test").Page) { await page.getByRole("toolbar", { name: "Comparison page actions" }).getByRole("button", { name: "Add current recipe" }).click(); const scenario = page.getByRole("region").filter({ has: page.getByRole("button", { name: "Duplicate" }) }).first(); await scenario.getByRole("button", { name: "Duplicate" }).click(); }
 async function saveRecipe(page: import("@playwright/test").Page) { await page.getByRole("button", { name: "Save", exact: true }).click(); const dialog = page.getByRole("dialog", { name: "Save recipe" }); await dialog.getByRole("button", { name: /Save recipe|Save revision|Rename recipe/ }).click(); await expect(dialog).not.toBeVisible(); }
 
 test.beforeEach(async ({ page }) => { await page.goto("/workspace"); await expect(page.locator('[data-recovery-ready="true"]')).toBeVisible(); await chooseExample(page); });
@@ -71,7 +71,7 @@ test("UX-RESTORE-001 previews and restores a verified backup", async ({ page }) 
   await saveRecipe(page);
   await openSettings(page); await page.getByRole("button", { name: "Create verified backup" }).click();
   const pending = page.waitForEvent("download"); await page.getByRole("button", { name: "Download backup JSON" }).click(); const download = await pending; const path = await download.path(); if (!path) throw new Error("Missing download");
-  await page.getByLabel("Choose MAX Stoich JSON file").setInputFiles(path);
+  await page.getByLabel("Choose MAXCalc JSON file").setInputFiles(path);
   await expect(page.getByText("Backup preview · verified")).toBeVisible();
   await page.getByRole("button", { name: "Merge verified backup" }).click();
   await expect(page.getByText(/Merge restore complete/)).toBeVisible();
@@ -79,10 +79,10 @@ test("UX-RESTORE-001 previews and restores a verified backup", async ({ page }) 
 
 test("UX-IMPORT-001/002 preserves a valid historical export and blocks tampering", async ({ page }) => {
   await saveRecipe(page); const pending = page.waitForEvent("download"); await page.getByRole("button", { name: "JSON", exact: true }).click(); const download = await pending; const path = await download.path(); if (!path) throw new Error("Missing download"); const json = await readFile(path, "utf8");
-  await openSettings(page); await page.getByLabel("Choose MAX Stoich JSON file").setInputFiles({ name: "calculation.json", mimeType: "application/json", buffer: Buffer.from(json) });
+  await openSettings(page); await page.getByLabel("Choose MAXCalc JSON file").setInputFiles({ name: "calculation.json", mimeType: "application/json", buffer: Buffer.from(json) });
   await expect(page.getByText("Calculation import preview · verified")).toBeVisible(); await page.getByRole("button", { name: "Import as new recipe" }).click(); await expect(page.getByText(/Imported historical calculation/)).toBeVisible();
   const tampered = JSON.parse(json); tampered.scientificResult.batch.finalRoundedTotalWeighingMassGrams = "999";
-  await page.getByLabel("Choose MAX Stoich JSON file").setInputFiles({ name: "tampered.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(tampered)) });
+  await page.getByLabel("Choose MAXCalc JSON file").setInputFiles({ name: "tampered.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(tampered)) });
   await expect(page.getByText("Calculation import preview · blocked")).toBeVisible(); await expect(page.getByText(/TAMPERED_SNAPSHOT_OUTPUT/)).toBeVisible();
 });
 
@@ -107,7 +107,7 @@ test("UX-ZOOM-001 keeps calculator, comparison, and data management usable at a 
   await page.setViewportSize({ width: 720, height: 900 });
   await expect(page.getByLabel("Target formula")).toBeVisible(); expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
   await openCompare(page); await expect(page.getByRole("heading", { name: "No recipes selected for comparison" })).toBeVisible(); expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
-  await page.goto("/settings"); await expect(page.getByRole("heading", { name: "Full local backup" })).toBeVisible(); await expect(page.getByLabel("Choose MAX Stoich JSON file")).toBeVisible(); expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+  await page.goto("/settings"); await expect(page.getByRole("heading", { name: "Full local backup" })).toBeVisible(); await expect(page.getByLabel("Choose MAXCalc JSON file")).toBeVisible(); expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
 });
 
 test("UX-RADIUS-010 uses source-verified data without claiming lab approval", async ({ page }) => {

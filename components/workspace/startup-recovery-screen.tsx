@@ -8,7 +8,7 @@ export function StartupRecoveryScreen({ failure, pending, onRetry, onOpenBlank, 
 }) {
   return <main className="min-h-screen bg-slate-100 p-6 text-slate-950"><section className="mx-auto max-w-3xl rounded-xl border bg-white p-6 shadow-sm" aria-labelledby="startup-recovery-heading">
     <p className="text-sm font-semibold uppercase tracking-wide text-amber-800">Local workspace recovery</p>
-    <h1 className="mt-1 text-2xl font-bold" id="startup-recovery-heading">MAX Stoich could not finish opening</h1>
+    <h1 className="mt-1 text-2xl font-bold" id="startup-recovery-heading">MAXCalc could not finish opening</h1>
     <p className="mt-3">{pending ? "Retrying local workspace…" : failure.message}</p>
     <div className="mt-5 flex flex-wrap gap-2">
       <button className="rounded bg-teal-800 px-4 py-2 font-semibold text-white disabled:bg-slate-400" disabled={pending} onClick={onRetry}>Retry</button>

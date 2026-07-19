@@ -30,7 +30,7 @@ test("DISPLAY-2K-001 scales calculator, comparison, and Settings without overflo
   await noHorizontalOverflow(page);
 
   await page.goto("/compare");
-  await page.locator("header").getByRole("button", { name: "Add blank scenario" }).click();
+  await page.getByRole("toolbar", { name: "Comparison page actions" }).getByRole("button", { name: "Add blank scenario" }).click();
   await page.getByLabel("Blank scenario scenario", { exact: true }).getByRole("button", { name: "Duplicate" }).click();
   const cards = page.locator('[aria-label$=" scenario"]');
   await expect(cards).toHaveCount(2);
@@ -49,7 +49,7 @@ test("DISPLAY-4K-001 uses larger tokens and bounded meaningful layouts", async (
   await page.goto("/workspace");
   await expect(page.locator('[data-recovery-ready="true"]')).toBeVisible();
   expect(await rootFontSize(page)).toBeGreaterThanOrEqual(17.5);
-  const workspaceWidth = await page.locator('main > header[data-testid="primary-command-bar"] + div').evaluate((element) => element.getBoundingClientRect().width);
+  const workspaceWidth = await page.locator("main > [data-layout]").evaluate((element) => element.getBoundingClientRect().width);
   expect(workspaceWidth).toBeGreaterThan(2200);
   expect(workspaceWidth).toBeLessThanOrEqual(2701);
   expect(await page.locator("main").evaluate((element) => getComputedStyle(element).transform)).toBe("none");
@@ -95,7 +95,7 @@ test("COMPARE-POLISH-001 exposes grouped actions and distinct comparison views",
   await expect(page.getByRole("heading", { name: "No recipes selected for comparison" })).toBeVisible();
   await expect(page.locator(".comparison-primary-actions")).toContainText("Add saved recipes");
   await expect(page.locator(".comparison-secondary-actions")).toContainText("Add blank scenario");
-  await page.locator("header").getByRole("button", { name: "Add blank scenario" }).click();
+  await page.getByRole("toolbar", { name: "Comparison page actions" }).getByRole("button", { name: "Add blank scenario" }).click();
   await page.getByLabel("Blank scenario scenario", { exact: true }).getByRole("button", { name: "Duplicate" }).click();
   const views = page.getByRole("group", { name: "Comparison view" });
   for (const name of ["Summary metrics", "Difference table", "Precursor matrix", "Recipe cards"]) {

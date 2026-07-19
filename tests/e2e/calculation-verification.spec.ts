@@ -82,7 +82,7 @@ test("VERIFY-004 batch scaling preserves linear unrounded conversion values", as
 test("VERIFY-005 comparison verifies valid and invalid scenarios independently", async ({ page }) => {
   await ready(page);
   await page.goto("/compare");
-  await page.locator("header").getByRole("button", { name: "Add current recipe" }).click();
+  await page.getByRole("toolbar", { name: "Comparison page actions" }).getByRole("button", { name: "Add current recipe" }).click();
   await page.getByLabel("Unsaved calculation scenario", { exact: true }).getByRole("button", { name: "Duplicate" }).click();
   await page.getByRole("button", { name: "Verify calculations" }).click();
   let dialog = page.getByRole("dialog", { name: "Comparison calculation verification" });

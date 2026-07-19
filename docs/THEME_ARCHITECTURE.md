@@ -1,6 +1,6 @@
 # Theme architecture
 
-MAX Stoich stores one appearance preference in user-settings schema `4.0.0`: `light`, `dark`, `midnight`, or `system`. System resolves only through `prefers-color-scheme` to Light or Dark. Midnight is always explicit. Schema `3.0.0` Dark remains Dark after migration and receives the revised neutral palette; it is never converted to Midnight.
+MAXCalc stores one appearance preference in user-settings schema `4.0.0`: `light`, `dark`, `midnight`, or `system`. System resolves only through `prefers-color-scheme` to Light or Dark. Midnight is always explicit. Schema `3.0.0` Dark remains Dark after migration and receives the revised neutral palette; it is never converted to Midnight.
 
 The root initialization script reads the derived bootstrap mirror before hydration, applies `data-theme`, and sets the native `color-scheme`. IndexedDB remains authoritative. Successful writes, reset, backup restore, and migration synchronize the mirror. A layout-time client reconciliation prevents hydration from removing the early attribute, and live OS changes are observed only while System is selected.
 

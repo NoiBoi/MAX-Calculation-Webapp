@@ -1,11 +1,11 @@
-# MAX Stoich Product Specification
+# MAXCalc Product Specification
 
 Status: foundation baseline, 2026-07-13  
 Product version target: first usable release (FUR)
 
 ## Product statement
 
-MAX Stoich is a local-first laboratory workspace that turns a known MAX-phase target composition and an explicit precursor route into reproducible weighing masses. It is optimized for trained users performing many related calculations without leaving the primary screen.
+MAXCalc is a local-first laboratory workspace that turns a known MAX-phase target composition and an explicit precursor route into reproducible weighing masses. It is optimized for trained users performing many related calculations without leaving the primary screen.
 
 ## Priority order
 
@@ -172,7 +172,7 @@ Suggestion evaluates registered routes and a deterministic direct elemental iden
 Print settings are local presentation state, not recipe input. Required fields retain recipe identity, adjusted feed, precursor identity, final mass, and total. Letter and A4 support 2/4/6-up packing at 100% scale. Calculator results use detailed one-up; comparison and selected-library recipes preserve visible order. Invalid scenarios show identity and blocking reason without masses. Oversized recipes receive a full page and notice.
 # Appearance system
 
-MAX Stoich provides Light, neutral Dark, black Midnight, and System appearance modes without changing chemistry, saved recipes, exports, or snapshots. A compact global control toggles Light/Dark and opens the four-choice menu; Settings exposes the same authoritative preference. System follows live operating-system changes and never resolves to Midnight. Semantic background, border, text, accent, status, focus, shadow, and overlay tokens preserve the teal identity and warning hierarchy. Midnight uses line-oriented near-black structure with minimal shadows. Print remains a larger-type white-paper presentation regardless of application appearance.
+MAXCalc provides Light, neutral Dark, black Midnight, and System appearance modes without changing chemistry, saved recipes, exports, or snapshots. A compact global control toggles Light/Dark and opens the four-choice menu; Settings exposes the same authoritative preference. System follows live operating-system changes and never resolves to Midnight. Semantic background, border, text, accent, status, focus, shadow, and overlay tokens preserve the teal identity and warning hierarchy. Midnight uses line-oriented near-black structure with minimal shadows. Print remains a larger-type white-paper presentation regardless of application appearance.
 # Reliability and analysis additions
 
 Print Settings provides a live, production-accurate page preview. Route comparison supports a selectable baseline, summary metrics, signed differences, aligned precursor matrices, original or common-batch display, and copy/CSV output. Startup failures use a dedicated recovery surface with real Retry and non-destructive safe-open, repair, export, and recovery-reset actions.

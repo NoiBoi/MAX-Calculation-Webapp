@@ -33,7 +33,7 @@ test("creator credit is consistent on screen and the fixed site instance is excl
 });
 
 test("BRAND-001 uses the transparent logo in site chrome and the opaque logo as the tab icon", async ({ page }) => {
-  await ready(page); const brand = page.getByRole("link", { name: "MAX Stoich calculator" }); const logo = brand.locator("img.site-logo"); await expect(logo).toHaveAttribute("src", "/brand/max-stoich-logo.svg"); const icon = page.locator('link[rel="icon"]'); await expect(icon).toHaveAttribute("href", /\/icon\.svg/);
+  await ready(page); const brand = page.getByRole("link", { name: "MAXCalc calculator" }); const logo = brand.getByRole("img", { name: "MAXCalc logo" }); await expect(logo).toHaveAttribute("src", "/brand/max-stoich-logo.svg"); const icon = page.locator('link[rel="icon"]'); await expect(icon).toHaveAttribute("href", /\/icon\.svg/);
   const transparentAsset = await page.request.get("/brand/max-stoich-logo.svg"); const opaqueAsset = await page.request.get("/icon.svg"); expect(transparentAsset.ok()).toBe(true); expect(opaqueAsset.ok()).toBe(true); expect(await transparentAsset.text()).not.toContain('<path fill="#ffffff" d="m-0.001312336 107.871155'); expect(await opaqueAsset.text()).toContain('<path fill="#ffffff" d="m-0.001312336 107.871155');
   await appearance(page, "Light"); await expect(logo).toHaveCSS("filter", "none"); await appearance(page, "Dark"); await expect(logo).toHaveCSS("filter", "invert(1)"); await appearance(page, "Midnight"); await expect(logo).toHaveCSS("filter", "invert(1)");
 });

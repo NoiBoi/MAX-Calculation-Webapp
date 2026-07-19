@@ -11,7 +11,8 @@ import { createOwnedRecordExport } from "@/lib/persistence/backup";
 import type { Mode } from "@/lib/persistence/workspace-types";
 import { RecipeCommandHistory } from "@/lib/workspace/history";
 import { AtomicRadiusPanel } from "@/components/descriptor-panel/atomic-radius-panel";
-import { SiteBrand } from "@/components/site/site-brand";
+import { AppHeader } from "@/components/site/app-header";
+import { InputWithSuffix } from "@/components/ui/input-with-suffix";
 import { presentDiagnostics, precursorStatus } from "@/lib/presentation/diagnostics";
 import { formatDescriptor, formatMassForBalance, formatMoles, formatPercent } from "@/lib/presentation/scientific-format";
 import { sortWeighingPrecursors, WEIGHING_SORT_OPTIONS, type WeighingSortOption } from "@/lib/presentation/weighing-sort";
@@ -307,7 +308,7 @@ export function WorkspaceShell() {
     catch (error) { setStartupFailure(classifyStartupError(error)); setStartupPending(false); }
   };
   const fullStartupReset = async () => {
-    if (!window.confirm("Delete all local MAX Stoich recipes, revisions, snapshots, notes, routes, comparisons, settings, and recovery data on this browser? This cannot be undone unless you exported a backup.")) return;
+    if (!window.confirm("Delete all local MAXCalc recipes, revisions, snapshots, notes, routes, comparisons, settings, and recovery data on this browser? This cannot be undone unless you exported a backup.")) return;
     setStartupPending(true);
     try { await repositories.deleteDatabase(); await initializeWorkspace({ skipRecovery: true }); }
     catch (error) { setStartupFailure(classifyStartupError(error)); setStartupPending(false); }
@@ -637,33 +638,44 @@ export function WorkspaceShell() {
       return `Ideal ${xComponent.value.template} value: ${xComponent.value.idealCoefficient.canonical} · ${state}`;
     } catch { return undefined; }
   })() : undefined;
+  const batchMassInvalid = (() => {
+    try { return !new ChemistryDecimal(recipe.requestedMassGrams).greaterThan(0); }
+    catch { return true; }
+  })();
 
   if (startupFailure) return <StartupRecoveryScreen failure={startupFailure} pending={startupPending} onExport={() => void exportStartupDiagnostic()} onFullReset={() => void fullStartupReset()} onOpenBlank={() => void initializeWorkspace({ skipRecovery: true })} onRepair={() => void repairStartup()} onResetRecovery={() => void resetStartupRecovery()} onRetry={() => void initializeWorkspace()} />;
   if (startupPending && !recoveryReady) return <main className="min-h-screen bg-slate-100 p-8 text-slate-950"><p className="font-semibold">Opening local workspace…</p></main>;
   return <main className="min-h-screen bg-slate-100 text-slate-950" onKeyDown={primaryNavigation}>
-    <header className="sticky top-0 z-20 flex min-h-16 flex-nowrap items-center gap-2 border-b border-slate-300 bg-white px-3 py-2 shadow-sm" data-testid="primary-command-bar">
-      <Link aria-label="MAX Stoich calculator" className="shrink-0 text-base font-bold tracking-tight text-slate-950 sm:text-lg" href="/"><SiteBrand /></Link>
-      <div className="min-w-0 flex-1 border-l border-slate-300 pl-3">
-        <p className="truncate text-sm font-semibold" title={currentIdentity}>{currentIdentity}</p>
-        <p aria-live="polite" className="truncate text-xs text-slate-600" data-recovery-ready={recoveryReady}>{identityStatus} · {statusMessage}</p>
+    <AppHeader
+      activeSection="calculator"
+      status={<span data-recovery-ready={recoveryReady}>{identityStatus} · {statusMessage}</span>}
+      testId="primary-command-bar"
+      title={currentIdentity}
+      contextualActions={<>
+        <Link className="ui-button header-navigation-button" href="/compare">Compare</Link>
+        <Link className="ui-button header-navigation-button" href="/settings">Settings</Link>
+        <button aria-expanded={commandOpen} aria-label="More actions and commands" className="ui-button header-navigation-button" onClick={() => { setActivePanel("none"); setCommandOpen((current) => !current); }} ref={moreButtonRef}>More <span aria-hidden="true">•••</span></button>
+        <div aria-label="Interaction mode" className="segmented-control workspace-detail-mode hidden sm:flex" role="group">
+          <button aria-pressed={mode === "standard"} onClick={() => setMode("standard")}>Standard</button>
+          <button aria-pressed={mode === "advanced"} onClick={() => setMode("advanced")}>Advanced</button>
+        </div>
+      </>}
+    />
+    <div className="workspace-command-bar">
+      <div className="workspace-command-bar-inner">
+        <div aria-label="Calculator page actions" className="page-toolbar" role="toolbar">
+        <button className="ui-button" onClick={newRecipe}>New</button>
+        <button className="ui-button hidden sm:inline-flex" onClick={(event) => { panelTriggerRef.current = event.currentTarget; setCommandOpen(false); setActivePanel((current) => current === "recipes" ? "none" : "recipes"); void refreshLibraries(); }}>Open</button>
+        <button className="ui-button ui-button-primary" disabled={!currentValid} onClick={openSaveDialog} ref={saveButtonRef}>Save</button>
+        <div className="hidden md:flex"><button aria-label="Undo" className="ui-icon-button rounded-r-none" disabled={!canUndo} onClick={undo}>↶</button><button aria-label="Redo" className="ui-icon-button rounded-l-none border-l-0" disabled={!canRedo} onClick={redo}>↷</button></div>
+        <button className="ui-button hidden 2xl:inline-flex" disabled={!savedRecipe||!savedRevision||!savedSnapshot} onClick={()=>savedRecipe&&void openPublish(savedRecipe,savedRevision?.id)}>Publish to lab</button>
+        </div>
       </div>
-      <button className="min-h-10 shrink-0 rounded-md border border-slate-400 px-3 text-sm font-medium hover:bg-slate-100" onClick={newRecipe}>New</button>
-      <button className="hidden min-h-10 shrink-0 rounded-md border border-slate-400 px-3 text-sm font-medium hover:bg-slate-100 sm:block" onClick={(event) => { panelTriggerRef.current = event.currentTarget; setCommandOpen(false); setActivePanel((current) => current === "recipes" ? "none" : "recipes"); void refreshLibraries(); }}>Open</button>
-      <div aria-label="Interaction mode" className="hidden min-h-10 shrink-0 rounded-md border border-slate-400 p-0.5 sm:flex">
-        <button aria-pressed={mode === "standard"} className={`rounded px-2 text-sm font-medium ${mode === "standard" ? "bg-slate-900 text-white" : "hover:bg-slate-100"}`} onClick={() => setMode("standard")}>Standard</button>
-        <button aria-pressed={mode === "advanced"} className={`rounded px-2 text-sm font-medium ${mode === "advanced" ? "bg-slate-900 text-white" : "hover:bg-slate-100"}`} onClick={() => setMode("advanced")}>Advanced</button>
-      </div>
-      <button className="min-h-10 shrink-0 rounded-md bg-teal-900 px-3 text-sm font-semibold text-white disabled:bg-slate-600" disabled={!currentValid} onClick={openSaveDialog} ref={saveButtonRef}>Save</button>
-      <div className="hidden shrink-0 md:flex"><button aria-label="Undo" className="min-h-10 rounded-l-md border px-2 disabled:text-slate-400" disabled={!canUndo} onClick={undo}>↶</button><button aria-label="Redo" className="min-h-10 rounded-r-md border border-l-0 px-2 disabled:text-slate-400" disabled={!canRedo} onClick={redo}>↷</button></div>
-      <Link className="hidden min-h-10 shrink-0 rounded-md border px-3 py-2 text-sm font-medium lg:block" href="/compare">Compare</Link>
-      <button className="hidden min-h-10 shrink-0 rounded-md border px-3 py-2 text-sm font-medium xl:block disabled:text-slate-400" disabled={!savedRecipe||!savedRevision||!savedSnapshot} onClick={()=>savedRecipe&&void openPublish(savedRecipe,savedRevision?.id)}>Publish to lab</button>
-      <Link className="min-h-10 shrink-0 rounded-md border px-3 py-2 text-sm font-medium" href="/settings">Settings</Link>
-      <button aria-expanded={commandOpen} aria-label="More actions and commands" className="min-h-10 shrink-0 rounded-md border border-slate-400 px-3 text-sm font-medium hover:bg-slate-100" onClick={() => { setActivePanel("none"); setCommandOpen((current) => !current); }} ref={moreButtonRef}>More <span aria-hidden="true">•••</span></button>
-    </header>
+    </div>
 
     {remoteUpdateAvailable && <section aria-live="polite" className="mx-auto mt-3 flex w-[min(100%-1.5rem,1480px)] flex-wrap items-center gap-3 rounded border border-blue-400 bg-blue-50 p-3 text-sm"><p className="mr-auto font-medium">{unsavedChanges ? "A newer cloud revision was downloaded. Your unsaved work remains open." : "A newer cloud revision is available. Your current view was not replaced."}</p><button className="rounded border border-blue-500 bg-white px-3 py-2 font-semibold" onClick={() => { if (unsavedChanges && !window.confirm("Open the downloaded revision and replace the unsaved workspace? Save or duplicate first if you need to preserve these edits.")) return; const latest = remoteUpdateAvailable; setRemoteUpdateAvailable(undefined); void openRecipe(latest); }} type="button">Open newer revision</button><button className="rounded border px-3 py-2" onClick={() => setRemoteUpdateAvailable(undefined)} type="button">Keep viewing current</button></section>}
 
-    {commandOpen && <section aria-label="More actions" className="fixed right-3 top-16 z-30 max-h-[82vh] w-[min(22rem,calc(100vw-1.5rem))] overflow-auto rounded-lg border border-slate-400 bg-white p-4 shadow-xl" ref={commandLayerRef}><div className="flex items-center justify-between"><h2 className="font-semibold">More actions</h2><button aria-label="Close more actions" className="min-h-8 min-w-8 rounded border" onClick={() => setCommandOpen(false)}>×</button></div><div className="mt-3 grid gap-2">
+    {commandOpen && <section aria-label="More actions" className="workspace-command-layer fixed right-3 z-30 max-h-[82vh] w-[min(22rem,calc(100vw-1.5rem))] overflow-auto rounded-lg border border-slate-400 bg-white p-4 shadow-xl" ref={commandLayerRef}><div className="flex items-center justify-between"><h2 className="font-semibold">More actions</h2><button aria-label="Close more actions" className="min-h-8 min-w-8 rounded border" onClick={() => setCommandOpen(false)}>×</button></div><div className="mt-3 grid gap-2">
       <label className="text-xs font-semibold uppercase tracking-wide text-slate-600" htmlFor="template-picker">Start or reset<select className="mt-1 min-h-10 w-full rounded border border-slate-400 bg-white px-2 text-sm font-normal normal-case tracking-normal" id="template-picker" onChange={(event) => { choosePreset(event.target.value); setCommandOpen(false); }} value=""><option disabled value="">Choose…</option><option value="blank">New blank calculation</option><optgroup label="New carbide templates"><option value="generic-211">New 211 carbide</option><option value="generic-312">New 312 carbide</option><option value="generic-413">New 413 carbide</option></optgroup><optgroup label="Built-in examples">{WORKSPACE_PRESETS.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</optgroup></select></label>
       <label className="text-xs font-semibold uppercase tracking-wide text-slate-600" htmlFor="layout-picker">Workspace layout<select aria-label="Workspace layout" className="mt-1 min-h-10 w-full rounded border border-slate-400 bg-white px-2 text-sm font-normal normal-case tracking-normal" id="layout-picker" onChange={(event) => { const selected = layouts.find((item) => item.id === event.target.value); if (!selected) return; if (selected.kind === "route-comparison") { window.location.href = "/compare"; return; } setActiveLayout(selected); setMode(selected.kind === "advanced-calculator" ? "advanced" : "standard"); setCommandOpen(false); }} value={activeLayout?.id ?? ""}><optgroup label="Built-in layouts">{layouts.filter((item) => item.builtIn).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</optgroup>{layouts.some((item) => !item.builtIn) && <optgroup label="My layouts">{layouts.filter((item) => !item.builtIn).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</optgroup>}</select></label>
       <div className="flex rounded border p-1 sm:hidden"><button className={`flex-1 rounded p-2 text-sm ${mode === "standard" ? "bg-slate-900 text-white" : ""}`} onClick={() => setMode("standard")}>Standard</button><button className={`flex-1 rounded p-2 text-sm ${mode === "advanced" ? "bg-slate-900 text-white" : ""}`} onClick={() => setMode("advanced")}>Advanced</button></div>
@@ -718,7 +730,7 @@ export function WorkspaceShell() {
 
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <label className="block text-sm font-medium" htmlFor="batch-basis">Batch-mass basis<select className="mt-1 min-h-10 w-full rounded border border-slate-400 bg-white px-2" data-primary-field id="batch-basis" onChange={(event) => setRecipe({ ...recipe, basis: event.target.value as BatchMassBasis })} value={recipe.basis}><option value="ideal-product-mass">Ideal product mass</option><option value="recovered-product-mass">Recovered product mass</option><option value="final-precursor-mixture-mass">Final precursor mixture mass</option></select></label>
-          <label className="block text-sm font-medium" htmlFor="batch-mass">Target batch mass<span className="mt-1 flex rounded border border-slate-400"><input className="min-h-10 min-w-0 flex-1 px-3 font-mono" data-primary-field id="batch-mass" inputMode="decimal" onChange={(event) => setRecipe({ ...recipe, requestedMassGrams: event.target.value })} ref={batchRef} value={recipe.requestedMassGrams} /><span className="flex items-center border-l bg-slate-100 px-3 text-xs">g</span></span></label>
+          <label className="block text-sm font-medium" htmlFor="batch-mass">Target batch mass<InputWithSuffix aria-invalid={batchMassInvalid} className="font-mono" data-primary-field id="batch-mass" inputMode="decimal" onChange={(event) => setRecipe({ ...recipe, requestedMassGrams: event.target.value })} ref={batchRef} suffix="g" value={recipe.requestedMassGrams} /></label>
           {recipe.basis === "recovered-product-mass" && <div className="sm:col-span-2"><NumberField id="yield" label="Expected reaction yield" onChange={(value) => setRecipe({ ...recipe, expectedYieldPercent: value })} unit="%" value={recipe.expectedYieldPercent} /></div>}
           {aluminumFeed.visible && <label className="block text-sm font-medium" htmlFor="aluminum-per-formula">Aluminum per formula<input aria-describedby={aluminumFeed.error ? "aluminum-per-formula-error" : "aluminum-per-formula-help"} className="mt-1 min-h-10 w-full rounded-md border border-slate-400 px-3 font-mono outline-none focus:border-teal-700 focus:ring-2 focus:ring-teal-200" id="aluminum-per-formula" inputMode="decimal" onChange={(event) => setRecipe({ ...recipe, aluminumPerFormula: event.target.value })} value={recipe.aluminumPerFormula ?? aluminumFeed.enteredCoefficient ?? ""} /><span className="mt-1 block text-xs font-normal text-slate-600" id="aluminum-per-formula-help">Ideal value: {aluminumFeed.idealCoefficient} · {aluminumHelper}</span>{aluminumFeed.error && <span className="mt-1 block text-xs font-semibold text-red-800" id="aluminum-per-formula-error">{aluminumFeed.error}</span>}</label>}
           {xComponent.success && <label className="block text-sm font-medium" htmlFor="x-per-formula">{xComponent.value.element === "C" ? "Carbon" : "Nitrogen"} per formula<input aria-describedby={xCoefficientError ? "x-per-formula-error" : "x-per-formula-help"} className="mt-1 min-h-10 w-full rounded-md border border-slate-400 px-3 font-mono outline-none focus:border-teal-700 focus:ring-2 focus:ring-teal-200" id="x-per-formula" inputMode="decimal" onChange={(event) => updateXCoefficient(event.target.value)} value={xCoefficientDraft ?? xComponent.value.enteredCoefficientText} /><span className="mt-1 block text-xs font-normal text-slate-600" id="x-per-formula-help">{xFeedHelper}</span>{xCoefficientError && <span className="mt-1 block text-xs font-semibold text-red-800" id="x-per-formula-error">{xCoefficientError}</span>}</label>}

@@ -1,8 +1,8 @@
-# MAX Stoich
+# MAXCalc
 
 The calculator includes a paper-friendly balance-side weighing summary. General recipe comparison starts empty, can import several saved recipes with the same or different targets at once, and offers an ordered comparison summary for copying or printing.
 
-MAX Stoich is a local, one-screen MAX-phase precursor calculator. It turns an explicit target and precursor route into auditable final gross weighing masses using the framework-independent chemistry engine.
+MAXCalc is a local, one-screen MAX-phase precursor calculator. It turns an explicit target and precursor route into auditable final gross weighing masses using the framework-independent chemistry engine.
 
 ## Run the calculator
 
@@ -27,7 +27,7 @@ Release-candidate hardening uses `v1.0.0-rc.1`. Run `npm run release:baseline`, 
 
 Appearance supports Light, neutral-charcoal Dark, black Midnight, and System from one compact control fixed at the application edge and from Settings. The versioned local settings record is authoritative; a derived local bootstrap value applies `data-theme` before hydration to prevent flashing. System follows live OS changes and resolves only to Light or Dark without replacing the persisted `system` choice. Printed Letter/A4 documents always use the light paper palette with readability-first typography at 100% scale.
 
-The supplied MAX Stoich logo appears in the calculator and print identity. Its transparent variant automatically changes contrast in Dark and Midnight, while the opaque variant is the browser-tab icon.
+The supplied MAXCalc logo appears in the calculator and print identity. Its transparent variant automatically changes contrast in Dark and Midnight, while the opaque variant is the browser-tab icon.
 
 Every screen includes the unobtrusive creator credit `Built by Matthew Deng · deng301@purdue.edu for inquiries · Built for the Anasori Lab`; the address is a mail link. The fixed screen instance is excluded from print, while dedicated recipe printouts use the same credit in their reserved page footer.
 
@@ -51,7 +51,9 @@ Current valid results can be copied as tab-delimited weighing rows, exported as 
 
 Use **Compare routes** to evaluate two to four independently editable precursor scenarios against one locked target. Differences use canonical compositions and existing engine results; summaries do not predict which route will synthesize successfully. A preferred scenario can be saved as an independent recipe or route without changing its source.
 
-**Layouts & data** provides tested layout presets and bounded local user layouts. Layout changes never store or alter scientific state. The same panel creates manifest-backed full backups, previews merge or replace restores, reports conflicts, and imports only MAX Stoich-owned calculation, recipe, route, comparison, or backup JSON. Replace is confirmed and transactionally protected by a safety backup. Tampered, future, malformed, oversized, and arbitrary files are blocked before database writes.
+**Layouts & data** provides tested layout presets and bounded local user layouts. Layout changes never store or alter scientific state. The same panel creates manifest-backed full backups, previews merge or replace restores, reports conflicts, and imports only MAXCalc-owned calculation, recipe, route, comparison, or backup JSON. Replace is confirmed and transactionally protected by a safety backup. Tampered, future, malformed, oversized, and arbitrary files are blocked before database writes.
+
+The user-facing product name is **MAXCalc**. Legacy internal identifiers such as the `max-stoich` package/workspace names, IndexedDB names, storage keys, record types, backup schemas, and existing asset filenames are intentionally retained for backward compatibility.
 
 ## Local data and offline limitations
 

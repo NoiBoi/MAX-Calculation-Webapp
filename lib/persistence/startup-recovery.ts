@@ -40,7 +40,7 @@ export function classifyStartupError(error: unknown): StartupFailure {
   const messages: Record<StartupErrorCategory, string> = {
     "indexeddb-unavailable": "Local browser storage is unavailable. Check private-browsing or storage restrictions, then retry.",
     "quota-exceeded": "Local storage is full. Export a diagnostic backup if possible, free browser storage, and retry.",
-    "database-blocked": "Another MAX Stoich tab is preventing a local database upgrade. Close other tabs and retry.",
+    "database-blocked": "Another MAXCalc tab is preventing a local database upgrade. Close other tabs and retry.",
     "migration-failed": "The local database could not finish its version upgrade. Saved records were not reset.",
     "recovery-record-corrupt": "The last unsaved workspace cannot be restored, but saved scientific records appear intact.",
     "settings-record-corrupt": "Local settings could not be read. Saved recipes were not deleted.",

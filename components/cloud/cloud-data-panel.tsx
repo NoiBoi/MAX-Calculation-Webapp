@@ -12,6 +12,7 @@ import { getOrCreateInstallationId } from "@/lib/cloud/local-data-owner";
 import { CLOUD_SYNC_SCHEMA_VERSION } from "@/lib/cloud/sync-types";
 import { DATABASE_VERSION } from "@/lib/persistence/database";
 import packageMetadata from "@/package.json";
+import { AppHeader, PageContainer } from "@/components/site/app-header";
 
 const categoryLabels: Readonly<Record<SyncUploadCategory, string>> = { recipes: "Recipes and immutable revisions", notes: "Structured notes", comparisons: "Saved comparisons", settings: "User settings" };
 const valueName = (value: unknown, fallback: string): string => {
@@ -89,9 +90,18 @@ export function CloudDataPanel() {
     }, null, 2));
     setMessage("Redacted synchronization diagnostics copied. Record contents, full identifiers, and credentials were excluded.");
   };
-  return <main className="auth-page min-h-screen p-4">
-    <div className="mx-auto w-full max-w-6xl">
-      <header className="flex flex-wrap items-center gap-3"><Link className="rounded border px-3 py-2 font-semibold" href="/account">← Account</Link><Link className="rounded border px-3 py-2" href="/workspace">Calculator</Link><div className="mr-auto"><h1 className="text-2xl font-bold">Cloud data and synchronization</h1><p className="text-sm">Automatic account-scoped foreground synchronization with durable offline queuing.</p></div><button className="rounded bg-teal-800 px-4 py-2 font-semibold text-white disabled:bg-slate-400" disabled={cloud.pending || !cloud.online} onClick={() => void cloud.syncNow().then((result) => result && setMessage(result.status === "complete" ? "Sync complete." : result.errors.join(" ")))} type="button">{cloud.pending ? "Syncing…" : "Sync now"}</button></header>
+  return <main className="auth-page min-h-screen">
+    <AppHeader
+      activeSection="account"
+      title="Cloud data and synchronization"
+      status="Automatic account-scoped synchronization"
+      contextualActions={<>
+        <Link className="ui-button" href="/account">Account</Link>
+        <Link className="ui-button" href="/workspace">Calculator</Link>
+        <button className="ui-button ui-button-primary" disabled={cloud.pending || !cloud.online} onClick={() => void cloud.syncNow().then((result) => result && setMessage(result.status === "complete" ? "Sync complete." : result.errors.join(" ")))} type="button">{cloud.pending ? "Syncing…" : "Sync now"}</button>
+      </>}
+    />
+    <PageContainer className="py-4" width="settings">
       {message && <p aria-live="polite" className="mt-4 rounded border bg-white p-3 text-sm">{message}</p>}
       <div className="mt-5 grid gap-4 lg:grid-cols-3">
         <section className="rounded border bg-white p-4"><h2 className="font-semibold">Status</h2><p className="mt-2 text-lg font-bold">{cloud.statusLabel}</p><dl className="mt-3 grid grid-cols-2 gap-2 text-sm"><div><dt>Local-only</dt><dd className="font-semibold">{cloud.counts.localOnly}</dd></div><div><dt>Pending upload</dt><dd className="font-semibold">{cloud.counts.pendingUpload}</dd></div><div><dt>Known cloud records</dt><dd className="font-semibold">{cloud.counts.cloudRecords}</dd></div><div><dt>Conflicts</dt><dd className="font-semibold">{cloud.counts.conflicts}</dd></div></dl><p className="mt-3 text-xs">Last successful sync: {cloud.session?.lastSuccessfulSyncAt ? new Date(cloud.session.lastSuccessfulSyncAt).toLocaleString() : "Never on this device"}</p></section>
@@ -130,6 +140,6 @@ export function CloudDataPanel() {
       <section className="mt-4 rounded border bg-white p-4"><h2 className="text-lg font-semibold">Validation quarantine</h2><p className="mt-1 text-sm">A malformed or future-schema cloud record is isolated without clearing IndexedDB or blocking unrelated valid records.</p>{cloud.quarantine.length ? <ul className="mt-3 space-y-2 text-sm">{cloud.quarantine.map((item) => <li className="rounded border p-2" key={item.id}><strong>{item.code}</strong> · {item.recordType} · {item.message}</li>)}</ul> : <p className="mt-2 text-sm">No quarantined cloud records.</p>}</section>
 
       <section className="mt-4 rounded border bg-white p-4"><h2 className="text-lg font-semibold">Device cache</h2><p className="mt-2 text-sm">Removing downloaded cache affects only this account on this browser. It never deletes cloud records, anonymous records, or pending local changes.</p><button className="mt-3 rounded border border-red-400 px-3 py-2 font-semibold" onClick={() => void removeCache()} type="button">Remove downloaded cloud cache from this device…</button></section>
-    </div>
+    </PageContainer>
   </main>;
 }

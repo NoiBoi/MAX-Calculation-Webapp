@@ -1,6 +1,6 @@
 # Chemistry Engine
 
-Framework-independent MAX Stoich scientific functions. This package has no React, Next.js, storage, or network dependency.
+Framework-independent MAXCalc scientific functions. This package has no React, Next.js, storage, or network dependency.
 
 ## Implemented public API
 

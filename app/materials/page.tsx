@@ -1,1 +1,4 @@
-export default function MaterialsPage() { return <main className="p-8"><h1>Materials — planned</h1></main>; }
+import Link from "next/link";
+import { AppHeader, PageContainer } from "@/components/site/app-header";
+
+export default function MaterialsPage() { return <><AppHeader activeSection="other" status="Planned application surface" title="Materials" contextualActions={<Link className="ui-button" href="/workspace">Calculator</Link>} /><main><PageContainer width="readable"><h2 className="text-xl font-bold">Materials — planned</h2></PageContainer></main></>; }

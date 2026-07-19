@@ -8,7 +8,7 @@ Scientific data is immutable by `dataVersion`. Corrections create a new version;
 
 The complete registry in `data/elements.json` is deterministically parsed from the IUPAC Commission on Isotopic Abundances and Atomic Weights (CIAAW) [2024 standard table](https://ciaaw.org/atomic-weights.htm) and [2024 abridged table](https://ciaaw.org/abridged-atomic-weights.htm), accessed 2026-07-14.
 
-CIAAW represents some standard atomic weights as intervals because normal terrestrial materials vary isotopically. MAX Stoich preserves those intervals and separately stores the CIAAW abridged value used for routine molar-mass calculation. The `calculationValuePolicy` makes this choice explicit. Samples with known nonstandard isotopic composition require a user-defined value and provenance note.
+CIAAW represents some standard atomic weights as intervals because normal terrestrial materials vary isotopically. MAXCalc preserves those intervals and separately stores the CIAAW abridged value used for routine molar-mass calculation. The `calculationValuePolicy` makes this choice explicit. Samples with known nonstandard isotopic composition require a user-defined value and provenance note.
 
 The registry contains all 118 symbols, all 84 CIAAW entries with usable standard calculation values, and explicit unavailable records for 34 elements without a standard atomic weight.
 

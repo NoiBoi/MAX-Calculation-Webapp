@@ -53,9 +53,9 @@ test("PRINT-PREVIEW-LIVE-001 uses the production print component and current uns
 
 test("RECOVERY-RETRY-001 performs a real retry and repair enters the calculator", async ({ page }) => {
   await ready(page); await page.goto("/demo"); await corruptRecovery(page); await page.goto("/workspace");
-  await expect(page.getByRole("heading", { name: "MAX Stoich could not finish opening" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "MAXCalc could not finish opening" })).toBeVisible();
   await page.getByRole("button", { name: "Retry", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "MAX Stoich could not finish opening" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "MAXCalc could not finish opening" })).toBeVisible();
   await page.getByText("Technical details").click(); await expect(page.getByText("recovery-record-corrupt", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Repair local workspace" }).click();
   await expect(page.getByRole("heading", { name: "Target and precursor route" })).toBeVisible();
@@ -86,7 +86,7 @@ test("RECOVERY-SETTINGS-001 corrupt settings do not crash or delete scientific r
 
 test("COMPARE-ANALYSIS-001 supports baseline, normalization, sorting, hiding, export, and overview print", async ({ page }) => {
   await ready(page); await chooseExample(page); await page.getByRole("link", { name: "Compare", exact: true }).click();
-  await page.locator("header").getByRole("button", { name: "Add current recipe" }).click();
+  await page.getByRole("toolbar", { name: "Comparison page actions" }).getByRole("button", { name: "Add current recipe" }).click();
   const first = page.getByLabel("Unsaved calculation scenario", { exact: true }); await first.getByRole("button", { name: "Duplicate" }).click(); await first.getByRole("button", { name: "Duplicate" }).click();
   const names = page.locator('section[aria-label$=" scenario"] input[aria-label$=" name"]'); await names.nth(0).fill("Route C"); await names.nth(1).fill("Route A"); await names.nth(2).fill("Route B");
   await page.getByLabel("Baseline").selectOption({ label: "Route B" }); await page.getByRole("button", { name: "Difference table" }).click();

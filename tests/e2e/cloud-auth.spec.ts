@@ -21,7 +21,7 @@ test("AUTH-004 missing cloud configuration preserves the local calculator", asyn
   await expect(page.getByRole("heading", { name: "Cloud accounts unavailable" })).toBeVisible();
   await expect(page.getByText(/calculator, local recipes, comparisons, notes, backups, recovery, and printing continue/i)).toBeVisible();
   await expect(page.getByText(/local application recovery/i)).toHaveCount(0);
-  await page.getByRole("link", { name: "Return to MAX Stoich calculator" }).click();
+  await page.getByRole("link", { name: "Calculator" }).click();
   await expect(page.locator('[data-recovery-ready="true"]')).toBeVisible();
 });
 

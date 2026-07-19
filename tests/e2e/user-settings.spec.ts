@@ -51,6 +51,6 @@ test("PRINT-SETTINGS-001 persists paper, packing, fields, and required-field pro
 });
 
 test("VERIFY-PLACEMENT-001 puts verification beside trace at the bottom and restores focus", async ({ page }) => {
-  await readyWorkspace(page); await choose(page, "ti2aln"); const top = page.getByTestId("primary-command-bar"); await expect(top.getByRole("button", { name: /Verify/ })).toHaveCount(0); await expect(top.getByRole("link", { name: "Settings" })).toBeVisible();
+  await readyWorkspace(page); await choose(page, "ti2aln"); const top = page.getByRole("toolbar", { name: "Calculator page actions" }); await expect(top.getByRole("button", { name: /Verify/ })).toHaveCount(0); await expect(page.getByRole("banner").getByRole("link", { name: "Settings" })).toBeVisible();
   const details = page.getByRole("region", { name: "Calculation details" }); const verify = details.getByRole("button", { name: "Verify calculations" }); await expect(verify).toBeEnabled(); await expect(details.getByRole("button", { name: "Open calculation trace" })).toBeVisible(); await verify.click(); await page.getByRole("dialog", { name: "Calculation verification" }).getByRole("button", { name: "Close" }).click(); await expect(verify).toBeFocused();
 });

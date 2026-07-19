@@ -2,7 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 
 async function ready(page: Page, path = "/workspace") { await page.goto(path); await expect(page.locator('[data-recovery-ready="true"]')).toBeVisible(); }
 async function chooseExample(page: Page, id = "ti2aln") { await page.getByRole("button", { name: /More actions/ }).click(); await page.getByLabel("Start or reset").selectOption(id); }
-async function addComparisonPair(page: Page) { await page.goto("/compare"); await page.locator("header").getByRole("button", { name: "Add current recipe" }).click(); await page.getByLabel("Unsaved calculation scenario", { exact: true }).getByRole("button", { name: "Duplicate" }).click(); }
+async function addComparisonPair(page: Page) { await page.goto("/compare"); await page.getByRole("toolbar", { name: "Comparison page actions" }).getByRole("button", { name: "Add current recipe" }).click(); await page.getByLabel("Unsaved calculation scenario", { exact: true }).getByRole("button", { name: "Duplicate" }).click(); }
 
 test("COMPARE-CONSISTENCY-001 uses calculator result tables and advanced hierarchy", async ({ page }) => {
   await ready(page); await chooseExample(page); await addComparisonPair(page);

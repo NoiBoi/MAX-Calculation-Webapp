@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 async function openMore(page: import("@playwright/test").Page) { await page.getByRole("button", { name: /More actions/ }).click(); }
 async function chooseExample(page: import("@playwright/test").Page, id = "ti2aln") { await openMore(page); await page.getByLabel("Start or reset").selectOption(id); }
 async function openCompare(page: import("@playwright/test").Page) { await page.getByRole("link", { name: "Compare", exact: true }).click(); }
-async function addCurrentPair(page: import("@playwright/test").Page) { await page.locator("header").getByRole("button", { name: "Add current recipe" }).click(); await page.getByLabel("Unsaved calculation scenario", { exact: true }).getByRole("button", { name: "Duplicate" }).click(); }
+async function addCurrentPair(page: import("@playwright/test").Page) { await page.getByRole("toolbar", { name: "Comparison page actions" }).getByRole("button", { name: "Add current recipe" }).click(); await page.getByLabel("Unsaved calculation scenario", { exact: true }).getByRole("button", { name: "Duplicate" }).click(); }
 async function saveRecipe(page: import("@playwright/test").Page) { await page.getByRole("button", { name: "Save", exact: true }).click(); const dialog = page.getByRole("dialog", { name: "Save recipe" }); await dialog.getByRole("button", { name: /Save recipe|Save revision|Rename recipe/ }).click(); await expect(dialog).not.toBeVisible(); }
 
 test.beforeEach(async ({ page }) => { await page.goto("/workspace"); await expect(page.locator('[data-recovery-ready="true"]')).toBeVisible(); await chooseExample(page); });
@@ -28,12 +28,12 @@ test("historical weighing summaries are available and clearly labeled", async ({
 test("COMPARE-EMPTY-001 starts empty and adds one named current scenario", async ({ page }) => {
   await openCompare(page); await expect(page.getByRole("heading", { name: "No recipes selected for comparison" })).toBeVisible();
   await expect(page.getByText("Scenario A", { exact: true })).toHaveCount(0); await expect(page.getByText("Scenario B", { exact: true })).toHaveCount(0);
-  await page.locator("header").getByRole("button", { name: "Add current recipe" }).click();
+  await page.getByRole("toolbar", { name: "Comparison page actions" }).getByRole("button", { name: "Add current recipe" }).click();
   await expect(page.getByLabel("Unsaved calculation scenario", { exact: true })).toBeVisible(); await expect(page.getByText("Add at least one more scenario to compare results.")).toBeVisible();
 });
 
 test("COMPARE-CONTROLS-001 add, duplicate, remove, undo, and precursor buttons stay functional", async ({ page }) => {
-  await openCompare(page); await page.locator("header").getByRole("button", { name: "Add blank scenario" }).click();
+  await openCompare(page); await page.getByRole("toolbar", { name: "Comparison page actions" }).getByRole("button", { name: "Add blank scenario" }).click();
   const blank = page.getByLabel("Blank scenario scenario", { exact: true }); await blank.getByRole("button", { name: "Add precursor" }).click(); await expect(blank.getByLabel("Blank scenario precursor 1 formula")).toBeVisible();
   await blank.getByRole("button", { name: "Duplicate" }).click(); await expect(page.locator('section[aria-label$=" scenario"]')).toHaveCount(2); await expect(page.getByText("Duplicated Blank scenario.", { exact: true })).toBeVisible();
   await page.getByLabel("Copy of Blank scenario scenario", { exact: true }).getByRole("button", { name: "Remove", exact: true }).click(); await expect(page.locator('section[aria-label$=" scenario"]')).toHaveCount(1);
@@ -60,13 +60,13 @@ test("COMPARE-MULTISELECT-001 adds three saved recipes in one operation", async 
     if (index > 0) { await page.getByRole("button", { name: "New", exact: true }).click(); await chooseExample(page); }
     await page.getByLabel("Target batch mass").fill(`${10 + index}`); await saveRecipe(page); await expect(page.getByText(/Saved Ti2AlN recipe, revision 1/)).toBeVisible();
   }
-  await openCompare(page); await page.locator("header").getByRole("button", { name: "Add saved recipes" }).click(); const picker = page.getByRole("dialog", { name: "Add saved recipes" }); await picker.getByRole("button", { name: "Select all visible" }).click(); await picker.getByRole("button", { name: "Add selected" }).click();
+  await openCompare(page); await page.getByRole("toolbar", { name: "Comparison page actions" }).getByRole("button", { name: "Add saved recipes" }).click(); const picker = page.getByRole("dialog", { name: "Add saved recipes" }); await picker.getByRole("button", { name: "Select all visible" }).click(); await picker.getByRole("button", { name: "Add selected" }).click();
   await expect(page.locator('section[aria-label$=" scenario"]')).toHaveCount(3); await expect(page.getByLabel("Ti2AlN recipe scenario", { exact: true })).toBeVisible(); await expect(page.getByLabel("Ti2AlN recipe (2) scenario", { exact: true })).toBeVisible(); await expect(page.getByLabel("Ti2AlN recipe (3) scenario", { exact: true })).toBeVisible();
 });
 
 test("COMPARE-GENERAL-001 imports and calculates recipes with different targets", async ({ page }) => {
   await saveRecipe(page); await expect(page.getByText(/Saved Ti2AlN recipe/)).toBeVisible(); await page.getByRole("button", { name: "New", exact: true }).click(); await chooseExample(page, "ti3alc2"); await saveRecipe(page); await expect(page.getByText(/Saved Ti3AlC2 recipe/)).toBeVisible();
-  await openCompare(page); await page.locator("header").getByRole("button", { name: "Add saved recipes" }).click(); const picker = page.getByRole("dialog", { name: "Add saved recipes" }); await picker.getByRole("button", { name: "Select all visible" }).click(); await picker.getByRole("button", { name: "Add selected" }).click();
+  await openCompare(page); await page.getByRole("toolbar", { name: "Comparison page actions" }).getByRole("button", { name: "Add saved recipes" }).click(); const picker = page.getByRole("dialog", { name: "Add saved recipes" }); await picker.getByRole("button", { name: "Select all visible" }).click(); await picker.getByRole("button", { name: "Add selected" }).click();
   await expect(picker).not.toBeVisible(); await expect(page.locator('section[aria-label$=" scenario"]')).toHaveCount(2); await expect(page.getByLabel("Ti2AlN recipe scenario", { exact: true })).toContainText("Final total"); await expect(page.getByLabel("Ti3AlC2 recipe scenario", { exact: true })).toContainText("Final total");
   await page.getByLabel("Comparison name").fill("Mixed target comparison"); await page.getByRole("button", { name: "Save comparison" }).click(); await expect(page.getByText("Comparison saved", { exact: true })).toBeVisible();
   await page.getByRole("link", { name: "Calculator" }).click(); await openCompare(page); await page.getByLabel("Open saved comparison").selectOption({ label: "Mixed target comparison" });

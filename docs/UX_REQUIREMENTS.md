@@ -30,7 +30,7 @@ The main workflow is a single desktop screen with a narrow top command bar and t
 
 ```text
 +--------------------------------------------------------------------------------+
-| MAX Stoich | Built-in example | Standard–Advanced | Reset | Commands |
+| MAXCalc | Built-in example | Standard–Advanced | Reset | Commands |
 +----------------------------+---------------------------------------------------+
 | COMPOSITION + ROUTE        | WEIGHING TABLE                                    |
 | Formula [TiNbAlN       ]   | Precursor | formula | purity | moles | FINAL MASS |

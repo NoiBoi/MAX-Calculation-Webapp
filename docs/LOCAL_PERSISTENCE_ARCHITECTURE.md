@@ -59,7 +59,7 @@ Signing in does not claim anonymous records. The first-upload review explicitly 
 
 Workspace initialization is an explicit repeatable operation, not a cached promise. Every Retry closes the current Dexie connection, reopens IndexedDB, reruns idempotent upgrades, reloads settings, checks scientific-record pointers, validates recovery, reloads libraries, and only then enters the calculator.
 
-Failures are classified as IndexedDB unavailable, quota exceeded, upgrade blocked, migration failed, recovery corrupt, settings corrupt, scientific-record corrupt, or unknown. A blocked upgrade tells the user to close other MAX Stoich tabs; existing connections close on `versionchange`.
+Failures are classified as IndexedDB unavailable, quota exceeded, upgrade blocked, migration failed, recovery corrupt, settings corrupt, scientific-record corrupt, or unknown. A blocked upgrade tells the user to close other MAXCalc tabs; existing connections close on `versionchange`.
 
 Recovery actions have strict safety boundaries:
 
