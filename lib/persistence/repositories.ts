@@ -66,6 +66,7 @@ export interface SavedRevisionBundle {
   readonly snapshot: CalculationSnapshot;
 }
 
+/** Transactional repository for mutable recipe metadata and immutable revisions. */
 export interface RecipeRepository {
   saveCalculatedRevision(request: SaveCalculatedRevisionRequest): Promise<SavedRevisionBundle>;
   listRecipes(includeArchived?: boolean): Promise<readonly SavedRecipe[]>;
@@ -144,6 +145,13 @@ export interface SaveRouteRevisionRequest {
   readonly inputState: WorkspaceRecipeState;
 }
 
+/**
+ * Account-namespace-aware local repository facade.
+ *
+ * Scientific revision and snapshot writes commit atomically. When `ownerId` is
+ * present, entity mutations enqueue their durable sync descriptor in the same
+ * transaction; anonymous repositories never acquire cloud authority.
+ */
 export class LocalDataRepositories implements RecipeRepository, RouteRepository, UserSettingsRepository {
   readonly sync?: LocalSyncRepository;
   constructor(readonly database = new MaxStoichDatabase(), readonly ownerId?: string, readonly installationId?: string) {

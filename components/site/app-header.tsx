@@ -14,6 +14,10 @@ interface AppHeaderProps {
   readonly testId?: string;
 }
 
+/**
+ * Shared route banner that keeps product identity, route context, account
+ * controls, and appearance controls in a stable accessible order.
+ */
 export function AppHeader({
   activeSection,
   title,
@@ -39,6 +43,10 @@ export function AppHeader({
   </header>;
 }
 
+/**
+ * Applies the route-specific maximum-width contract without adding page
+ * semantics or changing the order of its children.
+ */
 export function PageContainer({
   children,
   className = "",

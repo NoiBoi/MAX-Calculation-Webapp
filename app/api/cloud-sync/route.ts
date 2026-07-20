@@ -164,7 +164,9 @@ async function identityMaps(client: Client): Promise<Readonly<{ recipes: Map<str
 }
 
 async function getRecipeBundle(client: Client, userId: string, localRecipeId: string): Promise<CloudRecipeBundle | undefined> {
-  const { data: recipe, error } = await client.from("recipes").select("*").eq("local_record_id", localRecipeId).maybeSingle();
+  // RLS remains authoritative. The explicit owner predicate is defense in depth
+  // and prevents this helper from broadening if its client boundary changes.
+  const { data: recipe, error } = await client.from("recipes").select("*").eq("owner_id", userId).eq("local_record_id", localRecipeId).maybeSingle();
   if (error) throw error;
   if (!recipe) return undefined;
   const { data: revisions, error: revisionError } = await client.from("recipe_revisions").select("*").eq("recipe_id", recipe.id).order("revision_number");

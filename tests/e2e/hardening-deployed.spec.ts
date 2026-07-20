@@ -9,7 +9,7 @@ test("HARDEN-DEPLOYED-001 public calculator and invitation-only authentication l
   await page.goto("/signup");
   await expect(page.getByText(/invitation-only/i)).toBeVisible();
   await page.goto("/login");
-  await expect(page.getByRole("heading", { name: "Sign in to MAXCalc" })).toBeVisible();
+  await expect(page.getByLabel("Sign in to MAXCalc").getByRole("heading", { name: "Sign in to MAXCalc" })).toBeVisible();
 });
 
 test("HARDEN-DEPLOYED-002 protected account data is not publicly rendered or cached", async ({ page }) => {

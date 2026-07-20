@@ -89,6 +89,13 @@ async function preSettingsManifestFor(records: Omit<BackupRecords, "userSettings
   return { counts, recordDigests, datasetVersions, manifestDigest };
 }
 
+/**
+ * Reads application-owned local records and creates a manifest-backed backup.
+ *
+ * Sync metadata, credentials, transient recovery state, and browser ownership
+ * data are intentionally excluded. Record and manifest digests cover the
+ * serialized compatibility format.
+ */
 export async function createLocalBackup(database: MaxStoichDatabase): Promise<MaxStoichBackup> {
   const records = await readRecords(database);
   return { backupSchemaVersion: BACKUP_SCHEMA_VERSION, recordType: "max-stoich-local-backup", applicationVersion: ENGINE_VERSION, databaseVersion: DATABASE_VERSION, createdAt: new Date().toISOString(), records, manifest: await manifestFor(records) };
@@ -168,6 +175,10 @@ async function parseBackupText(text: string): Promise<Readonly<{ backup?: MaxSto
   return { backup, diagnostics };
 }
 
+/**
+ * Validates size, structure, references, scientific values, and digests without
+ * writing to IndexedDB. Supplying a database also reports merge conflicts.
+ */
 export async function previewBackup(text: string, database?: MaxStoichDatabase): Promise<BackupPreview> {
   const parsed = await parseBackupText(text);
   if (!parsed.backup) return { valid: false, diagnostics: parsed.diagnostics, counts: {}, conflicts: [] };
@@ -217,6 +228,13 @@ function remapConflicts(backup: MaxStoichBackup, conflicts: readonly RestoreConf
   };
 }
 
+/**
+ * Restores a previously verified backup in one Dexie transaction.
+ *
+ * Replace mode creates a safety backup before destructive writes. Merge mode
+ * requires explicit conflict behavior. Any failure aborts the transaction;
+ * historical compatibility identifiers and scientific snapshots are retained.
+ */
 export async function restoreBackup(text: string, database: MaxStoichDatabase, mode: RestoreMode, resolution: ConflictResolution = "keep-local", failAfterTable?: TableName): Promise<Readonly<{ preview: BackupPreview; safetyBackup?: MaxStoichBackup }>> {
   const preview = await previewBackup(text, database);
   if (mode === "preview" || !preview.valid || !preview.backup) return { preview };

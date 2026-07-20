@@ -181,7 +181,7 @@ Blocking and action-required issues expand by default; minor advisories and calc
 
 ## Print interaction
 
-- Settings is directly visible in the calculator command bar. Print settings provide Letter/A4, orientation, 2/4/6-up packing, field toggles, formula/warning/note modes, verification detail, signatures, and page metadata with a synthetic preview.
+- Settings is directly visible in the calculator header. Print settings provide Letter/A4, orientation, 2/4/6-up packing, field toggles, formula/warning/note modes, verification detail, signatures, and page metadata with a synthetic preview.
 - Recipe/scenario identity, adjusted feed, precursor identity, final mass, and total mass cannot be hidden.
 - Print validates content, builds the shared model, opens `/print`, waits for fonts/layout, marks `data-print-ready="true"`, and invokes the browser dialog. Pop-up failure leaves the workspace unchanged.
 - Dedicated print state excludes application controls and trace. Short 2/4/6 layouts use intrinsic-height cards, reserved header/footer bands, readable physical type, and no scaling in Letter/A4 portrait or landscape. Long recipes receive a full-width page region with a notice. The white-paper palette and weighing-results numeric font are invariant across Light, Dark, and Midnight.

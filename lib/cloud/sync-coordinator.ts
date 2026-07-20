@@ -36,6 +36,13 @@ export function retryDelayMs(attempt: number, random = Math.random): number {
   return Math.min(600_000, Math.round(base * (0.85 + Math.min(Math.max(random(), 0), 1) * 0.3)));
 }
 
+/**
+ * Schedules foreground synchronization without changing sync semantics.
+ *
+ * The coordinator owns debounce/retry timing and an account-scoped cross-tab
+ * lease. Both automatic triggers and manual requests call the same
+ * `performManualSync` engine; disposal releases timers and leases.
+ */
 export class AutomaticSyncCoordinator {
   private readonly tabId: string;
   private timer?: ReturnType<typeof setTimeout>;

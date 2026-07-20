@@ -12,7 +12,7 @@ Anonymous records remain in `max-stoich-local`. Each authenticated account uses 
 
 Existing MAXCalc IDs are stable text identities. Cloud tables use UUID primary keys. `cloudSyncRecords` stores the durable local-ID-to-cloud-UUID mapping separately from recipes, revisions, snapshots, notes, comparisons, and scientific exports. Sync state never enters canonical scientific input/output or immutable calculation snapshots.
 
-The local schema is version 10. Milestone 2 introduced:
+The local schema is version 11. Milestone 2 introduced:
 
 - `cloudSyncRecords`: per-record state, cloud UUID/version, last successful base, error, and source-device metadata.
 - `cloudSyncSessions`: monotonic cursor, first-upload decision, timestamps, and last summary.

@@ -182,6 +182,15 @@ function canonicalBatch(result: Omit<BatchCalculationResult, "canonicalScientifi
   return JSON.stringify({ schemaVersion: result.schemaVersion, engineVersion: result.engineVersion, status: result.status, idealCrystalComposition: result.idealCrystalComposition, intendedFeedComposition: result.intendedFeedComposition, adjustedFeedComposition: result.adjustedFeedComposition, realizedComposition: result.realizedComposition, rawRealizedElementMoles: result.rawRealizedElementMoles, precursorOnlyRealizedElementMoles: result.precursorOnlyRealizedElementMoles, matrix: result.matrix?.canonicalScientificRepresentation, solver: result.solver?.canonicalScientificRepresentation, batch: result.batch, precursors, realizedElements: result.realizedElements, resolvedAdjustmentOrder: result.resolvedAdjustmentOrder, appliedDefaults: result.appliedDefaults, warnings: result.warnings.map(diagnosticData), errors: result.errors.map(diagnosticData), trace: result.trace, dataVersions: result.dataVersions });
 }
 
+/**
+ * Runs the deterministic precursor-to-batch pipeline.
+ *
+ * Finite inputs are decimal strings; exact solver quantities remain structured
+ * scientific scalars. The returned gram and mole fields identify their units,
+ * all adjustments are applied in documented stage order, and the result
+ * includes an immutable canonical scientific representation. Invalid input is
+ * reported as a structured result rather than thrown.
+ */
 export function calculateBatchRecipe(input: BatchRecipeInput): BatchCalculationResult {
   const errors: BatchDiagnostic[] = [];
   const warnings: BatchDiagnostic[] = [];

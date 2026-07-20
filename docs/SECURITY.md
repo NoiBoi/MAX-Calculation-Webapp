@@ -10,7 +10,7 @@ The browser uses only `NEXT_PUBLIC_SUPABASE_URL` and the public anon key. The re
 
 - Server mutations call Supabase Auth to verify the current user.
 - The profile endpoint does not accept `user_id`.
-- The cloud-sync endpoint does not accept `owner_id` as authority; it derives ownership from the server-verified user and rejects cross-origin POSTs.
+- The cloud-sync endpoint does not accept `owner_id` as authority; it derives ownership from the server-verified user, applies that identity explicitly to account-owned reads, and rejects cross-origin POSTs.
 - Callback return locations pass through `safeInternalPath`; external, protocol-relative, backslash, malformed, and control-character paths are rejected.
 - The profile endpoint rejects cross-origin browser POSTs.
 - Supabase SSR owns cookie creation and refresh. Application code does not manually serialize bearer tokens.

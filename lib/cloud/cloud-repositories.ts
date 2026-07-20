@@ -43,6 +43,14 @@ export interface CloudDeviceRepository {
   upsertDevice(operation: Extract<CloudWriteOperation, { kind: "upsert-device" }>): Promise<CloudWriteResult>;
 }
 
+/**
+ * Account-scoped cloud boundary used by the synchronization engine.
+ *
+ * Implementations must authenticate independently, enforce `ownerId`, validate
+ * downloaded envelopes, and preserve optimistic-version and idempotency
+ * semantics. Callers must not treat this browser-visible identifier as
+ * authorization.
+ */
 export interface CloudSyncRepository extends CloudRecipeRepository, CloudNoteRepository, CloudComparisonRepository, CloudSettingsRepository, CloudDeviceRepository {
   readonly ownerId: string;
   pull(cursor: string): Promise<CloudChangeSet>;

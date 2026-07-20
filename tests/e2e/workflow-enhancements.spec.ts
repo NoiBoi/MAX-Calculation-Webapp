@@ -30,7 +30,19 @@ test("PANEL-DISMISS-001 closes utility layers outside and with Escape while pres
 });
 
 test("DEFAULT-ROUTE-001 opens the calculator and keeps the feature demo as a labeled secondary route", async ({ page }) => {
-  await ready(page); await expect(page.getByRole("heading", { name: "Target and precursor route" })).toBeVisible(); await openMore(page); await page.getByRole("link", { name: /Feature demo and tutorial/ }).click(); await expect(page).toHaveURL(/\/demo$/); await expect(page.getByRole("heading", { name: "Feature demo and tutorial" })).toBeVisible(); await expect(page.getByText("Development reference", { exact: false })).toBeVisible(); await page.getByRole("link", { name: "Return to calculator" }).click(); await expect(page).toHaveURL(/\/$/); await expect(page.getByRole("heading", { name: "Target and precursor route" })).toBeVisible();
+  await ready(page);
+  await expect(page.getByRole("heading", { name: "Target and precursor route" })).toBeVisible();
+  await openMore(page);
+  await page.getByRole("link", { name: /Feature demo and tutorial/ }).click();
+  await expect(page).toHaveURL(/\/demo$/);
+
+  const demo = page.getByLabel("Feature demo and tutorial");
+  await expect(demo.getByRole("heading", { name: "Feature demo and tutorial" })).toBeVisible();
+  await expect(demo.getByText("MAXCalc · Development reference", { exact: true })).toBeVisible();
+
+  await page.getByRole("link", { name: "Calculator", exact: true }).click();
+  await expect(page).toHaveURL(/\/workspace$/);
+  await expect(page.getByRole("heading", { name: "Target and precursor route" })).toBeVisible();
 });
 
 test("NOTES-001 creates searchable revision-linked multiline notes and keeps them with the saved recipe", async ({ page }) => {

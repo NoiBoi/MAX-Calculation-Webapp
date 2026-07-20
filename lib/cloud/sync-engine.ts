@@ -460,6 +460,14 @@ async function acceptUploadResults(
   return { conflicts, errors };
 }
 
+/**
+ * Executes the authoritative pull, validate, merge, upload, and finalize pass.
+ *
+ * Local scientific records remain authoritative until validation and conflict
+ * policy permit a merge. The function is account-scoped, preserves the durable
+ * outbox and monotonic cursor, isolates malformed records in quarantine, and
+ * returns a summary instead of erasing pending work on partial failure.
+ */
 export async function performManualSync(options: ManualSyncOptions): Promise<SyncSummary> {
   const now = options.now ?? (() => new Date().toISOString());
   const startedAt = now();
