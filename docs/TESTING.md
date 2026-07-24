@@ -10,6 +10,7 @@ npm run test:e2e
 npm run build
 npm run security:scan
 npm run release:baseline
+npm run emi:verify
 npm audit
 ```
 
@@ -18,6 +19,9 @@ npm audit
 ## Test layers
 
 - Chemistry tests live beside engine modules and prove parsing, exact arithmetic, deterministic matrices/solver, batch scaling, data provenance, and descriptors.
+- EMI tests live under `packages/chemistry-engine/emi/__tests__`; the optional
+  all-file verification command reads the uncommitted reference corpus and
+  writes an ignored JSON quality report.
 - `tests/unit` covers adapters, persistence/migrations, backup/recovery, cloud sync/conflicts/outbox, Auth policy, labs/RLS source contracts, settings, print, and presentation.
 - `tests/e2e` covers calculator/comparison workflows, accessibility, keyboard operation, themes, responsive geometry, print/PDF output, recovery, and configured cloud behavior.
 - `supabase/tests` contains disposable-project pgTAP/RLS verification. Never run it against production data.

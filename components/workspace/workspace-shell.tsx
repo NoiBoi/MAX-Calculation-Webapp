@@ -653,6 +653,7 @@ export function WorkspaceShell() {
       title={currentIdentity}
       contextualActions={<>
         <Link className="ui-button header-navigation-button" href="/compare">Compare</Link>
+        <Link className="ui-button header-navigation-button" href="/emi">EMI</Link>
         <Link className="ui-button header-navigation-button" href="/settings">Settings</Link>
         <button aria-expanded={commandOpen} aria-label="More actions and commands" className="ui-button header-navigation-button" onClick={() => { setActivePanel("none"); setCommandOpen((current) => !current); }} ref={moreButtonRef}>More <span aria-hidden="true">•••</span></button>
         <div aria-label="Interaction mode" className="segmented-control workspace-detail-mode hidden sm:flex" role="group">
@@ -691,7 +692,7 @@ export function WorkspaceShell() {
       <button className="rounded border p-2 text-left disabled:text-slate-400" disabled={(!currentValid && !historicalSnapshot) || !displayed} onClick={() => { exportFile("csv"); setCommandOpen(false); }}>Export CSV</button>
       <button className="rounded border p-2 text-left disabled:text-slate-400" disabled={(!currentValid && !historicalSnapshot) || !displayed} onClick={() => { exportFile("json"); setCommandOpen(false); }}>Export JSON</button>
       <button className="rounded border p-2 text-left disabled:text-slate-400" disabled={!weighingSummary} onClick={() => { printCurrent(); setCommandOpen(false); }}>Print preparation sheet</button>
-      <Link className="rounded border p-2 text-left" href="/compare">Open route comparison</Link><Link className="rounded border p-2 text-left" href="/settings">Layouts, data, backup, and settings</Link><Link className="rounded border p-2 text-left" href="/demo">Feature demo and tutorial <span className="block text-xs text-slate-600">Development reference</span></Link><button className="rounded border p-2 text-left" onClick={() => { setTraceOpen(true); setCommandOpen(false); }}>Open calculation trace</button>{activePreset && <button className="rounded border p-2 text-left" onClick={() => { choosePreset(activePreset.id); setCommandOpen(false); }}>Reset copied example</button>}
+      <Link className="rounded border p-2 text-left" href="/compare">Open route comparison</Link><Link className="rounded border p-2 text-left" href="/emi">Open EMI Shielding Analyzer</Link><Link className="rounded border p-2 text-left" href="/settings">Layouts, data, backup, and settings</Link><Link className="rounded border p-2 text-left" href="/demo">Feature demo and tutorial <span className="block text-xs text-slate-600">Development reference</span></Link><button className="rounded border p-2 text-left" onClick={() => { setTraceOpen(true); setCommandOpen(false); }}>Open calculation trace</button>{activePreset && <button className="rounded border p-2 text-left" onClick={() => { choosePreset(activePreset.id); setCommandOpen(false); }}>Reset copied example</button>}
     </div></section>}
 
     {activePanel !== "none" && <aside aria-label={activePanel === "recipes" ? "Saved recipe library" : activePanel === "routes" ? "Saved route library" : "Recipe revision history"} className="fixed inset-y-14 right-0 z-20 w-full max-w-md overflow-auto border-l border-slate-400 bg-white p-4 shadow-xl print:hidden" ref={panelLayerRef}>

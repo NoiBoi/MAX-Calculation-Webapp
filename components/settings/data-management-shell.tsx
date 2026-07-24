@@ -189,6 +189,9 @@ export function DataManagementShell() {
             <Link className="ui-button" href="/compare">
               Comparison
             </Link>
+            <Link className="ui-button" href="/emi">
+              EMI Analyzer
+            </Link>
           </>
         }
       />

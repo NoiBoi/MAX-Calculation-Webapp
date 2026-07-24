@@ -18,6 +18,7 @@ export * from "./precursor-suggestions";
 export * from "./element-precursor-eligibility";
 export * from "./batch-calculation";
 export * from "./descriptors";
+export * from "./emi";
 
 // The calculation implementation is intentionally introduced in the ordered
 // scientific phases documented in docs/IMPLEMENTATION_PLAN.md.

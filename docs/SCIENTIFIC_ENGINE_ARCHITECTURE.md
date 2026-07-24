@@ -27,6 +27,9 @@ Finite external inputs cross the engine boundary as decimal strings. Exact solve
 - `precursor-solver.ts`: constrained exact solving and verification.
 - `molar-mass.ts`: atomic-data-backed mass calculation.
 - `batch-calculation.ts`: ordered end-to-end mole-to-mass orchestration.
+- `emi/`: React-free Keysight CSV parsing, directional shielding calculations,
+  validation, and single-dataset statistics. EMI files are not formula/site
+  inputs and do not enter recipe persistence.
 - `schemas.ts`, `errors.ts`, `validation.ts`: public validation and diagnostic contracts.
 - `index.ts`: supported package surface.
 

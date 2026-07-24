@@ -3,6 +3,7 @@ node_modules/
 coverage/
 playwright-report/
 test-results/
+emi-reference-data/verification-report.json
 *.tsbuildinfo
 .env*
 !.env.example

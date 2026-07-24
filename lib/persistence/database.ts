@@ -5,8 +5,9 @@ import { createDefaultUserSettings } from "../settings/user-settings";
 import { migrateEditableWorkspaceInput, migrateRecord } from "./migrations";
 import type { LocalDeviceRecord, LocalSyncConflict, LocalSyncMetadata, LocalSyncSession, QuarantinedCloudRecord, SyncCoordinatorLease, SyncOutboxOperation } from "../cloud/sync-types";
 import type { LabAuditEvent, LabLibraryEntry, LabLibraryVersion, LabMembership, LabPublicationNote, LabSummary, LabSyncSession } from "../labs/types";
+import type { EmiProjectRecord } from "../emi/project";
 
-export const DATABASE_VERSION = 11;
+export const DATABASE_VERSION = 12;
 
 export class MaxStoichDatabase extends Dexie {
   recipes!: Table<SavedRecipe, string>;
@@ -36,6 +37,7 @@ export class MaxStoichDatabase extends Dexie {
   labPublicationNotes!: Table<LabPublicationNote, string>;
   labAuditEvents!: Table<LabAuditEvent, string>;
   labSyncSessions!: Table<LabSyncSession, string>;
+  emiProjects!: Table<EmiProjectRecord, string>;
 
   constructor(name = "max-stoich-local") {
     super(name);
@@ -180,6 +182,11 @@ export class MaxStoichDatabase extends Dexie {
       // personal records, especially immutable revisions and snapshots, do not
       // need rewriting merely because new object stores were introduced.
       await transaction.table("migrations").put({ schemaVersion: "11.0.0", id: "10-to-11-private-lab-library-cache", fromVersion: 10, toVersion: 11, appliedAt: new Date().toISOString(), status: "complete" });
+    });
+    this.version(12).stores({
+      recipes: "&id,name,targetFormula,updatedAt,archived,currentRevisionNumber,validationStatus", recipeRevisions: "&id,[recipeId+revisionNumber],recipeId", snapshots: "&id,recipeId,recipeRevisionId,createdAt", routes: "&id,name,updatedAt,archived,validationStatus", routeRevisions: "&id,[routeId+revisionNumber],routeId", recentCalculations: "&snapshotId,lastOpenedAt,recipeId", recovery: "&id", migrations: "&id", comparisons: "&id,name,updatedAt,validationStatus", layouts: "&id,name,kind,isDefault,builtIn,updatedAt", radiusDatasets: "&id,&[datasetId+datasetVersion],datasetId,datasetVersion,localTrust,updatedAt", recipeNotes: "&id,recipeId,recipeRevisionId,category,updatedAt,archived,*tags", userSettings: "&id,updatedAt", cloudSyncRecords: "&id,ownerId,[ownerId+cloudState],[ownerId+recordType],recordId,cloudId", cloudSyncSessions: "&ownerId,lastSuccessfulSyncAt", cloudConflicts: "&id,ownerId,[ownerId+status],[ownerId+recordType],recordId", cloudQuarantine: "&id,ownerId,[ownerId+recordType],receivedAt", cloudDevices: "&ownerId,installationId", cloudSyncOutbox: "&id,ownerId,[ownerId+state],[ownerId+recordType],recordId,nextAttemptAt,idempotencyKey", cloudSyncLeases: "&ownerId,installationId,tabId,expiresAt", labCaches: "&id,name,role,updatedAt", labMemberships: "&id,labId,userId,[labId+status],role", labEntries: "&id,labId,[labId+visibilityStatus],updatedAt,syncSequence", labVersions: "&id,labId,entryId,[entryId+versionNumber],syncSequence", labPublicationNotes: "&id,labId,entryId,publicationVersionId,syncSequence", labAuditEvents: "&id,labId,eventType,occurredAt,syncSequence", labSyncSessions: "&id,ownerId,labId,lastSuccessfulSyncAt", emiProjects: "&id,name,updatedAt,createdAt",
+    }).upgrade(async (transaction) => {
+      await transaction.table("migrations").put({ schemaVersion: "12.0.0", id: "11-to-12-local-emi-projects", fromVersion: 11, toVersion: 12, appliedAt: new Date().toISOString(), status: "complete" });
     });
   }
 }

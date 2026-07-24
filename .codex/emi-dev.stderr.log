@@ -1,0 +1,940 @@
+⚠ Fast Refresh had to perform a full reload when ./packages/chemistry-engine/emi/parser.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/persistence/database.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⨯ ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  [90m208 |[0m         [36mreturn[0m { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  [90m209 |[0m       }),
+[31m[1m>[0m [90m210 |[0m     }));
+  [90m    |[0m        [31m[1m^[0m
+  [90m211 |[0m     [36mreturn[0m [...individual, ...groups];
+  [90m212 |[0m   };
+  [90m213 |[0m   [36mconst[0m setRangeBoundary = (boundary: [32m"minimumHz"[0m | [32m"maximumHz"[0m, value: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx
+
+
+⨯ ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  [90m208 |[0m         [36mreturn[0m { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  [90m209 |[0m       }),
+[31m[1m>[0m [90m210 |[0m     }));
+  [90m    |[0m        [31m[1m^[0m
+  [90m211 |[0m     [36mreturn[0m [...individual, ...groups];
+  [90m212 |[0m   };
+  [90m213 |[0m   [36mconst[0m setRangeBoundary = (boundary: [32m"minimumHz"[0m | [32m"maximumHz"[0m, value: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx
+
+
+⨯ ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  [90m208 |[0m         [36mreturn[0m { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  [90m209 |[0m       }),
+[31m[1m>[0m [90m210 |[0m     }));
+  [90m    |[0m        [31m[1m^[0m
+  [90m211 |[0m     [36mreturn[0m [...individual, ...groups];
+  [90m212 |[0m   };
+  [90m213 |[0m   [36mconst[0m setRangeBoundary = (boundary: [32m"minimumHz"[0m | [32m"maximumHz"[0m, value: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx
+
+
+[browser] ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  208 |         return { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  209 |       }),
+> 210 |     }));
+      |        ^
+  211 |     return [...individual, ...groups];
+  212 |   };
+  213 |   const setRangeBoundary = (boundary: "minimumHz" | "maximumHz", value: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:13951:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:14014:21)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:13458:52) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:13951:21)
+[browser] ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  208 |         return { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  209 |       }),
+> 210 |     }));
+      |        ^
+  211 |     return [...individual, ...groups];
+  212 |   };
+  213 |   const setRangeBoundary = (boundary: "minimumHz" | "maximumHz", value: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:13951:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:14014:21)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:13458:52) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:13951:21)
+[browser] ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  208 |         return { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  209 |       }),
+> 210 |     }));
+      |        ^
+  211 |     return [...individual, ...groups];
+  212 |   };
+  213 |   const setRangeBoundary = (boundary: "minimumHz" | "maximumHz", value: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:13951:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:14014:21)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:13458:52) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:13951:21)
+[browser] ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  208 |         return { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  209 |       }),
+> 210 |     }));
+      |        ^
+  211 |     return [...individual, ...groups];
+  212 |   };
+  213 |   const setRangeBoundary = (boundary: "minimumHz" | "maximumHz", value: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:13951:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:14014:21)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:13458:52) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:13951:21)
+⨯ ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  [90m208 |[0m         [36mreturn[0m { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  [90m209 |[0m       }),
+[31m[1m>[0m [90m210 |[0m     }));
+  [90m    |[0m        [31m[1m^[0m
+  [90m211 |[0m     [36mreturn[0m [...individual, ...groups];
+  [90m212 |[0m   };
+  [90m213 |[0m   [36mconst[0m setRangeBoundary = (boundary: [32m"minimumHz"[0m | [32m"maximumHz"[0m, value: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx
+
+
+⨯ ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  [90m208 |[0m         [36mreturn[0m { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  [90m209 |[0m       }),
+[31m[1m>[0m [90m210 |[0m     }));
+  [90m    |[0m        [31m[1m^[0m
+  [90m211 |[0m     [36mreturn[0m [...individual, ...groups];
+  [90m212 |[0m   };
+  [90m213 |[0m   [36mconst[0m setRangeBoundary = (boundary: [32m"minimumHz"[0m | [32m"maximumHz"[0m, value: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx
+
+
+[browser] Uncaught Error: ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  208 |         return { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  209 |       }),
+> 210 |     }));
+      |        ^
+  211 |     return [...individual, ...groups];
+  212 |   };
+  213 |   const setRangeBoundary = (boundary: "minimumHz" | "maximumHz", value: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx
+
+
+    at <unknown> (Error: ./components/emi/emi-analyzer-shell.tsx:210:8)
+    at <unknown> (Error: (./components/emi/emi-analyzer-shell.tsx:210:8)
+[browser] ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  208 |         return { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  209 |       }),
+> 210 |     }));
+      |        ^
+  211 |     return [...individual, ...groups];
+  212 |   };
+  213 |   const setRangeBoundary = (boundary: "minimumHz" | "maximumHz", value: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] Uncaught Error: ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  208 |         return { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  209 |       }),
+> 210 |     }));
+      |        ^
+  211 |     return [...individual, ...groups];
+  212 |   };
+  213 |   const setRangeBoundary = (boundary: "minimumHz" | "maximumHz", value: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx
+
+
+    at <unknown> (Error: ./components/emi/emi-analyzer-shell.tsx:210:8)
+    at <unknown> (Error: (./components/emi/emi-analyzer-shell.tsx:210:8)
+[browser] ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  208 |         return { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  209 |       }),
+> 210 |     }));
+      |        ^
+  211 |     return [...individual, ...groups];
+  212 |   };
+  213 |   const setRangeBoundary = (boundary: "minimumHz" | "maximumHz", value: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  208 |         return { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  209 |       }),
+> 210 |     }));
+      |        ^
+  211 |     return [...individual, ...groups];
+  212 |   };
+  213 |   const setRangeBoundary = (boundary: "minimumHz" | "maximumHz", value: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+⨯ ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  [90m208 |[0m         [36mreturn[0m { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  [90m209 |[0m       }),
+[31m[1m>[0m [90m210 |[0m     }));
+  [90m    |[0m        [31m[1m^[0m
+  [90m211 |[0m     [36mreturn[0m [...individual, ...groups];
+  [90m212 |[0m   };
+  [90m213 |[0m   [36mconst[0m setRangeBoundary = (boundary: [32m"minimumHz"[0m | [32m"maximumHz"[0m, value: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx
+
+
+[browser] ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  208 |         return { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  209 |       }),
+> 210 |     }));
+      |        ^
+  211 |     return [...individual, ...groups];
+  212 |   };
+  213 |   const setRangeBoundary = (boundary: "minimumHz" | "maximumHz", value: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+⨯ ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  [90m208 |[0m         [36mreturn[0m { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  [90m209 |[0m       }),
+[31m[1m>[0m [90m210 |[0m     }));
+  [90m    |[0m        [31m[1m^[0m
+  [90m211 |[0m     [36mreturn[0m [...individual, ...groups];
+  [90m212 |[0m   };
+  [90m213 |[0m   [36mconst[0m setRangeBoundary = (boundary: [32m"minimumHz"[0m | [32m"maximumHz"[0m, value: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx
+
+
+[browser] Uncaught Error: ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  208 |         return { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  209 |       }),
+> 210 |     }));
+      |        ^
+  211 |     return [...individual, ...groups];
+  212 |   };
+  213 |   const setRangeBoundary = (boundary: "minimumHz" | "maximumHz", value: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx
+
+
+    at <unknown> (Error: ./components/emi/emi-analyzer-shell.tsx:210:8)
+    at <unknown> (Error: (./components/emi/emi-analyzer-shell.tsx:210:8)
+[browser] ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  208 |         return { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  209 |       }),
+> 210 |     }));
+      |        ^
+  211 |     return [...individual, ...groups];
+  212 |   };
+  213 |   const setRangeBoundary = (boundary: "minimumHz" | "maximumHz", value: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] Uncaught Error: ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  208 |         return { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  209 |       }),
+> 210 |     }));
+      |        ^
+  211 |     return [...individual, ...groups];
+  212 |   };
+  213 |   const setRangeBoundary = (boundary: "minimumHz" | "maximumHz", value: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx
+
+
+    at <unknown> (Error: ./components/emi/emi-analyzer-shell.tsx:210:8)
+    at <unknown> (Error: (./components/emi/emi-analyzer-shell.tsx:210:8)
+[browser] ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  208 |         return { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  209 |       }),
+> 210 |     }));
+      |        ^
+  211 |     return [...individual, ...groups];
+  212 |   };
+  213 |   const setRangeBoundary = (boundary: "minimumHz" | "maximumHz", value: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  208 |         return { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  209 |       }),
+> 210 |     }));
+      |        ^
+  211 |     return [...individual, ...groups];
+  212 |   };
+  213 |   const setRangeBoundary = (boundary: "minimumHz" | "maximumHz", value: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  208 |         return { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  209 |       }),
+> 210 |     }));
+      |        ^
+  211 |     return [...individual, ...groups];
+  212 |   };
+  213 |   const bands = (plotMetrics: readonly EmiMetric[]): EmiPlotBand[] => project.plot.uncert...
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  208 |         return { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  209 |       }),
+> 210 |     }));
+      |        ^
+  211 |     return [...individual, ...groups];
+  212 |   };
+  213 |   const bands = (plotMetrics: readonly EmiMetric[]): EmiPlotBand[] => project.plot.uncert...
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  208 |         return { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  209 |       }),
+> 210 |     }));
+      |        ^
+  211 |     return [...individual, ...groups];
+  212 |   };
+  213 |   const bands = (plotMetrics: readonly EmiMetric[]): EmiPlotBand[] => project.plot.uncert...
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  208 |         return { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  209 |       }),
+> 210 |     }));
+      |        ^
+  211 |     return [...individual, ...groups];
+  212 |   };
+  213 |   const bands = (plotMetrics: readonly EmiMetric[]): EmiPlotBand[] => project.plot.uncert...
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  208 |         return { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  209 |       }),
+> 210 |     }));
+      |        ^
+  211 |     return [...individual, ...groups];
+  212 |   };
+  213 |   const bands = (plotMetrics: readonly EmiMetric[]): EmiPlotBand[] => project.plot.uncert...
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  208 |         return { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  209 |       }),
+> 210 |     }));
+      |        ^
+  211 |     return [...individual, ...groups];
+  212 |   };
+  213 |   const bands = (plotMetrics: readonly EmiMetric[]): EmiPlotBand[] => project.plot.uncert...
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  208 |         return { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  209 |       }),
+> 210 |     }));
+      |        ^
+  211 |     return [...individual, ...groups];
+  212 |   };
+  213 |   const bands = (plotMetrics: readonly EmiMetric[]): EmiPlotBand[] => project.plot.uncert...
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  208 |         return { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  209 |       }),
+> 210 |     }));
+      |        ^
+  211 |     return [...individual, ...groups];
+  212 |   };
+  213 |   const bands = (plotMetrics: readonly EmiMetric[]): EmiPlotBand[] => project.plot.uncert...
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  208 |         return { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  209 |       }),
+> 210 |     }));
+      |        ^
+  211 |     return [...individual, ...groups];
+  212 |   };
+  213 |   const bands = (plotMetrics: readonly EmiMetric[]): EmiPlotBand[] => project.plot.uncert...
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  208 |         return { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  209 |       }),
+> 210 |     }));
+      |        ^
+  211 |     return [...individual, ...groups];
+  212 |   };
+  213 |   const bands = (plotMetrics: readonly EmiMetric[]): EmiPlotBand[] => project.plot.uncert...
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  208 |         return { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  209 |       }),
+> 210 |     }));
+      |        ^
+  211 |     return [...individual, ...groups];
+  212 |   };
+  213 |   const bands = (plotMetrics: readonly EmiMetric[]): EmiPlotBand[] => project.plot.uncert...
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  208 |         return { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  209 |       }),
+> 210 |     }));
+      |        ^
+  211 |     return [...individual, ...groups];
+  212 |   };
+  213 |   const bands = (plotMetrics: readonly EmiMetric[]): EmiPlotBand[] => project.plot.uncert...
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  208 |         return { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  209 |       }),
+> 210 |     }));
+      |        ^
+  211 |     return [...individual, ...groups];
+  212 |   };
+  213 |   const bands = (plotMetrics: readonly EmiMetric[]): EmiPlotBand[] => project.plot.uncert...
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  208 |         return { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  209 |       }),
+> 210 |     }));
+      |        ^
+  211 |     return [...individual, ...groups];
+  212 |   };
+  213 |   const bands = (plotMetrics: readonly EmiMetric[]): EmiPlotBand[] => project.plot.uncert...
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./components/emi/emi-analyzer-shell.tsx:210:8
+Expected ',', got ';'
+  208 |         return { direction: aggregation.direction, frequencyHz, reflectionParameter: aggr...
+  209 |       }),
+> 210 |     }));
+      |        ^
+  211 |     return [...individual, ...groups];
+  212 |   };
+  213 |   const bands = (plotMetrics: readonly EmiMetric[]): EmiPlotBand[] => project.plot.uncert...
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./components/emi/emi-analyzer-shell.tsx:181:8
+Expected ';', '}' or <eof>
+  179 |         setFiles((current) => current.map((entry) => entry.id === id ? { id, filename: fi...
+  180 |       }
+> 181 |     })));
+      |        ^
+  182 |   };
+  183 |
+  184 |   const removeFile = (id: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+⨯ ./components/emi/emi-analyzer-shell.tsx:181:8
+Expected ';', '}' or <eof>
+  [90m179 |[0m         setFiles((current) => current.map((entry) => entry.id === id ? { id, filename: fi...
+  [90m180 |[0m       }
+[31m[1m>[0m [90m181 |[0m     })));
+  [90m    |[0m        [31m[1m^[0m
+  [90m182 |[0m   };
+  [90m183 |[0m
+  [90m184 |[0m   [36mconst[0m removeFile = (id: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx
+
+
+⨯ ./components/emi/emi-analyzer-shell.tsx:181:8
+Expected ';', '}' or <eof>
+  [90m179 |[0m         setFiles((current) => current.map((entry) => entry.id === id ? { id, filename: fi...
+  [90m180 |[0m       }
+[31m[1m>[0m [90m181 |[0m     })));
+  [90m    |[0m        [31m[1m^[0m
+  [90m182 |[0m   };
+  [90m183 |[0m
+  [90m184 |[0m   [36mconst[0m removeFile = (id: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx
+
+
+[browser] Uncaught Error: ./components/emi/emi-analyzer-shell.tsx:181:8
+Expected ';', '}' or <eof>
+  179 |         setFiles((current) => current.map((entry) => entry.id === id ? { id, filename: fi...
+  180 |       }
+> 181 |     })));
+      |        ^
+  182 |   };
+  183 |
+  184 |   const removeFile = (id: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx
+
+
+    at <unknown> (Error: ./components/emi/emi-analyzer-shell.tsx:181:8)
+    at <unknown> (Error: (./components/emi/emi-analyzer-shell.tsx:181:8)
+[browser] Uncaught Error: ./components/emi/emi-analyzer-shell.tsx:181:8
+Expected ';', '}' or <eof>
+  179 |         setFiles((current) => current.map((entry) => entry.id === id ? { id, filename: fi...
+  180 |       }
+> 181 |     })));
+      |        ^
+  182 |   };
+  183 |
+  184 |   const removeFile = (id: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx
+
+
+    at <unknown> (Error: ./components/emi/emi-analyzer-shell.tsx:181:8)
+    at <unknown> (Error: (./components/emi/emi-analyzer-shell.tsx:181:8)
+[browser] ./components/emi/emi-analyzer-shell.tsx:181:8
+Expected ';', '}' or <eof>
+  179 |         setFiles((current) => current.map((entry) => entry.id === id ? { id, filename: fi...
+  180 |       }
+> 181 |     })));
+      |        ^
+  182 |   };
+  183 |
+  184 |   const removeFile = (id: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./components/emi/emi-analyzer-shell.tsx:181:8
+Expected ';', '}' or <eof>
+  179 |         setFiles((current) => current.map((entry) => entry.id === id ? { id, filename: fi...
+  180 |       }
+> 181 |     })));
+      |        ^
+  182 |   };
+  183 |
+  184 |   const removeFile = (id: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./components/emi/emi-analyzer-shell.tsx:181:8
+Expected ';', '}' or <eof>
+  179 |         setFiles((current) => current.map((entry) => entry.id === id ? { id, filename: fi...
+  180 |       }
+> 181 |     })));
+      |        ^
+  182 |   };
+  183 |
+  184 |   const removeFile = (id: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./components/emi/emi-analyzer-shell.tsx:181:8
+Expected ';', '}' or <eof>
+  179 |         setFiles((current) => current.map((entry) => entry.id === id ? { id, filename: fi...
+  180 |       }
+> 181 |     })));
+      |        ^
+  182 |   };
+  183 |
+  184 |   const removeFile = (id: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./components/emi/emi-analyzer-shell.tsx:181:8
+Expected ';', '}' or <eof>
+  179 |         setFiles((current) => current.map((entry) => entry.id === id ? { id, filename: fi...
+  180 |       }
+> 181 |     })));
+      |        ^
+  182 |   };
+  183 |
+  184 |   const removeFile = (id: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+[browser] ./components/emi/emi-analyzer-shell.tsx:181:8
+Expected ';', '}' or <eof>
+  179 |         setFiles((current) => current.map((entry) => entry.id === id ? { id, filename: fi...
+  180 |       }
+> 181 |     })));
+      |        ^
+  182 |   };
+  183 |
+  184 |   const removeFile = (id: string) => {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./components/emi/emi-analyzer-shell.tsx
+    ./app/emi/page.tsx 
+    at handleErrors (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
+    at processMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2835:28)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2325:17) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_client_16lnmlo._.js:2774:21)
