@@ -6,3 +6,4 @@ export * from "./statistics";
 export * from "./replicates";
 export * from "./scientific-constants";
 export * from "./electrical-properties";
+export * from "./smoothing";

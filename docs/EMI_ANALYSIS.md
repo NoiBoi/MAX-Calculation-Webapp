@@ -6,5 +6,4 @@ Electrical measurements are optional per dataset. A missing or invalid thickness
 
 Scientific provenance is recorded through the calculation-engine version, parser version, EMI project schema version, electrical calculation version, stored correction factor, original filename, structured raw S-parameter values, and user-entered metadata.
 
-Interpolation applies only to explicitly requested replicate aggregation. Electrical calculations and Simon series use unsmoothed values and the original measured frequency points. No graph smoothing or Simon overlay controls are implemented in this milestone.
-
+Interpolation applies only to explicitly requested replicate aggregation. Electrical calculations and Simon series use unsmoothed values and the original measured frequency points. The SET graph can display a toggleable, separately labeled Simon theoretical overlay. Eligible measured frequency graphs support independent display-only centered moving averages; these controls never alter calculations, summaries, saved records, or spreadsheet exports.

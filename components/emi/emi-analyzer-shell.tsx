@@ -5,6 +5,7 @@ import {
   EMI_PARSER_VERSION,
   ENGINE_VERSION,
   calculateEmiDataset,
+  calculateSimonSeries,
   calculatePointwiseReplicateStatistics,
   calculatePooledPointBandSummary,
   calculateSpecimenFirstBandSummary,
@@ -39,7 +40,7 @@ import {
 } from "@/lib/emi/project";
 import { createBandSummaryCsv, createEmiAnalysisManifest, createEmiAnalysisSummaryHtml, createReplicatePointwiseCsv } from "@/lib/emi/replicate-exports";
 import { createEmiAnalysisXlsx } from "@/lib/emi/xlsx-export";
-import { EmiPlot, type EmiPlotBand, type EmiPlotTrace } from "./emi-plot";
+import { EmiPlot, type EmiPlotBand, type EmiPlotTrace, type EmiSimonPlotTrace } from "./emi-plot";
 import { EmiElectricalPropertiesEditor } from "./emi-electrical-properties-editor";
 
 type ImportedFile =
@@ -233,6 +234,33 @@ export function EmiAnalyzerShell() {
     });
     return points.length > 1 ? [{ id: `band-${aggregation.group.id}-${aggregation.direction}-${metric}`, label: `${aggregation.group.name} ${project.plot.uncertaintyBand === "confidence-95" ? "95% CI" : "sample SD"} · ${metric}`, color: COLORS[(groupIndex * 3 + metricIndex + 4) % COLORS.length] as string, points }] : [];
   }));
+  const simonTraces: EmiSimonPlotTrace[] = project.plot.showIndividualReplicates ? selected.flatMap((file, fileIndex) => {
+    const entry = project.datasets.find((candidate) => candidate.id === file.id);
+    const electrical = entry?.electricalProperties;
+    const aggregate = electrical?.derived?.aggregate;
+    const thicknessMicrometers = electrical?.thicknessMicrometers;
+    if (!entry || !aggregate || typeof thicknessMicrometers !== "number") return [];
+    const points = calculateSimonSeries({
+      frequencyPointsHz: file.dataset.points.map((point) => point.frequencyHz),
+      conductivitySiemensPerCentimeter: aggregate.conductivitySiemensPerCentimeter,
+      thicknessMicrometers,
+    });
+    if (!points) return [];
+    const gapFrequenciesHz = file.dataset.points.flatMap((point, pointIndex) => directions.some((direction) => Number.isFinite(file.calculation[direction][pointIndex]?.SET)) ? [] : [point.frequencyHz]);
+    return [{
+      id: `simon-${file.id}`,
+      label: `${entry.sampleMetadata.displayName} · Simon theoretical SET`,
+      color: COLORS[(fileIndex * 6) % COLORS.length] as string,
+      sampleName: entry.sampleMetadata.displayName,
+      points,
+      conductivitySiemensPerMeter: aggregate.conductivitySiemensPerMeter,
+      conductivitySiemensPerCentimeter: aggregate.conductivitySiemensPerCentimeter,
+      thicknessMicrometers,
+      calculationVersion: electrical.calculationVersion,
+      gapFrequenciesHz,
+    }];
+  }) : [];
+  const simonUnavailableCount = Math.max(0, selected.length - simonTraces.length);
   const setRangeBoundary = (boundary: "minimumHz" | "maximumHz", value: string) => {
     rangeEditedRef.current = true;
     setRange((current) => ({ ...current, [boundary]: value === "" ? undefined : Number(value) * factor }));
@@ -387,11 +415,13 @@ export function EmiAnalyzerShell() {
         </div></details>
       </section>
 
-      <EmiPlot bands={bands(["SET", "SER", "SEA"])} exportName="emi-shielding-effectiveness" format={project.plot} maximumHz={range.maximumHz} minimumHz={range.minimumHz} title="4. Shielding effectiveness" traces={traces(["SET", "SER", "SEA"])} unit={unit} warningFrequenciesHz={selectedWarningFrequencies} yLabel="dB" />
-      <EmiPlot bands={bands(["R", "T", "A"])} exportName="emi-power-coefficients" format={project.plot} maximumHz={range.maximumHz} minimumHz={range.minimumHz} title="5. Incident-power coefficients" traces={traces(["R", "T", "A"])} unit={unit} warningFrequenciesHz={selectedWarningFrequencies} yLabel="Dimensionless" />
+      <EmiPlot bands={bands(["SET"])} exportName="emi-total-shielding-effectiveness" format={project.plot} graphId="set-vs-frequency" maximumHz={range.maximumHz} minimumHz={range.minimumHz} simonEligible simonTraces={simonTraces} simonUnavailableCount={simonUnavailableCount} title="4. Total shielding effectiveness (SET)" traces={traces(["SET"])} unit={unit} warningFrequenciesHz={selectedWarningFrequencies} yLabel="dB" />
+      <EmiPlot bands={bands(["SER"])} exportName="emi-reflection-contribution" format={project.plot} graphId="ser-vs-frequency" maximumHz={range.maximumHz} minimumHz={range.minimumHz} title="5. Reflection contribution (SER)" traces={traces(["SER"])} unit={unit} warningFrequenciesHz={selectedWarningFrequencies} yLabel="dB" />
+      <EmiPlot bands={bands(["SEA"])} exportName="emi-absorption-contribution" format={project.plot} graphId="sea-vs-frequency" maximumHz={range.maximumHz} minimumHz={range.minimumHz} title="6. Effective absorption contribution (SEA)" traces={traces(["SEA"])} unit={unit} warningFrequenciesHz={selectedWarningFrequencies} yLabel="dB" />
+      <EmiPlot bands={bands(["R", "T", "A"])} exportName="emi-power-coefficients" format={project.plot} graphId="rta-vs-frequency" maximumHz={range.maximumHz} minimumHz={range.minimumHz} title="7. Incident-power coefficients" traces={traces(["R", "T", "A"])} unit={unit} warningFrequenciesHz={selectedWarningFrequencies} yLabel="Dimensionless" />
 
       <section className="emi-panel" aria-label="Quality control">
-        <div className="emi-section-heading"><div><h2>6. Quality-control report</h2><p>Warnings are screening results only; the software does not alter measurements or determine their physical cause.</p></div></div>
+        <div className="emi-section-heading"><div><h2>8. Quality-control report</h2><p>Warnings are screening results only; the software does not alter measurements or determine their physical cause.</p></div></div>
         <p className="emi-causal-note">Flagged values can indicate calibration uncertainty, fixture or reference-plane effects, instrument drift, or malformed data. Review the measurement context before drawing physical conclusions.</p>
         {selected.map((file) => <article className="emi-qc-file" key={file.id}><h3>{file.filename} · {file.issues.length} warning{file.issues.length === 1 ? "" : "s"}</h3>
           {[...directions, "shared" as const].map((group) => {
@@ -407,14 +437,14 @@ export function EmiAnalyzerShell() {
       </section>
 
       <section className="emi-panel" aria-label="Data table">
-        <div className="emi-section-heading"><div><h2>7. Tabular inspection</h2><p>Raw complex values and calculated metrics for one selected file and direction.</p></div></div>
+        <div className="emi-section-heading"><div><h2>9. Tabular inspection</h2><p>Raw complex values and calculated metrics for one selected file and direction.</p></div></div>
         <div className="emi-table-controls"><label>File<select className="ui-select" onChange={(event) => setTableFileId(event.target.value)} value={tableFile?.id ?? ""}>{selected.map((file) => <option key={file.id} value={file.id}>{file.filename}</option>)}</select></label><label>Direction<select className="ui-select" onChange={(event) => setTableDirection(event.target.value as EmiDirection)} value={tableDirection}><option value="forward">Forward (S11 / S21)</option><option value="reverse">Reverse (S22 / S12)</option></select></label></div>
         <div className="emi-table-scroll emi-data-table-scroll"><table className="emi-table"><thead><tr><th>Frequency ({unit})</th><th>Reflection Re</th><th>Reflection Im</th><th>Transmission Re</th><th>Transmission Im</th><th>R</th><th>T</th><th>A</th><th>SET (dB)</th><th>SER (dB)</th><th>SEA (dB)</th><th>Status</th><th>Validation messages</th></tr></thead><tbody>{tableRows.map((row, index) => <tr key={`${row.frequencyHz}-${index}`}><td>{formatNumber(row.frequencyHz / factor, 10)}</td><td>{formatNumber(row.reflectionReal, 10)}</td><td>{formatNumber(row.reflectionImaginary, 10)}</td><td>{formatNumber(row.transmissionReal, 10)}</td><td>{formatNumber(row.transmissionImaginary, 10)}</td><td>{formatNumber(row.R, 10)}</td><td>{formatNumber(row.T, 10)}</td><td>{formatNumber(row.A, 10)}</td><td>{formatNumber(row.SET, 10)}</td><td>{formatNumber(row.SER, 10)}</td><td>{formatNumber(row.SEA, 10)}</td><td><span className={`emi-validity emi-validity-${row.validity}`}>{row.validity}</span></td><td>{row.validationCodes.length > 0 ? <details><summary>{row.validationCodes.join(", ")}</summary><ul>{row.validationMessages.map((message, messageIndex) => <li key={messageIndex}>{message}</li>)}</ul></details> : "—"}</td></tr>)}</tbody></table></div>
         <p className="emi-supporting">Showing {tableRows.length} points in the selected frequency band.</p>
       </section>
 
       <section className="emi-panel" aria-label="CSV exports">
-        <div className="emi-section-heading"><div><h2>8. Analysis notes and exports</h2><p>Blank shielding cells represent undefined metrics. Project and manifest JSON formats are versioned.</p></div></div>
+        <div className="emi-section-heading"><div><h2>10. Analysis notes and exports</h2><p>Blank shielding cells represent undefined metrics. Project and manifest JSON formats are versioned.</p></div></div>
         <label className="emi-project-description">Project notes<textarea onChange={(event) => setProject((current) => ({ ...current, notes: event.target.value }))} rows={4} value={project.notes} /></label>
         <div className="emi-export-actions"><button className="ui-button ui-button-primary" onClick={() => { const snapshot = projectSnapshot(); downloadBytes("emi-analysis.xlsx", createEmiAnalysisXlsx(snapshot, selected, directions, range), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"); }} type="button">Export analysis workbook XLSX</button><button className="ui-button" onClick={() => { const snapshot = projectSnapshot(); downloadCsv("emi-processed-data.csv", createProcessedEmiCsv(selected, directions, snapshot)); }} type="button">Export processed data CSV</button><button className="ui-button" onClick={() => { const snapshot = projectSnapshot(); downloadCsv("emi-summary-statistics.csv", createSummaryStatisticsCsv(selected, directions, range, snapshot)); }} type="button">Export summary statistics CSV</button><button className="ui-button" disabled={project.groups.length === 0} onClick={() => downloadCsv("emi-replicate-pointwise-summary.csv", createReplicatePointwiseCsv(projectSnapshot(), ready, directions, interpolation))} type="button">Export replicate pointwise CSV</button><button className="ui-button" onClick={() => downloadCsv("emi-band-summary.csv", createBandSummaryCsv(projectSnapshot(), ready, directions, range))} type="button">Export band summary CSV</button><button className="ui-button" onClick={() => downloadContent("emi-analysis-manifest.json", createEmiAnalysisManifest(projectSnapshot()), "application/json;charset=utf-8")} type="button">Export analysis manifest</button><button className="ui-button" onClick={() => { const figures = [...document.querySelectorAll("svg[data-emi-plot]")].map((element) => new XMLSerializer().serializeToString(element)); downloadContent("emi-analysis-summary.html", createEmiAnalysisSummaryHtml(projectSnapshot(), figures), "text/html;charset=utf-8"); }} type="button">Export analysis summary HTML</button></div>
       </section>

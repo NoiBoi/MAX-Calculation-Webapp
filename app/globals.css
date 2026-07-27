@@ -408,8 +408,16 @@ button[aria-pressed="true"] { box-shadow: inset 0 0 0 1px currentColor; }
 .emi-legend-item { display: inline-flex; align-items: center; gap: .35rem; border: 1px solid var(--border-default); border-radius: 999px; background: var(--background-elevated); color: var(--text-primary); padding: .3rem .55rem; font-size: .72rem; }
 .emi-legend-item[aria-pressed="false"] { opacity: .45; text-decoration: line-through; }
 .emi-legend-item span { width: .65rem; height: .65rem; border-radius: 50%; }
+.emi-legend-simon span { height: 0; border-radius: 0; }
+.emi-legend-item em { color: var(--text-muted); font-size: .65rem; font-style: normal; }
+.emi-graph-toolbar { display: flex; min-height: var(--control-height); flex-wrap: wrap; align-items: center; gap: .45rem .85rem; margin-bottom: .35rem; border: 1px solid var(--border-subtle); border-radius: .5rem; background: var(--background-hover); padding: .45rem .6rem; }
+.emi-window-control { display: inline-flex; align-items: center; gap: .4rem; font-size: .75rem; font-weight: 700; }
+.emi-window-control .ui-select { min-height: 2rem; padding-block: .25rem; }
+.emi-view-badge { border: 1px solid var(--status-info-border); border-radius: 999px; background: var(--status-info-background); color: var(--status-info-text); padding: .2rem .5rem; font-size: .68rem; font-weight: 700; }
+.emi-graph-help { margin: 0 0 .55rem; color: var(--text-muted); font-size: .72rem; line-height: 1.45; }
 .emi-chart-wrap { position: relative; width: 100%; min-width: 0; }
 .emi-chart { display: block; width: 100%; height: auto; max-height: 25rem; overflow: visible; }
+.emi-chart:focus-visible { border-radius: .35rem; outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 .emi-grid-line { stroke: var(--border-subtle); stroke-width: 1; }
 .emi-hover-line { stroke: var(--border-strong); stroke-dasharray: 4 3; }
 .emi-axis-text { fill: var(--text-muted); font-size: 11px; }
@@ -472,6 +480,8 @@ button[aria-pressed="true"] { box-shadow: inset 0 0 0 1px currentColor; }
   .emi-section-heading { flex-direction: column; }
   .emi-project-toolbar, .emi-metadata-grid, .emi-format-grid { grid-template-columns: 1fr; }
   .emi-metadata-grid label:nth-last-child(-n+2) { grid-column: auto; }
+  .emi-graph-toolbar { align-items: stretch; }
+  .emi-graph-toolbar .emi-checkbox-label { flex: 1 1 100%; }
 }
 
 .input-with-suffix {
