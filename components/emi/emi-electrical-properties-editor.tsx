@@ -12,11 +12,12 @@ function scientific(value: number | undefined): string {
   return value === undefined || !Number.isFinite(value) ? "Unavailable" : value.toLocaleString(undefined, { maximumSignificantDigits: 10 });
 }
 
-export function EmiElectricalPropertiesEditor({ filename, frequenciesHz, value, thicknessLabel, thicknessMicrometers, thicknessConflict, onChange, onEditSampleThickness, onResolveThicknessConflict }: Readonly<{
+export function EmiElectricalPropertiesEditor({ filename, frequenciesHz, value, thicknessLabel, enteredThicknessLabel, thicknessMicrometers, thicknessConflict, onChange, onEditSampleThickness, onResolveThicknessConflict }: Readonly<{
   filename: string;
   frequenciesHz: readonly number[];
   value?: EmiElectricalPropertyRecord;
   thicknessLabel: string;
+  enteredThicknessLabel?: string;
   thicknessMicrometers: number | null;
   thicknessConflict?: EmiThicknessConflict;
   onChange: (value: EmiElectricalPropertyRecord) => void;
@@ -44,6 +45,7 @@ export function EmiElectricalPropertiesEditor({ filename, frequenciesHz, value, 
     </div>}
     <dl className="emi-electrical-context">
       <div><dt>Sample thickness</dt><dd>{thicknessConflict ? "Conflict unresolved" : thicknessLabel}</dd></div>
+      {!thicknessConflict && enteredThicknessLabel && enteredThicknessLabel !== thicknessLabel && <div><dt>Entered as</dt><dd>{enteredThicknessLabel}</dd></div>}
       <div><dt>Geometric correction factor</dt><dd>{correctionFactor}</dd></div>
       <div><dt>Calculation status</dt><dd>{thicknessConflict ? "Paused" : calculation.ok ? "Ready" : "Needs valid thickness and readings"}</dd></div>
     </dl>

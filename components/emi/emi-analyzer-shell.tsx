@@ -35,6 +35,7 @@ import {
   calculateEmiElectricalRecord,
   EmiProjectRepository,
   getAuthoritativeThicknessMicrometers,
+  getAuthoritativeNormalizedThickness,
   parseEmiProjectJson,
   serializeEmiProject,
   suggestEmiMetadata,
@@ -195,7 +196,7 @@ export function EmiAnalyzerShell() {
         const issues = validateEmiDataset(parsed.dataset, calculation);
         const loaded: Extract<ImportedFile, { status: "ready" }> = { id, filename: file.name, status: "ready", dataset: parsed.dataset, calculation, issues };
         setFiles((current) => current.map((entry) => entry.id === id ? loaded : entry));
-        setProject((current) => ({ ...current, datasets: [...current.datasets, { id, originalFilename: file.name, parsedDataset: parsed.dataset, sampleMetadata: { displayName: file.name }, importedAt: new Date().toISOString(), parserVersion: EMI_PARSER_VERSION }] }));
+        setProject((current) => ({ ...current, datasets: [...current.datasets, { id, originalFilename: file.name, parsedDataset: parsed.dataset, sampleMetadata: { displayName: file.name, thicknessUnit: "mm" }, importedAt: new Date().toISOString(), parserVersion: EMI_PARSER_VERSION }] }));
         setSelectedIds((current) => new Set(current).add(id));
         setTableFileId((current) => current || id);
         const frequencies = parsed.dataset.points.map((point) => point.frequencyHz).filter(Number.isFinite);
@@ -333,7 +334,7 @@ export function EmiAnalyzerShell() {
       <p className="emi-status" aria-live="polite">{status}</p>
       {ready.length > 0 && <p className="emi-causal-note"><strong>Measurement-quality interpretation:</strong> passivity and logarithm-domain checks describe the measured data behavior; they do not diagnose a single cause. Review calibration, fixture and reference-plane quality, instrument drift, and source-file integrity before deciding whether a point is experimentally acceptable.</p>}
       {files.length > 0 && <div className="emi-file-grid">
-        {files.map((file) => { const projectDataset = project.datasets.find((entry) => entry.id === file.id); const metadata = projectDataset?.sampleMetadata; const suggestion = suggestEmiMetadata(file.filename); const quality = file.status === "ready" ? directions.map((direction) => ({ direction, summary: summarizeEmiPhysicalValidity(file.calculation[direction]) })) : []; return <article className={`emi-file-card emi-file-${file.status}${file.status === "ready" && file.issues.length > 0 ? " emi-file-warning" : ""}`} data-testid="emi-file-card" key={file.id}>
+        {files.map((file) => { const projectDataset = project.datasets.find((entry) => entry.id === file.id); const metadata = projectDataset?.sampleMetadata; const normalizedThickness = projectDataset ? getAuthoritativeNormalizedThickness(projectDataset) : null; const suggestion = suggestEmiMetadata(file.filename); const quality = file.status === "ready" ? directions.map((direction) => ({ direction, summary: summarizeEmiPhysicalValidity(file.calculation[direction]) })) : []; return <article className={`emi-file-card emi-file-${file.status}${file.status === "ready" && file.issues.length > 0 ? " emi-file-warning" : ""}`} data-testid="emi-file-card" key={file.id}>
           <div className="emi-file-title"><label><input checked={file.status === "ready" && selectedIds.has(file.id)} disabled={file.status !== "ready"} onChange={() => setSelectedIds((current) => { const next = new Set(current); if (next.has(file.id)) next.delete(file.id); else next.add(file.id); return next; })} type="checkbox" /><strong>{file.filename}</strong></label><button aria-label={`Remove ${file.filename}`} className="ui-button ui-button-compact ui-button-destructive" onClick={() => removeFile(file.id)} type="button">Remove</button></div>
           {file.status === "loading" && <p>Reading and validating…</p>}
           {file.status === "error" && <><p className="emi-error-text">Parse failed</p><ul>{file.issues.map((issue, index) => <li key={`${issue.code}-${index}`}>{issue.message}</li>)}</ul></>}
@@ -369,7 +370,8 @@ export function EmiAnalyzerShell() {
             }}
             onResolveThicknessConflict={(source) => setProject((current) => ({ ...current, datasets: current.datasets.map((entry) => entry.id === file.id ? resolveEmiThicknessConflict(entry, source) : entry) }))}
             thicknessConflict={projectDataset?.thicknessConflict}
-            thicknessLabel={metadata?.thickness !== undefined && metadata.thicknessUnit ? `${metadata.thickness} ${metadata.thicknessUnit === "um" ? "µm" : metadata.thicknessUnit}` : "Not entered"}
+            enteredThicknessLabel={metadata?.thickness !== undefined && metadata.thicknessUnit ? `${metadata.thickness} ${metadata.thicknessUnit === "um" ? "µm" : metadata.thicknessUnit}` : undefined}
+            thicknessLabel={normalizedThickness ? `${formatNumber(normalizedThickness.micrometers, 10)} µm` : "Not entered"}
             thicknessMicrometers={projectDataset ? getAuthoritativeThicknessMicrometers(projectDataset) : null}
             value={projectDataset?.electricalProperties}
           /></>}

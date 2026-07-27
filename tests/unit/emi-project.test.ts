@@ -40,6 +40,15 @@ describe("versioned local EMI projects", () => {
     expect(restored.datasets[0]?.electricalProperties?.derived).toBeDefined();
   });
 
+  it("repairs the historical visually-defaulted mm unit at the compatibility boundary", () => {
+    const project = createEmptyEmiProject("Missing displayed unit");
+    const dataset = { filename: "sample.csv", headers: [], metadata: { comments: [] }, parsingIssues: [], points: [] };
+    const legacy = { ...project, schemaVersion: EMI_PROJECT_PREVIOUS_SCHEMA_VERSION, datasets: [{ id: "a", originalFilename: "sample.csv", parsedDataset: dataset, sampleMetadata: { displayName: "Sample", thickness: 0.0143 }, importedAt: project.createdAt, parserVersion: "test" }] };
+    const restored = parseEmiProjectJson(JSON.stringify(legacy));
+    expect(restored.datasets[0]?.sampleMetadata.thicknessUnit).toBe("mm");
+    expect(getAuthoritativeThicknessMicrometers(restored.datasets[0]!)).toBeCloseTo(14.3, 14);
+  });
+
   it("deduplicates equivalent legacy thickness values and pauses conflicting values until resolution", () => {
     const project = createEmptyEmiProject("Legacy conflict");
     const dataset = { filename: "sample.csv", headers: [], metadata: { comments: [] }, parsingIssues: [], points: [] };

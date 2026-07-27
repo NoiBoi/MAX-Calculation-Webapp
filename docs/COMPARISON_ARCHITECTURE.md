@@ -3,6 +3,8 @@
 Each comparison scenario owns its target, explicit site model, radius configuration, precursor route, feed adjustments, batch settings, validation state, and optional historical snapshot. Scientifically different targets remain supported. Comparison identity and add/open/save actions are workspace-level; scientific edits and failures remain scenario-local.
 
 The comparison UI reuses the calculator weighing-summary presentation for formulas, purity, molar quantities, masses, status, warnings, radius descriptors, and provenance. Standard mode keeps routine inputs and results visible. Advanced mode adds per-scenario site descriptors and a grouped solver/balance/residual/trace summary. Radius values from different datasets are labeled not directly comparable and are never ranked or differenced.
+
+Calculator and comparison Standard/Advanced selection is rendered by the same `DetailModeControl` component and semantic segmented-control styles. Routes supply only their accessible label, current mode, and existing state transition. This prevents route-specific markup or toolbar inheritance from changing active-segment height, padding, focus behavior, or theme rendering while preserving each workspace's mode semantics.
 # Analysis representation
 
 Comparison analysis has four presentations: recipe cards, summary metrics, baseline-relative differences, and an aligned precursor matrix. Baseline selection is presentation state and never edits a scenario. Signed mass and percentage differences are descriptive and must not be labeled as scientifically better.

@@ -141,15 +141,34 @@ export function calculatePooledPointBandSummary(series: readonly EmiReplicateSer
 export type EmiThicknessUnit = "m" | "mm" | "um" | "in";
 export type EmiArealDensityUnit = "kg/m2" | "g/m2" | "g/cm2";
 
-export function convertThicknessToMillimeters(value: number, unit: EmiThicknessUnit): number | null {
+export interface NormalizedEmiThickness {
+  readonly micrometers: number;
+  readonly millimeters: number;
+  readonly centimeters: number;
+  readonly meters: number;
+}
+
+/** The only EMI thickness conversion path. Invalid, missing, zero, and negative values are rejected. */
+export function normalizeEmiThickness(value: number, unit: EmiThicknessUnit): NormalizedEmiThickness | null {
   if (!Number.isFinite(value) || value <= 0) return null;
-  return value * ({ m: 1000, mm: 1, um: 0.001, in: 25.4 } as const)[unit];
+  const factors = ({
+    m: { micrometers: 1e6, millimeters: 1000, centimeters: 100, meters: 1 },
+    mm: { micrometers: 1000, millimeters: 1, centimeters: 0.1, meters: 0.001 },
+    um: { micrometers: 1, millimeters: 0.001, centimeters: 1e-4, meters: 1e-6 },
+    in: { micrometers: 25_400, millimeters: 25.4, centimeters: 2.54, meters: 0.0254 },
+  } as const)[unit];
+  if (factors === undefined) return null;
+  const normalized = { micrometers: value * factors.micrometers, millimeters: value * factors.millimeters, centimeters: value * factors.centimeters, meters: value * factors.meters };
+  return Object.values(normalized).every((candidate) => Number.isFinite(candidate) && candidate > 0) ? normalized : null;
+}
+
+export function convertThicknessToMillimeters(value: number, unit: EmiThicknessUnit): number | null {
+  return normalizeEmiThickness(value, unit)?.millimeters ?? null;
 }
 
 /** Converts the authoritative sample thickness to the µm unit used by electrical calculations. */
 export function convertThicknessToMicrometers(value: number, unit: EmiThicknessUnit): number | null {
-  const millimeters = convertThicknessToMillimeters(value, unit);
-  return millimeters === null ? null : millimeters * 1000;
+  return normalizeEmiThickness(value, unit)?.micrometers ?? null;
 }
 
 export function normalizeSetByThickness(setDb: number | null, thickness: number, unit: EmiThicknessUnit): number | null {

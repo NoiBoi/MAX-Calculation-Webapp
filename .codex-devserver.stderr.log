@@ -451,3 +451,525 @@ To fix this, make sure your Cache-Control headers allow revalidation of chunks a
     at flushSyncWorkAcrossRoots_impl (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10179:316)
     at processRootScheduleInMicrotask (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10200:106)
     at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10274:158) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4104:33)
+⚠ Fast Refresh had to perform a full reload when ./packages/chemistry-engine/emi/replicates.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./packages/chemistry-engine/emi/replicates.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[browser] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <InnerScrollAndFocusHandlerOld focusAndScrollRef={{scrollRef:null, ...}} cacheNode={{rsc:{...}, ...}}>
+      <ErrorBoundary errorComponent={function ComparisonError} errorStyles={{...}} errorScripts={[...]}>
+        <ErrorBoundaryHandler pathname="/compare" errorComponent={function ComparisonError} errorStyles={{...}} ...>
+          <LoadingBoundary name="compare/" loading={null}>
+            <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <InnerLayoutRouter url="/compare" tree={[...]} params={{}} cacheNode={{rsc:{...}, ...}} ...>
+                    <SegmentViewNode type="page" pagePath="compare/pa...">
+                      <SegmentTrieNode>
+                      <ComparePage>
+                        <ComparisonShell>
+                          <main className="comparison...">
+                            <AppHeader>
+                            <div>
+                            <section aria-label="Comparison..." className="mx-auto fl...">
+                              <label className="text-sm fo...">
+                                <input
+                                  className="ml-2 rounded border px-2 py-1"
+                                  onChange={function onChange}
+                                  value="Untitled comparison"
+-                                 style={{caret-color:"transparent"}}
+                                >
+                              ...
+                            <section>
+                            <RecipePicker candidates={[...]} capacity={4} existing={Set} ...>
+                              <dialog aria-labelledby="recipe-pic..." className="m-auto max..." ...>
+                                <header>
+                                <div className="p-4">
+                                  <label className="block font...">
+                                    <input
+                                      className="mt-1 w-full rounded border px-3 py-2"
+                                      onChange={function onChange}
+                                      value=""
+-                                     style={{caret-color:"transparent"}}
+                                    >
+                                  ...
+                            ...
+                    ...
+                  ...
+      ...
+ 
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:3439:25)
+    at runWithFiberInDEV (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at emitPendingHydrationWarnings (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:3438:13)
+    at completeWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6885:102)
+    at runWithFiberInDEV (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:131)
+    at completeUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9622:23)
+    at performUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9557:28)
+    at workLoopConcurrentByScheduler (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9551:58)
+    at renderRootConcurrent (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9534:71)
+    at performWorkOnRoot (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9061:150)
+    at performWorkOnRootViaSchedulerTask (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10255:9)
+    at MessagePort.performWorkUntilDeadline (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:2647:64) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:3439:25)
+[browser] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <InnerScrollAndFocusHandlerOld focusAndScrollRef={{scrollRef:null, ...}} cacheNode={{rsc:{...}, ...}}>
+      <ErrorBoundary errorComponent={function ComparisonError} errorStyles={{...}} errorScripts={[...]}>
+        <ErrorBoundaryHandler pathname="/compare" errorComponent={function ComparisonError} errorStyles={{...}} ...>
+          <LoadingBoundary name="compare/" loading={null}>
+            <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <InnerLayoutRouter url="/compare" tree={[...]} params={{}} cacheNode={{rsc:{...}, ...}} ...>
+                    <SegmentViewNode type="page" pagePath="compare/pa...">
+                      <SegmentTrieNode>
+                      <ComparePage>
+                        <ComparisonShell>
+                          <main className="comparison...">
+                            <AppHeader>
+                            <div>
+                            <section aria-label="Comparison..." className="mx-auto fl...">
+                              <label className="text-sm fo...">
+                                <input
+                                  className="ml-2 rounded border px-2 py-1"
+                                  onChange={function onChange}
+                                  value="Untitled comparison"
+-                                 style={{caret-color:"transparent"}}
+                                >
+                              ...
+                            <section>
+                            <RecipePicker candidates={[...]} capacity={4} existing={Set} ...>
+                              <dialog aria-labelledby="recipe-pic..." className="m-auto max..." ...>
+                                <header>
+                                <div className="p-4">
+                                  <label className="block font...">
+                                    <input
+                                      className="mt-1 w-full rounded border px-3 py-2"
+                                      onChange={function onChange}
+                                      value=""
+-                                     style={{caret-color:"transparent"}}
+                                    >
+                                  ...
+                            ...
+                    ...
+                  ...
+      ...
+ 
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:3439:25)
+    at runWithFiberInDEV (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at emitPendingHydrationWarnings (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:3438:13)
+    at completeWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6885:102)
+    at runWithFiberInDEV (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:131)
+    at completeUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9622:23)
+    at performUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9557:28)
+    at workLoopConcurrentByScheduler (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9551:58)
+    at renderRootConcurrent (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9534:71)
+    at performWorkOnRoot (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9061:150)
+    at performWorkOnRootViaSchedulerTask (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10255:9)
+    at MessagePort.performWorkUntilDeadline (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:2647:64) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:3439:25)
+⨯ Error: Module [project]/components/auth/auth-provider.tsx [app-ssr] (ecmascript) was instantiated because it was required from module [project]/node_modules/next/dist/esm/build/templates/app-page.js?page=/account/cloud-data/page { METADATA_0 => "[project]/app/icon.svg.mjs { IMAGE => \"[project]/app/icon.svg (static in ecmascript, tag client)\" } [app-rsc] (structured image object, ecmascript)", MODULE_1 => "[project]/app/layout.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_2 => "[project]/app/error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_3 => "[project]/node_modules/next/dist/client/components/builtin/not-found.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_4 => "[project]/node_modules/next/dist/client/components/builtin/forbidden.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_5 => "[project]/node_modules/next/dist/client/components/builtin/unauthorized.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_6 => "[project]/app/global-error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_7 => "[project]/app/account/cloud-data/page.tsx [app-rsc] (ecmascript, Next.js Server Component)" } [app-rsc] (ecmascript) <locals>, but the module factory is not available.
+This is often caused by a stale browser cache, misconfigured Cache-Control headers, or a service worker serving outdated responses.
+To fix this, make sure your Cache-Control headers allow revalidation of chunks and review your service worker configuration. As an immediate workaround, try hard-reloading the page, clearing the browser cache, or unregistering any service workers.
+    at ignore-listed frames {
+  digest: '1997528104'
+}
+[browser] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). 
+    at completeWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6945:102)
+    at runWithFiberInDEV (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at completeUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9622:23)
+    at performUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9557:28)
+    at workLoopSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9449:40)
+    at renderRootSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9433:13)
+    at performWorkOnRoot (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9061:186)
+    at performWorkOnRootViaSchedulerTask (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10255:9)
+    at MessagePort.performWorkUntilDeadline (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:2647:64) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6945:102)
+⨯ Error: Module [project]/components/auth/auth-provider.tsx [app-ssr] (ecmascript) was instantiated because it was required from module [project]/node_modules/next/dist/esm/build/templates/app-page.js?page=/settings/page { METADATA_0 => "[project]/app/icon.svg.mjs { IMAGE => \"[project]/app/icon.svg (static in ecmascript, tag client)\" } [app-rsc] (structured image object, ecmascript)", MODULE_1 => "[project]/app/layout.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_2 => "[project]/app/error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_3 => "[project]/node_modules/next/dist/client/components/builtin/not-found.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_4 => "[project]/node_modules/next/dist/client/components/builtin/forbidden.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_5 => "[project]/node_modules/next/dist/client/components/builtin/unauthorized.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_6 => "[project]/app/global-error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_7 => "[project]/app/settings/error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_8 => "[project]/app/settings/page.tsx [app-rsc] (ecmascript, Next.js Server Component)" } [app-rsc] (ecmascript) <locals>, but the module factory is not available.
+This is often caused by a stale browser cache, misconfigured Cache-Control headers, or a service worker serving outdated responses.
+To fix this, make sure your Cache-Control headers allow revalidation of chunks and review your service worker configuration. As an immediate workaround, try hard-reloading the page, clearing the browser cache, or unregistering any service workers.
+    at ignore-listed frames {
+  digest: '3325926769'
+}
+[browser] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). 
+    at completeWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6945:102)
+    at runWithFiberInDEV (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at completeUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9622:23)
+    at performUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9557:28)
+    at workLoopSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9449:40)
+    at renderRootSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9433:13)
+    at performWorkOnRoot (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9061:186)
+    at performWorkOnRootViaSchedulerTask (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10255:9)
+    at MessagePort.performWorkUntilDeadline (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:2647:64) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6945:102)
+⨯ Error: Module [project]/components/comparison/comparison-shell.tsx [app-ssr] (ecmascript) was instantiated because it was required from module [project]/node_modules/next/dist/esm/build/templates/app-page.js?page=/workspace/page { METADATA_0 => "[project]/app/icon.svg.mjs { IMAGE => \"[project]/app/icon.svg (static in ecmascript, tag client)\" } [app-rsc] (structured image object, ecmascript)", MODULE_1 => "[project]/app/layout.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_2 => "[project]/app/error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_3 => "[project]/node_modules/next/dist/client/components/builtin/not-found.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_4 => "[project]/node_modules/next/dist/client/components/builtin/forbidden.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_5 => "[project]/node_modules/next/dist/client/components/builtin/unauthorized.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_6 => "[project]/app/global-error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_7 => "[project]/app/workspace/page.tsx [app-rsc] (ecmascript, Next.js Server Component)" } [app-rsc] (ecmascript) <locals>, but the module factory is not available.
+This is often caused by a stale browser cache, misconfigured Cache-Control headers, or a service worker serving outdated responses.
+To fix this, make sure your Cache-Control headers allow revalidation of chunks and review your service worker configuration. As an immediate workaround, try hard-reloading the page, clearing the browser cache, or unregistering any service workers.
+    at ignore-listed frames {
+  digest: '506832649'
+}
+[browser] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). 
+    at completeWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6945:102)
+    at runWithFiberInDEV (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at completeUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9622:23)
+    at performUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9557:28)
+    at workLoopSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9449:40)
+    at renderRootSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9433:13)
+    at performWorkOnRoot (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9061:186)
+    at performWorkOnRootViaSchedulerTask (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10255:9)
+    at MessagePort.performWorkUntilDeadline (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:2647:64) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6945:102)
+⨯ Error: Module [project]/components/workspace/workspace-shell.tsx [app-ssr] (ecmascript) was instantiated because it was required from module [project]/node_modules/next/dist/esm/build/templates/app-page.js?page=/settings/page { METADATA_0 => "[project]/app/icon.svg.mjs { IMAGE => \"[project]/app/icon.svg (static in ecmascript, tag client)\" } [app-rsc] (structured image object, ecmascript)", MODULE_1 => "[project]/app/layout.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_2 => "[project]/app/error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_3 => "[project]/node_modules/next/dist/client/components/builtin/not-found.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_4 => "[project]/node_modules/next/dist/client/components/builtin/forbidden.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_5 => "[project]/node_modules/next/dist/client/components/builtin/unauthorized.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_6 => "[project]/app/global-error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_7 => "[project]/app/settings/error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_8 => "[project]/app/settings/page.tsx [app-rsc] (ecmascript, Next.js Server Component)" } [app-rsc] (ecmascript) <locals>, but the module factory is not available.
+This is often caused by a stale browser cache, misconfigured Cache-Control headers, or a service worker serving outdated responses.
+To fix this, make sure your Cache-Control headers allow revalidation of chunks and review your service worker configuration. As an immediate workaround, try hard-reloading the page, clearing the browser cache, or unregistering any service workers.
+    at ignore-listed frames {
+  digest: '3484800990'
+}
+[browser] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). 
+    at completeWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6945:102)
+    at runWithFiberInDEV (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at completeUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9622:23)
+    at performUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9557:28)
+    at workLoopSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9449:40)
+    at renderRootSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9433:13)
+    at performWorkOnRoot (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9061:186)
+    at performWorkOnRootViaSchedulerTask (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10255:9)
+    at MessagePort.performWorkUntilDeadline (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:2647:64) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6945:102)
+⨯ Error: Module [project]/components/auth/auth-provider.tsx [app-ssr] (ecmascript) was instantiated because it was required from module [project]/node_modules/next/dist/esm/build/templates/app-page.js?page=/labs/page { METADATA_0 => "[project]/app/icon.svg.mjs { IMAGE => \"[project]/app/icon.svg (static in ecmascript, tag client)\" } [app-rsc] (structured image object, ecmascript)", MODULE_1 => "[project]/app/layout.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_2 => "[project]/app/error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_3 => "[project]/node_modules/next/dist/client/components/builtin/not-found.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_4 => "[project]/node_modules/next/dist/client/components/builtin/forbidden.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_5 => "[project]/node_modules/next/dist/client/components/builtin/unauthorized.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_6 => "[project]/app/global-error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_7 => "[project]/app/labs/page.tsx [app-rsc] (ecmascript, Next.js Server Component)" } [app-rsc] (ecmascript) <locals>, but the module factory is not available.
+This is often caused by a stale browser cache, misconfigured Cache-Control headers, or a service worker serving outdated responses.
+To fix this, make sure your Cache-Control headers allow revalidation of chunks and review your service worker configuration. As an immediate workaround, try hard-reloading the page, clearing the browser cache, or unregistering any service workers.
+    at ignore-listed frames {
+  digest: '2367806760'
+}
+⨯ Error: Module [project]/components/labs/lab-shell.tsx [app-ssr] (ecmascript) was instantiated because it was required from module [project]/node_modules/next/dist/esm/build/templates/app-page.js?page=/print/page { METADATA_0 => "[project]/app/icon.svg.mjs { IMAGE => \"[project]/app/icon.svg (static in ecmascript, tag client)\" } [app-rsc] (structured image object, ecmascript)", MODULE_1 => "[project]/app/layout.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_2 => "[project]/app/error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_3 => "[project]/node_modules/next/dist/client/components/builtin/not-found.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_4 => "[project]/node_modules/next/dist/client/components/builtin/forbidden.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_5 => "[project]/node_modules/next/dist/client/components/builtin/unauthorized.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_6 => "[project]/app/global-error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_7 => "[project]/app/print/page.tsx [app-rsc] (ecmascript, Next.js Server Component)" } [app-rsc] (ecmascript) <locals>, but the module factory is not available.
+This is often caused by a stale browser cache, misconfigured Cache-Control headers, or a service worker serving outdated responses.
+To fix this, make sure your Cache-Control headers allow revalidation of chunks and review your service worker configuration. As an immediate workaround, try hard-reloading the page, clearing the browser cache, or unregistering any service workers.
+    at ignore-listed frames {
+  digest: '2632632148'
+}
+[browser] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). 
+    at completeWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6945:102)
+    at runWithFiberInDEV (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at completeUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9622:23)
+    at performUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9557:28)
+    at workLoopSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9449:40)
+    at renderRootSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9433:13)
+    at performWorkOnRoot (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9061:186)
+    at performWorkOnRootViaSchedulerTask (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10255:9)
+    at MessagePort.performWorkUntilDeadline (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:2647:64) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6945:102)
+[browser] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). 
+    at completeWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6945:102)
+    at runWithFiberInDEV (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at completeUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9622:23)
+    at performUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9557:28)
+    at workLoopSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9449:40)
+    at renderRootSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9433:13)
+    at performWorkOnRoot (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9061:186)
+    at performWorkOnRootViaSchedulerTask (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10255:9)
+    at MessagePort.performWorkUntilDeadline (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:2647:64) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6945:102)
+⨯ Error: Module [project]/components/print/print-root.tsx [app-ssr] (ecmascript) was instantiated because it was required from module [project]/node_modules/next/dist/esm/build/templates/app-page.js?page=/workspace/page { METADATA_0 => "[project]/app/icon.svg.mjs { IMAGE => \"[project]/app/icon.svg (static in ecmascript, tag client)\" } [app-rsc] (structured image object, ecmascript)", MODULE_1 => "[project]/app/layout.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_2 => "[project]/app/error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_3 => "[project]/node_modules/next/dist/client/components/builtin/not-found.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_4 => "[project]/node_modules/next/dist/client/components/builtin/forbidden.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_5 => "[project]/node_modules/next/dist/client/components/builtin/unauthorized.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_6 => "[project]/app/global-error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_7 => "[project]/app/workspace/page.tsx [app-rsc] (ecmascript, Next.js Server Component)" } [app-rsc] (ecmascript) <locals>, but the module factory is not available.
+This is often caused by a stale browser cache, misconfigured Cache-Control headers, or a service worker serving outdated responses.
+To fix this, make sure your Cache-Control headers allow revalidation of chunks and review your service worker configuration. As an immediate workaround, try hard-reloading the page, clearing the browser cache, or unregistering any service workers.
+    at ignore-listed frames {
+  digest: '2736118753'
+}
+⨯ Error: Module [project]/components/print/print-root.tsx [app-ssr] (ecmascript) was instantiated because it was required from module [project]/node_modules/next/dist/esm/build/templates/app-page.js?page=/workspace/page { METADATA_0 => "[project]/app/icon.svg.mjs { IMAGE => \"[project]/app/icon.svg (static in ecmascript, tag client)\" } [app-rsc] (structured image object, ecmascript)", MODULE_1 => "[project]/app/layout.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_2 => "[project]/app/error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_3 => "[project]/node_modules/next/dist/client/components/builtin/not-found.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_4 => "[project]/node_modules/next/dist/client/components/builtin/forbidden.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_5 => "[project]/node_modules/next/dist/client/components/builtin/unauthorized.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_6 => "[project]/app/global-error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_7 => "[project]/app/workspace/page.tsx [app-rsc] (ecmascript, Next.js Server Component)" } [app-rsc] (ecmascript) <locals>, but the module factory is not available.
+This is often caused by a stale browser cache, misconfigured Cache-Control headers, or a service worker serving outdated responses.
+To fix this, make sure your Cache-Control headers allow revalidation of chunks and review your service worker configuration. As an immediate workaround, try hard-reloading the page, clearing the browser cache, or unregistering any service workers.
+    at ignore-listed frames {
+  digest: '2736118753'
+}
+[browser] Uncaught Error: Switched to client rendering because the server rendering errored:
+
+Module [project]/components/print/print-root.tsx [app-ssr] (ecmascript) was instantiated because it was required from module [project]/node_modules/next/dist/esm/build/templates/app-page.js?page=/workspace/page { METADATA_0 => "[project]/app/icon.svg.mjs { IMAGE => \"[project]/app/icon.svg (static in ecmascript, tag client)\" } [app-rsc] (structured image object, ecmascript)", MODULE_1 => "[project]/app/layout.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_2 => "[project]/app/error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_3 => "[project]/node_modules/next/dist/client/components/builtin/not-found.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_4 => "[project]/node_modules/next/dist/client/components/builtin/forbidden.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_5 => "[project]/node_modules/next/dist/client/components/builtin/unauthorized.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_6 => "[project]/app/global-error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_7 => "[project]/app/workspace/page.tsx [app-rsc] (ecmascript, Next.js Server Component)" } [app-rsc] (ecmascript) <locals>, but the module factory is not available.
+This is often caused by a stale browser cache, misconfigured Cache-Control headers, or a service worker serving outdated responses.
+To fix this, make sure your Cache-Control headers allow revalidation of chunks and review your service worker configuration. As an immediate workaround, try hard-reloading the page, clearing the browser cache, or unregistering any service workers.
+[browser] Uncaught Error: Switched to client rendering because the server rendering errored:
+
+Module [project]/components/print/print-root.tsx [app-ssr] (ecmascript) was instantiated because it was required from module [project]/node_modules/next/dist/esm/build/templates/app-page.js?page=/workspace/page { METADATA_0 => "[project]/app/icon.svg.mjs { IMAGE => \"[project]/app/icon.svg (static in ecmascript, tag client)\" } [app-rsc] (structured image object, ecmascript)", MODULE_1 => "[project]/app/layout.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_2 => "[project]/app/error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_3 => "[project]/node_modules/next/dist/client/components/builtin/not-found.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_4 => "[project]/node_modules/next/dist/client/components/builtin/forbidden.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_5 => "[project]/node_modules/next/dist/client/components/builtin/unauthorized.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_6 => "[project]/app/global-error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_7 => "[project]/app/workspace/page.tsx [app-rsc] (ecmascript, Next.js Server Component)" } [app-rsc] (ecmascript) <locals>, but the module factory is not available.
+This is often caused by a stale browser cache, misconfigured Cache-Control headers, or a service worker serving outdated responses.
+To fix this, make sure your Cache-Control headers allow revalidation of chunks and review your service worker configuration. As an immediate workaround, try hard-reloading the page, clearing the browser cache, or unregistering any service workers.
+⨯ Error: Module [project]/components/comparison/comparison-shell.tsx [app-ssr] (ecmascript) was instantiated because it was required from module [project]/node_modules/next/dist/esm/build/templates/app-page.js?page=/workspace/page { METADATA_0 => "[project]/app/icon.svg.mjs { IMAGE => \"[project]/app/icon.svg (static in ecmascript, tag client)\" } [app-rsc] (structured image object, ecmascript)", MODULE_1 => "[project]/app/layout.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_2 => "[project]/app/error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_3 => "[project]/node_modules/next/dist/client/components/builtin/not-found.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_4 => "[project]/node_modules/next/dist/client/components/builtin/forbidden.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_5 => "[project]/node_modules/next/dist/client/components/builtin/unauthorized.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_6 => "[project]/app/global-error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_7 => "[project]/app/workspace/page.tsx [app-rsc] (ecmascript, Next.js Server Component)" } [app-rsc] (ecmascript) <locals>, but the module factory is not available.
+This is often caused by a stale browser cache, misconfigured Cache-Control headers, or a service worker serving outdated responses.
+To fix this, make sure your Cache-Control headers allow revalidation of chunks and review your service worker configuration. As an immediate workaround, try hard-reloading the page, clearing the browser cache, or unregistering any service workers.
+    at ignore-listed frames {
+  digest: '506832649'
+}
+⨯ Error: Module [project]/app/formula-demo.tsx [app-ssr] (ecmascript) was instantiated because it was required from module [project]/node_modules/next/dist/esm/build/templates/app-page.js?page=/workspace/page { METADATA_0 => "[project]/app/icon.svg.mjs { IMAGE => \"[project]/app/icon.svg (static in ecmascript, tag client)\" } [app-rsc] (structured image object, ecmascript)", MODULE_1 => "[project]/app/layout.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_2 => "[project]/app/error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_3 => "[project]/node_modules/next/dist/client/components/builtin/not-found.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_4 => "[project]/node_modules/next/dist/client/components/builtin/forbidden.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_5 => "[project]/node_modules/next/dist/client/components/builtin/unauthorized.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_6 => "[project]/app/global-error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_7 => "[project]/app/workspace/page.tsx [app-rsc] (ecmascript, Next.js Server Component)" } [app-rsc] (ecmascript) <locals>, but the module factory is not available.
+This is often caused by a stale browser cache, misconfigured Cache-Control headers, or a service worker serving outdated responses.
+To fix this, make sure your Cache-Control headers allow revalidation of chunks and review your service worker configuration. As an immediate workaround, try hard-reloading the page, clearing the browser cache, or unregistering any service workers.
+    at ignore-listed frames {
+  digest: '1904975856'
+}
+[browser] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). 
+    at completeWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6945:102)
+    at runWithFiberInDEV (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at completeUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9622:23)
+    at performUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9557:28)
+    at workLoopSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9449:40)
+    at renderRootSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9433:13)
+    at performWorkOnRoot (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9061:186)
+    at performWorkOnRootViaSchedulerTask (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10255:9)
+    at MessagePort.performWorkUntilDeadline (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:2647:64) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6945:102)
+[browser] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). 
+    at completeWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6945:102)
+    at runWithFiberInDEV (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at completeUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9622:23)
+    at performUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9557:28)
+    at workLoopSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9449:40)
+    at renderRootSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9433:13)
+    at performWorkOnRoot (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9061:186)
+    at performWorkOnRootViaSchedulerTask (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10255:9)
+    at MessagePort.performWorkUntilDeadline (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:2647:64) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6945:102)
+⨯ Error: Module [project]/components/auth/login-form.tsx [app-ssr] (ecmascript) was instantiated because it was required from module [project]/node_modules/next/dist/esm/build/templates/app-page.js?page=/settings/page { METADATA_0 => "[project]/app/icon.svg.mjs { IMAGE => \"[project]/app/icon.svg (static in ecmascript, tag client)\" } [app-rsc] (structured image object, ecmascript)", MODULE_1 => "[project]/app/layout.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_2 => "[project]/app/error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_3 => "[project]/node_modules/next/dist/client/components/builtin/not-found.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_4 => "[project]/node_modules/next/dist/client/components/builtin/forbidden.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_5 => "[project]/node_modules/next/dist/client/components/builtin/unauthorized.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_6 => "[project]/app/global-error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_7 => "[project]/app/settings/error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_8 => "[project]/app/settings/page.tsx [app-rsc] (ecmascript, Next.js Server Component)" } [app-rsc] (ecmascript) <locals>, but the module factory is not available.
+This is often caused by a stale browser cache, misconfigured Cache-Control headers, or a service worker serving outdated responses.
+To fix this, make sure your Cache-Control headers allow revalidation of chunks and review your service worker configuration. As an immediate workaround, try hard-reloading the page, clearing the browser cache, or unregistering any service workers.
+    at ignore-listed frames {
+  digest: '722274611'
+}
+[browser] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). 
+    at completeWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6945:102)
+    at runWithFiberInDEV (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at completeUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9622:23)
+    at performUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9557:28)
+    at workLoopSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9449:40)
+    at renderRootSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9433:13)
+    at performWorkOnRoot (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9061:186)
+    at performWorkOnRootViaSchedulerTask (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10255:9)
+    at MessagePort.performWorkUntilDeadline (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:2647:64) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6945:102)
+[browser] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <InnerScrollAndFocusHandlerOld focusAndScrollRef={{scrollRef:null, ...}} cacheNode={{rsc:{...}, ...}}>
+      <ErrorBoundary errorComponent={function ComparisonError} errorStyles={{...}} errorScripts={[...]}>
+        <ErrorBoundaryHandler pathname="/compare" errorComponent={function ComparisonError} errorStyles={{...}} ...>
+          <LoadingBoundary name="compare/" loading={null}>
+            <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <InnerLayoutRouter url="/compare" tree={[...]} params={{}} cacheNode={{rsc:{...}, ...}} ...>
+                    <SegmentViewNode type="page" pagePath="compare/pa...">
+                      <SegmentTrieNode>
+                      <ComparePage>
+                        <ComparisonShell>
+                          <main className="comparison...">
+                            <AppHeader>
+                            <div>
+                            <section aria-label="Comparison..." className="mx-auto fl...">
+                              <label className="text-sm fo...">
+                                <input
+                                  className="ml-2 rounded border px-2 py-1"
+                                  onChange={function onChange}
+                                  value="Untitled comparison"
+-                                 style={{caret-color:"transparent"}}
+                                >
+                              ...
+                            <section>
+                            <RecipePicker candidates={[...]} capacity={4} existing={Set} ...>
+                              <dialog aria-labelledby="recipe-pic..." className="m-auto max..." ...>
+                                <header>
+                                <div className="p-4">
+                                  <label className="block font...">
+                                    <input
+                                      className="mt-1 w-full rounded border px-3 py-2"
+                                      onChange={function onChange}
+                                      value=""
+-                                     style={{caret-color:"transparent"}}
+                                    >
+                                  ...
+                            ...
+                    ...
+                  ...
+      ...
+ 
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:3439:25)
+    at runWithFiberInDEV (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at emitPendingHydrationWarnings (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:3438:13)
+    at completeWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6885:102)
+    at runWithFiberInDEV (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:131)
+    at completeUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9622:23)
+    at performUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9557:28)
+    at workLoopConcurrentByScheduler (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9551:58)
+    at renderRootConcurrent (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9534:71)
+    at performWorkOnRoot (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9061:150)
+    at performWorkOnRootViaSchedulerTask (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10255:9)
+    at MessagePort.performWorkUntilDeadline (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:2647:64) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:3439:25)
+⨯ Error: Module [project]/app/formula-demo.tsx [app-ssr] (ecmascript) was instantiated because it was required from module [project]/node_modules/next/dist/esm/build/templates/app-page.js?page=/workspace/page { METADATA_0 => "[project]/app/icon.svg.mjs { IMAGE => \"[project]/app/icon.svg (static in ecmascript, tag client)\" } [app-rsc] (structured image object, ecmascript)", MODULE_1 => "[project]/app/layout.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_2 => "[project]/app/error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_3 => "[project]/node_modules/next/dist/client/components/builtin/not-found.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_4 => "[project]/node_modules/next/dist/client/components/builtin/forbidden.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_5 => "[project]/node_modules/next/dist/client/components/builtin/unauthorized.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_6 => "[project]/app/global-error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_7 => "[project]/app/workspace/page.tsx [app-rsc] (ecmascript, Next.js Server Component)" } [app-rsc] (ecmascript) <locals>, but the module factory is not available.
+This is often caused by a stale browser cache, misconfigured Cache-Control headers, or a service worker serving outdated responses.
+To fix this, make sure your Cache-Control headers allow revalidation of chunks and review your service worker configuration. As an immediate workaround, try hard-reloading the page, clearing the browser cache, or unregistering any service workers.
+    at ignore-listed frames {
+  digest: '1904975856'
+}
+[browser] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). 
+    at completeWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6945:102)
+    at runWithFiberInDEV (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at completeUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9622:23)
+    at performUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9557:28)
+    at workLoopSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9449:40)
+    at renderRootSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9433:13)
+    at performWorkOnRoot (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9061:186)
+    at performWorkOnRootViaSchedulerTask (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10255:9)
+    at MessagePort.performWorkUntilDeadline (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:2647:64) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6945:102)
+⨯ Error: Module [project]/components/labs/lab-shell.tsx [app-ssr] (ecmascript) was instantiated because it was required from module [project]/node_modules/next/dist/esm/build/templates/app-page.js?page=/workspace/page { METADATA_0 => "[project]/app/icon.svg.mjs { IMAGE => \"[project]/app/icon.svg (static in ecmascript, tag client)\" } [app-rsc] (structured image object, ecmascript)", MODULE_1 => "[project]/app/layout.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_2 => "[project]/app/error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_3 => "[project]/node_modules/next/dist/client/components/builtin/not-found.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_4 => "[project]/node_modules/next/dist/client/components/builtin/forbidden.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_5 => "[project]/node_modules/next/dist/client/components/builtin/unauthorized.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_6 => "[project]/app/global-error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_7 => "[project]/app/workspace/page.tsx [app-rsc] (ecmascript, Next.js Server Component)" } [app-rsc] (ecmascript) <locals>, but the module factory is not available.
+This is often caused by a stale browser cache, misconfigured Cache-Control headers, or a service worker serving outdated responses.
+To fix this, make sure your Cache-Control headers allow revalidation of chunks and review your service worker configuration. As an immediate workaround, try hard-reloading the page, clearing the browser cache, or unregistering any service workers.
+    at ignore-listed frames {
+  digest: '1893898772'
+}
+[browser] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). 
+    at completeWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6945:102)
+    at runWithFiberInDEV (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at completeUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9622:23)
+    at performUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9557:28)
+    at workLoopSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9449:40)
+    at renderRootSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9433:13)
+    at performWorkOnRoot (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9061:186)
+    at performWorkOnRootViaSchedulerTask (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10255:9)
+    at MessagePort.performWorkUntilDeadline (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:2647:64) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6945:102)
+⨯ Error: Module [project]/components/labs/lab-shell.tsx [app-ssr] (ecmascript) was instantiated because it was required from module [project]/node_modules/next/dist/esm/build/templates/app-page.js?page=/settings/page { METADATA_0 => "[project]/app/icon.svg.mjs { IMAGE => \"[project]/app/icon.svg (static in ecmascript, tag client)\" } [app-rsc] (structured image object, ecmascript)", MODULE_1 => "[project]/app/layout.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_2 => "[project]/app/error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_3 => "[project]/node_modules/next/dist/client/components/builtin/not-found.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_4 => "[project]/node_modules/next/dist/client/components/builtin/forbidden.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_5 => "[project]/node_modules/next/dist/client/components/builtin/unauthorized.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_6 => "[project]/app/global-error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_7 => "[project]/app/settings/error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_8 => "[project]/app/settings/page.tsx [app-rsc] (ecmascript, Next.js Server Component)" } [app-rsc] (ecmascript) <locals>, but the module factory is not available.
+This is often caused by a stale browser cache, misconfigured Cache-Control headers, or a service worker serving outdated responses.
+To fix this, make sure your Cache-Control headers allow revalidation of chunks and review your service worker configuration. As an immediate workaround, try hard-reloading the page, clearing the browser cache, or unregistering any service workers.
+    at ignore-listed frames {
+  digest: '575232969'
+}
+[browser] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). 
+    at completeWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6945:102)
+    at runWithFiberInDEV (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at completeUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9622:23)
+    at performUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9557:28)
+    at workLoopSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9449:40)
+    at renderRootSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9433:13)
+    at performWorkOnRoot (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9061:186)
+    at performWorkOnRootViaSchedulerTask (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10255:9)
+    at MessagePort.performWorkUntilDeadline (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:2647:64) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6945:102)
+⨯ Error: Module [project]/app/formula-demo.tsx [app-ssr] (ecmascript) was instantiated because it was required from module [project]/node_modules/next/dist/esm/build/templates/app-page.js?page=/settings/page { METADATA_0 => "[project]/app/icon.svg.mjs { IMAGE => \"[project]/app/icon.svg (static in ecmascript, tag client)\" } [app-rsc] (structured image object, ecmascript)", MODULE_1 => "[project]/app/layout.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_2 => "[project]/app/error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_3 => "[project]/node_modules/next/dist/client/components/builtin/not-found.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_4 => "[project]/node_modules/next/dist/client/components/builtin/forbidden.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_5 => "[project]/node_modules/next/dist/client/components/builtin/unauthorized.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_6 => "[project]/app/global-error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_7 => "[project]/app/settings/error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_8 => "[project]/app/settings/page.tsx [app-rsc] (ecmascript, Next.js Server Component)" } [app-rsc] (ecmascript) <locals>, but the module factory is not available.
+This is often caused by a stale browser cache, misconfigured Cache-Control headers, or a service worker serving outdated responses.
+To fix this, make sure your Cache-Control headers allow revalidation of chunks and review your service worker configuration. As an immediate workaround, try hard-reloading the page, clearing the browser cache, or unregistering any service workers.
+    at ignore-listed frames {
+  digest: '711405097'
+}
+[browser] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). 
+    at completeWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6945:102)
+    at runWithFiberInDEV (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at completeUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9622:23)
+    at performUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9557:28)
+    at workLoopSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9449:40)
+    at renderRootSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9433:13)
+    at performWorkOnRoot (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9061:186)
+    at performWorkOnRootViaSchedulerTask (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10255:9)
+    at MessagePort.performWorkUntilDeadline (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:2647:64) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6945:102)
+⨯ Error: Module [project]/components/workspace/workspace-shell.tsx [app-ssr] (ecmascript) was instantiated because it was required from module [project]/node_modules/next/dist/esm/build/templates/app-page.js?page=/recipes/page { METADATA_0 => "[project]/app/icon.svg.mjs { IMAGE => \"[project]/app/icon.svg (static in ecmascript, tag client)\" } [app-rsc] (structured image object, ecmascript)", MODULE_1 => "[project]/app/layout.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_2 => "[project]/app/error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_3 => "[project]/node_modules/next/dist/client/components/builtin/not-found.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_4 => "[project]/node_modules/next/dist/client/components/builtin/forbidden.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_5 => "[project]/node_modules/next/dist/client/components/builtin/unauthorized.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_6 => "[project]/app/global-error.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_7 => "[project]/app/recipes/page.tsx [app-rsc] (ecmascript, Next.js Server Component)" } [app-rsc] (ecmascript) <locals>, but the module factory is not available.
+This is often caused by a stale browser cache, misconfigured Cache-Control headers, or a service worker serving outdated responses.
+To fix this, make sure your Cache-Control headers allow revalidation of chunks and review your service worker configuration. As an immediate workaround, try hard-reloading the page, clearing the browser cache, or unregistering any service workers.
+    at ignore-listed frames {
+  digest: '1361014810'
+}
+[browser] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). 
+    at completeWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6945:102)
+    at runWithFiberInDEV (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at completeUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9622:23)
+    at performUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9557:28)
+    at workLoopSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9449:40)
+    at renderRootSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9433:13)
+    at performWorkOnRoot (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9061:186)
+    at performWorkOnRootViaSchedulerTask (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10255:9)
+    at MessagePort.performWorkUntilDeadline (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:2647:64) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6945:102)
+[browser] Encountered two children with the same key, `C:ATOMIC_WEIGHT_INTERVAL`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. 
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4104:33)
+    at runWithFiberInDEV (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at warnOnInvalidKey (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4103:21)
+    at reconcileChildrenArray (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4129:160)
+    at reconcileChildFibersImpl (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4236:51)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4261:39)
+    at reconcileChildren (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:5898:119)
+    at beginWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6768:101)
+    at runWithFiberInDEV (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at performUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9555:97)
+    at workLoopSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9449:40)
+    at renderRootSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9433:13)
+    at performWorkOnRoot (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9061:186)
+    at performSyncWorkOnRoot (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10263:9)
+    at flushSyncWorkAcrossRoots_impl (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10179:316)
+    at flushSyncWork$1 (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9230:86)
+    at batchedUpdates$1 (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:2257:21)
+    at dispatchEventForPluginEventSystem (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10431:9)
+    at dispatchEvent (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:13002:37)
+    at dispatchDiscreteEvent (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:12984:64) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4104:33)
+[browser] Encountered two children with the same key, `C:ATOMIC_WEIGHT_INTERVAL`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. 
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4104:33)
+    at runWithFiberInDEV (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at warnOnInvalidKey (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4103:21)
+    at reconcileChildrenArray (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4120:29)
+    at reconcileChildFibersImpl (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4236:51)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4261:39)
+    at reconcileChildren (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:5898:119)
+    at beginWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6768:101)
+    at runWithFiberInDEV (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at performUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9555:97)
+    at workLoopSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9449:40)
+    at renderRootSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9433:13)
+    at performWorkOnRoot (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9061:186)
+    at performWorkOnRootViaSchedulerTask (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10255:9)
+    at MessagePort.performWorkUntilDeadline (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:2647:64) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4104:33)
+[browser] Encountered two children with the same key, `C:ATOMIC_WEIGHT_INTERVAL`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. 
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4104:33)
+    at runWithFiberInDEV (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at warnOnInvalidKey (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4103:21)
+    at reconcileChildrenArray (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4120:29)
+    at reconcileChildFibersImpl (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4236:51)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4261:39)
+    at reconcileChildren (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:5898:119)
+    at beginWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6768:101)
+    at runWithFiberInDEV (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at performUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9555:97)
+    at workLoopSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9449:40)
+    at renderRootSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9433:13)
+    at performWorkOnRoot (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9061:186)
+    at performSyncWorkOnRoot (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10263:9)
+    at flushSyncWorkAcrossRoots_impl (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10179:316)
+    at processRootScheduleInMicrotask (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10200:106)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10274:158) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4104:33)
+[browser] Encountered two children with the same key, `C:ATOMIC_WEIGHT_INTERVAL`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. 
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4104:33)
+    at runWithFiberInDEV (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at warnOnInvalidKey (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4103:21)
+    at reconcileChildrenArray (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4120:29)
+    at reconcileChildFibersImpl (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4236:51)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4261:39)
+    at reconcileChildren (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:5898:119)
+    at beginWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6768:101)
+    at runWithFiberInDEV (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at performUnitOfWork (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9555:97)
+    at workLoopSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9449:40)
+    at renderRootSync (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9433:13)
+    at performWorkOnRoot (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9061:186)
+    at performSyncWorkOnRoot (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10263:9)
+    at flushSyncWorkAcrossRoots_impl (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10179:316)
+    at processRootScheduleInMicrotask (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10200:106)
+    at <unknown> (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10274:158) (file://C:/Users/Matthew Deng/OneDrive/Pictures/Documents/MAX Calculation Webapp/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4104:33)

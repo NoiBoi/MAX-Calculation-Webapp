@@ -26,13 +26,16 @@ describe("MAXCalc shared UI architecture", () => {
   it("keeps workflow commands in dedicated responsive bars and maps neutral borders to tokens", () => {
     const workspace = source("components/workspace/workspace-shell.tsx");
     const comparison = source("components/comparison/comparison-shell.tsx");
+    const detailMode = source("components/site/detail-mode-control.tsx");
     const styles = source("app/globals.css");
     expect(workspace).toContain('className="workspace-command-bar"');
     expect(comparison).toContain('className="comparison-command-bar"');
     expect(workspace).toContain('className="ui-button header-navigation-button" href="/compare"');
     expect(comparison).toContain('className="ui-button header-navigation-button" href="/settings"');
-    expect(workspace).toContain('aria-label="Interaction mode"');
-    expect(comparison).toContain('aria-label="Comparison detail mode"');
+    expect(workspace).toContain('<DetailModeControl ariaLabel="Interaction mode"');
+    expect(comparison).toContain('<DetailModeControl ariaLabel="Comparison detail mode"');
+    expect(detailMode).toContain('className={`segmented-control detail-mode-control');
+    expect(detailMode).toContain('aria-label={ariaLabel}');
     expect(styles).toContain(":is(.border, .border-2");
     expect(styles).toContain("border-color: var(--border-default)");
   });

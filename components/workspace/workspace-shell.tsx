@@ -12,6 +12,7 @@ import type { Mode } from "@/lib/persistence/workspace-types";
 import { RecipeCommandHistory } from "@/lib/workspace/history";
 import { AtomicRadiusPanel } from "@/components/descriptor-panel/atomic-radius-panel";
 import { AppHeader } from "@/components/site/app-header";
+import { DetailModeControl } from "@/components/site/detail-mode-control";
 import { InputWithSuffix } from "@/components/ui/input-with-suffix";
 import { presentDiagnostics, precursorStatus } from "@/lib/presentation/diagnostics";
 import { formatDescriptor, formatMassForBalance, formatMoles, formatPercent } from "@/lib/presentation/scientific-format";
@@ -656,10 +657,7 @@ export function WorkspaceShell() {
         <Link className="ui-button header-navigation-button" href="/emi">EMI</Link>
         <Link className="ui-button header-navigation-button" href="/settings">Settings</Link>
         <button aria-expanded={commandOpen} aria-label="More actions and commands" className="ui-button header-navigation-button" onClick={() => { setActivePanel("none"); setCommandOpen((current) => !current); }} ref={moreButtonRef}>More <span aria-hidden="true">•••</span></button>
-        <div aria-label="Interaction mode" className="segmented-control workspace-detail-mode hidden sm:flex" role="group">
-          <button aria-pressed={mode === "standard"} onClick={() => setMode("standard")}>Standard</button>
-          <button aria-pressed={mode === "advanced"} onClick={() => setMode("advanced")}>Advanced</button>
-        </div>
+        <DetailModeControl ariaLabel="Interaction mode" className="workspace-detail-mode hidden sm:flex" mode={mode} onChange={setMode} />
       </>}
     />
     <div className="workspace-command-bar">

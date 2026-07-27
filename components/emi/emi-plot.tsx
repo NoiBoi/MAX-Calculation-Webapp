@@ -10,6 +10,7 @@ import {
 import { createMetricSegments, type PlotPoint } from "@/lib/emi/analyzer";
 import type { EmiPlotConfiguration } from "@/lib/emi/project";
 import { mapClientPointToViewBox } from "@/lib/emi/plot-geometry";
+import { buildEmiYAxis, type EmiAxisQuantity } from "@/lib/emi/graph-axis";
 
 export interface EmiPlotTrace {
   readonly id: string;
@@ -140,22 +141,20 @@ export function EmiPlot({
   const yValues = [...all.map((point) => point.value), ...bands.flatMap((band) => band.points.flatMap((point) => [point.lower, point.upper]))];
   let xMin = xValues.length > 0 ? Math.min(...xValues) : 0;
   let xMax = xValues.length > 0 ? Math.max(...xValues) : 1;
-  let yMin = yValues.length > 0 ? Math.min(...yValues) : 0;
-  let yMax = yValues.length > 0 ? Math.max(...yValues) : 1;
   const configuredYMinimum = yLabel === "dB" ? format?.shieldingYMinimum : format?.powerYMinimum;
   const configuredYMaximum = yLabel === "dB" ? format?.shieldingYMaximum : format?.powerYMaximum;
   if (xMin === xMax) { xMin -= 0.5; xMax += 0.5; }
-  if (yMin === yMax) { const delta = Math.abs(yMin) * 0.05 || 1; yMin -= delta; yMax += delta; }
-  const yPadding = (yMax - yMin) * 0.06;
-  if (configuredYMinimum !== undefined && Number.isFinite(configuredYMinimum)) yMin = configuredYMinimum; else yMin -= yPadding;
-  if (configuredYMaximum !== undefined && Number.isFinite(configuredYMaximum)) yMax = configuredYMaximum; else yMax += yPadding;
-  const plotWidth = WIDTH - MARGIN.left - MARGIN.right;
-  const plotHeight = HEIGHT - MARGIN.top - MARGIN.bottom;
+  const axisQuantity: EmiAxisQuantity = yLabel === "dB" ? "shielding-db" : "power-coefficient";
+  const yAxis = buildEmiYAxis({ values: yValues, quantity: axisQuantity, configuredMinimum: configuredYMinimum, configuredMaximum: configuredYMaximum });
+  const yMin = yAxis.minimum; const yMax = yAxis.maximum;
+  const plotMargin = { ...MARGIN, left: yAxis.leftMargin };
+  const plotWidth = WIDTH - plotMargin.left - plotMargin.right;
+  const plotHeight = HEIGHT - plotMargin.top - plotMargin.bottom;
   const logarithmicX = format?.xScale === "logarithmic" && xMin > 0;
   const transformedXMin = logarithmicX ? Math.log10(xMin) : xMin;
   const transformedXMax = logarithmicX ? Math.log10(xMax) : xMax;
-  const x = (value: number) => MARGIN.left + (((logarithmicX ? Math.log10(value) : value) - transformedXMin) / (transformedXMax - transformedXMin)) * plotWidth;
-  const y = (value: number) => MARGIN.top + (1 - ((value - yMin) / (yMax - yMin))) * plotHeight;
+  const x = (value: number) => plotMargin.left + (((logarithmicX ? Math.log10(value) : value) - transformedXMin) / (transformedXMax - transformedXMin)) * plotWidth;
+  const y = (value: number) => plotMargin.top + (1 - ((value - yMin) / (yMax - yMin))) * plotHeight;
   const candidates: HoverPoint[] = [
     ...rendered.flatMap(({ trace, segments }) => segments.flatMap((segment) => segment.map((point) => ({ ...point, id: trace.id, label: trace.label, color: trace.color, kind: "measured" as const, x: x(point.frequencyHz), y: y(point.value) })))),
     ...renderedSimon.flatMap(({ trace, segments }) => segments.flatMap((segment) => segment.map((point) => ({ ...point, id: trace.id, label: trace.label, color: trace.color, kind: "simon" as const, simon: trace, x: x(point.frequencyHz), y: y(point.value) })))),
@@ -268,15 +267,15 @@ export function EmiPlot({
         <text className="emi-axis-label" textAnchor="middle" x={WIDTH / 2} y="14">{format?.title || title}</text>
         {format?.subtitle && <text className="emi-axis-text" textAnchor="middle" x={WIDTH / 2} y="28">{format.subtitle}</text>}
         {format?.legendPosition !== "none" && <g aria-label="Exported trace legend">{legendTraces.slice(0, 4).map((trace, index) => <g key={`svg-legend-${trace.id}`} transform={`translate(${72 + index * 200} 43)`}><line stroke={trace.color} strokeDasharray={"sampleName" in trace ? "7 5" : undefined} strokeWidth="3" x1="0" x2="16" y1="0" y2="0" /><text className="emi-axis-text" x="21" y="4">{trace.label.length > 22 ? `${trace.label.slice(0, 21)}…` : trace.label}</text></g>)}{legendTraces.length > 4 && <text className="emi-axis-text" textAnchor="end" x={WIDTH - 24} y="55">+{legendTraces.length - 4} additional traces</text>}</g>}
-        {(minimumHz !== undefined || maximumHz !== undefined) && <rect data-selected-frequency-band fill="#0f766e" fillOpacity="0.035" height={plotHeight} width={plotWidth} x={MARGIN.left} y={MARGIN.top}><title>Selected analysis frequency band</title></rect>}
-        {(format?.gridVisibility === false ? [] : [0, 0.25, 0.5, 0.75, 1]).map((fraction) => { const yy = MARGIN.top + fraction * plotHeight; const value = yMax - fraction * (yMax - yMin); return <g key={`y-${fraction}`}><line className="emi-grid-line" x1={MARGIN.left} x2={WIDTH - MARGIN.right} y1={yy} y2={yy} /><text className="emi-axis-text" textAnchor="end" x={MARGIN.left - 9} y={yy + 4}>{axisValue(value)}</text></g>; })}
-        {(format?.gridVisibility === false ? [] : [0, 0.25, 0.5, 0.75, 1]).map((fraction) => { const xx = MARGIN.left + fraction * plotWidth; const transformed = transformedXMin + fraction * (transformedXMax - transformedXMin); const value = (logarithmicX ? 10 ** transformed : transformed) / factor; return <g key={`x-${fraction}`}><line className="emi-grid-line" x1={xx} x2={xx} y1={MARGIN.top} y2={HEIGHT - MARGIN.bottom} /><text className="emi-axis-text" textAnchor="middle" x={xx} y={HEIGHT - MARGIN.bottom + 20}>{axisValue(value)}</text></g>; })}
-        <text className="emi-axis-label" textAnchor="middle" transform={`rotate(-90 18 ${HEIGHT / 2})`} x={18} y={HEIGHT / 2}>{displayedYLabel}</text>
-        <text className="emi-axis-label" textAnchor="middle" x={MARGIN.left + plotWidth / 2} y={HEIGHT - 8}>{format?.xAxisLabel || "Frequency"} ({unit})</text>
+        {(minimumHz !== undefined || maximumHz !== undefined) && <rect data-selected-frequency-band fill="#0f766e" fillOpacity="0.035" height={plotHeight} width={plotWidth} x={plotMargin.left} y={plotMargin.top}><title>Selected analysis frequency band</title></rect>}
+        {(format?.gridVisibility === false ? [] : yAxis.ticks).map((tick) => { const yy = y(tick.value); return <g data-y-axis-tick={tick.value} key={`y-${tick.value}`}><line className="emi-grid-line" x1={plotMargin.left} x2={WIDTH - plotMargin.right} y1={yy} y2={yy} /><text className="emi-axis-text emi-y-tick-label" textAnchor="end" x={plotMargin.left - 9} y={yy + 4}>{tick.label}</text></g>; })}
+        {(format?.gridVisibility === false ? [] : [0, 0.25, 0.5, 0.75, 1]).map((fraction) => { const xx = plotMargin.left + fraction * plotWidth; const transformed = transformedXMin + fraction * (transformedXMax - transformedXMin); const value = (logarithmicX ? 10 ** transformed : transformed) / factor; return <g key={`x-${fraction}`}><line className="emi-grid-line" x1={xx} x2={xx} y1={plotMargin.top} y2={HEIGHT - plotMargin.bottom} /><text className="emi-axis-text" textAnchor="middle" x={xx} y={HEIGHT - plotMargin.bottom + 20}>{axisValue(value)}</text></g>; })}
+        <text className="emi-axis-label emi-y-axis-title" data-axis-left-margin={yAxis.leftMargin} textAnchor="middle" transform={`rotate(-90 ${yAxis.titleX} ${HEIGHT / 2})`} x={yAxis.titleX} y={HEIGHT / 2}>{displayedYLabel}</text>
+        <text className="emi-axis-label" textAnchor="middle" x={plotMargin.left + plotWidth / 2} y={HEIGHT - 8}>{format?.xAxisLabel || "Frequency"} ({unit})</text>
         {bands.map((band) => { const valid = band.points.filter((point) => Number.isFinite(point.lower) && Number.isFinite(point.upper) && point.frequencyHz >= xMin && point.frequencyHz <= xMax); if (valid.length < 2) return null; const polygon = [...valid.map((point) => `${x(point.frequencyHz)},${y(point.upper)}`), ...[...valid].reverse().map((point) => `${x(point.frequencyHz)},${y(point.lower)}`)].join(" "); return <polygon data-contributing-counts={valid.map((point) => point.contributingCount).join(",")} fill={band.color} fillOpacity="0.16" key={band.id} points={polygon}><title>{band.label}; contributing replicate counts {valid.map((point) => point.contributingCount).join(", ")}</title></polygon>; })}
         {rendered.flatMap(({ trace, segments }) => segments.map((segment, index) => <polyline data-segment-count={segments.length} data-series-kind="measured" data-smoothed={smoothingActive ? "true" : "false"} data-trace-id={trace.id} fill="none" key={`${trace.id}-${index}`} points={segment.map((point) => `${x(point.frequencyHz)},${y(point.value)}`).join(" ")} stroke={trace.color} strokeDasharray={format?.lineStyle === "dashed" || (format?.lineStyle !== "solid" && trace.lineStyle === "dashed") ? "8 5" : undefined} strokeLinejoin="round" strokeWidth="2" />))}
         {renderedSimon.flatMap(({ trace, segments }) => segments.map((segment, index) => <polyline data-series-kind="simon" data-trace-id={trace.id} data-values={segment.map((point) => point.value).join(",")} fill="none" key={`${trace.id}-${index}`} opacity="0.72" points={segment.map((point) => `${x(point.frequencyHz)},${y(point.value)}`).join(" ")} stroke={trace.color} strokeDasharray="7 5" strokeLinejoin="round" strokeWidth="1.5" />))}
-        {hover && <g data-active-frequency-hz={hover.frequencyHz} pointerEvents="none"><line className="emi-hover-line" data-frequency-hz={hover.frequencyHz} x1={hover.x} x2={hover.x} y1={MARGIN.top} y2={HEIGHT - MARGIN.bottom} /><circle cx={hover.x} cy={hover.y} data-frequency-hz={hover.frequencyHz} fill={hover.color} r={format?.markerVisibility === false ? "3.5" : "4"} /></g>}
+        {hover && <g data-active-frequency-hz={hover.frequencyHz} pointerEvents="none"><line className="emi-hover-line" data-frequency-hz={hover.frequencyHz} x1={hover.x} x2={hover.x} y1={plotMargin.top} y2={HEIGHT - plotMargin.bottom} /><circle cx={hover.x} cy={hover.y} data-frequency-hz={hover.frequencyHz} fill={hover.color} r={format?.markerVisibility === false ? "3.5" : "4"} /></g>}
       </svg>
       {hover && <div className="emi-chart-tooltip" data-frequency-hz={hover.frequencyHz} role="status"><strong>{hover.label}</strong><span>Frequency: {(hover.frequencyHz / factor).toPrecision(10)} {unit}</span>{hover.kind === "measured" ? <>{smoothingActive ? <><span>Raw measured value: {hover.rawValue.toPrecision(10)} {yLabel}</span><span>Smoothed display: {hover.value.toPrecision(10)} {yLabel}</span></> : <span>Measured value: {hover.rawValue.toPrecision(10)} {yLabel}</span>}</> : <><span>Simon theoretical SET: {hover.value.toPrecision(10)} dB</span><span>Conductivity: {scientific(hover.simon?.conductivitySiemensPerMeter ?? Number.NaN)} S/m</span><span>Thickness: {axisValue(hover.simon?.thicknessMicrometers ?? Number.NaN)} µm</span><span>Calculation version: {hover.simon?.calculationVersion}</span><span>Theoretical estimate, not measured.</span></>}</div>}
     </div>}

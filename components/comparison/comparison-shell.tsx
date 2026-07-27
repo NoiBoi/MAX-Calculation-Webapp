@@ -23,6 +23,7 @@ import { createDefaultUserSettings, type LocalUserSettings } from "@/lib/setting
 import { createPrintJob, launchPrintJob } from "@/lib/print/print-model";
 import { buildComparisonAnalysis, comparisonOverviewTsv, precursorMatrixTsv, signedDifference, type MatrixDisplayMode } from "@/lib/comparison/analysis";
 import { AppHeader } from "@/components/site/app-header";
+import { DetailModeControl } from "@/components/site/detail-mode-control";
 
 const clone = <T,>(value: T): T => structuredClone(value);
 const forkHistoricalComparison = (value: ComparisonWorkspace): ComparisonWorkspace => { if (!value.historical) return value; const now = new Date().toISOString(); return { ...value, id: `comparison-${crypto.randomUUID()}`, name: `${value.name} (current engine)`, historical: false, createdAt: now, updatedAt: now }; };
@@ -197,7 +198,7 @@ export function ComparisonShell() {
         <Link className="ui-button header-navigation-button" href="/emi">EMI</Link>
         <Link className="ui-button header-navigation-button" href="/settings">Settings</Link>
         <details className="action-menu header-action-menu relative"><summary className="ui-button header-navigation-button cursor-pointer">More</summary><div className="action-menu-panel"><button className="comparison-add-current-compact ui-button justify-start" disabled={workspace.scenarios.length >= MAX_COMPARISON_SCENARIOS} onClick={addCurrentRecipe}>Add current recipe</button><button className="comparison-menu-compact-only ui-button justify-start" disabled={workspace.scenarios.length >= MAX_COMPARISON_SCENARIOS} onClick={addBlankScenario}>Add blank scenario</button><button className="ui-button justify-start xl:hidden" disabled={!workspace.scenarios.length} onClick={() => setSummaryOpen(true)}>View comparison summaries</button><button className="ui-button justify-start xl:hidden" disabled={!workspace.scenarios.length} onClick={() => void exportComparison()}>Export comparison JSON</button><button className="comparison-print-compact ui-button justify-start" disabled={!workspace.scenarios.length} onClick={printComparison}>Print comparison</button><select aria-label="Saved route source" className="ui-select" onChange={(event) => setSourceRouteId(event.target.value)} value={sourceRouteId}><option value="">Saved route…</option>{routes.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select><button className="ui-button justify-start" disabled={!sourceRouteId || workspace.scenarios.length >= MAX_COMPARISON_SCENARIOS} onClick={() => void addRoute()}>Add saved route</button></div></details>
-        <div className="comparison-detail-mode" aria-label="Comparison detail mode" role="group"><div className="segmented-control"><button aria-pressed={mode === "standard"} onClick={() => setMode("standard")}>Standard</button><button aria-pressed={mode === "advanced"} onClick={() => setMode("advanced")}>Advanced</button></div></div>
+        <DetailModeControl ariaLabel="Comparison detail mode" className="comparison-detail-mode" mode={mode} onChange={setMode} />
       </>}
     />
     <div className="comparison-command-bar">

@@ -6,6 +6,7 @@ import {
   calculateSpecimenFirstBandSummary,
   classifyEmiFrequencyGrids,
   convertThicknessToMillimeters,
+  normalizeEmiThickness,
   interpolateEmiMetric,
   normalizeSetByThickness,
 } from "../replicates";
@@ -62,5 +63,12 @@ describe("EMI replicate analysis", () => {
     expect(normalizeSetByThickness(30, 2, "mm")).toBe(15);
     expect(normalizeSetByThickness(30, 0, "mm")).toBeNull();
     expect(normalizeSetByThickness(30, -1, "mm")).toBeNull();
+    const normalized = normalizeEmiThickness(0.0143, "mm")!;
+    expect(normalized.micrometers).toBeCloseTo(14.3, 14);
+    expect(normalized.millimeters).toBeCloseTo(0.0143, 14);
+    expect(normalized.centimeters).toBeCloseTo(0.00143, 14);
+    expect(normalized.meters).toBeCloseTo(0.0000143, 14);
+    expect(normalizeEmiThickness(Number.NaN, "mm")).toBeNull();
+    expect(normalizeEmiThickness(Number.POSITIVE_INFINITY, "um")).toBeNull();
   });
 });

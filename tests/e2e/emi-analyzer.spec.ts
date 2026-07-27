@@ -78,18 +78,31 @@ test("EMI analyzer renders invalid shielding gaps and downloads both CSV exports
   await expect((await summaryDownload).suggestedFilename()).toBe("emi-summary-statistics.csv");
 });
 
-test("EMI thickness, themed electrical controls, and graph interaction use one canonical model", async ({ page }) => {
+test("EMI thickness, themed electrical controls, and graph interaction use one canonical model", async ({ page }, testInfo) => {
   await page.goto("/emi");
   await page.locator('input[type="file"][accept^=".csv"]').setInputFiles({ name: "interaction.csv", mimeType: "text/csv", buffer: Buffer.from(validCsv()) });
   const card = page.getByTestId("emi-file-card");
   await card.getByText("Edit sample metadata").click();
   await expect(card.getByLabel("Sample thickness for interaction.csv")).toHaveCount(1);
   await expect(card.getByLabel(/Film thickness/)).toHaveCount(0);
-  await card.getByLabel("Sample thickness for interaction.csv").fill("12");
-  await card.getByLabel("Thickness unit for interaction.csv").selectOption("um");
+  await expect(card.getByLabel("Thickness unit for interaction.csv")).toHaveValue("mm");
+  await card.getByLabel("Sample thickness for interaction.csv").fill("0.0143");
   await card.getByText("Electrical properties and Simon estimate").click();
   await expect(card.getByText("Enter raw four-point-probe resistance in Ω. MAXCalc applies the fixed geometric correction factor 4.532.")).toBeVisible();
-  await expect(card.getByText("12 µm", { exact: true })).toBeVisible();
+  await expect(card.getByText("14.3 µm", { exact: true })).toBeVisible();
+  await expect(card.getByText("0.0143 mm", { exact: true })).toBeVisible();
+  await card.getByRole("button", { name: "Add reading" }).click();
+  await card.getByLabel("Raw four-point-probe resistance 1 for interaction.csv").fill("1.2");
+  await expect(card.getByText(/12,858\.5742 S\/m/)).toBeVisible();
+  await expect(card.getByText(/128\.585742 S\/cm/)).toBeVisible();
+  await expect(card.getByText("3 unsmoothed theoretical points are available at the measured frequencies. They remain separate from measured SET.")).toBeVisible();
+  await card.getByLabel("Sample thickness for interaction.csv").fill("0.0200");
+  await expect(card.getByText("20 µm", { exact: true })).toBeVisible();
+  await expect(card.getByText(/9,193\.880553 S\/m/)).toBeVisible();
+  await card.getByLabel("Thickness unit for interaction.csv").selectOption("um");
+  await card.getByLabel("Sample thickness for interaction.csv").fill("20");
+  await expect(card.getByText("20 µm", { exact: true })).toBeVisible();
+  await expect(card.getByText(/9,193\.880553 S\/m/)).toBeVisible();
   const note = card.getByLabel("Electrical measurement note for interaction.csv");
   for (const theme of ["light", "dark", "midnight"] as const) {
     await page.evaluate((value) => document.documentElement.setAttribute("data-theme", value), theme);
@@ -106,6 +119,45 @@ test("EMI thickness, themed electrical controls, and graph interaction use one c
   await expect(svg.locator("g[data-active-frequency-hz]")).toHaveAttribute("data-active-frequency-hz", tooltipFrequency ?? "");
   await expect(svg.locator("line.emi-hover-line")).toHaveAttribute("data-frequency-hz", tooltipFrequency ?? "");
   await expect(svg.locator("circle[data-frequency-hz]")).toHaveAttribute("data-frequency-hz", tooltipFrequency ?? "");
+  const tickLabels = await plot.locator(".emi-y-tick-label").allTextContents();
+  expect(tickLabels).toHaveLength(5);
+  expect(tickLabels.every((label) => !label.includes("e") && label !== "-0")).toBe(true);
+  const axisClearance = await plot.locator("svg.emi-chart").evaluate((element) => {
+    const title = element.querySelector<SVGGraphicsElement>(".emi-y-axis-title")!.getBoundingClientRect();
+    const ticks = [...element.querySelectorAll<SVGGraphicsElement>(".emi-y-tick-label")].map((tick) => tick.getBoundingClientRect());
+    return Math.min(...ticks.map((tick) => tick.left)) - title.right;
+  });
+  expect(axisClearance).toBeGreaterThanOrEqual(4);
+  await plot.screenshot({ path: testInfo.outputPath("emi-axis-standard-range.png") });
+});
+
+test("EMI graph axes use one readable notation for tiny and near-unity configured ranges", async ({ page }, testInfo) => {
+  await page.goto("/emi");
+  await page.locator('input[type="file"][accept^=".csv"]').setInputFiles({ name: "axis.csv", mimeType: "text/csv", buffer: Buffer.from(validCsv()) });
+  await page.getByText("Publication plot formatting").click();
+  await page.getByLabel("Power Y minimum").fill("-0.00008967");
+  await page.getByLabel("Power Y maximum").fill("0.00005049");
+  const powerPlot = page.getByRole("region", { name: "7. Incident-power coefficients" });
+  const tinyLabels = await powerPlot.locator(".emi-y-tick-label").allTextContents();
+  expect(tinyLabels).toHaveLength(5);
+  expect(tinyLabels.filter((label) => label !== "0").every((label) => label.includes("×10"))).toBe(true);
+  expect(tinyLabels.every((label) => !label.includes("e") && label !== "-0")).toBe(true);
+  await powerPlot.screenshot({ path: testInfo.outputPath("emi-axis-tiny-range.png") });
+  for (const theme of ["dark", "midnight"] as const) {
+    await page.evaluate((value) => document.documentElement.setAttribute("data-theme", value), theme);
+    await powerPlot.screenshot({ path: testInfo.outputPath(`emi-axis-tiny-${theme}.png`) });
+  }
+
+  await page.evaluate(() => document.documentElement.setAttribute("data-theme", "light"));
+  await page.getByLabel("Power Y minimum").fill("0.9998");
+  await page.getByLabel("Power Y maximum").fill("1.006");
+  const unityLabels = await powerPlot.locator(".emi-y-tick-label").allTextContents();
+  expect(unityLabels).toHaveLength(5);
+  expect(new Set(unityLabels).size).toBe(unityLabels.length);
+  expect(unityLabels.every((label) => !label.includes("e") && label !== "-0")).toBe(true);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(powerPlot.locator("svg.emi-chart")).toBeVisible();
+  await powerPlot.screenshot({ path: testInfo.outputPath("emi-axis-near-unity-mobile.png") });
 });
 
 test("EMI projects support bulk metadata, replicate interpolation, persistence, comparison, and figure export", async ({ page }) => {

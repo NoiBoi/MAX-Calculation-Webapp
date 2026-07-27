@@ -5,6 +5,8 @@ import {
   FOUR_POINT_PROBE_CORRECTION_FACTOR,
   calculateElectricalPropertySummary,
   convertThicknessToMicrometers,
+  normalizeEmiThickness,
+  type NormalizedEmiThickness,
   type ElectricalPropertySummary,
   type EmiDataset,
   type EmiDirection,
@@ -172,9 +174,13 @@ export function calculateEmiElectricalRecord(input: Readonly<{
 }
 
 export function getAuthoritativeThicknessMicrometers(dataset: EmiProjectDataset): number | null {
+  return getAuthoritativeNormalizedThickness(dataset)?.micrometers ?? null;
+}
+
+export function getAuthoritativeNormalizedThickness(dataset: EmiProjectDataset): NormalizedEmiThickness | null {
   if (dataset.thicknessConflict) return null;
   const { thickness, thicknessUnit } = dataset.sampleMetadata;
-  return thickness === undefined || thicknessUnit === undefined ? null : convertThicknessToMicrometers(thickness, thicknessUnit);
+  return thickness === undefined || thicknessUnit === undefined ? null : normalizeEmiThickness(thickness, thicknessUnit);
 }
 
 function equivalentThickness(left: number, right: number): boolean {
@@ -209,7 +215,11 @@ export function resolveEmiThicknessConflict(dataset: EmiProjectDataset, source: 
 function migrateEmiProject(value: Record<string, unknown>): EmiProjectRecord {
   const datasets = (value.datasets as readonly Record<string, unknown>[]).map((entry) => {
     const electrical = isRecord(entry.electricalProperties) ? entry.electricalProperties : undefined;
-    const sampleMetadata = entry.sampleMetadata as unknown as EmiSampleMetadata;
+    const rawSampleMetadata = entry.sampleMetadata as unknown as EmiSampleMetadata;
+    // Historical UI displayed mm as the selected default even when it failed to persist the unit.
+    const sampleMetadata = rawSampleMetadata.thickness !== undefined && rawSampleMetadata.thicknessUnit === undefined
+      ? { ...rawSampleMetadata, thicknessUnit: "mm" as const }
+      : rawSampleMetadata;
     const metadataMicrometers = sampleMetadata.thickness !== undefined && sampleMetadata.thicknessUnit
       ? convertThicknessToMicrometers(sampleMetadata.thickness, sampleMetadata.thicknessUnit)
       : null;

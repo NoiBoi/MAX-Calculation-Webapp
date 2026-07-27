@@ -28,6 +28,12 @@ Raw segments and rendered series are memoized against source data and the applic
 
 Controls have visible native labels, wrap at narrow widths, and use shared theme tokens. The focused SVG supports Left/Right Arrow point traversal. Smoothed and theoretical status are communicated in text, while Simon is additionally distinguished with dash pattern and reduced stroke weight. Representative Light desktop, Dark desktop, and Midnight narrow-mobile captures were inspected; controls remained within the panel and legends wrapped without page overflow.
 
+## Axis-number presentation
+
+Y-axis domains and tick strings are display-only products of the visible finite series and any explicit presentation bounds. The shared axis utility pads nondegenerate domains, gives constant series a useful span, retains negative diagnostic coefficients, and keeps zero visible when it is close to a boundary. It never changes source points, statistics, tooltips, saved projects, or exports.
+
+Tick precision is selected from the full axis range and tick step. Shielding axes use consistent one- or two-decimal labels; ordinary dimensionless axes use a consistent fixed precision; sufficiently small or large ranges use Unicode scientific notation for every nonzero tick. Negative zero is normalized to `0`, and duplicate formatted ticks are prevented. The chart estimates the widest formatted label and allocates a bounded left margin so the rotated title remains separate without imposing the largest margin on every graph.
+
 ## Scientific safeguards and export regression
 
 - Calculation equations and result objects were not changed.

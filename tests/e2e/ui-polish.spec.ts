@@ -159,13 +159,15 @@ test("POLISH-006 comparison commands stay outside the app header and never overl
   await page.screenshot({ path: testInfo.outputPath("comparison-command-bar-1574.png"), fullPage: false });
 });
 
-test("POLISH-008 calculator and comparison keep detail mode in the same stable header slot", async ({ page }, testInfo) => {
-  for (const viewport of [{ width: 1280, height: 800 }, { width: 1574, height: 927 }, { width: 1920, height: 1080 }]) {
+test("POLISH-008 calculator and comparison share an identical detail-mode control", async ({ page }, testInfo) => {
+  for (const theme of ["light", "dark", "midnight"] as const) {
+    for (const viewport of [{ width: 640, height: 800 }, { width: 900, height: 800 }, { width: 1574, height: 927 }]) {
     await page.setViewportSize(viewport);
     const routeGeometry = [];
     for (const route of ["/workspace", "/compare"]) {
       await page.goto(route);
-      if (route === "/workspace") await expect(page.locator('[data-recovery-ready="true"]')).toBeVisible();
+      if (route === "/workspace") await page.locator('[data-recovery-ready="true"]').waitFor({ state: "attached" });
+      await page.evaluate((value) => document.documentElement.setAttribute("data-theme", value), theme);
       const header = page.getByRole("banner");
       const mode = route === "/workspace"
         ? header.getByRole("group", { name: "Interaction mode" })
@@ -179,13 +181,35 @@ test("POLISH-008 calculator and comparison keep detail mode in the same stable h
       expect(modeBox).toBeTruthy();
       expect(globalBox).toBeTruthy();
       expect(modeBox!.width).toBeGreaterThan(140);
-      expect(modeBox!.x + modeBox!.width).toBeLessThanOrEqual(globalBox!.x);
+      if (viewport.width >= 1280) expect(modeBox!.x + modeBox!.width).toBeLessThanOrEqual(globalBox!.x);
       expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
-      routeGeometry.push({ mode: modeBox!, global: globalBox! });
+      const appearance = await mode.evaluate((element) => {
+        const active = element.querySelector<HTMLElement>('[aria-pressed="true"]')!;
+        const outer = element.getBoundingClientRect();
+        const inner = active.getBoundingClientRect();
+        const style = getComputedStyle(active);
+        return {
+          outerHeight: outer.height,
+          activeHeight: inner.height,
+          activeTopInset: inner.top - outer.top,
+          activeBottomInset: outer.bottom - inner.bottom,
+          paddingTop: style.paddingTop,
+          paddingBottom: style.paddingBottom,
+          lineHeight: style.lineHeight,
+          borderRadius: style.borderRadius,
+        };
+      });
+      routeGeometry.push({ mode: modeBox!, global: globalBox!, appearance });
     }
     expect(Math.abs(routeGeometry[0]!.mode.height - routeGeometry[1]!.mode.height)).toBeLessThanOrEqual(1);
-    expect(Math.abs(routeGeometry[0]!.global.x - routeGeometry[1]!.global.x)).toBeLessThanOrEqual(1);
-    expect(Math.abs(routeGeometry[0]!.global.width - routeGeometry[1]!.global.width)).toBeLessThanOrEqual(1);
+    if (viewport.width >= 1280) {
+      expect(Math.abs(routeGeometry[0]!.global.x - routeGeometry[1]!.global.x)).toBeLessThanOrEqual(1);
+      expect(Math.abs(routeGeometry[0]!.global.width - routeGeometry[1]!.global.width)).toBeLessThanOrEqual(1);
+    }
+    expect(routeGeometry[0]!.appearance).toEqual(routeGeometry[1]!.appearance);
+    expect(routeGeometry[0]!.appearance.activeTopInset).toBeGreaterThanOrEqual(2);
+    expect(routeGeometry[0]!.appearance.activeBottomInset).toBeGreaterThanOrEqual(2);
+    }
   }
   await page.goto("/compare");
   await page.screenshot({ path: testInfo.outputPath("cross-route-header-alignment.png"), fullPage: false });

@@ -14,6 +14,15 @@ describe("four-point-probe electrical properties", () => {
     expect(result.value.resistivityOhmCentimeter).toBeCloseTo(0.004532, 14);
   });
 
+  it("reproduces the 0.0143 mm and 1.2 ohm UI regression case after canonical conversion", () => {
+    const result = calculateElectricalProperty({ rawResistanceOhm: 1.2, thicknessMicrometers: 14.3 });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.sheetResistanceOhmPerSquare).toBeCloseTo(5.4384, 14);
+    expect(result.value.conductivitySiemensPerMeter).toBeCloseTo(12858.57420014525, 9);
+    expect(result.value.conductivitySiemensPerCentimeter).toBeCloseTo(128.5857420014525, 10);
+  });
+
   it("aggregates arithmetic mean raw resistance rather than averaging conductivity", () => {
     const result = calculateElectricalPropertySummary({ rawResistanceReadingsOhm: [1, 2, 3], thicknessMicrometers: 10 });
     expect(result.ok).toBe(true);
