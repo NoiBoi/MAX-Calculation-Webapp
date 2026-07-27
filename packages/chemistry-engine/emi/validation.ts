@@ -6,6 +6,7 @@ import type {
   EmiValidationIssue,
   EmiValidationOptions,
 } from "./types";
+import { EMI_PHYSICAL_EPSILON } from "./physical-validity";
 
 export const DEFAULT_EMI_VALIDATION_OPTIONS = Object.freeze({
   decompositionToleranceDb: 1e-10,
@@ -30,13 +31,13 @@ const PASSIVITY_CONTEXT = "Possible causes include calibration uncertainty, fixt
 function validateDirection(dataset: EmiDataset, point: EmiDirectionalPointResult, tolerance: number): EmiValidationIssue[] {
   const issues: EmiValidationIssue[] = [];
   const values = { R: point.R, T: point.T, A: point.A, SET: point.SET, SER: point.SER, SEA: point.SEA, decompositionResidual: point.decompositionResidual };
-  if (point.R > 1) issues.push(warning(dataset, "REFLECTION_GREATER_THAN_ONE", `Reflection power R exceeds 1. ${PASSIVITY_CONTEXT}`, point.frequencyHz, point.direction, values));
-  if (point.T > 1) issues.push(warning(dataset, "TRANSMISSION_GREATER_THAN_ONE", `Transmission power T exceeds 1. ${PASSIVITY_CONTEXT}`, point.frequencyHz, point.direction, values));
-  if (point.R + point.T > 1) issues.push(warning(dataset, "POWER_SUM_GREATER_THAN_ONE", `R + T exceeds 1. ${PASSIVITY_CONTEXT}`, point.frequencyHz, point.direction, values));
-  if (point.A < 0) issues.push(warning(dataset, "NEGATIVE_ABSORPTION", `Calculated A is negative. ${PASSIVITY_CONTEXT}`, point.frequencyHz, point.direction, values));
+  if (point.R > 1 + EMI_PHYSICAL_EPSILON) issues.push(warning(dataset, "REFLECTION_GREATER_THAN_ONE", `Reflection power R exceeds 1. ${PASSIVITY_CONTEXT}`, point.frequencyHz, point.direction, values));
+  if (point.T > 1 + EMI_PHYSICAL_EPSILON) issues.push(warning(dataset, "TRANSMISSION_GREATER_THAN_ONE", `Transmission power T exceeds 1. ${PASSIVITY_CONTEXT}`, point.frequencyHz, point.direction, values));
+  if (point.R + point.T > 1 + EMI_PHYSICAL_EPSILON) issues.push(warning(dataset, "POWER_SUM_GREATER_THAN_ONE", `R + T exceeds 1. ${PASSIVITY_CONTEXT}`, point.frequencyHz, point.direction, values));
+  if (point.A < -EMI_PHYSICAL_EPSILON) issues.push(warning(dataset, "NEGATIVE_ABSORPTION", `Calculated A is negative. ${PASSIVITY_CONTEXT}`, point.frequencyHz, point.direction, values));
   if (point.SET === null) issues.push(warning(dataset, "UNDEFINED_SET", "SET is undefined because T is not finite and greater than zero.", point.frequencyHz, point.direction, values));
-  if (point.SER === null) issues.push(warning(dataset, "UNDEFINED_SER", "SER is undefined because 1 - R is not finite and greater than zero.", point.frequencyHz, point.direction, values));
-  if (point.SEA === null) issues.push(warning(dataset, "UNDEFINED_SEA", "SEA is undefined because both T and 1 - R must be finite and greater than zero.", point.frequencyHz, point.direction, values));
+  if (point.SER === null) issues.push(warning(dataset, "UNDEFINED_SER", "SER unavailable: measured reflectance is greater than or equal to 1, or is non-finite. Check calibration, fixture, and reference-plane quality.", point.frequencyHz, point.direction, values));
+  if (point.SEA === null) issues.push(warning(dataset, "UNDEFINED_SEA", "SEA unavailable: measured T and 1 - R are not both finite and greater than zero. Check calibration, fixture, and reference-plane quality.", point.frequencyHz, point.direction, values));
   if (point.decompositionResidual !== null && Number.isFinite(point.decompositionResidual) && Math.abs(point.decompositionResidual) > tolerance) {
     issues.push(warning(dataset, "DECOMPOSITION_RESIDUAL_EXCEEDED", `SET differs from SER + SEA by more than ${tolerance} dB.`, point.frequencyHz, point.direction, values));
   }

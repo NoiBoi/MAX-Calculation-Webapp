@@ -381,8 +381,14 @@ button[aria-pressed="true"] { box-shadow: inset 0 0 0 1px currentColor; }
 .emi-comparison-excluded > td:not(:first-child) { opacity: .42; }
 .emi-electrical-editor { margin-top: .65rem; border-top: 1px solid var(--border-subtle); padding-top: .55rem; }
 .emi-electrical-editor > summary { cursor: pointer; font-weight: 700; }
-.emi-electrical-inputs { display: grid; grid-template-columns: minmax(12rem, .6fr) minmax(16rem, 1.4fr); gap: .65rem; margin: .7rem 0; }
-.emi-electrical-inputs label { display: grid; gap: .25rem; font-size: .75rem; font-weight: 700; }
+.emi-electrical-context { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; margin: .7rem 0; }
+.emi-electrical-context > div { border: 1px solid var(--border-subtle); border-radius: .4rem; background: var(--surface-subtle); padding: .5rem .6rem; }
+.emi-electrical-context dt { color: var(--text-muted); font-size: .68rem; }
+.emi-electrical-context dd { margin: .15rem 0 0; font-weight: 700; }
+.emi-measurement-note { display: grid; gap: .3rem; margin-top: .75rem; font-size: .75rem; font-weight: 700; }
+.emi-measurement-note textarea, .emi-electrical-table input { min-height: var(--control-height); width: 100%; border: 1px solid var(--border-default); border-radius: .45rem; background: var(--background-input); color: var(--text-primary); padding: .45rem .65rem; }
+.emi-thickness-conflict { border: 1px solid var(--status-warning-border); border-radius: .45rem; background: var(--status-warning-background); color: var(--status-warning-text); margin: .65rem 0; padding: .65rem .75rem; }
+.emi-thickness-conflict p { margin: .25rem 0 .55rem; }
 .emi-reading-heading { display: flex; align-items: start; justify-content: space-between; gap: 1rem; margin-top: .75rem; }
 .emi-reading-heading h4, .emi-reading-heading p { margin: 0; }
 .emi-reading-heading p { color: var(--text-muted); font-size: .72rem; margin-top: .2rem; }
@@ -394,7 +400,7 @@ button[aria-pressed="true"] { box-shadow: inset 0 0 0 1px currentColor; }
 .emi-electrical-summary dd { margin: .15rem 0 0; font-variant-numeric: tabular-nums; font-weight: 700; }
 .emi-simon-note { border-left: 3px solid var(--accent); background: var(--surface-subtle); margin-top: .65rem; padding: .6rem .75rem; }
 .emi-simon-note p { margin: .25rem 0 0; font-size: .75rem; }
-@media (max-width: 700px) { .emi-electrical-inputs { grid-template-columns: 1fr; } }
+@media (max-width: 700px) { .emi-electrical-context { grid-template-columns: 1fr; } }
 .emi-empty-state { padding-block: 3rem; text-align: center; }
 .emi-empty-state h2, .emi-empty-state p { margin: 0; }
 .emi-empty-state p { margin-top: .35rem; color: var(--text-muted); }
@@ -416,7 +422,7 @@ button[aria-pressed="true"] { box-shadow: inset 0 0 0 1px currentColor; }
 .emi-view-badge { border: 1px solid var(--status-info-border); border-radius: 999px; background: var(--status-info-background); color: var(--status-info-text); padding: .2rem .5rem; font-size: .68rem; font-weight: 700; }
 .emi-graph-help { margin: 0 0 .55rem; color: var(--text-muted); font-size: .72rem; line-height: 1.45; }
 .emi-chart-wrap { position: relative; width: 100%; min-width: 0; }
-.emi-chart { display: block; width: 100%; height: auto; max-height: 25rem; overflow: visible; }
+.emi-chart { display: block; width: 100%; height: auto; overflow: visible; }
 .emi-chart:focus-visible { border-radius: .35rem; outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 .emi-grid-line { stroke: var(--border-subtle); stroke-width: 1; }
 .emi-hover-line { stroke: var(--border-strong); stroke-dasharray: 4 3; }
@@ -426,6 +432,9 @@ button[aria-pressed="true"] { box-shadow: inset 0 0 0 1px currentColor; }
 .emi-chart-tooltip strong { overflow-wrap: anywhere; }
 .emi-empty-chart { display: grid; min-height: 12rem; place-items: center; border: 1px dashed var(--border-default); color: var(--text-muted); }
 .emi-causal-note { border-left: 4px solid var(--status-info-border); background: var(--status-info-background); color: var(--status-info-text); margin: 0 0 1rem; padding: .65rem .8rem; font-size: .82rem; }
+.emi-quality-summary { margin-top: .65rem; border: 1px solid var(--status-warning-border); border-radius: .4rem; background: var(--status-warning-background); color: var(--status-warning-text); padding: .55rem .65rem; }
+.emi-quality-summary summary { cursor: pointer; font-weight: 700; }
+.emi-quality-summary p { margin: .2rem 0 .5rem; font-size: .75rem; }
 .emi-qc-file { border-top: 1px solid var(--border-subtle); padding-top: .8rem; }
 .emi-qc-file + .emi-qc-file { margin-top: 1rem; }
 .emi-qc-file h3, .emi-qc-group h4 { margin: 0 0 .5rem; }

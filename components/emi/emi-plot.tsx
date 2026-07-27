@@ -9,6 +9,7 @@ import {
 } from "@max-stoich/chemistry-engine";
 import { createMetricSegments, type PlotPoint } from "@/lib/emi/analyzer";
 import type { EmiPlotConfiguration } from "@/lib/emi/project";
+import { mapClientPointToViewBox } from "@/lib/emi/plot-geometry";
 
 export interface EmiPlotTrace {
   readonly id: string;
@@ -77,7 +78,6 @@ export function EmiPlot({
   maximumHz,
   unit,
   bands = [],
-  warningFrequenciesHz = [],
   format,
   exportName = "emi-figure",
   smoothingEligible = true,
@@ -93,7 +93,6 @@ export function EmiPlot({
   readonly maximumHz?: number;
   readonly unit: "GHz" | "Hz";
   readonly bands?: readonly EmiPlotBand[];
-  readonly warningFrequenciesHz?: readonly number[];
   readonly format?: EmiPlotConfiguration;
   readonly exportName?: string;
   readonly smoothingEligible?: boolean;
@@ -145,10 +144,11 @@ export function EmiPlot({
   let yMax = yValues.length > 0 ? Math.max(...yValues) : 1;
   const configuredYMinimum = yLabel === "dB" ? format?.shieldingYMinimum : format?.powerYMinimum;
   const configuredYMaximum = yLabel === "dB" ? format?.shieldingYMaximum : format?.powerYMaximum;
-  if (configuredYMinimum !== undefined && Number.isFinite(configuredYMinimum)) yMin = configuredYMinimum;
-  if (configuredYMaximum !== undefined && Number.isFinite(configuredYMaximum)) yMax = configuredYMaximum;
   if (xMin === xMax) { xMin -= 0.5; xMax += 0.5; }
   if (yMin === yMax) { const delta = Math.abs(yMin) * 0.05 || 1; yMin -= delta; yMax += delta; }
+  const yPadding = (yMax - yMin) * 0.06;
+  if (configuredYMinimum !== undefined && Number.isFinite(configuredYMinimum)) yMin = configuredYMinimum; else yMin -= yPadding;
+  if (configuredYMaximum !== undefined && Number.isFinite(configuredYMaximum)) yMax = configuredYMaximum; else yMax += yPadding;
   const plotWidth = WIDTH - MARGIN.left - MARGIN.right;
   const plotHeight = HEIGHT - MARGIN.top - MARGIN.bottom;
   const logarithmicX = format?.xScale === "logarithmic" && xMin > 0;
@@ -160,6 +160,13 @@ export function EmiPlot({
     ...rendered.flatMap(({ trace, segments }) => segments.flatMap((segment) => segment.map((point) => ({ ...point, id: trace.id, label: trace.label, color: trace.color, kind: "measured" as const, x: x(point.frequencyHz), y: y(point.value) })))),
     ...renderedSimon.flatMap(({ trace, segments }) => segments.flatMap((segment) => segment.map((point) => ({ ...point, id: trace.id, label: trace.label, color: trace.color, kind: "simon" as const, simon: trace, x: x(point.frequencyHz), y: y(point.value) })))),
   ];
+  const canonicalFrequencies = [...new Set(candidates.map((point) => point.frequencyHz))].sort((left, right) => left - right);
+  const selectAtFrequency = (frequencyHz: number, pointerY?: number, preferredId?: string): HoverPoint | null => {
+    const atFrequency = candidates.filter((point) => point.frequencyHz === frequencyHz);
+    return atFrequency.find((point) => point.id === preferredId)
+      ?? (pointerY === undefined ? atFrequency[0] : atFrequency.reduce<HoverPoint | null>((best, point) => !best || Math.abs(point.y - pointerY) < Math.abs(best.y - pointerY) ? point : best, null))
+      ?? null;
+  };
   const factor = unit === "GHz" ? 1e9 : 1;
   const displayedYLabel = yLabel === "dB" ? (format?.shieldingYAxisLabel || yLabel) : (format?.powerYAxisLabel || yLabel);
   const legendTraces = [...traces, ...(showSimonEstimate ? simonTraces : [])];
@@ -211,17 +218,17 @@ export function EmiPlot({
 
   return <section className="emi-panel" aria-label={title} data-emi-graph-id={graphId}>
     <div className="emi-section-heading"><div><h2>{format?.title || title}</h2>{format?.subtitle && <p>{format.subtitle}</p>}<p>Invalid calculated values are displayed as gaps.</p></div><div className="emi-export-actions"><button className="ui-button ui-button-compact" onClick={exportSvg} type="button">Export {exportName} SVG</button><button className="ui-button ui-button-compact" onClick={exportPng} type="button">Export {exportName} PNG</button></div></div>
+    {format?.legendPosition !== "none" && <div className={`emi-chart-legend emi-legend-${format?.legendPosition ?? "top"}`} aria-label={`${title} traces`}>
+      {legendTraces.map((trace) => <button aria-pressed={!hidden.has(trace.id)} className={`emi-legend-item ${"sampleName" in trace ? "emi-legend-simon" : ""}`} key={trace.id} onClick={() => toggle(trace.id)} type="button">
+        <span aria-hidden="true" style={"sampleName" in trace ? { backgroundColor: "transparent", borderTop: `2px dashed ${trace.color}` } : { backgroundColor: trace.color }} />{trace.label}{"sampleName" in trace && <em>Theoretical</em>}
+      </button>)}
+    </div>}
     {(canSmooth || simonEligible) && <div className="emi-graph-toolbar" aria-label={`${title} display controls`}>
       {canSmooth && <><label className="emi-checkbox-label"><input checked={smoothingEnabled} onChange={(event) => setSmoothingEnabled(event.target.checked)} type="checkbox" />Smooth measured curves</label>{smoothingEnabled && <label className="emi-window-control">Window<select aria-label={`${title} smoothing window`} className="ui-select" onChange={(event) => setSmoothingWindowSize(Number(event.target.value) as EmiSmoothingWindowSize)} value={smoothingWindowSize}>{SMOOTHING_WINDOWS.map((windowSize) => <option key={windowSize} value={windowSize}>{windowSize} points</option>)}</select></label>}</>}
       {simonEligible && <label className="emi-checkbox-label"><input checked={showSimonEstimate} disabled={simonTraces.length === 0} onChange={(event) => setShowSimonEstimate(event.target.checked)} type="checkbox" />Show Simon estimate</label>}
       {smoothingEnabled && <span className="emi-view-badge" aria-live="polite">Smoothed display</span>}
     </div>}
     {(canSmooth || simonEligible) && <p className="emi-graph-help" id={`${graphId}-help`}>Display-only centered moving average. Raw measured values are retained for calculations, tooltips, summaries, and spreadsheet exports. Simon estimates are theoretical and never smoothed.{simonUnavailableMessage && <> {simonUnavailableMessage}</>}</p>}
-    {format?.legendPosition !== "none" && <div className={`emi-chart-legend emi-legend-${format?.legendPosition ?? "top"}`} aria-label={`${title} traces`}>
-      {legendTraces.map((trace) => <button aria-pressed={!hidden.has(trace.id)} className={`emi-legend-item ${"sampleName" in trace ? "emi-legend-simon" : ""}`} key={trace.id} onClick={() => toggle(trace.id)} type="button">
-        <span aria-hidden="true" style={"sampleName" in trace ? { backgroundColor: "transparent", borderTop: `2px dashed ${trace.color}` } : { backgroundColor: trace.color }} />{trace.label}{"sampleName" in trace && <em>Theoretical</em>}
-      </button>)}
-    </div>}
     {all.length === 0 ? <div className="emi-empty-chart">No valid selected points are available for this plot.</div> : <div className="emi-chart-wrap">
       <svg
         aria-describedby={`${graphId}-help`}
@@ -231,19 +238,26 @@ export function EmiPlot({
         onBlur={() => setHover(null)}
         onFocus={() => { if (!hover) setHover(candidates[0] ?? null); }}
         onKeyDown={(event) => {
-          if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+          if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) return;
           event.preventDefault();
-          const current = hover ? candidates.findIndex((candidate) => candidate.id === hover.id && candidate.frequencyHz === hover.frequencyHz) : -1;
+          if ((event.key === "ArrowUp" || event.key === "ArrowDown") && hover) {
+            const atFrequency = candidates.filter((candidate) => candidate.frequencyHz === hover.frequencyHz);
+            const currentSeries = atFrequency.findIndex((candidate) => candidate.id === hover.id);
+            const seriesDelta = event.key === "ArrowDown" ? 1 : -1;
+            setHover(atFrequency[(currentSeries + seriesDelta + atFrequency.length) % atFrequency.length] ?? hover);
+            return;
+          }
+          const current = hover ? canonicalFrequencies.indexOf(hover.frequencyHz) : -1;
           const delta = event.key === "ArrowRight" ? 1 : -1;
-          setHover(candidates[Math.max(0, Math.min(candidates.length - 1, current + delta))] ?? null);
+          const frequencyHz = canonicalFrequencies[Math.max(0, Math.min(canonicalFrequencies.length - 1, current + delta))];
+          setHover(frequencyHz === undefined ? null : selectAtFrequency(frequencyHz, undefined, hover?.id));
         }}
         onMouseLeave={() => setHover(null)}
         onMouseMove={(event) => {
           const bounds = event.currentTarget.getBoundingClientRect();
-          const pointerX = ((event.clientX - bounds.left) / bounds.width) * WIDTH;
-          const pointerY = ((event.clientY - bounds.top) / bounds.height) * HEIGHT;
-          const nearest = candidates.reduce<HoverPoint | null>((best, point) => !best || Math.hypot(point.x - pointerX, point.y - pointerY) < Math.hypot(best.x - pointerX, best.y - pointerY) ? point : best, null);
-          setHover(nearest);
+          const pointer = mapClientPointToViewBox({ clientX: event.clientX, clientY: event.clientY, left: bounds.left, top: bounds.top, width: bounds.width, height: bounds.height, viewBoxWidth: WIDTH, viewBoxHeight: HEIGHT });
+          const frequencyHz = canonicalFrequencies.reduce<number | null>((best, candidate) => best === null || Math.abs(x(candidate) - pointer.x) < Math.abs(x(best) - pointer.x) ? candidate : best, null);
+          setHover(frequencyHz === null ? null : selectAtFrequency(frequencyHz, pointer.y));
         }}
         role="img"
         ref={svgRef}
@@ -262,11 +276,9 @@ export function EmiPlot({
         {bands.map((band) => { const valid = band.points.filter((point) => Number.isFinite(point.lower) && Number.isFinite(point.upper) && point.frequencyHz >= xMin && point.frequencyHz <= xMax); if (valid.length < 2) return null; const polygon = [...valid.map((point) => `${x(point.frequencyHz)},${y(point.upper)}`), ...[...valid].reverse().map((point) => `${x(point.frequencyHz)},${y(point.lower)}`)].join(" "); return <polygon data-contributing-counts={valid.map((point) => point.contributingCount).join(",")} fill={band.color} fillOpacity="0.16" key={band.id} points={polygon}><title>{band.label}; contributing replicate counts {valid.map((point) => point.contributingCount).join(", ")}</title></polygon>; })}
         {rendered.flatMap(({ trace, segments }) => segments.map((segment, index) => <polyline data-segment-count={segments.length} data-series-kind="measured" data-smoothed={smoothingActive ? "true" : "false"} data-trace-id={trace.id} fill="none" key={`${trace.id}-${index}`} points={segment.map((point) => `${x(point.frequencyHz)},${y(point.value)}`).join(" ")} stroke={trace.color} strokeDasharray={format?.lineStyle === "dashed" || (format?.lineStyle !== "solid" && trace.lineStyle === "dashed") ? "8 5" : undefined} strokeLinejoin="round" strokeWidth="2" />))}
         {renderedSimon.flatMap(({ trace, segments }) => segments.map((segment, index) => <polyline data-series-kind="simon" data-trace-id={trace.id} data-values={segment.map((point) => point.value).join(",")} fill="none" key={`${trace.id}-${index}`} opacity="0.72" points={segment.map((point) => `${x(point.frequencyHz)},${y(point.value)}`).join(" ")} stroke={trace.color} strokeDasharray="7 5" strokeLinejoin="round" strokeWidth="1.5" />))}
-        {format?.markerVisibility && candidates.filter((point) => point.kind === "measured").map((point, index) => <circle cx={point.x} cy={point.y} fill={point.color} key={`marker-${point.id}-${index}`} r="2.4" />)}
-        {[...new Set(warningFrequenciesHz)].filter((frequencyHz) => frequencyHz >= xMin && frequencyHz <= xMax).map((frequencyHz) => <path d={`M ${x(frequencyHz)} ${HEIGHT - MARGIN.bottom - 9} l 5 8 h -10 z`} fill="#dc2626" key={`qc-${frequencyHz}`}><title>Quality-control warning at {axisValue(frequencyHz / factor)} {unit}</title></path>)}
-        {hover && <g pointerEvents="none"><line className="emi-hover-line" x1={hover.x} x2={hover.x} y1={MARGIN.top} y2={HEIGHT - MARGIN.bottom} /><circle cx={hover.x} cy={hover.y} fill={hover.color} r="4" /></g>}
+        {hover && <g data-active-frequency-hz={hover.frequencyHz} pointerEvents="none"><line className="emi-hover-line" data-frequency-hz={hover.frequencyHz} x1={hover.x} x2={hover.x} y1={MARGIN.top} y2={HEIGHT - MARGIN.bottom} /><circle cx={hover.x} cy={hover.y} data-frequency-hz={hover.frequencyHz} fill={hover.color} r={format?.markerVisibility === false ? "3.5" : "4"} /></g>}
       </svg>
-      {hover && <div className="emi-chart-tooltip" role="status"><strong>{hover.label}</strong><span>Frequency: {(hover.frequencyHz / factor).toPrecision(10)} {unit}</span>{hover.kind === "measured" ? <>{smoothingActive ? <><span>Raw measured value: {hover.rawValue.toPrecision(10)} {yLabel}</span><span>Smoothed display: {hover.value.toPrecision(10)} {yLabel}</span></> : <span>Measured value: {hover.rawValue.toPrecision(10)} {yLabel}</span>}</> : <><span>Simon theoretical SET: {hover.value.toPrecision(10)} dB</span><span>Conductivity: {scientific(hover.simon?.conductivitySiemensPerMeter ?? Number.NaN)} S/m</span><span>Thickness: {axisValue(hover.simon?.thicknessMicrometers ?? Number.NaN)} µm</span><span>Calculation version: {hover.simon?.calculationVersion}</span><span>Theoretical estimate, not measured.</span></>}</div>}
+      {hover && <div className="emi-chart-tooltip" data-frequency-hz={hover.frequencyHz} role="status"><strong>{hover.label}</strong><span>Frequency: {(hover.frequencyHz / factor).toPrecision(10)} {unit}</span>{hover.kind === "measured" ? <>{smoothingActive ? <><span>Raw measured value: {hover.rawValue.toPrecision(10)} {yLabel}</span><span>Smoothed display: {hover.value.toPrecision(10)} {yLabel}</span></> : <span>Measured value: {hover.rawValue.toPrecision(10)} {yLabel}</span>}</> : <><span>Simon theoretical SET: {hover.value.toPrecision(10)} dB</span><span>Conductivity: {scientific(hover.simon?.conductivitySiemensPerMeter ?? Number.NaN)} S/m</span><span>Thickness: {axisValue(hover.simon?.thicknessMicrometers ?? Number.NaN)} µm</span><span>Calculation version: {hover.simon?.calculationVersion}</span><span>Theoretical estimate, not measured.</span></>}</div>}
     </div>}
   </section>;
 }

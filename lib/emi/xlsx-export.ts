@@ -14,7 +14,13 @@ function cellXml(value: EmiExportCell, row: number, column: number): string {
 }
 function worksheet(table: EmiExportTable): string {
   const rows = [table.columns.map((column) => column.header), ...table.rows.map((row) => table.columns.map((column) => row[column.key] ?? null))];
-  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>${rows.map((row, rowIndex) => `<row r="${rowIndex + 1}">${row.map((value, columnIndex) => cellXml(value, rowIndex + 1, columnIndex)).join("")}</row>`).join("")}</sheetData></worksheet>`;
+  const widths = table.columns.map((column, columnIndex) => {
+    const contentWidth = Math.max(column.header.length, ...table.rows.slice(0, 250).map((row) => String(row[column.key] ?? "").length));
+    const width = Math.min(42, Math.max(column.kind === "number" ? 14 : 12, contentWidth + 2));
+    return `<col min="${columnIndex + 1}" max="${columnIndex + 1}" width="${width}" customWidth="1"/>`;
+  }).join("");
+  const lastColumn = columnName(Math.max(0, table.columns.length - 1));
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>${widths}</cols><sheetData>${rows.map((row, rowIndex) => `<row r="${rowIndex + 1}">${row.map((value, columnIndex) => cellXml(value, rowIndex + 1, columnIndex)).join("")}</row>`).join("")}</sheetData><autoFilter ref="A1:${lastColumn}${rows.length}"/></worksheet>`;
 }
 
 /** Produce a standards-based XLSX workbook whose cells come only from canonical typed export tables. */
@@ -33,4 +39,3 @@ export function createEmiAnalysisXlsx(project: EmiProjectRecord, files: readonly
   tables.forEach((table, index) => { filesMap[`xl/worksheets/sheet${index + 1}.xml`] = strToU8(worksheet(table)); });
   return zipSync(filesMap, { level: 6 });
 }
-

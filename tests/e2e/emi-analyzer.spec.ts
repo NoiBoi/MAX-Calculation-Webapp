@@ -78,6 +78,36 @@ test("EMI analyzer renders invalid shielding gaps and downloads both CSV exports
   await expect((await summaryDownload).suggestedFilename()).toBe("emi-summary-statistics.csv");
 });
 
+test("EMI thickness, themed electrical controls, and graph interaction use one canonical model", async ({ page }) => {
+  await page.goto("/emi");
+  await page.locator('input[type="file"][accept^=".csv"]').setInputFiles({ name: "interaction.csv", mimeType: "text/csv", buffer: Buffer.from(validCsv()) });
+  const card = page.getByTestId("emi-file-card");
+  await card.getByText("Edit sample metadata").click();
+  await expect(card.getByLabel("Sample thickness for interaction.csv")).toHaveCount(1);
+  await expect(card.getByLabel(/Film thickness/)).toHaveCount(0);
+  await card.getByLabel("Sample thickness for interaction.csv").fill("12");
+  await card.getByLabel("Thickness unit for interaction.csv").selectOption("um");
+  await card.getByText("Electrical properties and Simon estimate").click();
+  await expect(card.getByText("Enter raw four-point-probe resistance in Ω. MAXCalc applies the fixed geometric correction factor 4.532.")).toBeVisible();
+  await expect(card.getByText("12 µm", { exact: true })).toBeVisible();
+  const note = card.getByLabel("Electrical measurement note for interaction.csv");
+  for (const theme of ["light", "dark", "midnight"] as const) {
+    await page.evaluate((value) => document.documentElement.setAttribute("data-theme", value), theme);
+    const style = await note.evaluate((element) => { const computed = getComputedStyle(element); return { background: computed.backgroundColor, color: computed.color, border: computed.borderTopColor }; });
+    expect(style.background).not.toBe("rgba(0, 0, 0, 0)");
+    expect(style.color).not.toBe(style.background);
+    expect(style.border).not.toBe(style.background);
+  }
+  const plot = page.getByRole("region", { name: "4. Total shielding effectiveness (SET)" });
+  await expect(plot.locator('path[fill="#dc2626"]')).toHaveCount(0);
+  const svg = plot.locator("svg.emi-chart");
+  await svg.focus();
+  const tooltipFrequency = await plot.getByRole("status").getAttribute("data-frequency-hz");
+  await expect(svg.locator("g[data-active-frequency-hz]")).toHaveAttribute("data-active-frequency-hz", tooltipFrequency ?? "");
+  await expect(svg.locator("line.emi-hover-line")).toHaveAttribute("data-frequency-hz", tooltipFrequency ?? "");
+  await expect(svg.locator("circle[data-frequency-hz]")).toHaveAttribute("data-frequency-hz", tooltipFrequency ?? "");
+});
+
 test("EMI projects support bulk metadata, replicate interpolation, persistence, comparison, and figure export", async ({ page }) => {
   await page.goto("/emi");
   const secondGrid = validCsv(0.02).replace("2000000000,1.1", "2200000000,1.1");
@@ -93,8 +123,10 @@ test("EMI projects support bulk metadata, replicate interpolation, persistence, 
   await expect(page.getByText(/same range different points/)).toBeVisible();
 
   const firstCard = page.getByTestId("emi-file-card").filter({ hasText: "batch-1.1.csv" });
+  await firstCard.getByText("Edit sample metadata").click();
+  await firstCard.getByLabel("Sample thickness for batch-1.1.csv").fill("10");
+  await firstCard.getByLabel("Thickness unit for batch-1.1.csv").selectOption("um");
   await firstCard.getByText("Electrical properties and Simon estimate").click();
-  await firstCard.getByLabel("Film thickness in micrometers for batch-1.1.csv").fill("10");
   await firstCard.getByRole("button", { name: "Add reading" }).click();
   await firstCard.getByLabel("Raw four-point-probe resistance 1 for batch-1.1.csv").fill("1");
   await expect(firstCard.getByText(/22,065\.31333 S\/m/)).toBeVisible();
@@ -126,7 +158,7 @@ test("EMI projects support bulk metadata, replicate interpolation, persistence, 
   await expect(page.getByText("2 of 2 files ready")).toBeVisible();
   const restoredCard = page.getByTestId("emi-file-card").filter({ hasText: "batch-1.1.csv" });
   await restoredCard.getByText("Electrical properties and Simon estimate").click();
-  await expect(restoredCard.getByLabel("Film thickness in micrometers for batch-1.1.csv")).toHaveValue("10");
+  await expect(restoredCard.getByLabel("Sample thickness for batch-1.1.csv")).toHaveValue("10");
   await expect(restoredCard.getByLabel("Raw four-point-probe resistance 1 for batch-1.1.csv")).toHaveValue("1");
 });
 
@@ -148,8 +180,10 @@ test("SET smoothing and Simon overlay are independent, theoretical, and export-n
   await expect(seaPlot.getByLabel("Show Simon estimate")).toHaveCount(0);
 
   const electricalCard = page.getByTestId("emi-file-card").filter({ hasText: "sample-with-electrical.csv" });
+  await electricalCard.getByText("Edit sample metadata").click();
+  await electricalCard.getByLabel("Sample thickness for sample-with-electrical.csv").fill("10");
+  await electricalCard.getByLabel("Thickness unit for sample-with-electrical.csv").selectOption("um");
   await electricalCard.getByText("Electrical properties and Simon estimate").click();
-  await electricalCard.getByLabel("Film thickness in micrometers for sample-with-electrical.csv").fill("10");
   await electricalCard.getByRole("button", { name: "Add reading" }).click();
   await electricalCard.getByLabel("Raw four-point-probe resistance 1 for sample-with-electrical.csv").fill("1");
   await expect(setPlot.getByLabel("Show Simon estimate")).toBeEnabled();
@@ -179,6 +213,7 @@ test("SET smoothing and Simon overlay are independent, theoretical, and export-n
   await expect(setPlot.getByRole("status")).toContainText("Raw measured value");
   await expect(setPlot.getByRole("status")).toContainText("Smoothed display");
   for (let index = 0; index < 10; index += 1) await setPlot.locator("svg.emi-chart").press("ArrowRight");
+  await setPlot.locator("svg.emi-chart").press("ArrowUp");
   await expect(setPlot.getByRole("status")).toContainText("Simon theoretical SET");
   await expect(setPlot.getByRole("status")).toContainText("Theoretical estimate, not measured");
   await setPlot.getByLabel("Show Simon estimate").uncheck();

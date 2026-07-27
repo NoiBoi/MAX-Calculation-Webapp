@@ -146,6 +146,12 @@ export function convertThicknessToMillimeters(value: number, unit: EmiThicknessU
   return value * ({ m: 1000, mm: 1, um: 0.001, in: 25.4 } as const)[unit];
 }
 
+/** Converts the authoritative sample thickness to the µm unit used by electrical calculations. */
+export function convertThicknessToMicrometers(value: number, unit: EmiThicknessUnit): number | null {
+  const millimeters = convertThicknessToMillimeters(value, unit);
+  return millimeters === null ? null : millimeters * 1000;
+}
+
 export function normalizeSetByThickness(setDb: number | null, thickness: number, unit: EmiThicknessUnit): number | null {
   const millimeters = convertThicknessToMillimeters(thickness, unit);
   return setDb === null || !Number.isFinite(setDb) || millimeters === null ? null : setDb / millimeters;

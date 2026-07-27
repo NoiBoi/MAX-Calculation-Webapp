@@ -1,11 +1,12 @@
 import {
   calculateEmiStatistics,
   calculateSimonSeries,
+  diagnoseEmiPhysicalValidity,
   type EmiDirection,
   type EmiFrequencyRange,
 } from "@max-stoich/chemistry-engine";
 import { buildProcessedRows, EMI_METRICS, type EmiAnalysisFile } from "./analyzer";
-import type { EmiProjectRecord } from "./project";
+import { getAuthoritativeThicknessMicrometers, type EmiProjectRecord } from "./project";
 
 export type EmiExportCell = string | number | null;
 export interface EmiExportColumn { readonly key: string; readonly header: string; readonly kind: "text" | "number"; }
@@ -21,19 +22,19 @@ export function buildDirectionalProcessedExport(project: EmiProjectRecord | unde
     number("frequencyHz", "Frequency (Hz)"), number("frequencyGHz", "Frequency (GHz)"),
     number("reflectionReal", "Reflection real"), number("reflectionImaginary", "Reflection imaginary"), number("transmissionReal", "Transmission real"), number("transmissionImaginary", "Transmission imaginary"),
     number("R", "R"), number("T", "T"), number("A", "A"), number("SET", "SET (dB)"), number("SER", "SER (dB)"), number("SEA", "SEA (dB)"),
-    text("validity", "Validity flags"), text("validationCodes", "Validation codes"), text("displayName", "Display name"), text("sampleId", "Sample ID"),
+    text("validity", "Validity flags"), text("validationCodes", "Validation codes"), text("physicalValidityStatus", "Physical validity status"), number("powerBalanceResidual", "Power-balance residual (R+T+A-1)"), text("decompositionValid", "Decomposition valid"), text("invalidReasonCodes", "Invalid reason codes"), text("invalidReasons", "Invalid reasons"), text("displayName", "Display name"), text("sampleId", "Sample ID"),
     number("simonTotal", "Simon theoretical EMI SE (dB)"), number("simonReflection", "Simon reflection term (dB)"), number("simonAbsorption", "Simon absorption term (dB)"),
   ];
   const rows = files.flatMap((file) => directions.flatMap((direction) => {
     const sample = metadata(project, file.id)?.sampleMetadata;
     const electrical = metadata(project, file.id)?.electricalProperties?.derived?.aggregate;
     const simon = electrical ? calculateSimonSeries({ frequencyPointsHz: file.dataset.points.map((point) => point.frequencyHz), conductivitySiemensPerCentimeter: electrical.conductivitySiemensPerCentimeter, thicknessMicrometers: electrical.thicknessMicrometers }) : null;
-    return buildProcessedRows(file.dataset, file.calculation, direction, file.issues).map((row, index) => ({
+    return buildProcessedRows(file.dataset, file.calculation, direction, file.issues).map((row, index) => { const diagnostic = diagnoseEmiPhysicalValidity(file.calculation[direction][index]!); return ({
       originalFilename: row.filename, displayName: sample?.displayName ?? row.filename, sampleId: sample?.sampleId ?? "", direction: row.direction,
       frequencyHz: row.frequencyHz, frequencyGHz: row.frequencyHz / 1e9,
       reflectionReal: row.reflectionReal, reflectionImaginary: row.reflectionImaginary, transmissionReal: row.transmissionReal, transmissionImaginary: row.transmissionImaginary,
-      R: row.R, T: row.T, A: row.A, SET: row.SET, SER: row.SER, SEA: row.SEA, validity: row.validity, validationCodes: row.validationCodes.join("|"), simonTotal: simon?.[index]?.theoreticalSetDb ?? null, simonReflection: simon?.[index]?.reflectionTermDb ?? null, simonAbsorption: simon?.[index]?.absorptionTermDb ?? null,
-    }));
+      R: row.R, T: row.T, A: row.A, SET: row.SET, SER: row.SER, SEA: row.SEA, validity: row.validity, validationCodes: row.validationCodes.join("|"), physicalValidityStatus: diagnostic.status, powerBalanceResidual: diagnostic.powerBalanceResidual, decompositionValid: diagnostic.decompositionValid ? "yes" : "no", invalidReasonCodes: diagnostic.reasonCodes.join("|"), invalidReasons: diagnostic.reasons.join(" | "), simonTotal: simon?.[index]?.theoreticalSetDb ?? null, simonReflection: simon?.[index]?.reflectionTermDb ?? null, simonAbsorption: simon?.[index]?.absorptionTermDb ?? null,
+    }); });
   }));
   return { name: "Directional Data", columns, rows };
 }
@@ -43,7 +44,9 @@ export function buildFrequencyResolvedExport(project: EmiProjectRecord, files: r
     text("originalFilename", "Original filename"), text("displayName", "Display name"), text("sampleId", "Sample ID"), number("frequencyHz", "Frequency (Hz)"), number("frequencyGHz", "Frequency (GHz)"),
     number("s11Real", "S11 real"), number("s11Imaginary", "S11 imaginary"), number("s21Real", "S21 real"), number("s21Imaginary", "S21 imaginary"), number("s22Real", "S22 real"), number("s22Imaginary", "S22 imaginary"), number("s12Real", "S12 real"), number("s12Imaginary", "S12 imaginary"),
     number("forwardSET", "Forward measured SET (dB)"), number("forwardSER", "Forward measured SER (dB)"), number("forwardSEA", "Forward measured SEA (dB)"), number("forwardR", "Forward R"), number("forwardT", "Forward T"), number("forwardA", "Forward A"),
+    text("forwardValidityStatus", "Forward physical validity"), number("forwardPowerResidual", "Forward power residual"), text("forwardDecompositionValid", "Forward decomposition valid"), text("forwardInvalidReasons", "Forward invalid reasons"),
     number("reverseSET", "Reverse measured SET (dB)"), number("reverseSER", "Reverse measured SER (dB)"), number("reverseSEA", "Reverse measured SEA (dB)"), number("reverseR", "Reverse R"), number("reverseT", "Reverse T"), number("reverseA", "Reverse A"),
+    text("reverseValidityStatus", "Reverse physical validity"), number("reversePowerResidual", "Reverse power residual"), text("reverseDecompositionValid", "Reverse decomposition valid"), text("reverseInvalidReasons", "Reverse invalid reasons"),
     number("simonTotal", "Simon theoretical EMI SE (dB)"), number("simonReflection", "Simon reflection term (dB)"), number("simonAbsorption", "Simon absorption term (dB)"),
   ];
   const rows = files.flatMap((file) => {
@@ -51,12 +54,14 @@ export function buildFrequencyResolvedExport(project: EmiProjectRecord, files: r
     const electrical = entry?.electricalProperties?.derived?.aggregate;
     const simon = electrical ? calculateSimonSeries({ frequencyPointsHz: file.dataset.points.map((point) => point.frequencyHz), conductivitySiemensPerCentimeter: electrical.conductivitySiemensPerCentimeter, thicknessMicrometers: electrical.thicknessMicrometers }) : null;
     return file.dataset.points.map((point, index) => {
-      const forward = file.calculation.forward[index]; const reverse = file.calculation.reverse[index]; const theoretical = simon?.[index];
+      const forward = file.calculation.forward[index]; const reverse = file.calculation.reverse[index]; const theoretical = simon?.[index]; const forwardDiagnostic = forward ? diagnoseEmiPhysicalValidity(forward) : null; const reverseDiagnostic = reverse ? diagnoseEmiPhysicalValidity(reverse) : null;
       return {
         originalFilename: file.dataset.filename, displayName: entry?.sampleMetadata.displayName ?? file.dataset.filename, sampleId: entry?.sampleMetadata.sampleId ?? "", frequencyHz: point.frequencyHz, frequencyGHz: point.frequencyHz / 1e9,
         s11Real: point.s11.real, s11Imaginary: point.s11.imaginary, s21Real: point.s21.real, s21Imaginary: point.s21.imaginary, s22Real: point.s22.real, s22Imaginary: point.s22.imaginary, s12Real: point.s12.real, s12Imaginary: point.s12.imaginary,
         forwardSET: forward?.SET ?? null, forwardSER: forward?.SER ?? null, forwardSEA: forward?.SEA ?? null, forwardR: forward?.R ?? null, forwardT: forward?.T ?? null, forwardA: forward?.A ?? null,
+        forwardValidityStatus: forwardDiagnostic?.status ?? "", forwardPowerResidual: forwardDiagnostic?.powerBalanceResidual ?? null, forwardDecompositionValid: forwardDiagnostic ? forwardDiagnostic.decompositionValid ? "yes" : "no" : "", forwardInvalidReasons: forwardDiagnostic?.reasons.join(" | ") ?? "",
         reverseSET: reverse?.SET ?? null, reverseSER: reverse?.SER ?? null, reverseSEA: reverse?.SEA ?? null, reverseR: reverse?.R ?? null, reverseT: reverse?.T ?? null, reverseA: reverse?.A ?? null,
+        reverseValidityStatus: reverseDiagnostic?.status ?? "", reversePowerResidual: reverseDiagnostic?.powerBalanceResidual ?? null, reverseDecompositionValid: reverseDiagnostic ? reverseDiagnostic.decompositionValid ? "yes" : "no" : "", reverseInvalidReasons: reverseDiagnostic?.reasons.join(" | ") ?? "",
         simonTotal: theoretical?.theoreticalSetDb ?? null, simonReflection: theoretical?.reflectionTermDb ?? null, simonAbsorption: theoretical?.absorptionTermDb ?? null,
       };
     });
@@ -78,7 +83,7 @@ export function buildElectricalPropertiesExport(project: EmiProjectRecord): EmiE
   const rows = project.datasets.flatMap((entry) => {
     const electrical = entry.electricalProperties; const derived = electrical?.derived; const readings = electrical?.rawResistanceReadingsOhm ?? [];
     const source: readonly (number | null)[] = readings.length > 0 ? readings : [null];
-    return source.map((reading, index) => ({ displayName: entry.sampleMetadata.displayName, datasetId: entry.id, sampleId: entry.sampleMetadata.sampleId ?? "", thicknessUm: electrical?.thicknessMicrometers ?? null, readingNumber: readings.length > 0 ? index + 1 : null, rawResistance: reading, correctionFactor: electrical?.correctionFactor ?? null, sheetResistance: derived?.individualReadings[index]?.sheetResistanceOhmPerSquare ?? null, meanRawResistance: derived?.meanRawResistanceOhm ?? null, conductivitySm: derived?.aggregate.conductivitySiemensPerMeter ?? null, conductivityScm: derived?.aggregate.conductivitySiemensPerCentimeter ?? null, resistivityOhmM: derived?.aggregate.resistivityOhmMeter ?? null, resistivityOhmCm: derived?.aggregate.resistivityOhmCentimeter ?? null, aggregation: derived?.aggregationMethod ?? "", calculationVersion: electrical?.calculationVersion ?? "", measurementNote: electrical?.measurementNote ?? "" }));
+    return source.map((reading, index) => ({ displayName: entry.sampleMetadata.displayName, datasetId: entry.id, sampleId: entry.sampleMetadata.sampleId ?? "", thicknessUm: getAuthoritativeThicknessMicrometers(entry), readingNumber: readings.length > 0 ? index + 1 : null, rawResistance: reading, correctionFactor: electrical?.correctionFactor ?? null, sheetResistance: derived?.individualReadings[index]?.sheetResistanceOhmPerSquare ?? null, meanRawResistance: derived?.meanRawResistanceOhm ?? null, conductivitySm: derived?.aggregate.conductivitySiemensPerMeter ?? null, conductivityScm: derived?.aggregate.conductivitySiemensPerCentimeter ?? null, resistivityOhmM: derived?.aggregate.resistivityOhmMeter ?? null, resistivityOhmCm: derived?.aggregate.resistivityOhmCentimeter ?? null, aggregation: derived?.aggregationMethod ?? "", calculationVersion: electrical?.calculationVersion ?? "", measurementNote: electrical?.measurementNote ?? "" }));
   });
   return { name: "Electrical Properties", columns, rows };
 }

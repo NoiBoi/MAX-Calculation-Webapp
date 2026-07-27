@@ -4,6 +4,7 @@ import {
   ENGINE_VERSION,
   FOUR_POINT_PROBE_CORRECTION_FACTOR,
   calculateElectricalPropertySummary,
+  convertThicknessToMicrometers,
   type ElectricalPropertySummary,
   type EmiDataset,
   type EmiDirection,
@@ -14,17 +15,23 @@ import {
 import type { EmiArealDensityUnit, EmiThicknessUnit } from "@max-stoich/chemistry-engine";
 import { MaxStoichDatabase } from "../persistence/database";
 
-export const EMI_PROJECT_SCHEMA_VERSION = "2.0.0" as const;
+export const EMI_PROJECT_SCHEMA_VERSION = "3.0.0" as const;
 export const EMI_PROJECT_LEGACY_SCHEMA_VERSION = "1.0.0" as const;
+export const EMI_PROJECT_PREVIOUS_SCHEMA_VERSION = "2.0.0" as const;
 
 export interface EmiElectricalPropertyRecord {
-  readonly thicknessMicrometers?: number | null;
   readonly rawResistanceReadingsOhm: readonly (number | null)[];
   readonly correctionFactor: number;
   readonly calculationVersion: string;
   readonly measurementNote?: string;
   /** Reproducible snapshot derived from the stored inputs; absent for invalid or partial inputs. */
   readonly derived?: ElectricalPropertySummary;
+}
+
+export interface EmiThicknessConflict {
+  readonly status: "unresolved";
+  readonly metadataThickness: Readonly<{ value: number; unit: EmiThicknessUnit }>;
+  readonly legacyElectricalThicknessMicrometers: number;
 }
 
 export interface EmiSampleMetadata {
@@ -50,6 +57,8 @@ export interface EmiProjectDataset {
   readonly importedAt: string;
   readonly parserVersion: string;
   readonly electricalProperties?: EmiElectricalPropertyRecord;
+  /** Preserves conflicting legacy values until the user explicitly resolves authority. */
+  readonly thicknessConflict?: EmiThicknessConflict;
 }
 
 export interface EmiReplicateGroupDefinition {
@@ -154,7 +163,6 @@ export function calculateEmiElectricalRecord(input: Readonly<{
   const correctionFactor = input.correctionFactor ?? FOUR_POINT_PROBE_CORRECTION_FACTOR;
   const calculated = calculateElectricalPropertySummary({ rawResistanceReadingsOhm, thicknessMicrometers, correctionFactor });
   return {
-    thicknessMicrometers,
     rawResistanceReadingsOhm,
     correctionFactor,
     calculationVersion: EMI_ELECTRICAL_CALCULATION_VERSION,
@@ -163,17 +171,64 @@ export function calculateEmiElectricalRecord(input: Readonly<{
   };
 }
 
+export function getAuthoritativeThicknessMicrometers(dataset: EmiProjectDataset): number | null {
+  if (dataset.thicknessConflict) return null;
+  const { thickness, thicknessUnit } = dataset.sampleMetadata;
+  return thickness === undefined || thicknessUnit === undefined ? null : convertThicknessToMicrometers(thickness, thicknessUnit);
+}
+
+function equivalentThickness(left: number, right: number): boolean {
+  return Math.abs(left - right) <= Number.EPSILON * 16 * Math.max(1, Math.abs(left), Math.abs(right));
+}
+
+function rebuildElectrical(electrical: Record<string, unknown>, thicknessMicrometers: number | null): EmiElectricalPropertyRecord {
+  return calculateEmiElectricalRecord({
+    thicknessMicrometers,
+    rawResistanceReadingsOhm: Array.isArray(electrical.rawResistanceReadingsOhm) ? electrical.rawResistanceReadingsOhm.map((reading) => typeof reading === "number" ? reading : null) : [],
+    correctionFactor: typeof electrical.correctionFactor === "number" ? electrical.correctionFactor : FOUR_POINT_PROBE_CORRECTION_FACTOR,
+    measurementNote: typeof electrical.measurementNote === "string" ? electrical.measurementNote : undefined,
+  });
+}
+
+export function resolveEmiThicknessConflict(dataset: EmiProjectDataset, source: "metadata" | "legacy-electrical"): EmiProjectDataset {
+  const conflict = dataset.thicknessConflict;
+  if (!conflict) return dataset;
+  const sampleMetadata = source === "metadata"
+    ? dataset.sampleMetadata
+    : { ...dataset.sampleMetadata, thickness: conflict.legacyElectricalThicknessMicrometers, thicknessUnit: "um" as const };
+  const thicknessMicrometers = convertThicknessToMicrometers(sampleMetadata.thickness!, sampleMetadata.thicknessUnit!);
+  const electrical = dataset.electricalProperties as unknown as Record<string, unknown> | undefined;
+  return {
+    ...dataset,
+    sampleMetadata,
+    thicknessConflict: undefined,
+    ...(electrical ? { electricalProperties: rebuildElectrical(electrical, thicknessMicrometers) } : {}),
+  };
+}
+
 function migrateEmiProject(value: Record<string, unknown>): EmiProjectRecord {
   const datasets = (value.datasets as readonly Record<string, unknown>[]).map((entry) => {
     const electrical = isRecord(entry.electricalProperties) ? entry.electricalProperties : undefined;
+    const sampleMetadata = entry.sampleMetadata as unknown as EmiSampleMetadata;
+    const metadataMicrometers = sampleMetadata.thickness !== undefined && sampleMetadata.thicknessUnit
+      ? convertThicknessToMicrometers(sampleMetadata.thickness, sampleMetadata.thicknessUnit)
+      : null;
+    const legacyMicrometers = electrical && typeof electrical.thicknessMicrometers === "number" && Number.isFinite(electrical.thicknessMicrometers) && electrical.thicknessMicrometers > 0
+      ? electrical.thicknessMicrometers
+      : null;
+    const preservedConflict = isRecord(entry.thicknessConflict) ? entry.thicknessConflict as unknown as EmiThicknessConflict : undefined;
+    const conflict = preservedConflict ?? (metadataMicrometers !== null && legacyMicrometers !== null && !equivalentThickness(metadataMicrometers, legacyMicrometers)
+      ? { status: "unresolved" as const, metadataThickness: { value: sampleMetadata.thickness!, unit: sampleMetadata.thicknessUnit! }, legacyElectricalThicknessMicrometers: legacyMicrometers }
+      : undefined);
+    const migratedMetadata = metadataMicrometers === null && legacyMicrometers !== null
+      ? { ...sampleMetadata, thickness: legacyMicrometers, thicknessUnit: "um" as const }
+      : sampleMetadata;
+    const authoritativeMicrometers = conflict ? null : (metadataMicrometers ?? legacyMicrometers);
     return {
       ...entry,
-      ...(electrical ? { electricalProperties: calculateEmiElectricalRecord({
-        thicknessMicrometers: typeof electrical.thicknessMicrometers === "number" ? electrical.thicknessMicrometers : electrical.thicknessMicrometers === null ? null : undefined,
-        rawResistanceReadingsOhm: Array.isArray(electrical.rawResistanceReadingsOhm) ? electrical.rawResistanceReadingsOhm.map((reading) => typeof reading === "number" ? reading : null) : [],
-        correctionFactor: typeof electrical.correctionFactor === "number" ? electrical.correctionFactor : FOUR_POINT_PROBE_CORRECTION_FACTOR,
-        measurementNote: typeof electrical.measurementNote === "string" ? electrical.measurementNote : undefined,
-      }) } : {}),
+      sampleMetadata: migratedMetadata,
+      ...(electrical ? { electricalProperties: rebuildElectrical(electrical, authoritativeMicrometers) } : {}),
+      ...(conflict ? { thicknessConflict: conflict } : { thicknessConflict: undefined }),
     };
   });
   return { ...value, schemaVersion: EMI_PROJECT_SCHEMA_VERSION, datasets } as unknown as EmiProjectRecord;
@@ -183,7 +238,7 @@ export function parseEmiProjectJson(text: string): EmiProjectRecord {
   let value: unknown;
   try { value = JSON.parse(text); } catch { throw new EmiProjectImportError("MALFORMED_PROJECT", "The selected file is not valid JSON."); }
   if (!isRecord(value)) throw new EmiProjectImportError("MALFORMED_PROJECT", "The project root must be a JSON object.");
-  if (value.schemaVersion !== EMI_PROJECT_SCHEMA_VERSION && value.schemaVersion !== EMI_PROJECT_LEGACY_SCHEMA_VERSION) throw new EmiProjectImportError("UNSUPPORTED_PROJECT_VERSION", `Unsupported EMI project schema ${String(value.schemaVersion ?? "missing")}; this release supports ${EMI_PROJECT_LEGACY_SCHEMA_VERSION} and ${EMI_PROJECT_SCHEMA_VERSION}.`);
+  if (![EMI_PROJECT_SCHEMA_VERSION, EMI_PROJECT_PREVIOUS_SCHEMA_VERSION, EMI_PROJECT_LEGACY_SCHEMA_VERSION].includes(value.schemaVersion as typeof EMI_PROJECT_SCHEMA_VERSION)) throw new EmiProjectImportError("UNSUPPORTED_PROJECT_VERSION", `Unsupported EMI project schema ${String(value.schemaVersion ?? "missing")}; this release supports ${EMI_PROJECT_LEGACY_SCHEMA_VERSION}, ${EMI_PROJECT_PREVIOUS_SCHEMA_VERSION}, and ${EMI_PROJECT_SCHEMA_VERSION}.`);
   if (value.recordType !== "maxcalc-emi-project" || typeof value.id !== "string" || typeof value.name !== "string" || typeof value.createdAt !== "string" || typeof value.updatedAt !== "string" || !Array.isArray(value.datasets) || !Array.isArray(value.groups)) throw new EmiProjectImportError("MALFORMED_PROJECT", "The project is missing required identity, timestamp, dataset, or group fields.");
   for (const [index, entry] of value.datasets.entries()) {
     if (!isRecord(entry) || typeof entry.id !== "string" || typeof entry.originalFilename !== "string" || typeof entry.importedAt !== "string" || typeof entry.parserVersion !== "string" || !isRecord(entry.parsedDataset) || !Array.isArray(entry.parsedDataset.points) || !isRecord(entry.sampleMetadata) || typeof entry.sampleMetadata.displayName !== "string") throw new EmiProjectImportError("MALFORMED_PROJECT", `Dataset ${index + 1} is incomplete or malformed.`);
@@ -218,7 +273,7 @@ export class EmiProjectRepository {
   async list(): Promise<EmiProjectRecord[]> { return (await this.database.emiProjects.orderBy("updatedAt").reverse().toArray()).map((project) => migrateEmiProject(project as unknown as Record<string, unknown>)); }
   async get(id: string): Promise<EmiProjectRecord | undefined> { const project = await this.database.emiProjects.get(id); return project ? migrateEmiProject(project as unknown as Record<string, unknown>) : undefined; }
   async save(project: EmiProjectRecord): Promise<EmiProjectRecord> {
-    const saved = { ...project, schemaVersion: EMI_PROJECT_SCHEMA_VERSION, updatedAt: new Date().toISOString(), calculationEngineVersion: ENGINE_VERSION, parserVersion: EMI_PARSER_VERSION, datasets: project.datasets.map((entry) => ({ ...entry, ...(entry.electricalProperties ? { electricalProperties: calculateEmiElectricalRecord(entry.electricalProperties) } : {}) })) };
+    const saved = migrateEmiProject({ ...project, schemaVersion: EMI_PROJECT_SCHEMA_VERSION, updatedAt: new Date().toISOString(), calculationEngineVersion: ENGINE_VERSION, parserVersion: EMI_PARSER_VERSION } as unknown as Record<string, unknown>);
     await this.database.emiProjects.put(saved);
     return saved;
   }

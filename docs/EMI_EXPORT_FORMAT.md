@@ -33,5 +33,6 @@ CSV uses invariant JavaScript numeric serialization and RFC-style quoting for co
 
 ## JSON and HTML
 
-Project JSON schema `2.0.0` stores optional versioned electrical records. Manifest schema `1.1.0` includes electrical provenance and Simon unit conventions. The portable HTML summary labels Simon values as theoretical and includes electrical sample summaries.
+Project JSON schema `3.0.0` stores optional versioned electrical records while using sample metadata as the sole authoritative thickness. Versions `1.0.0` and `2.0.0` migrate on read; conflicting legacy values remain preserved in an unresolved conflict record. Manifest schema `1.1.0` includes electrical provenance and Simon unit conventions. The portable HTML summary labels Simon values as theoretical and includes electrical sample summaries.
 
+Frequency and directional worksheets include physical-validity status, `R + T + A - 1` residual, decomposition validity, and explicit reason text. Raw S-parameters and raw R/T/A values are preserved even when they violate passivity. Unavailable SET/SER/SEA cells are blank. XLSX worksheets freeze the header row, enable filters, and use bounded content-aware column widths.

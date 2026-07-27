@@ -24,8 +24,8 @@ describe("EMI XLSX authoritative export round trip", () => {
     const files = [first, second, third].map((source, index) => ({ id: String(index + 1), dataset: source, calculation: calculateEmiDataset(source), issues: [] }));
     const base = createEmptyEmiProject("Workbook audit", "2026-07-27T00:00:00.000Z");
     const project: EmiProjectRecord = { ...base, datasets: [
-      { id: "1", originalFilename: first.filename, parsedDataset: first, sampleMetadata: { displayName: "Valid sample", sampleId: "S-1" }, importedAt: base.createdAt, parserVersion: "test", electricalProperties: calculateEmiElectricalRecord({ thicknessMicrometers: 10, rawResistanceReadingsOhm: [1, 2] }) },
-      { id: "2", originalFilename: second.filename, parsedDataset: second, sampleMetadata: { displayName: "Partial sample" }, importedAt: base.createdAt, parserVersion: "test", electricalProperties: calculateEmiElectricalRecord({ thicknessMicrometers: 10, rawResistanceReadingsOhm: [1, null] }) },
+      { id: "1", originalFilename: first.filename, parsedDataset: first, sampleMetadata: { displayName: "Valid sample", sampleId: "S-1", thickness: 10, thicknessUnit: "um" }, importedAt: base.createdAt, parserVersion: "test", electricalProperties: calculateEmiElectricalRecord({ thicknessMicrometers: 10, rawResistanceReadingsOhm: [1, 2] }) },
+      { id: "2", originalFilename: second.filename, parsedDataset: second, sampleMetadata: { displayName: "Partial sample", thickness: 10, thicknessUnit: "um" }, importedAt: base.createdAt, parserVersion: "test", electricalProperties: calculateEmiElectricalRecord({ thicknessMicrometers: 10, rawResistanceReadingsOhm: [1, null] }) },
       { id: "3", originalFilename: third.filename, parsedDataset: third, sampleMetadata: { displayName: "No electrical metadata" }, importedAt: base.createdAt, parserVersion: "test" },
     ] };
     const archive = unzipSync(createEmiAnalysisXlsx(project, files, ["forward", "reverse"], { minimumHz: 9e9, maximumHz: 12e9 }));
@@ -35,11 +35,17 @@ describe("EMI XLSX authoritative export round trip", () => {
     const frequencyRows = rows(strFromU8(archive["xl/worksheets/sheet1.xml"] as Uint8Array));
     expect(frequencyRows).toHaveLength(7);
     expect(frequencyRows[0]).toContain("Simon theoretical EMI SE (dB)");
+    expect(frequencyRows[0]).toContain("Forward physical validity");
     expect(frequencyRows[1]?.[3]).toBe(10e9);
     expect(typeof frequencyRows[1]?.[3]).toBe("number");
-    expect(frequencyRows[1]?.[25]).toBeCloseTo(33.73804444676175, 10);
-    expect(frequencyRows[4]?.[25]).toBeNull();
-    expect(frequencyRows[6]?.[25]).toBeNull();
+    const simonColumn = frequencyRows[0]!.indexOf("Simon theoretical EMI SE (dB)");
+    expect(frequencyRows[1]?.[simonColumn]).toBeCloseTo(33.73804444676175, 10);
+    expect(frequencyRows[4]?.[simonColumn]).toBeNull();
+    expect(frequencyRows[6]?.[simonColumn]).toBeNull();
+    const frequencySheet = strFromU8(archive["xl/worksheets/sheet1.xml"] as Uint8Array);
+    expect(frequencySheet).toContain('state="frozen"');
+    expect(frequencySheet).toContain("<autoFilter");
+    expect(frequencySheet).toContain("<cols>");
 
     const electricalRows = rows(strFromU8(archive["xl/worksheets/sheet4.xml"] as Uint8Array));
     expect(electricalRows[0]).toEqual(expect.arrayContaining(["Raw resistance (Ω)", "Conductivity (S/m)", "Calculation version"]));
@@ -54,5 +60,18 @@ describe("EMI XLSX authoritative export round trip", () => {
     const archive = unzipSync(createEmiAnalysisXlsx(createEmptyEmiProject("Empty"), [], ["forward"], {}));
     expect(Object.keys(archive)).toEqual(expect.arrayContaining(["[Content_Types].xml", "xl/workbook.xml", "xl/worksheets/sheet1.xml"]));
     expect(rows(strFromU8(archive["xl/worksheets/sheet1.xml"] as Uint8Array))).toHaveLength(1);
+  });
+
+  it("preserves raw invalid power values while leaving unavailable decomposition cells blank with reasons", () => {
+    const baseSource = dataset("passivity.csv", [10e9]);
+    const source: EmiDataset = { ...baseSource, points: [{ ...baseSource.points[0]!, s11: { real: Math.sqrt(1.00582), imaginary: 0 } }] };
+    const file = { id: "invalid", dataset: source, calculation: calculateEmiDataset(source), issues: [] };
+    const base = createEmptyEmiProject("Passivity audit");
+    const project: EmiProjectRecord = { ...base, datasets: [{ id: file.id, originalFilename: source.filename, parsedDataset: source, sampleMetadata: { displayName: "Invalid measured point" }, importedAt: base.createdAt, parserVersion: "test" }] };
+    const archive = unzipSync(createEmiAnalysisXlsx(project, [file], ["forward"], {}));
+    const sourceXml = strFromU8(archive["xl/worksheets/sheet1.xml"] as Uint8Array);
+    expect(Number(/<c r="Q2"><v>([^<]+)<\/v><\/c>/.exec(sourceXml)?.[1])).toBeCloseTo(1.00582, 12);
+    expect(sourceXml).toContain('<c r="O2"/>');
+    expect(sourceXml).toContain("SER is unavailable");
   });
 });

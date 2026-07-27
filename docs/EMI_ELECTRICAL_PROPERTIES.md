@@ -13,7 +13,7 @@ For multiple readings, MAXCalc calculates the arithmetic mean raw resistance and
 
 ## Thickness and conductivity
 
-Electrical thickness is entered in micrometers:
+Sample thickness is entered once in general metadata with an explicit unit. The electrical pipeline converts that authoritative value to micrometers:
 
 ```text
 thickness_m  = thickness_um × 1e-6
@@ -57,4 +57,3 @@ This empirical expression may not accurately represent thin, porous, anisotropic
 ## Calculation version
 
 New records store `1.0.0-four-point-probe-simon` plus the correction factor. A future convention change must introduce a new version rather than silently reinterpret historical results.
-

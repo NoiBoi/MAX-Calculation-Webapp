@@ -7,3 +7,4 @@ export * from "./replicates";
 export * from "./scientific-constants";
 export * from "./electrical-properties";
 export * from "./smoothing";
+export * from "./physical-validity";
