@@ -1,6 +1,10 @@
 import {
   EMI_PARSER_VERSION,
+  EMI_ELECTRICAL_CALCULATION_VERSION,
   ENGINE_VERSION,
+  FOUR_POINT_PROBE_CORRECTION_FACTOR,
+  calculateElectricalPropertySummary,
+  type ElectricalPropertySummary,
   type EmiDataset,
   type EmiDirection,
   type EmiInterpolationOptions,
@@ -10,7 +14,18 @@ import {
 import type { EmiArealDensityUnit, EmiThicknessUnit } from "@max-stoich/chemistry-engine";
 import { MaxStoichDatabase } from "../persistence/database";
 
-export const EMI_PROJECT_SCHEMA_VERSION = "1.0.0" as const;
+export const EMI_PROJECT_SCHEMA_VERSION = "2.0.0" as const;
+export const EMI_PROJECT_LEGACY_SCHEMA_VERSION = "1.0.0" as const;
+
+export interface EmiElectricalPropertyRecord {
+  readonly thicknessMicrometers?: number | null;
+  readonly rawResistanceReadingsOhm: readonly (number | null)[];
+  readonly correctionFactor: number;
+  readonly calculationVersion: string;
+  readonly measurementNote?: string;
+  /** Reproducible snapshot derived from the stored inputs; absent for invalid or partial inputs. */
+  readonly derived?: ElectricalPropertySummary;
+}
 
 export interface EmiSampleMetadata {
   readonly displayName: string;
@@ -34,6 +49,7 @@ export interface EmiProjectDataset {
   readonly sampleMetadata: EmiSampleMetadata;
   readonly importedAt: string;
   readonly parserVersion: string;
+  readonly electricalProperties?: EmiElectricalPropertyRecord;
 }
 
 export interface EmiReplicateGroupDefinition {
@@ -127,14 +143,54 @@ export class EmiProjectImportError extends Error {
   constructor(readonly code: "MALFORMED_PROJECT" | "UNSUPPORTED_PROJECT_VERSION", message: string) { super(message); }
 }
 
+export function calculateEmiElectricalRecord(input: Readonly<{
+  thicknessMicrometers?: number | null;
+  rawResistanceReadingsOhm?: readonly (number | null)[];
+  correctionFactor?: number;
+  measurementNote?: string;
+}>): EmiElectricalPropertyRecord {
+  const thicknessMicrometers = input.thicknessMicrometers;
+  const rawResistanceReadingsOhm = input.rawResistanceReadingsOhm ?? [];
+  const correctionFactor = input.correctionFactor ?? FOUR_POINT_PROBE_CORRECTION_FACTOR;
+  const calculated = calculateElectricalPropertySummary({ rawResistanceReadingsOhm, thicknessMicrometers, correctionFactor });
+  return {
+    thicknessMicrometers,
+    rawResistanceReadingsOhm,
+    correctionFactor,
+    calculationVersion: EMI_ELECTRICAL_CALCULATION_VERSION,
+    measurementNote: input.measurementNote,
+    ...(calculated.ok ? { derived: calculated.value } : {}),
+  };
+}
+
+function migrateEmiProject(value: Record<string, unknown>): EmiProjectRecord {
+  const datasets = (value.datasets as readonly Record<string, unknown>[]).map((entry) => {
+    const electrical = isRecord(entry.electricalProperties) ? entry.electricalProperties : undefined;
+    return {
+      ...entry,
+      ...(electrical ? { electricalProperties: calculateEmiElectricalRecord({
+        thicknessMicrometers: typeof electrical.thicknessMicrometers === "number" ? electrical.thicknessMicrometers : electrical.thicknessMicrometers === null ? null : undefined,
+        rawResistanceReadingsOhm: Array.isArray(electrical.rawResistanceReadingsOhm) ? electrical.rawResistanceReadingsOhm.map((reading) => typeof reading === "number" ? reading : null) : [],
+        correctionFactor: typeof electrical.correctionFactor === "number" ? electrical.correctionFactor : FOUR_POINT_PROBE_CORRECTION_FACTOR,
+        measurementNote: typeof electrical.measurementNote === "string" ? electrical.measurementNote : undefined,
+      }) } : {}),
+    };
+  });
+  return { ...value, schemaVersion: EMI_PROJECT_SCHEMA_VERSION, datasets } as unknown as EmiProjectRecord;
+}
+
 export function parseEmiProjectJson(text: string): EmiProjectRecord {
   let value: unknown;
   try { value = JSON.parse(text); } catch { throw new EmiProjectImportError("MALFORMED_PROJECT", "The selected file is not valid JSON."); }
   if (!isRecord(value)) throw new EmiProjectImportError("MALFORMED_PROJECT", "The project root must be a JSON object.");
-  if (value.schemaVersion !== EMI_PROJECT_SCHEMA_VERSION) throw new EmiProjectImportError("UNSUPPORTED_PROJECT_VERSION", `Unsupported EMI project schema ${String(value.schemaVersion ?? "missing")}; this release requires ${EMI_PROJECT_SCHEMA_VERSION}.`);
+  if (value.schemaVersion !== EMI_PROJECT_SCHEMA_VERSION && value.schemaVersion !== EMI_PROJECT_LEGACY_SCHEMA_VERSION) throw new EmiProjectImportError("UNSUPPORTED_PROJECT_VERSION", `Unsupported EMI project schema ${String(value.schemaVersion ?? "missing")}; this release supports ${EMI_PROJECT_LEGACY_SCHEMA_VERSION} and ${EMI_PROJECT_SCHEMA_VERSION}.`);
   if (value.recordType !== "maxcalc-emi-project" || typeof value.id !== "string" || typeof value.name !== "string" || typeof value.createdAt !== "string" || typeof value.updatedAt !== "string" || !Array.isArray(value.datasets) || !Array.isArray(value.groups)) throw new EmiProjectImportError("MALFORMED_PROJECT", "The project is missing required identity, timestamp, dataset, or group fields.");
   for (const [index, entry] of value.datasets.entries()) {
     if (!isRecord(entry) || typeof entry.id !== "string" || typeof entry.originalFilename !== "string" || typeof entry.importedAt !== "string" || typeof entry.parserVersion !== "string" || !isRecord(entry.parsedDataset) || !Array.isArray(entry.parsedDataset.points) || !isRecord(entry.sampleMetadata) || typeof entry.sampleMetadata.displayName !== "string") throw new EmiProjectImportError("MALFORMED_PROJECT", `Dataset ${index + 1} is incomplete or malformed.`);
+    if (entry.electricalProperties !== undefined) {
+      const electrical = entry.electricalProperties;
+      if (!isRecord(electrical) || !Array.isArray(electrical.rawResistanceReadingsOhm) || !electrical.rawResistanceReadingsOhm.every((reading) => reading === null || typeof reading === "number") || typeof electrical.correctionFactor !== "number" || typeof electrical.calculationVersion !== "string" || (electrical.thicknessMicrometers !== undefined && electrical.thicknessMicrometers !== null && typeof electrical.thicknessMicrometers !== "number")) throw new EmiProjectImportError("MALFORMED_PROJECT", `Dataset ${index + 1} has malformed electrical-property metadata.`);
+    }
   }
   const datasetIds = new Set(value.datasets.map((entry) => (entry as Record<string, unknown>).id));
   for (const [index, group] of value.groups.entries()) {
@@ -144,7 +200,7 @@ export function parseEmiProjectJson(text: string): EmiProjectRecord {
   const validMetrics = new Set(["SET", "SER", "SEA", "R", "T", "A"]);
   if (!Array.isArray(value.selectedDatasetIds) || !value.selectedDatasetIds.every((id) => typeof id === "string" && datasetIds.has(id)) || !Array.isArray(value.selectedDirections) || !value.selectedDirections.every((direction) => validDirections.has(String(direction))) || !Array.isArray(value.visibleMetrics) || !value.visibleMetrics.every((metric) => validMetrics.has(String(metric)))) throw new EmiProjectImportError("MALFORMED_PROJECT", "Project selections contain unknown datasets, directions, or metrics.");
   if (!isRecord(value.frequencyRangeHz) || !isRecord(value.interpolation) || typeof value.interpolation.enabled !== "boolean" || !["reference-grid", "frequency-interval", "point-count"].includes(String(value.interpolation.strategy)) || typeof value.interpolation.overlapOnly !== "boolean" || !isRecord(value.plot) || !isRecord(value.qualityControl) || typeof value.notes !== "string" || typeof value.calculationEngineVersion !== "string" || typeof value.parserVersion !== "string") throw new EmiProjectImportError("MALFORMED_PROJECT", "Project analysis, plot, or provenance settings are incomplete.");
-  return value as unknown as EmiProjectRecord;
+  return migrateEmiProject(value);
 }
 
 export function serializeEmiProject(project: EmiProjectRecord): string {
@@ -159,10 +215,10 @@ export function addEmiReplicateGroup(project: EmiProjectRecord, name: string, da
 
 export class EmiProjectRepository {
   constructor(private readonly database = new MaxStoichDatabase()) {}
-  list(): Promise<EmiProjectRecord[]> { return this.database.emiProjects.orderBy("updatedAt").reverse().toArray(); }
-  get(id: string): Promise<EmiProjectRecord | undefined> { return this.database.emiProjects.get(id); }
+  async list(): Promise<EmiProjectRecord[]> { return (await this.database.emiProjects.orderBy("updatedAt").reverse().toArray()).map((project) => migrateEmiProject(project as unknown as Record<string, unknown>)); }
+  async get(id: string): Promise<EmiProjectRecord | undefined> { const project = await this.database.emiProjects.get(id); return project ? migrateEmiProject(project as unknown as Record<string, unknown>) : undefined; }
   async save(project: EmiProjectRecord): Promise<EmiProjectRecord> {
-    const saved = { ...project, updatedAt: new Date().toISOString(), calculationEngineVersion: ENGINE_VERSION, parserVersion: EMI_PARSER_VERSION };
+    const saved = { ...project, schemaVersion: EMI_PROJECT_SCHEMA_VERSION, updatedAt: new Date().toISOString(), calculationEngineVersion: ENGINE_VERSION, parserVersion: EMI_PARSER_VERSION, datasets: project.datasets.map((entry) => ({ ...entry, ...(entry.electricalProperties ? { electricalProperties: calculateEmiElectricalRecord(entry.electricalProperties) } : {}) })) };
     await this.database.emiProjects.put(saved);
     return saved;
   }

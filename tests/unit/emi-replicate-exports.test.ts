@@ -20,7 +20,9 @@ describe("EMI replicate exports", () => {
     const band = createBandSummaryCsv(project, files, ["forward"], { minimumHz: 1e9, maximumHz: 2e9 });
     expect(band).toContain("specimen-first-group");
     expect(band).toContain("SET per mm");
+    expect(band).toContain("population-across-frequency-points");
+    expect(band).toContain("sample-across-specimen-means-n-minus-one");
     const manifest = JSON.parse(createEmiAnalysisManifest(project));
-    expect(manifest).toMatchObject({ manifestSchemaVersion: "1.0.0", aggregationSettings: { standardDeviation: "sample-n-minus-one" } });
+    expect(manifest).toMatchObject({ manifestSchemaVersion: "1.1.0", aggregationSettings: { standardDeviation: "sample-n-minus-one" }, theoreticalCalculation: { measuredSeriesReplacement: false } });
   });
 });

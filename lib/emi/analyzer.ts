@@ -1,5 +1,4 @@
 import {
-  calculateEmiStatistics,
   type EmiCalculationResult,
   type EmiDataset,
   type EmiDirection,
@@ -8,6 +7,8 @@ import {
   type EmiMetric,
   type EmiValidationIssue,
 } from "@max-stoich/chemistry-engine";
+import type { EmiProjectRecord } from "./project";
+import { buildDirectionalProcessedExport, buildSummaryExport, exportTableToCsv } from "./export-model";
 
 export const EMI_METRICS = ["SET", "SER", "SEA", "R", "T", "A"] as const satisfies readonly EmiMetric[];
 
@@ -159,36 +160,15 @@ export function aggregateEmiIssues(issues: readonly EmiValidationIssue[]): reado
   }).sort((left, right) => left.code.localeCompare(right.code));
 }
 
-function csvCell(value: string | number | null): string {
-  if (value === null) return "";
-  const text = String(value);
-  return /[",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
-}
-
-function csv(rows: readonly (readonly (string | number | null)[])[]): string {
-  return `${rows.map((row) => row.map(csvCell).join(",")).join("\r\n")}\r\n`;
-}
-
-export function createProcessedEmiCsv(files: readonly EmiAnalysisFile[], directions: readonly EmiDirection[]): string {
-  const header = ["Original filename", "Direction", "Frequency (Hz)", "Frequency (GHz)", "Reflection real", "Reflection imaginary", "Transmission real", "Transmission imaginary", "R", "T", "A", "SET (dB)", "SER (dB)", "SEA (dB)", "Validity flags", "Validation codes"];
-  const rows = files.flatMap((file) => directions.flatMap((direction) =>
-    buildProcessedRows(file.dataset, file.calculation, direction, file.issues).map((row) => [
-      row.filename, row.direction, row.frequencyHz, row.frequencyHz / 1e9,
-      row.reflectionReal, row.reflectionImaginary, row.transmissionReal, row.transmissionImaginary,
-      row.R, row.T, row.A, row.SET, row.SER, row.SEA, row.validity, row.validationCodes.join("|"),
-    ])));
-  return csv([header, ...rows]);
+export function createProcessedEmiCsv(files: readonly EmiAnalysisFile[], directions: readonly EmiDirection[], project?: EmiProjectRecord): string {
+  return exportTableToCsv(buildDirectionalProcessedExport(project, files, directions));
 }
 
 export function createSummaryStatisticsCsv(
   files: readonly EmiAnalysisFile[],
   directions: readonly EmiDirection[],
   range: EmiFrequencyRange,
+  project?: EmiProjectRecord,
 ): string {
-  const header = ["Original filename", "Direction", "Metric", "Range minimum (Hz)", "Range maximum (Hz)", "Points", "Valid points", "Excluded points", "Valid-point percentage", "Mean", "Median", "Population standard deviation", "Minimum", "Maximum"];
-  const rows = files.flatMap((file) => directions.flatMap((direction) => EMI_METRICS.map((metric) => {
-    const statistics = calculateEmiStatistics(file.calculation[direction], metric, range);
-    return [file.dataset.filename, direction, metric, range.minimumHz ?? "", range.maximumHz ?? "", statistics.count, statistics.validPointCount, statistics.excludedPointCount, statistics.validPointPercentage, statistics.mean, statistics.median, statistics.standardDeviation, statistics.minimum, statistics.maximum];
-  })));
-  return csv([header, ...rows]);
+  return exportTableToCsv(buildSummaryExport(project, files, directions, range));
 }

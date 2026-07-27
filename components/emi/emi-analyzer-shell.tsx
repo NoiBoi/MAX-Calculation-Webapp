@@ -38,7 +38,9 @@ import {
   type EmiSampleMetadata,
 } from "@/lib/emi/project";
 import { createBandSummaryCsv, createEmiAnalysisManifest, createEmiAnalysisSummaryHtml, createReplicatePointwiseCsv } from "@/lib/emi/replicate-exports";
+import { createEmiAnalysisXlsx } from "@/lib/emi/xlsx-export";
 import { EmiPlot, type EmiPlotBand, type EmiPlotTrace } from "./emi-plot";
+import { EmiElectricalPropertiesEditor } from "./emi-electrical-properties-editor";
 
 type ImportedFile =
   | Readonly<{ id: string; filename: string; status: "loading" }>
@@ -88,6 +90,11 @@ function downloadContent(filename: string, content: string, type: string): void 
   anchor.download = filename;
   anchor.click();
   URL.revokeObjectURL(url);
+}
+
+function downloadBytes(filename: string, content: Uint8Array, type: string): void {
+  const url = URL.createObjectURL(new Blob([content as BlobPart], { type }));
+  const anchor = document.createElement("a"); anchor.href = url; anchor.download = filename; anchor.click(); URL.revokeObjectURL(url);
 }
 
 export function EmiAnalyzerShell() {
@@ -310,7 +317,7 @@ export function EmiAnalyzerShell() {
               <label>Direction notes<textarea onChange={(event) => updateMetadata(file.id, { directionNotes: event.target.value || undefined })} rows={2} value={metadata?.directionNotes ?? ""} /></label>
               <label>General notes<textarea onChange={(event) => updateMetadata(file.id, { notes: event.target.value || undefined })} rows={2} value={metadata?.notes ?? ""} /></label>
             </div>
-          </details></>}
+          </details><EmiElectricalPropertiesEditor filename={file.filename} frequenciesHz={file.dataset.points.map((point) => point.frequencyHz)} onChange={(electricalProperties) => setProject((current) => ({ ...current, datasets: current.datasets.map((entry) => entry.id === file.id ? { ...entry, electricalProperties } : entry) }))} value={projectDataset?.electricalProperties} /></>}
         </article>; })}
       </div>}
       {ready.length > 0 && <div className="emi-bulk-edit"><h3>Bulk metadata edit</h3><p>Applies only to the currently selected files.</p><label>Group<input aria-label="Bulk group" onChange={(event) => setBulkGroup(event.target.value)} value={bulkGroup} /></label><label>Material<input aria-label="Bulk material" onChange={(event) => setBulkMaterial(event.target.value)} value={bulkMaterial} /></label><button className="ui-button" disabled={selected.length === 0 || (!bulkGroup && !bulkMaterial)} onClick={() => selected.forEach((file) => updateMetadata(file.id, { ...(bulkGroup ? { group: bulkGroup } : {}), ...(bulkMaterial ? { material: bulkMaterial } : {}) }))} type="button">Apply to {selected.length} selected file{selected.length === 1 ? "" : "s"}</button></div>}
@@ -409,7 +416,7 @@ export function EmiAnalyzerShell() {
       <section className="emi-panel" aria-label="CSV exports">
         <div className="emi-section-heading"><div><h2>8. Analysis notes and exports</h2><p>Blank shielding cells represent undefined metrics. Project and manifest JSON formats are versioned.</p></div></div>
         <label className="emi-project-description">Project notes<textarea onChange={(event) => setProject((current) => ({ ...current, notes: event.target.value }))} rows={4} value={project.notes} /></label>
-        <div className="emi-export-actions"><button className="ui-button ui-button-primary" onClick={() => downloadCsv("emi-processed-data.csv", createProcessedEmiCsv(selected, directions))} type="button">Export processed data CSV</button><button className="ui-button" onClick={() => downloadCsv("emi-summary-statistics.csv", createSummaryStatisticsCsv(selected, directions, range))} type="button">Export summary statistics CSV</button><button className="ui-button" disabled={project.groups.length === 0} onClick={() => downloadCsv("emi-replicate-pointwise-summary.csv", createReplicatePointwiseCsv(projectSnapshot(), ready, directions, interpolation))} type="button">Export replicate pointwise CSV</button><button className="ui-button" onClick={() => downloadCsv("emi-band-summary.csv", createBandSummaryCsv(projectSnapshot(), ready, directions, range))} type="button">Export band summary CSV</button><button className="ui-button" onClick={() => downloadContent("emi-analysis-manifest.json", createEmiAnalysisManifest(projectSnapshot()), "application/json;charset=utf-8")} type="button">Export analysis manifest</button><button className="ui-button" onClick={() => { const figures = [...document.querySelectorAll("svg[data-emi-plot]")].map((element) => new XMLSerializer().serializeToString(element)); downloadContent("emi-analysis-summary.html", createEmiAnalysisSummaryHtml(projectSnapshot(), figures), "text/html;charset=utf-8"); }} type="button">Export analysis summary HTML</button></div>
+        <div className="emi-export-actions"><button className="ui-button ui-button-primary" onClick={() => { const snapshot = projectSnapshot(); downloadBytes("emi-analysis.xlsx", createEmiAnalysisXlsx(snapshot, selected, directions, range), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"); }} type="button">Export analysis workbook XLSX</button><button className="ui-button" onClick={() => { const snapshot = projectSnapshot(); downloadCsv("emi-processed-data.csv", createProcessedEmiCsv(selected, directions, snapshot)); }} type="button">Export processed data CSV</button><button className="ui-button" onClick={() => { const snapshot = projectSnapshot(); downloadCsv("emi-summary-statistics.csv", createSummaryStatisticsCsv(selected, directions, range, snapshot)); }} type="button">Export summary statistics CSV</button><button className="ui-button" disabled={project.groups.length === 0} onClick={() => downloadCsv("emi-replicate-pointwise-summary.csv", createReplicatePointwiseCsv(projectSnapshot(), ready, directions, interpolation))} type="button">Export replicate pointwise CSV</button><button className="ui-button" onClick={() => downloadCsv("emi-band-summary.csv", createBandSummaryCsv(projectSnapshot(), ready, directions, range))} type="button">Export band summary CSV</button><button className="ui-button" onClick={() => downloadContent("emi-analysis-manifest.json", createEmiAnalysisManifest(projectSnapshot()), "application/json;charset=utf-8")} type="button">Export analysis manifest</button><button className="ui-button" onClick={() => { const figures = [...document.querySelectorAll("svg[data-emi-plot]")].map((element) => new XMLSerializer().serializeToString(element)); downloadContent("emi-analysis-summary.html", createEmiAnalysisSummaryHtml(projectSnapshot(), figures), "text/html;charset=utf-8"); }} type="button">Export analysis summary HTML</button></div>
       </section>
     </>}
   </div>;

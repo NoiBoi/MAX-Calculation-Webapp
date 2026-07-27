@@ -167,6 +167,12 @@ These are derived normalizations, not directly measured shielding quantities.
 They are omitted when metadata are missing, nonfinite, zero, or negative. Raw
 SET remains available beside every normalization.
 
+## Electrical properties and theoretical Simon estimate
+
+Optional four-point-probe measurements are calculated in the React-free engine. Raw resistance is converted to sheet resistance with the versioned factor 4.532; conductivity and resistivity use an explicit micrometer-to-meter conversion. Multiple readings are aggregated by arithmetic mean raw resistance before calculating the sample result.
+
+The Simon series uses conductivity in S/cm, frequency in MHz converted once from canonical Hz, and thickness in cm. It is labeled theoretical, remains separate from measured VNA SET, and is generated at the original unsmoothed frequency points. See `EMI_ELECTRICAL_PROPERTIES.md` for equations and the original literature citation.
+
 ## Interpretation limitations
 
 SEA is an effective logarithmic decomposition contribution satisfying

@@ -11,6 +11,7 @@ import {
   createSummaryStatisticsCsv,
   type EmiAnalysisFile,
 } from "../../lib/emi/analyzer";
+import { calculateEmiElectricalRecord, createEmptyEmiProject } from "../../lib/emi/project";
 
 function fixture(): EmiAnalysisFile {
   const dataset: EmiDataset = {
@@ -53,6 +54,18 @@ describe("EMI analyzer presentation helpers", () => {
     expect(csv).toContain('"sample, one.csv",forward,2000000000,2,0.2,0,0,0');
     expect(csv).toContain("warning,UNDEFINED_SET");
     expect(csv).toContain('"sample, one.csv",reverse');
+  });
+
+  it("adds separately labeled theoretical Simon values from canonical electrical data", () => {
+    const file = fixture();
+    const base = createEmptyEmiProject("Simon CSV");
+    const project = { ...base, datasets: [{ id: file.id, originalFilename: file.dataset.filename, parsedDataset: file.dataset, sampleMetadata: { displayName: "Sample", sampleId: "S-1" }, importedAt: base.createdAt, parserVersion: "test", electricalProperties: calculateEmiElectricalRecord({ thicknessMicrometers: 10, rawResistanceReadingsOhm: [1] }) }] };
+    const csv = createProcessedEmiCsv([file], ["forward"], project);
+    expect(csv.split("\r\n")[0]).toContain("Simon theoretical EMI SE (dB)");
+    expect(csv).toContain("Sample,S-1");
+    expect(csv).not.toMatch(/NaN|Infinity/);
+    const simonValue = /Sample,S-1,([^,]+)/.exec(csv)?.[1];
+    expect(Number(simonValue)).toBeCloseTo(44.235654402181716, 10);
   });
 
   it("aggregates warning counts, frequency ranges, and maximum violations", () => {

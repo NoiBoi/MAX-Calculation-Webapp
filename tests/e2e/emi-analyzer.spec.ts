@@ -73,6 +73,14 @@ test("EMI projects support bulk metadata, replicate interpolation, persistence, 
   await page.getByRole("button", { name: "Create group from selected" }).click();
   await expect(page.getByText(/same range different points/)).toBeVisible();
 
+  const firstCard = page.getByTestId("emi-file-card").filter({ hasText: "batch-1.1.csv" });
+  await firstCard.getByText("Electrical properties and Simon estimate").click();
+  await firstCard.getByLabel("Film thickness in micrometers for batch-1.1.csv").fill("10");
+  await firstCard.getByRole("button", { name: "Add reading" }).click();
+  await firstCard.getByLabel("Raw four-point-probe resistance 1 for batch-1.1.csv").fill("1");
+  await expect(firstCard.getByText(/22,065\.31333 S\/m/)).toBeVisible();
+  await expect(firstCard.getByText("3 unsmoothed theoretical points are available at the measured frequencies. They remain separate from measured SET.")).toBeVisible();
+
   await page.getByText("Advanced interpolation settings").click();
   await page.getByLabel("Enable interpolation for incompatible grids").check();
   await expect(page.getByText(/aggregate frequencies \(interpolated\)/)).toBeVisible();
@@ -88,10 +96,17 @@ test("EMI projects support bulk metadata, replicate interpolation, persistence, 
   const summaryDownload = page.waitForEvent("download");
   await page.getByRole("button", { name: "Export analysis summary HTML" }).click();
   await expect((await summaryDownload).suggestedFilename()).toBe("emi-analysis-summary.html");
+  const workbookDownload = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Export analysis workbook XLSX" }).click();
+  await expect((await workbookDownload).suggestedFilename()).toBe("emi-analysis.xlsx");
 
   await page.getByRole("button", { name: "New project" }).click();
   await expect(page.getByText("No files loaded")).toBeVisible();
   await page.getByLabel("Open saved project").selectOption({ index: 1 });
   await expect(page.getByText("Restored Saved replicate project from local storage.")).toBeVisible();
   await expect(page.getByText("2 of 2 files ready")).toBeVisible();
+  const restoredCard = page.getByTestId("emi-file-card").filter({ hasText: "batch-1.1.csv" });
+  await restoredCard.getByText("Electrical properties and Simon estimate").click();
+  await expect(restoredCard.getByLabel("Film thickness in micrometers for batch-1.1.csv")).toHaveValue("10");
+  await expect(restoredCard.getByLabel("Raw four-point-probe resistance 1 for batch-1.1.csv")).toHaveValue("1");
 });
