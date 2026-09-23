@@ -52,6 +52,9 @@ test("EMI analyzer imports multiple files, shows failures, switches directions, 
 
   await page.getByLabel("Minimum frequency").fill("1");
   await page.getByLabel("Maximum frequency").fill("2");
+  const powerSummary = page.getByRole("table", { name: "Power coefficient summary" });
+  await expect(powerSummary.getByRole("columnheader", { name: "Bidirectional R" })).toBeVisible();
+  await expect(powerSummary.getByRole("row").filter({ hasText: "alpha.csv" })).toContainText("0.3375");
   const alphaForwardSetRow = page.getByRole("row").filter({ hasText: "alpha.csv" }).filter({ hasText: "Forward" }).filter({ hasText: "SET" }).first();
   await expect(alphaForwardSetRow).toContainText("1/2 (50%)");
 
@@ -76,6 +79,12 @@ test("EMI analyzer renders invalid shielding gaps and downloads both CSV exports
   const summaryDownload = page.waitForEvent("download");
   await page.getByRole("button", { name: "Export summary statistics CSV" }).click();
   await expect((await summaryDownload).suggestedFilename()).toBe("emi-summary-statistics.csv");
+
+  const coefficientDownload = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Export power coefficients CSV" }).click();
+  const coefficientCsv = await downloadText(await coefficientDownload);
+  expect(coefficientCsv).toContain("Bidirectional R mean");
+  expect(coefficientCsv).toContain("equal-direction-mean");
 });
 
 test("EMI thickness, themed electrical controls, and graph interaction use one canonical model", async ({ page }, testInfo) => {

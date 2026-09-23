@@ -7,11 +7,13 @@ import {
 import {
   aggregateEmiIssues,
   createMetricSegments,
+  createPowerCoefficientSummaryCsv,
   createProcessedEmiCsv,
   createSummaryStatisticsCsv,
   type EmiAnalysisFile,
 } from "../../lib/emi/analyzer";
 import { calculateEmiElectricalRecord, createEmptyEmiProject } from "../../lib/emi/project";
+import { buildPowerCoefficientSummaryExport } from "../../lib/emi/export-model";
 
 function fixture(): EmiAnalysisFile {
   const dataset: EmiDataset = {
@@ -45,6 +47,21 @@ describe("EMI analyzer presentation helpers", () => {
     expect(csv).toContain("forward,SET,1000000000,2000000000,2,1,1,50");
     expect(csv).toContain("reverse,SET,1000000000,2000000000,2,2,0,100");
     expect(file.dataset.points).toHaveLength(3);
+  });
+
+  it("exports directional and bidirectional R, T, and A band means", () => {
+    const file = fixture();
+    const selectedRange = { minimumHz: 1e9, maximumHz: 2e9 };
+    const csv = createPowerCoefficientSummaryCsv([file], selectedRange);
+    const row = buildPowerCoefficientSummaryExport(undefined, [file], selectedRange).rows[0]!;
+    expect(csv.split("\r\n")[0]).toContain("Bidirectional R mean");
+    expect(csv).toContain("equal-direction-mean");
+    expect(row.forwardR).toBeCloseTo(0.025, 14);
+    expect(row.reverseR).toBeCloseTo(0.065, 14);
+    expect(row.bidirectionalR).toBeCloseTo(0.045, 14);
+    expect(row.bidirectionalT).toBeCloseTo(0.125, 14);
+    expect(row.bidirectionalA).toBeCloseTo(0.83, 14);
+    expect(row.powerBalanceResidual).toBeCloseTo(0, 14);
   });
 
   it("exports raw directional values, calculations, validity, and codes", () => {

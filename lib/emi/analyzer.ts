@@ -8,7 +8,7 @@ import {
   type EmiValidationIssue,
 } from "@max-stoich/chemistry-engine";
 import type { EmiProjectRecord } from "./project";
-import { buildDirectionalProcessedExport, buildSummaryExport, exportTableToCsv } from "./export-model";
+import { buildDirectionalProcessedExport, buildPowerCoefficientSummaryExport, buildSummaryExport, exportTableToCsv } from "./export-model";
 
 export const EMI_METRICS = ["SET", "SER", "SEA", "R", "T", "A"] as const satisfies readonly EmiMetric[];
 
@@ -171,4 +171,12 @@ export function createSummaryStatisticsCsv(
   project?: EmiProjectRecord,
 ): string {
   return exportTableToCsv(buildSummaryExport(project, files, directions, range));
+}
+
+export function createPowerCoefficientSummaryCsv(
+  files: readonly EmiAnalysisFile[],
+  range: EmiFrequencyRange,
+  project?: EmiProjectRecord,
+): string {
+  return exportTableToCsv(buildPowerCoefficientSummaryExport(project, files, range));
 }

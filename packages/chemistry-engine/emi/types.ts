@@ -1,6 +1,7 @@
 export type EmiDirection = "forward" | "reverse";
 export type SParameter = "s11" | "s21" | "s22" | "s12";
 export type EmiMetric = "SET" | "SER" | "SEA" | "R" | "T" | "A";
+export type EmiPowerCoefficientMetric = "R" | "T" | "A";
 export type EmiIssueSeverity = "error" | "warning";
 
 export type EmiIssueCode =
@@ -124,6 +125,17 @@ export interface EmiMetricStatistics {
   readonly standardDeviation: number | null;
   readonly minimum: number | null;
   readonly maximum: number | null;
+}
+
+/** Equal-weight directional band summary matching the supplied R/T/A workbook convention. */
+export interface EmiBidirectionalPowerCoefficientSummary {
+  readonly metric: EmiPowerCoefficientMetric;
+  readonly forward: EmiMetricStatistics;
+  readonly reverse: EmiMetricStatistics;
+  readonly forwardMean: number | null;
+  readonly reverseMean: number | null;
+  readonly bidirectionalMean: number | null;
+  readonly method: "equal-direction-mean";
 }
 
 export type EmiGridCompatibility = "exact-grid-match" | "same-range-different-points" | "partial-overlap" | "nonoverlap";

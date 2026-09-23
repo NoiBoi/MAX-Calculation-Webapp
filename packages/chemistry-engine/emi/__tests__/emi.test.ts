@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { calculateEmiDataset, calculateEmiPoint } from "../calculations";
 import { parseKeysightCsv } from "../parser";
-import { calculateEmiStatistics } from "../statistics";
+import { calculateBidirectionalPowerCoefficientSummary, calculateEmiStatistics } from "../statistics";
 import type { EmiDataset, EmiDirectionalPointResult, EmiFrequencyPoint } from "../types";
 import { validateEmiDataset } from "../validation";
 
@@ -125,6 +125,24 @@ describe("directional EMI calculations", () => {
       expect(result.SER).toBeCloseTo(row.expected[1], 10);
       expect(result.SEA).toBeCloseTo(row.expected[2], 10);
     }
+  });
+
+  it("reports workbook-style bidirectional R, T, and A means without replacing directional results", () => {
+    const calculation = calculateEmiDataset(dataset([point()]));
+    const summaries = (["R", "T", "A"] as const).map((metric) =>
+      calculateBidirectionalPowerCoefficientSummary(calculation, metric));
+
+    expect(summaries.map((summary) => ({
+      metric: summary.metric,
+      forward: summary.forwardMean,
+      reverse: summary.reverseMean,
+      bidirectional: summary.bidirectionalMean,
+    }))).toEqual([
+      { metric: "R", forward: 0.25, reverse: 0, bidirectional: 0.125 },
+      { metric: "T", forward: 0.25, reverse: 0.0625, bidirectional: 0.15625 },
+      { metric: "A", forward: 0.5, reverse: 0.9375, bidirectional: 0.71875 },
+    ]);
+    expect(summaries.every((summary) => summary.method === "equal-direction-mean")).toBe(true);
   });
 });
 

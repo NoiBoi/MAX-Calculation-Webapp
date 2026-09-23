@@ -1,9 +1,12 @@
 import {
+  calculateBidirectionalPowerCoefficientSummary,
   calculateEmiStatistics,
   calculateSimonSeries,
   diagnoseEmiPhysicalValidity,
   type EmiDirection,
   type EmiFrequencyRange,
+  type EmiPowerCoefficientMetric,
+  EMI_POWER_COEFFICIENT_METRICS,
 } from "@max-stoich/chemistry-engine";
 import { buildProcessedRows, EMI_METRICS, type EmiAnalysisFile } from "./analyzer";
 import { getAuthoritativeThicknessMicrometers, type EmiProjectRecord } from "./project";
@@ -78,6 +81,37 @@ export function buildSummaryExport(project: EmiProjectRecord | undefined, files:
   return { name: "Summary Statistics", columns, rows };
 }
 
+export function buildPowerCoefficientSummaryExport(project: EmiProjectRecord | undefined, files: readonly EmiAnalysisFile[], range: EmiFrequencyRange): EmiExportTable {
+  const columns = [
+    text("originalFilename", "Original filename"), text("displayName", "Display name"), text("sampleId", "Sample ID"),
+    number("minimumHz", "Range minimum (Hz)"), number("maximumHz", "Range maximum (Hz)"),
+    number("forwardR", "Forward R mean"), number("reverseR", "Reverse R mean"), number("bidirectionalR", "Bidirectional R mean"),
+    number("forwardT", "Forward T mean"), number("reverseT", "Reverse T mean"), number("bidirectionalT", "Bidirectional T mean"),
+    number("forwardA", "Forward A mean"), number("reverseA", "Reverse A mean"), number("bidirectionalA", "Bidirectional A mean"),
+    number("powerBalanceResidual", "A = 1 - R - T check"), text("method", "Bidirectional averaging method"),
+    number("forwardValidPoints", "Common valid points (forward)"), number("reverseValidPoints", "Common valid points (reverse)"),
+  ];
+  const rows = files.map((file) => {
+    const sample = metadata(project, file.id)?.sampleMetadata;
+    const summaries = Object.fromEntries(EMI_POWER_COEFFICIENT_METRICS.map((metric) => [metric, calculateBidirectionalPowerCoefficientSummary(file.calculation, metric, range)])) as Record<EmiPowerCoefficientMetric, ReturnType<typeof calculateBidirectionalPowerCoefficientSummary>>;
+    const R = summaries.R; const T = summaries.T; const A = summaries.A;
+    const powerBalanceResidual = R.bidirectionalMean === null || T.bidirectionalMean === null || A.bidirectionalMean === null
+      ? null
+      : A.bidirectionalMean - (1 - R.bidirectionalMean - T.bidirectionalMean);
+    return {
+      originalFilename: file.dataset.filename, displayName: sample?.displayName ?? file.dataset.filename, sampleId: sample?.sampleId ?? "",
+      minimumHz: range.minimumHz ?? null, maximumHz: range.maximumHz ?? null,
+      forwardR: R.forwardMean, reverseR: R.reverseMean, bidirectionalR: R.bidirectionalMean,
+      forwardT: T.forwardMean, reverseT: T.reverseMean, bidirectionalT: T.bidirectionalMean,
+      forwardA: A.forwardMean, reverseA: A.reverseMean, bidirectionalA: A.bidirectionalMean,
+      powerBalanceResidual, method: R.method,
+      forwardValidPoints: Math.min(R.forward.validPointCount, T.forward.validPointCount, A.forward.validPointCount),
+      reverseValidPoints: Math.min(R.reverse.validPointCount, T.reverse.validPointCount, A.reverse.validPointCount),
+    };
+  });
+  return { name: "Power Coefficients", columns, rows };
+}
+
 export function buildElectricalPropertiesExport(project: EmiProjectRecord): EmiExportTable {
   const columns = [text("displayName", "Sample name"), text("datasetId", "Dataset ID"), text("sampleId", "Sample ID"), number("thicknessUm", "Thickness (µm)"), number("readingNumber", "Raw resistance reading number"), number("rawResistance", "Raw resistance (Ω)"), number("correctionFactor", "Correction factor"), number("sheetResistance", "Sheet resistance (Ω/sq)"), number("meanRawResistance", "Mean raw resistance (Ω)"), number("conductivitySm", "Conductivity (S/m)"), number("conductivityScm", "Conductivity (S/cm)"), number("resistivityOhmM", "Resistivity (Ω·m)"), number("resistivityOhmCm", "Resistivity (Ω·cm)"), text("aggregation", "Aggregation method"), text("calculationVersion", "Calculation version"), text("measurementNote", "Measurement note")];
   const rows = project.datasets.flatMap((entry) => {
@@ -89,7 +123,7 @@ export function buildElectricalPropertiesExport(project: EmiProjectRecord): EmiE
 }
 
 export function buildEmiExportTables(project: EmiProjectRecord, files: readonly EmiAnalysisFile[], directions: readonly EmiDirection[], range: EmiFrequencyRange): readonly EmiExportTable[] {
-  return [buildFrequencyResolvedExport(project, files), buildDirectionalProcessedExport(project, files, directions), buildSummaryExport(project, files, directions, range), buildElectricalPropertiesExport(project)];
+  return [buildFrequencyResolvedExport(project, files), buildDirectionalProcessedExport(project, files, directions), buildPowerCoefficientSummaryExport(project, files, range), buildSummaryExport(project, files, directions, range), buildElectricalPropertiesExport(project)];
 }
 
 export function exportTableToCsv(table: EmiExportTable): string {

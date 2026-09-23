@@ -1,4 +1,14 @@
-import type { EmiDirectionalPointResult, EmiFrequencyRange, EmiMetric, EmiMetricStatistics } from "./types";
+import type {
+  EmiBidirectionalPowerCoefficientSummary,
+  EmiCalculationResult,
+  EmiDirectionalPointResult,
+  EmiFrequencyRange,
+  EmiMetric,
+  EmiMetricStatistics,
+  EmiPowerCoefficientMetric,
+} from "./types";
+
+export const EMI_POWER_COEFFICIENT_METRICS = ["R", "T", "A"] as const satisfies readonly EmiPowerCoefficientMetric[];
 
 /** Calculate population statistics over an inclusive frequency range. */
 export function calculateEmiStatistics(
@@ -26,5 +36,31 @@ export function calculateEmiStatistics(
   return {
     metric, count, validPointCount, excludedPointCount, validPointPercentage, excludedPointPercentage,
     mean, median, standardDeviation: Math.sqrt(variance), minimum: sorted[0] as number, maximum: sorted[sorted.length - 1] as number,
+  };
+}
+
+/**
+ * Summarize a measured power coefficient over a band in each direction, then
+ * average the two directional means with equal weight. Directional data remain
+ * authoritative and are never replaced by this presentation summary.
+ */
+export function calculateBidirectionalPowerCoefficientSummary(
+  calculation: EmiCalculationResult,
+  metric: EmiPowerCoefficientMetric,
+  range: EmiFrequencyRange = {},
+): EmiBidirectionalPowerCoefficientSummary {
+  const forward = calculateEmiStatistics(calculation.forward, metric, range);
+  const reverse = calculateEmiStatistics(calculation.reverse, metric, range);
+  const bidirectionalMean = forward.mean === null || reverse.mean === null
+    ? null
+    : (forward.mean + reverse.mean) / 2;
+  return {
+    metric,
+    forward,
+    reverse,
+    forwardMean: forward.mean,
+    reverseMean: reverse.mean,
+    bidirectionalMean,
+    method: "equal-direction-mean",
   };
 }

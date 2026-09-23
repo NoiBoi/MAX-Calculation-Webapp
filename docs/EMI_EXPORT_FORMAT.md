@@ -14,6 +14,10 @@ One row per dataset and original measured frequency. Columns include original/di
 
 One row per dataset, selected direction, and original frequency. This preserves the existing processed-CSV structure and adds editable identity plus separately labeled Simon fields.
 
+### Power Coefficients
+
+One row per dataset with forward, reverse, and equal-direction band means for measured R, T, and A. The sheet includes an explicit `A = 1 - R - T` residual, the selected frequency range, valid-point counts, and the averaging-method label. The bidirectional values summarize the two directional band means; they do not replace directional results or average complex S-parameters.
+
 ### Summary Statistics
 
 One row per dataset, selected direction, and measured metric. The standard deviation is the population standard deviation across valid frequency points, matching the in-app single-dataset summary.
@@ -25,6 +29,7 @@ One row per raw resistance reading. Sample aggregate values are repeated so ever
 ## CSV exports
 
 - Processed data CSV uses the same authoritative directional export model as the workbook.
+- Power coefficients CSV uses the same forward/reverse/bidirectional summary model as the workbook.
 - Summary statistics CSV uses the same authoritative summary model as the workbook.
 - Replicate pointwise CSV reports sample statistics and contributing counts.
 - Band-summary CSV distinguishes population deviation across frequency points from sample deviation across specimen means.

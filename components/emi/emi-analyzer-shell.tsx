@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   EMI_PARSER_VERSION,
   ENGINE_VERSION,
+  EMI_POWER_COEFFICIENT_METRICS,
+  calculateBidirectionalPowerCoefficientSummary,
   calculateEmiDataset,
   calculateSimonSeries,
   calculatePointwiseReplicateStatistics,
@@ -20,11 +22,13 @@ import {
   type EmiFrequencyRange,
   type EmiInterpolationOptions,
   type EmiMetric,
+  type EmiPowerCoefficientMetric,
   type EmiValidationIssue,
 } from "@max-stoich/chemistry-engine";
 import {
   aggregateEmiIssues,
   buildProcessedRows,
+  createPowerCoefficientSummaryCsv,
   createProcessedEmiCsv,
   createSummaryStatisticsCsv,
   EMI_METRICS,
@@ -71,6 +75,10 @@ function formatNumber(value: number | null | undefined, digits = 6): string {
   if (value === null || value === undefined) return "—";
   if (!Number.isFinite(value)) return String(value);
   return value.toLocaleString(undefined, { maximumSignificantDigits: digits });
+}
+
+function formatIdentityResidual(value: number | null): string {
+  return value !== null && Math.abs(value) <= 1e-12 ? "0" : formatNumber(value);
 }
 
 function formatFrequency(value: number | undefined, unit: FrequencyUnit): string {
@@ -279,6 +287,14 @@ export function EmiAnalyzerShell() {
     setRange((current) => ({ ...current, [boundary]: value === "" ? undefined : Number(value) * factor }));
   };
   const status = files.some((file) => file.status === "loading") ? "Reading files locally…" : files.length === 0 ? "No files loaded" : `${ready.length} of ${files.length} files ready`;
+  const powerCoefficientRows = useMemo(() => selected.map((file) => {
+    const summaries = Object.fromEntries(EMI_POWER_COEFFICIENT_METRICS.map((metric) => [metric, calculateBidirectionalPowerCoefficientSummary(file.calculation, metric, range)])) as Record<EmiPowerCoefficientMetric, ReturnType<typeof calculateBidirectionalPowerCoefficientSummary>>;
+    const R = summaries.R; const T = summaries.T; const A = summaries.A;
+    const balanceResidual = R.bidirectionalMean === null || T.bidirectionalMean === null || A.bidirectionalMean === null
+      ? null
+      : A.bidirectionalMean - (1 - R.bidirectionalMean - T.bidirectionalMean);
+    return { file, R, T, A, balanceResidual };
+  }), [range, selected]);
   const comparisonEntries = useMemo(() => {
     const individual = ready.flatMap((file) => directions.map((direction) => {
       const metadata = project.datasets.find((entry) => entry.id === file.id)?.sampleMetadata;
@@ -411,6 +427,10 @@ export function EmiAnalyzerShell() {
     {selected.length === 0 ? <section className="emi-panel emi-empty-state"><h2>Select a successfully parsed file to analyze</h2><p>Plots, statistics, quality checks, tabular data, and exports will appear here.</p></section> : <>
       <section className="emi-panel" aria-label="Summary statistics">
         <div className="emi-section-heading"><div><h2>3. Summary statistics</h2><p>Each file remains independent. Invalid metric values are excluded and counted explicitly.</p></div></div>
+        <h3>Measured power-coefficient band means</h3>
+        <p className="emi-supporting">R and T are squared complex S-parameter magnitudes; A = 1 − R − T. The bidirectional result is the equal-weight mean of the forward and reverse band means, matching the supplied workbook convention without replacing either direction.</p>
+        <div className="emi-table-scroll"><table className="emi-table" aria-label="Power coefficient summary"><thead><tr><th>File</th><th>Forward R</th><th>Reverse R</th><th>Bidirectional R</th><th>Forward T</th><th>Reverse T</th><th>Bidirectional T</th><th>Forward A</th><th>Reverse A</th><th>Bidirectional A</th><th>A identity residual</th><th>Common valid points (F/R)</th></tr></thead><tbody>{powerCoefficientRows.map(({ file, R, T, A, balanceResidual }) => <tr key={`${file.id}-power-coefficients`}><td>{file.filename}</td><td>{formatNumber(R.forwardMean)}</td><td>{formatNumber(R.reverseMean)}</td><td>{formatNumber(R.bidirectionalMean)}</td><td>{formatNumber(T.forwardMean)}</td><td>{formatNumber(T.reverseMean)}</td><td>{formatNumber(T.bidirectionalMean)}</td><td>{formatNumber(A.forwardMean)}</td><td>{formatNumber(A.reverseMean)}</td><td>{formatNumber(A.bidirectionalMean)}</td><td>{formatIdentityResidual(balanceResidual)}</td><td>{Math.min(R.forward.validPointCount, T.forward.validPointCount, A.forward.validPointCount)}/{Math.min(R.reverse.validPointCount, T.reverse.validPointCount, A.reverse.validPointCount)}</td></tr>)}</tbody></table></div>
+        <h3>Directional metric statistics</h3>
         <div className="emi-table-scroll"><table className="emi-table"><thead><tr><th>File</th><th>Direction</th><th>Metric</th><th>Mean</th><th>Median</th><th>Std. dev.</th><th>Minimum</th><th>Maximum</th><th>Valid points</th></tr></thead><tbody>
           {selected.flatMap((file) => directions.flatMap((direction) => EMI_METRICS.map((metric) => {
             const stat = calculateEmiStatistics(file.calculation[direction], metric, range);
@@ -475,7 +495,7 @@ export function EmiAnalyzerShell() {
       <section className="emi-panel" aria-label="CSV exports">
         <div className="emi-section-heading"><div><h2>10. Analysis notes and exports</h2><p>Blank shielding cells represent undefined metrics. Project and manifest JSON formats are versioned.</p></div></div>
         <label className="emi-project-description">Project notes<textarea onChange={(event) => setProject((current) => ({ ...current, notes: event.target.value }))} rows={4} value={project.notes} /></label>
-        <div className="emi-export-actions"><button className="ui-button ui-button-primary" onClick={() => { const snapshot = projectSnapshot(); downloadBytes("emi-analysis.xlsx", createEmiAnalysisXlsx(snapshot, selected, directions, range), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"); }} type="button">Export analysis workbook XLSX</button><button className="ui-button" onClick={() => { const snapshot = projectSnapshot(); downloadCsv("emi-processed-data.csv", createProcessedEmiCsv(selected, directions, snapshot)); }} type="button">Export processed data CSV</button><button className="ui-button" onClick={() => { const snapshot = projectSnapshot(); downloadCsv("emi-summary-statistics.csv", createSummaryStatisticsCsv(selected, directions, range, snapshot)); }} type="button">Export summary statistics CSV</button><button className="ui-button" disabled={project.groups.length === 0} onClick={() => downloadCsv("emi-replicate-pointwise-summary.csv", createReplicatePointwiseCsv(projectSnapshot(), ready, directions, interpolation))} type="button">Export replicate pointwise CSV</button><button className="ui-button" onClick={() => downloadCsv("emi-band-summary.csv", createBandSummaryCsv(projectSnapshot(), ready, directions, range))} type="button">Export band summary CSV</button><button className="ui-button" onClick={() => downloadContent("emi-analysis-manifest.json", createEmiAnalysisManifest(projectSnapshot()), "application/json;charset=utf-8")} type="button">Export analysis manifest</button><button className="ui-button" onClick={() => { const figures = [...document.querySelectorAll("svg[data-emi-plot]")].map((element) => new XMLSerializer().serializeToString(element)); downloadContent("emi-analysis-summary.html", createEmiAnalysisSummaryHtml(projectSnapshot(), figures), "text/html;charset=utf-8"); }} type="button">Export analysis summary HTML</button></div>
+        <div className="emi-export-actions"><button className="ui-button ui-button-primary" onClick={() => { const snapshot = projectSnapshot(); downloadBytes("emi-analysis.xlsx", createEmiAnalysisXlsx(snapshot, selected, directions, range), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"); }} type="button">Export analysis workbook XLSX</button><button className="ui-button" onClick={() => { const snapshot = projectSnapshot(); downloadCsv("emi-processed-data.csv", createProcessedEmiCsv(selected, directions, snapshot)); }} type="button">Export processed data CSV</button><button className="ui-button" onClick={() => { const snapshot = projectSnapshot(); downloadCsv("emi-power-coefficients.csv", createPowerCoefficientSummaryCsv(selected, range, snapshot)); }} type="button">Export power coefficients CSV</button><button className="ui-button" onClick={() => { const snapshot = projectSnapshot(); downloadCsv("emi-summary-statistics.csv", createSummaryStatisticsCsv(selected, directions, range, snapshot)); }} type="button">Export summary statistics CSV</button><button className="ui-button" disabled={project.groups.length === 0} onClick={() => downloadCsv("emi-replicate-pointwise-summary.csv", createReplicatePointwiseCsv(projectSnapshot(), ready, directions, interpolation))} type="button">Export replicate pointwise CSV</button><button className="ui-button" onClick={() => downloadCsv("emi-band-summary.csv", createBandSummaryCsv(projectSnapshot(), ready, directions, range))} type="button">Export band summary CSV</button><button className="ui-button" onClick={() => downloadContent("emi-analysis-manifest.json", createEmiAnalysisManifest(projectSnapshot()), "application/json;charset=utf-8")} type="button">Export analysis manifest</button><button className="ui-button" onClick={() => { const figures = [...document.querySelectorAll("svg[data-emi-plot]")].map((element) => new XMLSerializer().serializeToString(element)); downloadContent("emi-analysis-summary.html", createEmiAnalysisSummaryHtml(projectSnapshot(), figures), "text/html;charset=utf-8"); }} type="button">Export analysis summary HTML</button></div>
       </section>
     </>}
   </div>;

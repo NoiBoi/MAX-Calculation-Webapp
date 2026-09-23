@@ -76,6 +76,19 @@ SEA = -10 log10(T / (1 - R))
 residual = SET - SER - SEA
 ```
 
+The measured power-coefficient summary retains the forward and reverse band
+means and adds a separately labeled bidirectional value:
+
+```text
+bidirectional mean = (forward band mean + reverse band mean) / 2
+```
+
+This equal-direction summary matches the convention in the supplied updated
+R/T/A workbook. It is a presentation and export summary only; it does not
+average complex S-parameters or replace either directional series. Its power
+balance check is `Amean - (1 - Rmean - Tmean)` and should be near zero when the
+same finite frequency points contribute to all three metrics.
+
 No measured power or logarithm input is clamped. R, T, and A are returned even
 when a logarithmic metric is undefined. SET requires finite `T > 0`; SER
 requires finite `1 - R > 0`; SEA requires both. Undefined metrics are `null`.

@@ -30,7 +30,7 @@ describe("EMI XLSX authoritative export round trip", () => {
     ] };
     const archive = unzipSync(createEmiAnalysisXlsx(project, files, ["forward", "reverse"], { minimumHz: 9e9, maximumHz: 12e9 }));
     const workbook = strFromU8(archive["xl/workbook.xml"] as Uint8Array);
-    for (const name of ["Frequency Data", "Directional Data", "Summary Statistics", "Electrical Properties"]) expect(workbook).toContain(`name="${name}"`);
+    for (const name of ["Frequency Data", "Directional Data", "Power Coefficients", "Summary Statistics", "Electrical Properties"]) expect(workbook).toContain(`name="${name}"`);
 
     const frequencyRows = rows(strFromU8(archive["xl/worksheets/sheet1.xml"] as Uint8Array));
     expect(frequencyRows).toHaveLength(7);
@@ -47,7 +47,11 @@ describe("EMI XLSX authoritative export round trip", () => {
     expect(frequencySheet).toContain("<autoFilter");
     expect(frequencySheet).toContain("<cols>");
 
-    const electricalRows = rows(strFromU8(archive["xl/worksheets/sheet4.xml"] as Uint8Array));
+    const coefficientRows = rows(strFromU8(archive["xl/worksheets/sheet3.xml"] as Uint8Array));
+    expect(coefficientRows[0]).toEqual(expect.arrayContaining(["Forward R mean", "Reverse R mean", "Bidirectional R mean", "A = 1 - R - T check"]));
+    expect(coefficientRows).toHaveLength(4);
+
+    const electricalRows = rows(strFromU8(archive["xl/worksheets/sheet5.xml"] as Uint8Array));
     expect(electricalRows[0]).toEqual(expect.arrayContaining(["Raw resistance (Ω)", "Conductivity (S/m)", "Calculation version"]));
     expect(electricalRows).toHaveLength(6);
     expect(electricalRows[1]?.[5]).toBe(1);
