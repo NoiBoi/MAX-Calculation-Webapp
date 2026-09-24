@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import {
   downloadText,
@@ -181,19 +180,6 @@ export function DataManagementShell() {
         activeSection="settings"
         status={status}
         title="Settings, layouts, and local data"
-        contextualActions={
-          <>
-            <Link className="ui-button" href="/workspace">
-              Workspace
-            </Link>
-            <Link className="ui-button" href="/compare">
-              Comparison
-            </Link>
-            <Link className="ui-button" href="/emi">
-              EMI Analyzer
-            </Link>
-          </>
-        }
       />
       <PageContainer className="grid gap-4 lg:grid-cols-2" width="settings">
         <UserSettingsPanel onStatus={setStatus} repositories={repositories} />

@@ -4,6 +4,6 @@ export function CreatorCredit({ className = "creator-credit" }: { readonly class
     <span aria-hidden="true">·</span>
     <a href="mailto:deng301@purdue.edu">deng301@purdue.edu <span className="credit-inquiry">for inquiries</span></a>
     <span aria-hidden="true">·</span>
-    <span>Built for the Anasori Lab</span>
+    <span>Built for LMSL/ICoN PCL</span>
   </footer>;
 }

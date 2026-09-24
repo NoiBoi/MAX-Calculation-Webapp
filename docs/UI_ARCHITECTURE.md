@@ -4,6 +4,14 @@
 
 `MAXCalc` is the authoritative user-facing product name in navigation, authentication, recovery, settings, comparison, print, metadata, and accessible labels. Existing internal `max-stoich` identifiers remain unchanged where they participate in package resolution, IndexedDB and local-storage continuity, cloud or backup record types, migrations, routes, exports, or historical fixtures.
 
+## Workspace hierarchy
+
+The shared `AppHeader` is the Level 1 application shell. Its custom `WorkspaceSwitcher` is the only Level 2 navigation among Calculator (`/workspace`), Comparison (`/compare`), EMI Analysis (`/emi`), and XRD Analysis (`/xrd`). Documentation, Settings, account, and appearance remain global utilities; workspace commands do not belong in this row.
+
+Each route owns Level 3 functionality and preserves its existing scientific state architecture. Calculator and Comparison retain their dedicated command bars. EMI keeps import, analysis, visualization, and export inside the EMI route. XRD is an explicit development placeholder and performs no scientific analysis.
+
+The switcher uses links so direct URLs, browser refresh, and back/forward navigation remain authoritative. It supports ordinary Tab navigation, arrow-key movement while open, Escape dismissal with focus restoration, click-outside dismissal, an `aria-current` active item, and a restrained mobile layout. Navigating between route-owned client shells may unmount their in-memory React state; durable calculator and EMI records continue through their existing local persistence contracts.
+
 ## Application shell
 
 `components/site/app-header.tsx` owns the persistent header geometry for the calculator, comparison, settings, account/authentication, and private-lab routes. Routes supply a stable title/status region and contextual actions, but cannot redefine header height, logo size, gutter, control height, or active-state dimensions.

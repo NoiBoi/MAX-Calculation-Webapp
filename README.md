@@ -29,7 +29,7 @@ Appearance supports Light, neutral-charcoal Dark, black Midnight, and System fro
 
 The supplied MAXCalc logo appears in the calculator and print identity. Its transparent variant automatically changes contrast in Dark and Midnight, while the opaque variant is the browser-tab icon.
 
-Every screen includes the unobtrusive creator credit `Built by Matthew Deng · deng301@purdue.edu for inquiries · Built for the Anasori Lab`; the address is a mail link. The fixed screen instance is excluded from print, while dedicated recipe printouts use the same credit in their reserved page footer.
+Every screen includes the unobtrusive in-flow footer credit `Built by Matthew Deng · deng301@purdue.edu for inquiries · Built for LMSL/ICoN PCL`; the address is a mail link. The screen instance is excluded from print, while dedicated recipe printouts use the same credit in their reserved page footer.
 
 ## Current scientific scope
 
@@ -60,6 +60,8 @@ Use **Compare routes** to evaluate two to four independently editable precursor 
 **Layouts & data** provides tested layout presets and bounded local user layouts. Layout changes never store or alter scientific state. The same panel creates manifest-backed full backups, previews merge or replace restores, reports conflicts, and imports only MAXCalc-owned calculation, recipe, route, comparison, or backup JSON. Replace is confirmed and transactionally protected by a safety backup. Tampered, future, malformed, oversized, and arbitrary files are blocked before database writes.
 
 The user-facing product name is **MAXCalc**. Legacy internal identifiers such as the `max-stoich` package/workspace names, IndexedDB names, storage keys, record types, backup schemas, and existing asset filenames are intentionally retained for backward compatibility.
+
+The persistent application header uses a compact workspace switcher for Calculator, Comparison, EMI Analysis, and the in-development XRD Analysis workspace. Workspace-specific commands remain in each route’s local toolbar instead of competing with global navigation. See `docs/UI_ARCHITECTURE.md`.
 
 ## Local data and offline limitations
 

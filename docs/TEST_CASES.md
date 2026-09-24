@@ -212,7 +212,7 @@ Repository tests cover defaults, save/reopen, independent 211/312/413 values, di
 - `PRINT-{LETTER,A4}-{PORTRAIT,LANDSCAPE}-{2,4,6}-UP`: assert one page, intrinsic-height cards, readable masses, no clipping, no card/reserved-region overlap, no internal page break, no transform, a valid PDF, and no print-root controls at 100% scale.
 - `PRINT-LONG-001`: promote a long-name, long-formula, warning-bearing fourteen-row recipe with additional columns to a full-width page region, keep it inside the printable page, report fallback, then resume configured packing without reordering.
 - `PRINT-THEME-001`: assert identical white, opaque, shadowless output with dark text/rules in Light, Dark, and Midnight and exact reuse of the weighing-result monospace/tabular-numeral typography.
-- `PRINT-CREDIT-001`: assert one non-overlapping brand plus the creator, inquiry email, and Anasori Lab credit in the reserved page footer.
+- `PRINT-CREDIT-001`: assert one non-overlapping brand plus the creator, inquiry email, and LMSL/ICoN PCL credit in the reserved page footer.
 # Appearance fixtures
 
 - `THEME-001`: Dark persists through refresh and calculator, comparison, Settings, and tutorial routes; the pre-hydration root already reports Dark.
@@ -225,7 +225,7 @@ Repository tests cover defaults, save/reopen, independent 211/312/413 values, di
 - `MIDNIGHT-001`: explicit Midnight uses black/near-black surfaces, lower structural contrast, no startup flash, persistence, readable scientific values, and a serious/critical accessibility audit.
 - `THEME-SWITCH-001`: all four choices are distinct, System resolves only to Light/Dark, and weighing values remain unchanged.
 - `PRINT-TEXT-001`, `PRINT-4-UP-TEXT-001`, and `PRINT-6-UP-TEXT-001`: title, row, final-mass, and total font floors are measured at 100%; formulas do not clip and long recipes receive a full page without transform scaling.
-- Creator credit is present with the correct `mailto:` link and Anasori Lab line in Light, Dark, and Midnight. The fixed site instance is hidden in print media and the dedicated print document supplies an in-flow footer credit.
+- Creator credit is present with the correct `mailto:` link and LMSL/ICoN PCL line in Light, Dark, and Midnight. The in-flow site footer is hidden in print media and the dedicated print document supplies its own footer credit.
 - `BRAND-001`: the transparent mark appears in site chrome, remains unchanged in Light, inverts in Dark/Midnight, and the opaque supplied variant is exposed through the browser-tab icon metadata. Print removes the dark-theme inversion.
 # Focused print, comparison, and recovery regressions
 

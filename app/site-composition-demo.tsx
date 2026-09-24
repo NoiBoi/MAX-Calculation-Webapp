@@ -80,9 +80,9 @@ export function SiteCompositionDemo() {
         }}
         value={template}
       >
-        <option value="211">211 — M₂AX</option>
-        <option value="312">312 — M₃AX₂</option>
-        <option value="413">413 — M₄AX₃</option>
+        <option value="211">211: M₂AX</option>
+        <option value="312">312: M₃AX₂</option>
+        <option value="413">413: M₄AX₃</option>
       </select>
 
       <div className="mt-6 grid gap-5 md:grid-cols-3">
