@@ -43,7 +43,7 @@ test("EMI analyzer imports multiple files, shows failures, switches directions, 
   await expect(page.getByText("Parse failed")).toBeVisible();
   await expect(page.getByText("No Keysight data-section BEGIN marker was found.")).toBeVisible();
   await expect(page.getByText("Keysight Technologies · N5247B · SERIAL-1").first()).toBeVisible();
-  await expect(page.getByRole("heading", { name: /alpha.csv/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "alpha.csv", exact: true })).toBeVisible();
 
   await page.getByRole("button", { name: "Both", exact: true }).click();
   await expect(page.getByRole("button", { name: /alpha.csv · Forward · SET/ })).toBeVisible();
@@ -96,22 +96,22 @@ test("EMI thickness, themed electrical controls, and graph interaction use one c
   await expect(card.getByLabel(/Film thickness/)).toHaveCount(0);
   await expect(card.getByLabel("Thickness unit for interaction.csv")).toHaveValue("mm");
   await card.getByLabel("Sample thickness for interaction.csv").fill("0.0143");
-  await card.getByText("Electrical properties and Simon estimate").click();
-  await expect(card.getByText("Enter raw four-point-probe resistance in Ω. MAXCalc applies the fixed geometric correction factor 4.532.")).toBeVisible();
+  await expect(card.getByRole("heading", { name: "Four-point resistance & Simon estimate" })).toBeVisible();
+  await expect(card.getByText(/MAXCalc averages the readings, applies the fixed geometric correction factor 4\.532/)).toBeVisible();
   await expect(card.getByText("14.3 µm", { exact: true })).toBeVisible();
   await expect(card.getByText("0.0143 mm", { exact: true })).toBeVisible();
-  await card.getByRole("button", { name: "Add reading" }).click();
+  await card.getByRole("button", { name: "Add first reading" }).click();
   await card.getByLabel("Raw four-point-probe resistance 1 for interaction.csv").fill("1.2");
-  await expect(card.getByText(/12,858\.5742 S\/m/)).toBeVisible();
+  await expect(card.getByText(/12,858\.5742 S\/m/).first()).toBeVisible();
   await expect(card.getByText(/128\.585742 S\/cm/)).toBeVisible();
   await expect(card.getByText("3 unsmoothed theoretical points are available at the measured frequencies. They remain separate from measured SET.")).toBeVisible();
   await card.getByLabel("Sample thickness for interaction.csv").fill("0.0200");
   await expect(card.getByText("20 µm", { exact: true })).toBeVisible();
-  await expect(card.getByText(/9,193\.880553 S\/m/)).toBeVisible();
+  await expect(card.getByText(/9,193\.880553 S\/m/).first()).toBeVisible();
   await card.getByLabel("Thickness unit for interaction.csv").selectOption("um");
   await card.getByLabel("Sample thickness for interaction.csv").fill("20");
   await expect(card.getByText("20 µm", { exact: true })).toBeVisible();
-  await expect(card.getByText(/9,193\.880553 S\/m/)).toBeVisible();
+  await expect(card.getByText(/9,193\.880553 S\/m/).first()).toBeVisible();
   const note = card.getByLabel("Electrical measurement note for interaction.csv");
   for (const theme of ["light", "dark", "midnight"] as const) {
     await page.evaluate((value) => document.documentElement.setAttribute("data-theme", value), theme);
@@ -179,7 +179,11 @@ test("EMI projects support bulk metadata, replicate interpolation, persistence, 
   await expect(page.getByText("2 of 2 files ready")).toBeVisible();
   await page.getByLabel("Bulk group").fill("Batch 1");
   await page.getByLabel("Bulk material").fill("Ti-based composite");
+  await page.getByLabel("Bulk thickness", { exact: true }).fill("10");
+  await page.getByLabel("Bulk thickness unit").selectOption("um");
   await page.getByRole("button", { name: "Apply to 2 selected files" }).click();
+  await expect(page.getByText("2/2", { exact: true }).first()).toBeVisible();
+  await expect(page.getByLabel("Areal density for batch-1.1.csv")).toHaveValue("");
   await page.getByRole("button", { name: "Create group from selected" }).click();
   await expect(page.getByText(/same range different points/)).toBeVisible();
 
@@ -187,10 +191,9 @@ test("EMI projects support bulk metadata, replicate interpolation, persistence, 
   await firstCard.getByText("Edit sample metadata").click();
   await firstCard.getByLabel("Sample thickness for batch-1.1.csv").fill("10");
   await firstCard.getByLabel("Thickness unit for batch-1.1.csv").selectOption("um");
-  await firstCard.getByText("Electrical properties and Simon estimate").click();
-  await firstCard.getByRole("button", { name: "Add reading" }).click();
+  await firstCard.getByRole("button", { name: "Add first reading" }).click();
   await firstCard.getByLabel("Raw four-point-probe resistance 1 for batch-1.1.csv").fill("1");
-  await expect(firstCard.getByText(/22,065\.31333 S\/m/)).toBeVisible();
+  await expect(firstCard.getByText(/22,065\.31333 S\/m/).first()).toBeVisible();
   await expect(firstCard.getByText("3 unsmoothed theoretical points are available at the measured frequencies. They remain separate from measured SET.")).toBeVisible();
 
   await page.getByText("Advanced interpolation settings").click();
@@ -218,7 +221,6 @@ test("EMI projects support bulk metadata, replicate interpolation, persistence, 
   await expect(page.getByText("Restored Saved replicate project from local storage.")).toBeVisible();
   await expect(page.getByText("2 of 2 files ready")).toBeVisible();
   const restoredCard = page.getByTestId("emi-file-card").filter({ hasText: "batch-1.1.csv" });
-  await restoredCard.getByText("Electrical properties and Simon estimate").click();
   await expect(restoredCard.getByLabel("Sample thickness for batch-1.1.csv")).toHaveValue("10");
   await expect(restoredCard.getByLabel("Raw four-point-probe resistance 1 for batch-1.1.csv")).toHaveValue("1");
 });
@@ -244,8 +246,7 @@ test("SET smoothing and Simon overlay are independent, theoretical, and export-n
   await electricalCard.getByText("Edit sample metadata").click();
   await electricalCard.getByLabel("Sample thickness for sample-with-electrical.csv").fill("10");
   await electricalCard.getByLabel("Thickness unit for sample-with-electrical.csv").selectOption("um");
-  await electricalCard.getByText("Electrical properties and Simon estimate").click();
-  await electricalCard.getByRole("button", { name: "Add reading" }).click();
+  await electricalCard.getByRole("button", { name: "Add first reading" }).click();
   await electricalCard.getByLabel("Raw four-point-probe resistance 1 for sample-with-electrical.csv").fill("1");
   await expect(setPlot.getByLabel("Show Simon estimate")).toBeEnabled();
   await expect(setPlot).toContainText("1 displayed sample lack valid electrical inputs");

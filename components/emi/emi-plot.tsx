@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import {
   smoothSeries,
+  type EmiDirection,
   type EmiMetric,
   type EmiSmoothingWindowSize,
   type SimonSeriesPoint,
@@ -14,6 +15,8 @@ import { buildEmiYAxis, type EmiAxisQuantity } from "@/lib/emi/graph-axis";
 
 export interface EmiPlotTrace {
   readonly id: string;
+  readonly datasetId: string;
+  readonly direction: EmiDirection | "aggregate";
   readonly label: string;
   readonly color: string;
   readonly metric: EmiMetric;

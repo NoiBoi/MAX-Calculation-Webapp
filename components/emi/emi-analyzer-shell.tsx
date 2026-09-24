@@ -52,6 +52,7 @@ import { createBandSummaryCsv, createEmiAnalysisManifest, createEmiAnalysisSumma
 import { createEmiAnalysisXlsx } from "@/lib/emi/xlsx-export";
 import { EmiPlot, type EmiPlotBand, type EmiPlotTrace, type EmiSimonPlotTrace } from "./emi-plot";
 import { EmiElectricalPropertiesEditor } from "./emi-electrical-properties-editor";
+import { PublicationFigureEditor } from "./publication-figure-editor";
 
 type ImportedFile =
   | Readonly<{ id: string; filename: string; status: "loading" }>
@@ -124,8 +125,13 @@ export function EmiAnalyzerShell() {
   const [project, setProject] = useState<EmiProjectRecord>(() => createEmptyEmiProject());
   const [savedProjects, setSavedProjects] = useState<readonly EmiProjectRecord[]>([]);
   const [projectStatus, setProjectStatus] = useState("New unsaved local project");
+  const [activeFileId, setActiveFileId] = useState("");
   const [bulkGroup, setBulkGroup] = useState("");
   const [bulkMaterial, setBulkMaterial] = useState("");
+  const [bulkThickness, setBulkThickness] = useState("");
+  const [bulkThicknessUnit, setBulkThicknessUnit] = useState<NonNullable<EmiSampleMetadata["thicknessUnit"]>>("um");
+  const [bulkArealDensity, setBulkArealDensity] = useState("");
+  const [bulkArealDensityUnit, setBulkArealDensityUnit] = useState<NonNullable<EmiSampleMetadata["arealDensityUnit"]>>("kg/m2");
   const [comparisonSort, setComparisonSort] = useState<"name" | "group" | EmiMetric | "thickness" | "arealDensity" | "warnings" | "validity">("name");
   const [excludedComparisonIds, setExcludedComparisonIds] = useState<ReadonlySet<string>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -135,6 +141,7 @@ export function EmiAnalyzerShell() {
 
   const ready = useMemo(() => files.filter((file): file is Extract<ImportedFile, { status: "ready" }> => file.status === "ready"), [files]);
   const selected = useMemo(() => ready.filter((file) => selectedIds.has(file.id)), [ready, selectedIds]);
+  const activeFile = files.find((file) => file.id === activeFileId) ?? files[0];
   const directions = directionsFor(directionMode);
   const tableFile = selected.find((file) => file.id === tableFileId) ?? selected[0];
   const tableRows = tableFile ? buildProcessedRows(tableFile.dataset, tableFile.calculation, tableDirection, tableFile.issues).filter((row) => (range.minimumHz === undefined || row.frequencyHz >= range.minimumHz) && (range.maximumHz === undefined || row.frequencyHz <= range.maximumHz)) : [];
@@ -171,7 +178,7 @@ export function EmiAnalyzerShell() {
       const calculation = calculateEmiDataset(entry.parsedDataset);
       return { id: entry.id, filename: entry.originalFilename, status: "ready" as const, dataset: entry.parsedDataset, calculation, issues: validateEmiDataset(entry.parsedDataset, calculation, restored.qualityControl) };
     });
-    setProject(restored); setFiles(restoredFiles); setSelectedIds(new Set(restored.selectedDatasetIds)); setRange(restored.frequencyRangeHz); setMetrics(new Set(restored.visibleMetrics)); setUnit(restored.plot.frequencyUnit); setDirectionMode(restored.selectedDirections.length > 1 ? "both" : restored.selectedDirections[0] ?? "forward"); setTableFileId(restored.selectedDatasetIds[0] ?? restored.datasets[0]?.id ?? ""); rangeEditedRef.current = true; setProjectStatus(`Restored ${restored.name} from local storage.`);
+    setProject(restored); setFiles(restoredFiles); setSelectedIds(new Set(restored.selectedDatasetIds)); setActiveFileId(restored.selectedDatasetIds[0] ?? restored.datasets[0]?.id ?? ""); setRange(restored.frequencyRangeHz); setMetrics(new Set(restored.visibleMetrics)); setUnit(restored.plot.frequencyUnit); setDirectionMode(restored.selectedDirections.length > 1 ? "both" : restored.selectedDirections[0] ?? "forward"); setTableFileId(restored.selectedDatasetIds[0] ?? restored.datasets[0]?.id ?? ""); rangeEditedRef.current = true; setProjectStatus(`Restored ${restored.name} from local storage.`);
   };
 
   const updateMetadata = (id: string, update: Partial<EmiSampleMetadata>) => setProject((current) => ({ ...current, datasets: current.datasets.map((entry) => {
@@ -206,6 +213,7 @@ export function EmiAnalyzerShell() {
         setFiles((current) => current.map((entry) => entry.id === id ? loaded : entry));
         setProject((current) => ({ ...current, datasets: [...current.datasets, { id, originalFilename: file.name, parsedDataset: parsed.dataset, sampleMetadata: { displayName: file.name, thicknessUnit: "mm" }, importedAt: new Date().toISOString(), parserVersion: EMI_PARSER_VERSION }] }));
         setSelectedIds((current) => new Set(current).add(id));
+        setActiveFileId((current) => current || id);
         setTableFileId((current) => current || id);
         const frequencies = parsed.dataset.points.map((point) => point.frequencyHz).filter(Number.isFinite);
         if (frequencies.length > 0 && !rangeEditedRef.current) setRange((current) => ({
@@ -220,15 +228,18 @@ export function EmiAnalyzerShell() {
   };
 
   const removeFile = (id: string) => {
+    if (activeFileId === id) setActiveFileId(files.find((file) => file.id !== id)?.id ?? "");
     setFiles((current) => current.filter((file) => file.id !== id));
     setSelectedIds((current) => { const next = new Set(current); next.delete(id); return next; });
     if (tableFileId === id) setTableFileId("");
     setProject((current) => ({ ...current, datasets: current.datasets.filter((entry) => entry.id !== id), groups: current.groups.map((group) => ({ ...group, datasetIds: group.datasetIds.filter((datasetId) => datasetId !== id) })) }));
   };
-  const clearFiles = () => { setFiles([]); setSelectedIds(new Set()); setTableFileId(""); setRange({}); setProject((current) => ({ ...current, datasets: [], groups: [], selectedDatasetIds: [] })); rangeEditedRef.current = false; };
+  const clearFiles = () => { setFiles([]); setSelectedIds(new Set()); setActiveFileId(""); setTableFileId(""); setRange({}); setProject((current) => ({ ...current, datasets: [], groups: [], selectedDatasetIds: [] })); rangeEditedRef.current = false; };
   const traces = (plotMetrics: readonly EmiMetric[]): EmiPlotTrace[] => {
     const individual = project.plot.showIndividualReplicates ? selected.flatMap((file, fileIndex) => directions.flatMap((direction, directionIndex) => plotMetrics.filter((metric) => metrics.has(metric)).map((metric, metricIndex) => ({
     id: `${file.id}-${direction}-${metric}`,
+    datasetId: file.id,
+    direction,
     label: `${project.datasets.find((entry) => entry.id === file.id)?.sampleMetadata.displayName ?? file.filename} · ${direction === "forward" ? "Forward" : "Reverse"} · ${metric}`,
     color: COLORS[(fileIndex * 6 + directionIndex * 3 + metricIndex) % COLORS.length] as string,
     metric,
@@ -237,6 +248,8 @@ export function EmiAnalyzerShell() {
   })))) : [];
     const groups = groupAggregations.flatMap((aggregation, groupIndex) => plotMetrics.filter((metric) => metrics.has(metric)).flatMap((metric, metricIndex) => (project.plot.medianVisibility ? ["mean", "median"] as const : ["mean"] as const).map((statistic) => ({
       id: `group-${aggregation.group.id}-${aggregation.direction}-${metric}`,
+      datasetId: aggregation.group.id,
+      direction: "aggregate" as const,
       label: `${aggregation.group.name} ${statistic} · ${aggregation.direction === "forward" ? "Forward" : "Reverse"} · ${metric}${aggregation.result.interpolationApplied ? " · interpolated" : ""}`,
       color: COLORS[(groupIndex * 3 + metricIndex + 4) % COLORS.length] as string,
       metric,
@@ -287,6 +300,16 @@ export function EmiAnalyzerShell() {
     setRange((current) => ({ ...current, [boundary]: value === "" ? undefined : Number(value) * factor }));
   };
   const status = files.some((file) => file.status === "loading") ? "Reading files locally…" : files.length === 0 ? "No files loaded" : `${ready.length} of ${files.length} files ready`;
+  const thicknessReadyCount = project.datasets.filter((entry) => getAuthoritativeThicknessMicrometers(entry) !== null).length;
+  const densityReadyCount = project.datasets.filter((entry) => entry.sampleMetadata.arealDensity !== undefined).length;
+  const simonReadyCount = project.datasets.filter((entry) => entry.electricalProperties?.derived && getAuthoritativeThicknessMicrometers(entry) !== null).length;
+  const hasBulkSetup = Boolean(bulkGroup || bulkMaterial || bulkThickness || bulkArealDensity);
+  const applyBulkSetup = () => selected.forEach((file) => updateMetadata(file.id, {
+    ...(bulkGroup ? { group: bulkGroup } : {}),
+    ...(bulkMaterial ? { material: bulkMaterial } : {}),
+    ...(bulkThickness ? { thickness: Number(bulkThickness), thicknessUnit: bulkThicknessUnit } : {}),
+    ...(bulkArealDensity ? { arealDensity: Number(bulkArealDensity), arealDensityUnit: bulkArealDensityUnit } : {}),
+  }));
   const powerCoefficientRows = useMemo(() => selected.map((file) => {
     const summaries = Object.fromEntries(EMI_POWER_COEFFICIENT_METRICS.map((metric) => [metric, calculateBidirectionalPowerCoefficientSummary(file.calculation, metric, range)])) as Record<EmiPowerCoefficientMetric, ReturnType<typeof calculateBidirectionalPowerCoefficientSummary>>;
     const R = summaries.R; const T = summaries.T; const A = summaries.A;
@@ -340,60 +363,51 @@ export function EmiAnalyzerShell() {
       </div>
       <p aria-live="polite" className="emi-status">{projectStatus}</p>
     </section>
-    <section className="emi-panel">
-      <div className="emi-section-heading"><div><h2>1. Import measurement CSV files</h2><p>Keysight complex S-parameter CSV files are parsed in this browser and are never uploaded.</p></div>{files.length > 0 && <button className="ui-button ui-button-compact" onClick={clearFiles} type="button">Clear all</button>}</div>
-      <div className="emi-dropzone" onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); void importFiles([...event.dataTransfer.files]); }}>
-        <strong>Drop one or more CSV files here</strong><span>or</span>
+    <section className="emi-panel emi-import-panel">
+      <div className="emi-section-heading"><div><h2>1. Import measurement data</h2><p>Add one or many Keysight complex S-parameter CSV files. Files are parsed locally and never uploaded.</p></div>{files.length > 0 && <button className="ui-button ui-button-compact" onClick={clearFiles} type="button">Clear all</button>}</div>
+      <div className={`emi-dropzone ${files.length > 0 ? "emi-dropzone-compact" : ""}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); void importFiles([...event.dataTransfer.files]); }}>
+        <div className="emi-dropzone-icon" aria-hidden="true">CSV</div><div><strong>{files.length > 0 ? "Add more measurement files" : "Drop measurement CSV files here"}</strong><span>Multiple files are supported</span></div>
         <button className="ui-button ui-button-primary" onClick={() => fileInputRef.current?.click()} type="button">Choose CSV files</button>
         <input accept=".csv,text/csv" className="sr-only" multiple onChange={(event) => { void importFiles([...(event.target.files ?? [])]); event.currentTarget.value = ""; }} ref={fileInputRef} type="file" />
       </div>
       <p className="emi-status" aria-live="polite">{status}</p>
-      {ready.length > 0 && <p className="emi-causal-note"><strong>Measurement-quality interpretation:</strong> passivity and logarithm-domain checks describe the measured data behavior; they do not diagnose a single cause. Review calibration, fixture and reference-plane quality, instrument drift, and source-file integrity before deciding whether a point is experimentally acceptable.</p>}
-      {files.length > 0 && <div className="emi-file-grid">
-        {files.map((file) => { const projectDataset = project.datasets.find((entry) => entry.id === file.id); const metadata = projectDataset?.sampleMetadata; const normalizedThickness = projectDataset ? getAuthoritativeNormalizedThickness(projectDataset) : null; const suggestion = suggestEmiMetadata(file.filename); const quality = file.status === "ready" ? directions.map((direction) => ({ direction, summary: summarizeEmiPhysicalValidity(file.calculation[direction]) })) : []; return <article className={`emi-file-card emi-file-${file.status}${file.status === "ready" && file.issues.length > 0 ? " emi-file-warning" : ""}`} data-testid="emi-file-card" key={file.id}>
-          <div className="emi-file-title"><label><input checked={file.status === "ready" && selectedIds.has(file.id)} disabled={file.status !== "ready"} onChange={() => setSelectedIds((current) => { const next = new Set(current); if (next.has(file.id)) next.delete(file.id); else next.add(file.id); return next; })} type="checkbox" /><strong>{file.filename}</strong></label><button aria-label={`Remove ${file.filename}`} className="ui-button ui-button-compact ui-button-destructive" onClick={() => removeFile(file.id)} type="button">Remove</button></div>
-          {file.status === "loading" && <p>Reading and validating…</p>}
-          {file.status === "error" && <><p className="emi-error-text">Parse failed</p><ul>{file.issues.map((issue, index) => <li key={`${issue.code}-${index}`}>{issue.message}</li>)}</ul></>}
-          {file.status === "ready" && <><dl className="emi-file-details">
-            <div><dt>Status</dt><dd>{file.issues.length > 0 ? "Ready with validation issues" : "Ready"}</dd></div>
-            <div><dt>Points</dt><dd>{file.dataset.points.length}</dd></div>
-            <div><dt>Frequency</dt><dd>{formatFrequency(Math.min(...file.dataset.points.map((point) => point.frequencyHz)), unit)} – {formatFrequency(Math.max(...file.dataset.points.map((point) => point.frequencyHz)), unit)}</dd></div>
-            <div><dt>Warnings</dt><dd>{file.issues.filter((issue) => issue.severity === "warning").length}</dd></div>
-            {file.dataset.metadata.instrument?.model && <div><dt>Instrument</dt><dd>{[file.dataset.metadata.instrument.manufacturer, file.dataset.metadata.instrument.model, file.dataset.metadata.instrument.serialNumber].filter(Boolean).join(" · ")}</dd></div>}
-            {file.dataset.metadata.date && <div><dt>Recorded</dt><dd>{file.dataset.metadata.date}</dd></div>}
-          </dl>{quality.some(({ summary }) => summary.warningCount + summary.invalidCount > 0) && <details className="emi-quality-summary"><summary>Measurement-quality warning</summary>{quality.map(({ direction, summary }) => <div key={direction}><strong>{directionLabel(direction)}</strong><p>{summary.warningCount + summary.invalidCount} of {summary.pointCount} points affected ({formatNumber(summary.affectedPercentage, 4)}%). R {formatNumber(summary.minimumR)} to {formatNumber(summary.maximumR)}; T {formatNumber(summary.minimumT)} to {formatNumber(summary.maximumT)}; A {formatNumber(summary.minimumA)} to {formatNumber(summary.maximumA)}.{summary.mostSevereFrequencyHz !== null ? ` Most severe at ${formatFrequency(summary.mostSevereFrequencyHz, unit)}.` : ""}</p></div>)}</details>}<details className="emi-metadata-editor" id={`emi-metadata-${file.id}`}><summary>Edit sample metadata</summary>
-            <p className="emi-suggestion"><strong>Filename suggestion:</strong> sample {suggestion.sampleId ?? "—"}, group {suggestion.group ?? "—"}, replicate {suggestion.replicateNumber ?? "—"}. {suggestion.rationale} <button className="ui-button ui-button-compact" onClick={() => updateMetadata(file.id, { sampleId: suggestion.sampleId, group: suggestion.group, replicateNumber: suggestion.replicateNumber, material: suggestion.material })} type="button">Apply suggestion</button></p>
-            <div className="emi-metadata-grid">
-              <label>Display name<input aria-label={`Display name for ${file.filename}`} onChange={(event) => updateMetadata(file.id, { displayName: event.target.value })} value={metadata?.displayName ?? file.filename} /></label>
-              <label>Sample ID<input onChange={(event) => updateMetadata(file.id, { sampleId: event.target.value || undefined })} value={metadata?.sampleId ?? ""} /></label>
-              <label>Group<input onChange={(event) => updateMetadata(file.id, { group: event.target.value || undefined })} value={metadata?.group ?? ""} /></label>
-              <label>Replicate number<input min="1" onChange={(event) => updateMetadata(file.id, { replicateNumber: event.target.value ? Number(event.target.value) : undefined })} type="number" value={metadata?.replicateNumber ?? ""} /></label>
-              <label>Material or composition<input onChange={(event) => updateMetadata(file.id, { material: event.target.value || undefined })} value={metadata?.material ?? ""} /></label>
-              <label>Thickness<span className="emi-compound-input"><input aria-label={`Sample thickness for ${file.filename}`} id={`emi-thickness-${file.id}`} min="0" onChange={(event) => updateMetadata(file.id, { thickness: event.target.value ? Number(event.target.value) : undefined })} step="any" type="number" value={metadata?.thickness ?? ""} /><select aria-label={`Thickness unit for ${file.filename}`} onChange={(event) => updateMetadata(file.id, { thicknessUnit: event.target.value as EmiSampleMetadata["thicknessUnit"] })} value={metadata?.thicknessUnit ?? "mm"}><option value="m">m</option><option value="mm">mm</option><option value="um">µm</option><option value="in">in</option></select></span></label>
-              <label>Areal density<span className="emi-compound-input"><input min="0" onChange={(event) => updateMetadata(file.id, { arealDensity: event.target.value ? Number(event.target.value) : undefined })} step="any" type="number" value={metadata?.arealDensity ?? ""} /><select aria-label={`Areal-density unit for ${file.filename}`} onChange={(event) => updateMetadata(file.id, { arealDensityUnit: event.target.value as EmiSampleMetadata["arealDensityUnit"] })} value={metadata?.arealDensityUnit ?? "kg/m2"}><option value="kg/m2">kg/m²</option><option value="g/m2">g/m²</option><option value="g/cm2">g/cm²</option></select></span></label>
-              <label>Test date<input onChange={(event) => updateMetadata(file.id, { testDate: event.target.value || undefined })} type="date" value={metadata?.testDate ?? ""} /></label>
-              <label>Direction notes<textarea onChange={(event) => updateMetadata(file.id, { directionNotes: event.target.value || undefined })} rows={2} value={metadata?.directionNotes ?? ""} /></label>
-              <label>General notes<textarea onChange={(event) => updateMetadata(file.id, { notes: event.target.value || undefined })} rows={2} value={metadata?.notes ?? ""} /></label>
-            </div>
-          </details><EmiElectricalPropertiesEditor
-            filename={file.filename}
-            frequenciesHz={file.dataset.points.map((point) => point.frequencyHz)}
-            onChange={(electricalProperties) => setProject((current) => ({ ...current, datasets: current.datasets.map((entry) => entry.id === file.id ? { ...entry, electricalProperties } : entry) }))}
-            onEditSampleThickness={() => {
-              const details = document.getElementById(`emi-metadata-${file.id}`) as HTMLDetailsElement | null;
-              if (details) details.open = true;
-              requestAnimationFrame(() => document.getElementById(`emi-thickness-${file.id}`)?.focus());
-            }}
-            onResolveThicknessConflict={(source) => setProject((current) => ({ ...current, datasets: current.datasets.map((entry) => entry.id === file.id ? resolveEmiThicknessConflict(entry, source) : entry) }))}
-            thicknessConflict={projectDataset?.thicknessConflict}
-            enteredThicknessLabel={metadata?.thickness !== undefined && metadata.thicknessUnit ? `${metadata.thickness} ${metadata.thicknessUnit === "um" ? "µm" : metadata.thicknessUnit}` : undefined}
-            thicknessLabel={normalizedThickness ? `${formatNumber(normalizedThickness.micrometers, 10)} µm` : "Not entered"}
-            thicknessMicrometers={projectDataset ? getAuthoritativeThicknessMicrometers(projectDataset) : null}
-            value={projectDataset?.electricalProperties}
-          /></>}
-        </article>; })}
-      </div>}
-      {ready.length > 0 && <div className="emi-bulk-edit"><h3>Bulk metadata edit</h3><p>Applies only to the currently selected files.</p><label>Group<input aria-label="Bulk group" onChange={(event) => setBulkGroup(event.target.value)} value={bulkGroup} /></label><label>Material<input aria-label="Bulk material" onChange={(event) => setBulkMaterial(event.target.value)} value={bulkMaterial} /></label><button className="ui-button" disabled={selected.length === 0 || (!bulkGroup && !bulkMaterial)} onClick={() => selected.forEach((file) => updateMetadata(file.id, { ...(bulkGroup ? { group: bulkGroup } : {}), ...(bulkMaterial ? { material: bulkMaterial } : {}) }))} type="button">Apply to {selected.length} selected file{selected.length === 1 ? "" : "s"}</button></div>}
+      {files.length > 0 && <>
+        <div className="emi-setup-overview" aria-label="Sample setup progress">
+          <div><strong>{ready.length}</strong><span>Measurements ready</span></div>
+          <div><strong>{thicknessReadyCount}/{ready.length}</strong><span>Thickness entered</span></div>
+          <div><strong>{densityReadyCount}/{ready.length}</strong><span>Areal density entered <em>optional</em></span></div>
+          <div><strong>{simonReadyCount}/{ready.length}</strong><span>Simon estimates ready <em>optional</em></span></div>
+        </div>
+        <div className="emi-section-heading emi-sample-setup-heading"><div><h3>Sample setup</h3><p>Select the files included in analysis, apply shared values in one pass, then edit individual samples only where needed.</p></div></div>
+        {ready.length > 0 && <div className="emi-bulk-edit">
+          <div className="emi-bulk-edit-intro"><h3>Apply shared values</h3><p>Only filled fields are applied to the {selected.length} included sample{selected.length === 1 ? "" : "s"}; existing values in blank fields stay unchanged.</p></div>
+          <label>Group<input aria-label="Bulk group" onChange={(event) => setBulkGroup(event.target.value)} placeholder="e.g. MXene 5 wt%" value={bulkGroup} /></label>
+          <label>Material / composition<input aria-label="Bulk material" onChange={(event) => setBulkMaterial(event.target.value)} placeholder="e.g. Ti₃C₂Tₓ composite" value={bulkMaterial} /></label>
+          <label>Thickness <span className="emi-field-tag emi-field-tag-required">needed for Simon</span><span className="emi-compound-input"><input aria-label="Bulk thickness" min="0" onChange={(event) => setBulkThickness(event.target.value)} placeholder="Value" step="any" type="number" value={bulkThickness} /><select aria-label="Bulk thickness unit" onChange={(event) => setBulkThicknessUnit(event.target.value as NonNullable<EmiSampleMetadata["thicknessUnit"]>)} value={bulkThicknessUnit}><option value="um">µm</option><option value="mm">mm</option><option value="m">m</option><option value="in">in</option></select></span></label>
+          <label>Areal density <span className="emi-field-tag">optional</span><span className="emi-compound-input"><input aria-label="Bulk areal density" min="0" onChange={(event) => setBulkArealDensity(event.target.value)} placeholder="Value" step="any" type="number" value={bulkArealDensity} /><select aria-label="Bulk areal-density unit" onChange={(event) => setBulkArealDensityUnit(event.target.value as NonNullable<EmiSampleMetadata["arealDensityUnit"]>)} value={bulkArealDensityUnit}><option value="kg/m2">kg/m²</option><option value="g/m2">g/m²</option><option value="g/cm2">g/cm²</option></select></span></label>
+          <button className="ui-button ui-button-primary" disabled={selected.length === 0 || !hasBulkSetup} onClick={applyBulkSetup} type="button">Apply to {selected.length} selected file{selected.length === 1 ? "" : "s"}</button>
+        </div>}
+        <div className="emi-sample-workspace">
+          <div className="emi-sample-list" role="list" aria-label="Imported measurement files">
+            {files.map((file) => { const projectDataset = project.datasets.find((entry) => entry.id === file.id); const metadata = projectDataset?.sampleMetadata; const normalizedThickness = projectDataset ? getAuthoritativeNormalizedThickness(projectDataset) : null; const suggestion = suggestEmiMetadata(file.filename); const quality = file.status === "ready" ? directions.map((direction) => ({ direction, summary: summarizeEmiPhysicalValidity(file.calculation[direction]) })) : []; const warningCount = file.status === "ready" ? file.issues.filter((issue) => issue.severity === "warning").length : 0; const isActive = activeFile?.id === file.id; return <article className={`emi-file-card emi-sample-row emi-file-${file.status}${warningCount > 0 ? " emi-file-warning" : ""}${isActive ? " emi-sample-row-active" : ""}`} data-testid="emi-file-card" key={file.id} role="listitem">
+              <div className="emi-sample-row-main"><label className="emi-sample-include"><input aria-label={`Include ${file.filename} in analysis`} checked={file.status === "ready" && selectedIds.has(file.id)} disabled={file.status !== "ready"} onChange={() => setSelectedIds((current) => { const next = new Set(current); if (next.has(file.id)) next.delete(file.id); else next.add(file.id); return next; })} type="checkbox" /><span><strong>{metadata?.displayName ?? file.filename}</strong><small>{file.filename}</small></span></label>{file.status === "ready" ? <><span className={`emi-row-status ${warningCount > 0 ? "emi-row-status-warning" : "emi-row-status-ready"}`}>{warningCount > 0 ? `${warningCount} warnings` : "Ready"}</span><span className={`emi-row-property ${normalizedThickness ? "is-complete" : ""}`}><small>Thickness</small>{normalizedThickness ? `${formatNumber(normalizedThickness.micrometers, 8)} µm` : "Not entered"}</span><span className={`emi-row-property ${projectDataset?.electricalProperties?.derived ? "is-complete" : ""}`}><small>Simon</small>{projectDataset?.electricalProperties?.derived ? "Ready" : "Optional"}</span><button aria-pressed={isActive} className="ui-button ui-button-compact" onClick={() => setActiveFileId(file.id)} type="button">Edit sample metadata</button></> : <span>{file.status === "loading" ? "Reading and validating…" : "Parse failed"}</span>}<button aria-label={`Remove ${file.filename}`} className="emi-icon-button" onClick={() => removeFile(file.id)} type="button">Remove</button></div>
+              {file.status === "error" && <ul className="emi-inline-errors">{file.issues.map((issue, index) => <li key={`${issue.code}-${index}`}>{issue.message}</li>)}</ul>}
+              {file.status === "ready" && isActive && <div className="emi-sample-editor">
+                <div className="emi-editor-heading"><div><span className="emi-step-kicker">Editing sample</span><h3>{metadata?.displayName ?? file.filename}</h3><p>{file.dataset.points.length} points · {formatFrequency(Math.min(...file.dataset.points.map((point) => point.frequencyHz)), unit)}–{formatFrequency(Math.max(...file.dataset.points.map((point) => point.frequencyHz)), unit)}{file.dataset.metadata.instrument?.model ? ` · ${[file.dataset.metadata.instrument.manufacturer, file.dataset.metadata.instrument.model, file.dataset.metadata.instrument.serialNumber].filter(Boolean).join(" · ")}` : ""}</p></div><button aria-label={`Remove active sample ${file.filename}`} className="ui-button ui-button-compact ui-button-destructive" onClick={() => removeFile(file.id)} type="button">Remove file</button></div>
+                <div className="emi-primary-inputs">
+                  <label className="emi-field-wide">Display name<input aria-label={`Display name for ${file.filename}`} onChange={(event) => updateMetadata(file.id, { displayName: event.target.value })} value={metadata?.displayName ?? file.filename} /></label>
+                  <label className="emi-priority-field">Thickness <span className="emi-field-tag emi-field-tag-required">needed for Simon</span><span className="emi-compound-input"><input aria-label={`Sample thickness for ${file.filename}`} id={`emi-thickness-${file.id}`} min="0" onChange={(event) => updateMetadata(file.id, { thickness: event.target.value ? Number(event.target.value) : undefined })} placeholder="Enter thickness" step="any" type="number" value={metadata?.thickness ?? ""} /><select aria-label={`Thickness unit for ${file.filename}`} onChange={(event) => updateMetadata(file.id, { thicknessUnit: event.target.value as EmiSampleMetadata["thicknessUnit"] })} value={metadata?.thicknessUnit ?? "mm"}><option value="um">µm</option><option value="mm">mm</option><option value="m">m</option><option value="in">in</option></select></span><small>Used for conductivity, Simon SET, and thickness-normalized comparison.</small></label>
+                  <label>Areal density <span className="emi-field-tag">optional</span><span className="emi-compound-input"><input aria-label={`Areal density for ${file.filename}`} min="0" onChange={(event) => updateMetadata(file.id, { arealDensity: event.target.value ? Number(event.target.value) : undefined })} placeholder="Leave blank if unknown" step="any" type="number" value={metadata?.arealDensity ?? ""} /><select aria-label={`Areal-density unit for ${file.filename}`} onChange={(event) => updateMetadata(file.id, { arealDensityUnit: event.target.value as EmiSampleMetadata["arealDensityUnit"] })} value={metadata?.arealDensityUnit ?? "kg/m2"}><option value="kg/m2">kg/m²</option><option value="g/m2">g/m²</option><option value="g/cm2">g/cm²</option></select></span><small>Only used for mass-normalized SET comparison.</small></label>
+                </div>
+                <details className="emi-secondary-metadata"><summary>Sample identity, grouping, and notes</summary><p className="emi-suggestion"><strong>Filename suggestion:</strong> sample {suggestion.sampleId ?? "—"}, group {suggestion.group ?? "—"}, replicate {suggestion.replicateNumber ?? "—"}. {suggestion.rationale} <button className="ui-button ui-button-compact" onClick={() => updateMetadata(file.id, { sampleId: suggestion.sampleId, group: suggestion.group, replicateNumber: suggestion.replicateNumber, material: suggestion.material })} type="button">Apply suggestion</button></p><div className="emi-metadata-grid"><label>Sample ID<input onChange={(event) => updateMetadata(file.id, { sampleId: event.target.value || undefined })} value={metadata?.sampleId ?? ""} /></label><label>Group<input onChange={(event) => updateMetadata(file.id, { group: event.target.value || undefined })} value={metadata?.group ?? ""} /></label><label>Replicate number<input min="1" onChange={(event) => updateMetadata(file.id, { replicateNumber: event.target.value ? Number(event.target.value) : undefined })} type="number" value={metadata?.replicateNumber ?? ""} /></label><label>Material or composition<input onChange={(event) => updateMetadata(file.id, { material: event.target.value || undefined })} value={metadata?.material ?? ""} /></label><label>Test date<input onChange={(event) => updateMetadata(file.id, { testDate: event.target.value || undefined })} type="date" value={metadata?.testDate ?? ""} /></label><label>Direction notes<textarea onChange={(event) => updateMetadata(file.id, { directionNotes: event.target.value || undefined })} rows={2} value={metadata?.directionNotes ?? ""} /></label><label>General notes<textarea onChange={(event) => updateMetadata(file.id, { notes: event.target.value || undefined })} rows={2} value={metadata?.notes ?? ""} /></label></div></details>
+                <EmiElectricalPropertiesEditor filename={file.filename} frequenciesHz={file.dataset.points.map((point) => point.frequencyHz)} onChange={(electricalProperties) => setProject((current) => ({ ...current, datasets: current.datasets.map((entry) => entry.id === file.id ? { ...entry, electricalProperties } : entry) }))} onEditSampleThickness={() => document.getElementById(`emi-thickness-${file.id}`)?.focus()} onResolveThicknessConflict={(source) => setProject((current) => ({ ...current, datasets: current.datasets.map((entry) => entry.id === file.id ? resolveEmiThicknessConflict(entry, source) : entry) }))} thicknessConflict={projectDataset?.thicknessConflict} enteredThicknessLabel={metadata?.thickness !== undefined && metadata.thicknessUnit ? `${metadata.thickness} ${metadata.thicknessUnit === "um" ? "µm" : metadata.thicknessUnit}` : undefined} thicknessLabel={normalizedThickness ? `${formatNumber(normalizedThickness.micrometers, 10)} µm` : "Not entered"} thicknessMicrometers={projectDataset ? getAuthoritativeThicknessMicrometers(projectDataset) : null} value={projectDataset?.electricalProperties} />
+                {quality.some(({ summary }) => summary.warningCount + summary.invalidCount > 0) && <details className="emi-quality-summary"><summary>Review measurement-quality warnings</summary>{quality.map(({ direction, summary }) => <div key={direction}><strong>{directionLabel(direction)}</strong><p>{summary.warningCount + summary.invalidCount} of {summary.pointCount} points affected ({formatNumber(summary.affectedPercentage, 4)}%). R {formatNumber(summary.minimumR)} to {formatNumber(summary.maximumR)}; T {formatNumber(summary.minimumT)} to {formatNumber(summary.maximumT)}; A {formatNumber(summary.minimumA)} to {formatNumber(summary.maximumA)}.{summary.mostSevereFrequencyHz !== null ? ` Most severe at ${formatFrequency(summary.mostSevereFrequencyHz, unit)}.` : ""}</p></div>)}</details>}
+              </div>}
+            </article>; })}
+          </div>
+        </div>
+        {ready.length > 0 && <p className="emi-causal-note"><strong>Measurement-quality interpretation:</strong> warnings screen measured behavior; they do not diagnose a single cause. Review calibration, fixture and reference-plane quality, instrument drift, and source-file integrity before deciding whether a point is experimentally acceptable.</p>}
+      </>}
     </section>
 
     <section className="emi-panel" aria-label="Dataset controls">
@@ -463,6 +477,8 @@ export function EmiAnalyzerShell() {
           <label className="emi-checkbox-label"><input checked={project.plot.showIndividualReplicates} onChange={(event) => setProject((current) => ({ ...current, plot: { ...current.plot, showIndividualReplicates: event.target.checked } }))} type="checkbox" />Show individual replicate traces</label><label className="emi-checkbox-label"><input checked={project.plot.medianVisibility} onChange={(event) => setProject((current) => ({ ...current, plot: { ...current.plot, medianVisibility: event.target.checked } }))} type="checkbox" />Show group median traces</label><label className="emi-checkbox-label"><input checked={project.plot.gridVisibility} onChange={(event) => setProject((current) => ({ ...current, plot: { ...current.plot, gridVisibility: event.target.checked } }))} type="checkbox" />Show grid</label><label className="emi-checkbox-label"><input checked={project.plot.markerVisibility} onChange={(event) => setProject((current) => ({ ...current, plot: { ...current.plot, markerVisibility: event.target.checked } }))} type="checkbox" />Show markers</label><label className="emi-checkbox-label"><input checked={project.plot.lightBackground} onChange={(event) => setProject((current) => ({ ...current, plot: { ...current.plot, lightBackground: event.target.checked } }))} type="checkbox" />Light export background</label>
         </div></details>
       </section>
+
+      <PublicationFigureEditor engineVersion={ENGINE_VERSION} range={range} traces={traces(EMI_METRICS)} unit={unit} />
 
       <EmiPlot bands={bands(["SET"])} exportName="emi-total-shielding-effectiveness" format={project.plot} graphId="set-vs-frequency" maximumHz={range.maximumHz} minimumHz={range.minimumHz} simonEligible simonTraces={simonTraces} simonUnavailableCount={simonUnavailableCount} title="4. Total shielding effectiveness (SET)" traces={traces(["SET"])} unit={unit} yLabel="dB" />
       <EmiPlot bands={bands(["SER"])} exportName="emi-reflection-contribution" format={project.plot} graphId="ser-vs-frequency" maximumHz={range.maximumHz} minimumHz={range.minimumHz} title="5. Reflection contribution (SER)" traces={traces(["SER"])} unit={unit} yLabel="dB" />
