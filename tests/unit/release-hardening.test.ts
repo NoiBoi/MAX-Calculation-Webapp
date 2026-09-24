@@ -5,7 +5,8 @@ import { resolveTestTarget } from "../../lib/release/test-target";
 describe("Milestone 5A release hardening", () => {
   it("records a versioned release-candidate baseline", () => {
     const baseline = releaseBaseline({ GIT_COMMIT: "abc123", VERCEL_URL: "preview.example" });
-    expect(baseline.releaseCandidate).toBe("v1.0.0-rc.1");
+    expect(baseline.releaseCandidate).toBe("v1.0.0-rc.2");
+    expect(baseline.applicationVersion).toBe("1.0.0-rc.2");
     expect(baseline.gitCommit).toBe("abc123");
     expect(baseline.indexedDbVersion).toBe(12);
     expect(baseline.supabaseMigrationVersion).toBe("202607170004");

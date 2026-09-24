@@ -223,6 +223,32 @@ export function applyPublicationPalette(spec: PublicationFigureSpec, paletteName
   }) };
 }
 
+export function carryPublicationSeriesStyles(
+  previous: readonly PublicationSeriesSpec[],
+  replacement: readonly PublicationSeriesSpec[],
+): readonly PublicationSeriesSpec[] {
+  const bySource = new Map(previous.map((series) => [`${series.datasetId}\u0000${series.direction}`, series]));
+  return replacement.map((series) => {
+    const prior = bySource.get(`${series.datasetId}\u0000${series.direction}`);
+    if (!prior) return series;
+    return {
+      ...series,
+      label: prior.label,
+      visible: prior.visible,
+      color: prior.color,
+      widthPt: prior.widthPt,
+      dash: prior.dash,
+      marker: prior.marker,
+      markerSizePt: prior.markerSizePt,
+      markerOpen: prior.markerOpen,
+      markerMaxDisplayed: prior.markerMaxDisplayed,
+      opacity: prior.opacity,
+      zOrder: prior.zOrder,
+      smoothing: prior.smoothing,
+    };
+  });
+}
+
 export function publicationSeriesCsv(spec: PublicationFigureSpec, resolved: readonly PublicationResolvedSeries[]): string {
   const byId = new Map(resolved.map((series) => [series.id, series]));
   const rows = [["series_id", "dataset_id", "direction", "metric", "display_label", `frequency_${spec.frequencyUnit}`, "value"]];

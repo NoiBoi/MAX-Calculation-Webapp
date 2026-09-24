@@ -73,5 +73,5 @@ export function buildPlotlyPublicationFigure(spec: PublicationFigureSpec, resolv
     legend: { ...legendPlacement(spec), font: font(spec.fonts.legend), bgcolor: spec.legend.background ? "rgba(255,255,255,0.94)" : "rgba(255,255,255,0)", bordercolor: "#111111", borderwidth: spec.legend.frame ? ptToPx(spec.legend.borderWidthPt) : 0, itemwidth: spec.legend.sampleLengthPx, tracegroupgap: spec.legend.rowSpacingPx, entrywidthmode: "pixels", entrywidth: spec.legend.columns > 1 ? Math.max(40, (dimensions.width - margins.left - margins.right) / spec.legend.columns - spec.legend.columnSpacingPx) : undefined, indentation: spec.legend.textGapPx, itemsizing: "trace" },
     annotations,
   };
-  return { data, layout, config: { displayModeBar: false, responsive: false, staticPlot: false, scrollZoom: false, doubleClick: false } };
+  return { data, layout, config: { displayModeBar: false, responsive: false, staticPlot: false, scrollZoom: false, doubleClick: "reset+autosize" } };
 }

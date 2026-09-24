@@ -3,8 +3,10 @@
 import { useMemo, useRef, useState } from "react";
 import { smoothSeries, type EmiFrequencyRange, type EmiMetric } from "@max-stoich/chemistry-engine";
 import { createMetricSegments } from "@/lib/emi/analyzer";
+import { APPLICATION_VERSION } from "@/lib/release/version";
 import {
   applyPublicationPalette,
+  carryPublicationSeriesStyles,
   convertFigureLength,
   createPublicationFigureSpec,
   figureRasterPixels,
@@ -45,7 +47,7 @@ function baseSeries(trace: EmiPlotTrace, includeDirection: boolean): Omit<Public
 function newSpec(metric: EmiMetric, unit: "GHz" | "Hz", traces: readonly EmiPlotTrace[], engineVersion: string) {
   const metricTraces = traces.filter((trace) => trace.metric === metric);
   const includeDirection = new Set(metricTraces.map((trace) => trace.direction)).size > 1;
-  return createPublicationFigureSpec({ metric, frequencyUnit: unit, applicationVersion: "1.0.0-rc.1", engineVersion, series: metricTraces.map((trace) => baseSeries(trace, includeDirection)) });
+  return createPublicationFigureSpec({ metric, frequencyUnit: unit, applicationVersion: APPLICATION_VERSION, engineVersion, series: metricTraces.map((trace) => baseSeries(trace, includeDirection)) });
 }
 
 function readPresets(): PublicationFigureSpec[] {
@@ -128,7 +130,7 @@ export function PublicationFigureEditor({ traces, range, unit, engineVersion }: 
   }));
   const setMetric = (metric: EmiMetric) => setSpec((current) => {
     const replacement = newSpec(metric, current.frequencyUnit, traces, engineVersion);
-    return { ...replacement, id: current.id, name: `${metric} publication figure`, geometry: current.geometry, fonts: current.fonts, legend: current.legend, palette: current.palette };
+    return { ...replacement, id: current.id, name: `${metric} publication figure`, geometry: current.geometry, fonts: current.fonts, legend: current.legend, palette: current.palette, series: carryPublicationSeriesStyles(current.series, replacement.series) };
   });
   const savePreset = () => {
     const next = [...presets.filter((entry) => entry.id !== spec.id), spec]; localStorage.setItem(PRESET_STORAGE_KEY, JSON.stringify(next)); setPresets(next); setSelectedPresetId(spec.id); setStatus(`Saved “${spec.name}” in this browser.`);
@@ -189,7 +191,7 @@ export function PublicationFigureEditor({ traces, range, unit, engineVersion }: 
         </div>{(axisErrors.x || axisErrors.y) && <div className="emi-inline-error" role="alert">{axisErrors.x ?? axisErrors.y} The last valid preview is preserved.</div>}</details>
 
         <details open><summary>Series</summary><div className="emi-publication-series-list">{spec.series.map((series) => <div className="emi-publication-series-row" key={series.id}><input aria-label={`Show ${series.label}`} checked={series.visible} type="checkbox" onChange={(event) => updateSeries(series.id, { visible: event.target.checked })} /><input aria-label={`Label for ${series.label}`} value={series.label} onChange={(event) => updateSeries(series.id, { label: event.target.value })} /><input aria-label={`Color for ${series.label}`} type="color" value={series.color} onChange={(event) => updateSeries(series.id, { color: event.target.value })} /><label>Width<input min="0.25" max="10" step="0.25" type="number" value={series.widthPt} onChange={(event) => updateSeries(series.id, { widthPt: Number(event.target.value) })} /></label><select aria-label={`Line style for ${series.label}`} className="ui-select" value={series.dash} onChange={(event) => updateSeries(series.id, { dash: event.target.value as PublicationSeriesSpec["dash"] })}>{PUBLICATION_DASH_SEQUENCE.map((dash) => <option key={dash}>{dash}</option>)}</select><select aria-label={`Marker for ${series.label}`} className="ui-select" value={series.marker} onChange={(event) => updateSeries(series.id, { marker: event.target.value as PublicationSeriesSpec["marker"] })}><option value="none">No marker</option>{PUBLICATION_MARKER_SEQUENCE.map((marker) => <option key={marker}>{marker}</option>)}</select><details className="emi-publication-series-advanced"><summary>Advanced</summary><div className="emi-format-grid"><label>Marker size (pt)<input min="0" max="40" step="0.5" type="number" value={series.markerSizePt} onChange={(event) => updateSeries(series.id, { markerSizePt: Number(event.target.value) })} /></label><label>Max markers<input min="0" max="10000" step="1" type="number" value={series.markerMaxDisplayed} onChange={(event) => updateSeries(series.id, { markerMaxDisplayed: Number(event.target.value) })} /></label><label>Opacity<input min="0" max="1" step="0.05" type="number" value={series.opacity} onChange={(event) => updateSeries(series.id, { opacity: Number(event.target.value) })} /></label><label>Z-order<input step="1" type="number" value={series.zOrder} onChange={(event) => updateSeries(series.id, { zOrder: Number(event.target.value) })} /></label><label className="emi-checkbox-label"><input checked={series.markerOpen} type="checkbox" onChange={(event) => updateSeries(series.id, { markerOpen: event.target.checked })} />Open marker</label><label className="emi-checkbox-label"><input checked={series.smoothing.enabled} type="checkbox" onChange={(event) => updateSeries(series.id, { smoothing: { ...series.smoothing, enabled: event.target.checked } })} />Display smoothing</label><label>Smoothing window<select className="ui-select" value={series.smoothing.windowSize} onChange={(event) => updateSeries(series.id, { smoothing: { ...series.smoothing, windowSize: Number(event.target.value) as 3 | 5 | 7 | 11 } })}>{[3, 5, 7, 11].map((window) => <option key={window}>{window}</option>)}</select></label></div></details></div>)}</div>
-          <label>Palette<select className="ui-select" value={spec.palette} onChange={(event) => setSpec((current) => applyPublicationPalette(current, event.target.value as PublicationFigureSpec["palette"]))}><option value="colorblind-safe">Colorblind-safe qualitative</option><option value="muted-scientific">Muted scientific</option><option value="high-contrast">High contrast</option><option value="grayscale">Grayscale with patterns</option></select></label>
+          <label>Palette<select className="ui-select" value={spec.palette} onChange={(event) => setSpec((current) => applyPublicationPalette(current, event.target.value as PublicationFigureSpec["palette"]))}><option value="colorblind-safe">Colorblind-safe</option><option value="muted-scientific">Muted scientific</option><option value="high-contrast">High contrast</option><option value="grayscale">Grayscale with patterns</option></select></label>
           {indistinguishableSeries && <div className="emi-inline-warning" role="status">Two or more visible series share the same color, dash, and marker. Change at least one style before publication.</div>}
         </details>
 

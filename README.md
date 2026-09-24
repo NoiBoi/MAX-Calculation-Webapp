@@ -23,7 +23,7 @@ Copy `.env.example` to `.env.local` and configure `NEXT_PUBLIC_SUPABASE_URL` and
 
 Start with `docs/ARCHITECTURE.md` and `docs/CODEBASE_GUIDE.md`. See `docs/SCIENTIFIC_ENGINE_ARCHITECTURE.md`, `docs/LOCAL_PERSISTENCE_ARCHITECTURE.md`, `docs/CLOUD_AUTH_ARCHITECTURE.md`, `docs/CLOUD_SYNC_ARCHITECTURE.md`, `docs/DATABASE_SCHEMA.md`, `docs/BACKUP_AND_RESTORE.md`, `docs/SECURITY.md`, `docs/TESTING.md`, `docs/CONTRIBUTING.md`, and `docs/DEPLOYMENT.md` for the detailed contracts and contributor workflow.
 
-Release-candidate hardening uses `v1.0.0-rc.1`. Run `npm run release:baseline`, `npm run security:auth-provider`, and `npm run validate:rc` before deployed validation. Environment-aware browser testing and destructive-test safeguards are documented in `docs/PRODUCTION_VALIDATION_5A.md`; current release-gate evidence and unresolved blockers are recorded in `docs/RELEASE_GATE_5A.md`.
+The current application version is `v1.0.0-rc.2`. Run `npm run release:baseline`, `npm run security:auth-provider`, and `npm run validate:rc` before deployed validation. Environment-aware browser testing and destructive-test safeguards are documented in `docs/PRODUCTION_VALIDATION_5A.md`; the earlier rc.1 release-gate evidence remains recorded in `docs/RELEASE_GATE_5A.md`.
 
 Appearance supports Light, neutral-charcoal Dark, black Midnight, and System from one compact control fixed at the application edge and from Settings. The versioned local settings record is authoritative; a derived local bootstrap value applies `data-theme` before hydration to prevent flashing. System follows live OS changes and resolves only to Light or Dark without replacing the persisted `system` choice. Printed Letter/A4 documents always use the light paper palette with readability-first typography at 100% scale.
 
@@ -38,6 +38,12 @@ The application supports formula parsing, explicit 211/312/413 site models, exac
 Built-in examples include Ti₂AlN, Ti₃AlC₂, Ti₄AlN₃, Nb₂AlN, explicit Ti/Nb mixed M-site material, and explicit C/N mixed X-site material. Each example shows its validation status. They are synthetic or hand-audited arithmetic fixtures; none is represented as an experimentally preferred or laboratory-approved synthesis route.
 
 The scientific reference registry records 20 required cases and their source, tolerance, and reviewer status. Spreadsheet comparison is manual and documented in `docs/SPREADSHEET_COMPARISON.md`; spreadsheets are not runtime dependencies.
+
+## EMI analysis and publication figures
+
+The `/emi` workspace imports Keysight complex S-parameter CSV files locally and calculates forward/reverse `R`, `T`, `A`, `SET`, `SER`, and `SEA`. Optional sample thickness and four-point-probe resistance readings add conductivity and Simon-model estimates without changing the measured VNA results.
+
+The Publication Figure editor uses one reproducible figure specification for its interactive Plotly preview, vector SVG export, and deterministic PNG rasterization. It supports exact physical dimensions, 300/600 DPI output, manual axes, publication-safe palettes, line and marker styling, legends, panel labels, configuration JSON, and plotted-data CSV. Matching dataset/direction series retain their custom styling when the EMI quantity changes; double-click restores the plot’s original zoom. See `docs/EMI_ANALYSIS.md`, `docs/EMI_PUBLICATION_FIGURES.md`, and `docs/EMI_EXPORT_FORMAT.md`.
 
 ## Current workflow
 

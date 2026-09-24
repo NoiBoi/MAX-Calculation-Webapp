@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildPlotlyPublicationFigure } from "../../lib/emi/plotly-publication-adapter";
 import { finalizePublicationSvg } from "../../lib/emi/publication-export";
-import { applyPublicationPalette, convertFigureLength, createPublicationFigureSpec, figurePreviewPixels, figureRasterPixels, parsePublicationFigureSpec, publicationSeriesCsv, serializePublicationFigureSpec, validatePublicationAxes } from "../../lib/emi/publication-figure";
+import { applyPublicationPalette, carryPublicationSeriesStyles, convertFigureLength, createPublicationFigureSpec, figurePreviewPixels, figureRasterPixels, parsePublicationFigureSpec, publicationSeriesCsv, serializePublicationFigureSpec, validatePublicationAxes } from "../../lib/emi/publication-figure";
 
 const series = [{ id: "sample-forward-SET", datasetId: "sample", direction: "forward" as const, metric: "SET" as const, label: "Sample α", visible: true, widthPt: 1.25, markerSizePt: 4, markerOpen: true, markerMaxDisplayed: 18, opacity: 1, smoothing: { enabled: false, windowSize: 5 as const } }];
 const create = () => createPublicationFigureSpec({ metric: "SET", frequencyUnit: "GHz", applicationVersion: "test", engineVersion: "engine", series });
@@ -72,6 +72,15 @@ describe("publication figure specification", () => {
     expect(figure.layout.xaxis).toMatchObject({ range: [27, 39], dtick: 2 });
     expect(figure.layout.yaxis).toMatchObject({ range: [20, 60], dtick: 5 });
     expect(figure.layout.legend).toMatchObject({ x: 0.4, y: 0.3, itemsizing: "trace" });
+    expect(figure.config.doubleClick).toBe("reset+autosize");
+  });
+
+  it("carries series styling to the same dataset and direction when the EMI quantity changes", () => {
+    const prior = create().series[0]!;
+    const styled = { ...prior, label: "My specimen", visible: false, color: "#123456", widthPt: 2.5, dash: "longdash" as const, marker: "diamond" as const, markerSizePt: 6, markerOpen: true, markerMaxDisplayed: 12, opacity: 0.7, zOrder: 4, smoothing: { enabled: true, windowSize: 7 as const } };
+    const next = { ...prior, id: "sample-forward-SEA", metric: "SEA" as const, label: "Default SEA", color: "#abcdef", widthPt: 1 };
+    const carried = carryPublicationSeriesStyles([styled], [next])[0]!;
+    expect(carried).toMatchObject({ id: "sample-forward-SEA", metric: "SEA", label: "My specimen", visible: false, color: "#123456", widthPt: 2.5, dash: "longdash", marker: "diamond", markerSizePt: 6, markerOpen: true, markerMaxDisplayed: 12, opacity: 0.7, zOrder: 4, smoothing: { enabled: true, windowSize: 7 } });
   });
 
   it("rejects inverted and nonpositive logarithmic axis ranges", () => {

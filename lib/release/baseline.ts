@@ -3,15 +3,17 @@ import { DATABASE_VERSION } from "../persistence/database";
 import { LOCAL_SCHEMA_VERSION } from "../persistence/entities";
 import { CLOUD_SYNC_SCHEMA_VERSION } from "../cloud/sync-types";
 import { LAB_SCHEMA_VERSION } from "../labs/types";
+import { APPLICATION_VERSION, RELEASE_CANDIDATE_ID } from "./version";
 
-export const RELEASE_CANDIDATE_ID = "v1.0.0-rc.1" as const;
+export { APPLICATION_VERSION, RELEASE_CANDIDATE_ID } from "./version";
+
 export const SUPABASE_MIGRATION_VERSION = "202607170004" as const;
 export const PRODUCTION_URL = "https://maxcalc.vercel.app" as const;
 
 export function releaseBaseline(environment: Readonly<Record<string, string | undefined>> = process.env) {
   return Object.freeze({
     releaseCandidate: RELEASE_CANDIDATE_ID,
-    applicationVersion: "1.0.0-rc.1",
+    applicationVersion: APPLICATION_VERSION,
     gitCommit: environment.VERCEL_GIT_COMMIT_SHA ?? environment.GIT_COMMIT ?? "unrecorded",
     chemistryEngineVersion: ENGINE_VERSION,
     scientificSchemaVersion: "1.0.0",
