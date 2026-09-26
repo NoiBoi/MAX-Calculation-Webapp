@@ -33,12 +33,11 @@ test("DEFAULT-ROUTE-001 opens the calculator and keeps the feature demo as a lab
   await ready(page);
   await expect(page.getByRole("heading", { name: "Target and precursor route" })).toBeVisible();
   await openMore(page);
-  await page.getByRole("link", { name: /Feature demo and tutorial/ }).click();
+  await page.getByRole("link", { name: "Documentation", exact: true }).click();
   await expect(page).toHaveURL(/\/demo$/);
 
-  const demo = page.getByLabel("Feature demo and tutorial");
-  await expect(demo.getByRole("heading", { name: "Feature demo and tutorial" })).toBeVisible();
-  await expect(demo.getByText("MAXCalc · Development reference", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Workflows and calculation references" })).toBeVisible();
+  await expect(page.getByText("MAXCalc documentation", { exact: true })).toBeVisible();
 
   await page.getByRole("link", { name: "Calculator", exact: true }).click();
   await expect(page).toHaveURL(/\/workspace$/);

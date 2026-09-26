@@ -1054,6 +1054,197 @@ main.min-h-screen > header:not(.sticky) + div.mx-auto.grid > section { padding: 
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
 }
 
+/*
+ * MAXCalc interface contract
+ *
+ * These rules intentionally converge legacy Tailwind surfaces and the newer
+ * EMI/XRD workspaces on the same compact scientific-application hierarchy.
+ * Print layout remains independent below this section.
+ */
+:root {
+  --font-body: .875rem;
+  --font-supporting: .75rem;
+  --font-input: .875rem;
+  --font-button: .8125rem;
+  --font-section-heading: 1rem;
+  --font-page-title: 1.125rem;
+  --font-subsection-heading: .875rem;
+  --font-table: .8125rem;
+  --control-height: 2.5rem;
+  --control-height-compact: 2rem;
+  --space-inline-control: .4rem;
+  --space-toolbar-group: .65rem;
+  --space-field-stack: .6rem;
+  --space-card: .85rem;
+  --space-section: 1.25rem;
+  --panel-padding: 1rem;
+  --layout-gap: .85rem;
+  --radius-control: .3rem;
+  --radius-panel: .4rem;
+  --radius-overlay: .5rem;
+  --shadow-panel: none;
+  --shadow-header: 0 1px 5px #0f172a18;
+  --shadow-overlay: 0 8px 24px #0f172a24;
+}
+
+body { line-height: 1.45; }
+main:not(.dedicated-print-root) .font-bold { font-weight: 650; }
+.app-header { box-shadow: var(--shadow-header); }
+:is(.workspace-menu, .action-menu-panel, .account-menu, .theme-menu, dialog, .emi-chart-tooltip) { box-shadow: var(--shadow-overlay); }
+
+/* Shared structural surfaces. Ordinary panels use borders, not elevation. */
+.ui-panel,
+.xrd-panel,
+.emi-panel,
+.page-container-settings > section,
+.page-container-settings > .rounded.border,
+.account-page-grid section {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-panel);
+  background: var(--background-panel);
+  padding: var(--panel-padding);
+  box-shadow: none;
+}
+.xrd-workspace,
+.emi-analyzer { gap: var(--layout-gap); }
+.xrd-workspace-divider { border-top-width: 1px; }
+.workspace-landing { margin-block: var(--space-section); padding: var(--panel-padding); }
+
+/* Four-level type hierarchy: app title, section, subsection, field label. */
+.app-header-context h1 { font-size: var(--font-page-title); font-weight: 650; }
+:is(.xrd-section-heading, .emi-section-heading) h2,
+.xrd-workspace-divider > div > h2,
+.page-container-settings h2,
+.workspace-card > h2,
+.comparison-workspace h2 { font-size: var(--font-section-heading); font-weight: 650; line-height: 1.3; }
+:is(.xrd-section-heading, .emi-section-heading) h3,
+:is(.xrd-panel, .emi-panel, .page-container-settings) h3 { font-size: var(--font-subsection-heading); font-weight: 650; line-height: 1.35; }
+:is(.xrd-section-heading, .emi-section-heading) p,
+.xrd-workspace-divider > div > p,
+.emi-supporting { color: var(--text-muted); font-size: var(--font-supporting); line-height: 1.45; }
+:is(.xrd-step-kicker, .emi-step-kicker, .workspace-landing-kicker) {
+  margin-bottom: .18rem;
+  color: var(--text-muted);
+  font-size: .6875rem;
+  font-weight: 600;
+  letter-spacing: .015em;
+  text-transform: none;
+}
+.workspace-menu-label { font-weight: 650; letter-spacing: .04em; }
+
+/* One field and control contract, including older utility-class forms. */
+main :is(input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="file"]), select, textarea) {
+  border-color: var(--border-default);
+  border-radius: var(--radius-control);
+  background: var(--background-input);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: var(--font-input);
+  font-weight: 400;
+}
+main :is(input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="file"]), select) { min-height: var(--control-height); }
+main :is(label, legend) { font-weight: 600; }
+main label :is(input, select, textarea) { margin-top: .25rem; }
+.ui-button,
+.ui-icon-button,
+.ui-select,
+main :is(button, a).rounded.border,
+main button.rounded[class*="bg-teal"] {
+  min-height: var(--control-height);
+  border-radius: var(--radius-control);
+  font-size: var(--font-button);
+  font-weight: 600;
+}
+.ui-button-compact { min-height: var(--control-height-compact); font-size: .75rem; }
+.ui-button-primary,
+main button.rounded[class*="bg-teal"] { border-color: var(--accent); background: var(--accent); color: var(--accent-foreground); }
+.ui-button-destructive { background: transparent; }
+.segmented-control { border-radius: var(--radius-control); }
+.segmented-control button { border-radius: calc(var(--radius-control) - 1px); }
+
+/* Toolbars stay dense and visually attached to the workflow. */
+.workspace-command-bar,
+.comparison-command-bar,
+.xrd-workspace-tabs,
+.emi-graph-toolbar {
+  border-color: var(--border-subtle);
+  border-radius: var(--radius-panel);
+  background: var(--background-panel);
+  box-shadow: none;
+}
+.xrd-workspace-tabs {
+  position: static;
+  gap: var(--space-inline-control);
+  padding: .5rem;
+  backdrop-filter: none;
+}
+.xrd-workspace-tabs .ui-button { min-height: var(--control-height-compact); background: transparent; }
+.xrd-workspace-tabs [aria-current="page"] { border-color: var(--border-strong); background: var(--background-selected); color: var(--text-inverse); }
+
+/* Dense data tables share header, row, numeric, and overflow behavior. */
+:is(.emi-table, .xrd-peak-table, .xrd-reflection-table table) {
+  font-size: var(--font-table);
+  font-variant-numeric: tabular-nums;
+}
+:is(.emi-table, .xrd-peak-table, .xrd-reflection-table table) th {
+  background: var(--background-hover);
+  color: var(--text-secondary);
+  font-size: .75rem;
+  font-weight: 650;
+}
+:is(.emi-table, .xrd-peak-table, .xrd-reflection-table table) :is(th, td) { padding: .45rem .55rem; }
+:is(.emi-table, .xrd-peak-table, .xrd-reflection-table table) :is(th, td):not(:first-child) { text-align: right; }
+:is(.emi-table-scroll, .xrd-reflection-table) { border-radius: var(--radius-control); }
+
+/* Status is quiet by default; warning and error treatments remain semantic. */
+:is(.xrd-status, .emi-status, .emi-publication-status) {
+  min-height: 1rem;
+  margin-top: .55rem;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  padding: 0;
+  font-size: var(--font-supporting);
+}
+.emi-project-badge { border-radius: var(--radius-control); }
+.emi-provenance { position: relative; }
+.emi-provenance > summary { cursor: pointer; color: var(--text-muted); font-size: var(--font-supporting); }
+.emi-provenance > p { position: absolute; z-index: 5; right: 0; width: max-content; max-width: 20rem; margin: .3rem 0 0; border: 1px solid var(--border-default); border-radius: var(--radius-overlay); background: var(--background-elevated); padding: .55rem .65rem; box-shadow: var(--shadow-overlay); }
+
+/* Reduce nested-card weight while retaining clear grouping. */
+:is(.xrd-results-list article, .emi-file-card, .emi-reading-card, .emi-primary-inputs > label, .page-container-settings article.rounded.border) {
+  border-radius: var(--radius-control);
+  box-shadow: none;
+}
+.emi-primary-inputs > label { background: transparent; }
+.emi-project-toolbar + .emi-project-description { margin-top: .65rem; }
+.emi-row-status, .emi-readiness-badge, .emi-validity, .emi-view-badge { font-weight: 650; }
+
+.comparison-workspace > [aria-label="Comparison identity"],
+.comparison-workspace > [aria-label="Comparison analysis controls"],
+.comparison-empty-state,
+.comparison-scenario-card,
+main .rounded-lg.shadow-sm,
+main .rounded-xl.shadow-sm {
+  border-radius: var(--radius-panel);
+  box-shadow: none;
+}
+.comparison-workspace > [aria-label="Comparison identity"] { border-radius: var(--radius-panel) var(--radius-panel) 0 0; }
+.comparison-workspace > [aria-label="Comparison analysis controls"] { border-radius: 0 0 var(--radius-panel) var(--radius-panel); }
+.scenario-name-input { font-weight: 600; }
+.scenario-baseline-badge { font-weight: 650; }
+
+/* Numerical content scans consistently without forcing a monospace UI. */
+:is(.emi-analyzer, .xrd-workspace, .comparison-workspace, .workspace-grid, .page-container-settings) :is(td, dd, input[type="number"], input[inputmode="decimal"]) {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 900px) {
+  :root { --panel-padding: .85rem; --page-gutter: .65rem; }
+  .app-header-context h1 { font-size: 1rem; }
+  .xrd-workspace-tabs { overflow-x: auto; flex-wrap: nowrap; }
+}
+
 .dedicated-print-root {
   --weighing-results-font: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   color-scheme: light;

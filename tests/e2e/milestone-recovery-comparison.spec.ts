@@ -10,6 +10,11 @@ async function chooseExample(page: Page) {
   await page.getByLabel("Start or reset").selectOption("ti2aln");
 }
 
+async function openComparison(page: Page) {
+  await page.getByRole("button", { name: "Calculator" }).click();
+  await page.getByRole("menuitem", { name: /Comparison/ }).click();
+}
+
 async function corruptRecovery(page: Page) {
   await page.evaluate(async () => {
     const request = indexedDB.open("max-stoich-local");
@@ -85,7 +90,7 @@ test("RECOVERY-SETTINGS-001 corrupt settings do not crash or delete scientific r
 });
 
 test("COMPARE-ANALYSIS-001 supports baseline, normalization, sorting, hiding, export, and overview print", async ({ page }) => {
-  await ready(page); await chooseExample(page); await page.getByRole("link", { name: "Compare", exact: true }).click();
+  await ready(page); await chooseExample(page); await openComparison(page);
   await page.getByRole("toolbar", { name: "Comparison page actions" }).getByRole("button", { name: "Add current recipe" }).click();
   const first = page.getByLabel("Unsaved calculation scenario", { exact: true }); await first.getByRole("button", { name: "Duplicate" }).click(); await first.getByRole("button", { name: "Duplicate" }).click();
   const names = page.locator('section[aria-label$=" scenario"] input[aria-label$=" name"]'); await names.nth(0).fill("Route C"); await names.nth(1).fill("Route A"); await names.nth(2).fill("Route B");

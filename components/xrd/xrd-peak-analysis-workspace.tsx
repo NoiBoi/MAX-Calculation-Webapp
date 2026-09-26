@@ -146,7 +146,7 @@ export function XrdPeakAnalysisWorkspace({ database, measurementRecord, onAnalys
   const selectedGroup = analysis?.fitGroups.find((item) => item.groupId === selectedPeak?.groupId);
 
   return <section className="xrd-panel" aria-labelledby="xrd-processing-title">
-    <div className="xrd-section-heading"><div><span className="xrd-step-kicker">Processing and peak analysis</span><h2 id="xrd-processing-title">Process and fit peaks</h2><p>Every saved result is a new derived record. Automatic peaks remain researcher-correctable.</p></div></div>
+    <div className="xrd-section-heading"><div><h2 id="xrd-processing-title">Process and fit peaks</h2><p>Every saved result is a new derived record. Automatic peaks remain researcher-correctable.</p></div></div>
     <p aria-live="polite" className="xrd-status">{message}</p>
     <div className="xrd-stage3-grid"><fieldset><legend>Processing</legend>
       <label>Baseline <span aria-label="Baseline help: estimates a slowly varying background for subtraction from the derived signal." className="xrd-info" role="img">i</span><select aria-label="Baseline" value={processingConfig.baseline.enabled ? processingConfig.baseline.algorithm : "off"} onChange={(event) => setProcessingConfig({ ...processingConfig, baseline: { ...processingConfig.baseline, enabled: event.target.value !== "off", algorithm: event.target.value === "asls" ? "asls" : "arpls" } })}><option value="off">Off</option><option value="arpls">arPLS</option><option value="asls">AsLS</option></select><span className="xrd-help-text">Optional background estimate. Raw intensity is never overwritten.</span></label>

@@ -98,7 +98,7 @@ test("saves and reopens immutable XRD processing and peak-analysis lineage", asy
   await page.getByRole("button", { name: "Search COD" }).click();
   await page.getByRole("button", { name: "Use reference" }).click();
   await expect(page.getByRole("heading", { name: "X theoretical powder pattern" })).toBeVisible();
-  await page.getByRole("button", { name: "Analyze" }).click();
+  await page.getByRole("button", { name: "Analysis", exact: true }).click();
   await page.getByLabel("Experimental wavelength (Å)").fill("1.5406");
   await page.getByRole("button", { name: "Propose matches" }).click();
   await expect(page.getByRole("table", { name: "Reference match review" })).toBeVisible();
@@ -114,7 +114,7 @@ test("saves and reopens immutable XRD processing and peak-analysis lineage", asy
   await page.getByRole("button", { name: /Open 9\/25\/2026/ }).click();
   await expect(page.getByRole("heading", { name: "Saved analysis revisions" })).toBeVisible();
   await page.getByRole("button", { name: "Open analysis" }).click();
-  await expect(page.getByRole("heading", { name: "Import → process → peaks → reference → match → lattice" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Analysis lineage" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Saved reference-matching analyses" })).toBeVisible();
   await page.getByRole("button", { name: "Open matching result" }).click();
   await page.getByRole("button", { name: "Open refinement result" }).click();

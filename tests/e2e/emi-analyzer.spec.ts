@@ -32,7 +32,7 @@ async function downloadText(download: Download): Promise<string> {
 
 test("EMI analyzer imports multiple files, shows failures, switches directions, and removes files", async ({ page }) => {
   await page.goto("/emi");
-  await expect(page.getByRole("heading", { name: "EMI Shielding Analyzer" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "EMI Analysis" })).toBeVisible();
   await page.locator('input[type="file"][accept^=".csv"]').setInputFiles([
     { name: "alpha.csv", mimeType: "text/csv", buffer: Buffer.from(validCsv()) },
     { name: "beta.csv", mimeType: "text/csv", buffer: Buffer.from(validCsv(0.02)) },

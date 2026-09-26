@@ -179,7 +179,7 @@ export function DataManagementShell() {
       <AppHeader
         activeSection="settings"
         status={status}
-        title="Settings, layouts, and local data"
+        title="Settings"
       />
       <PageContainer className="grid gap-4 lg:grid-cols-2" width="settings">
         <UserSettingsPanel onStatus={setStatus} repositories={repositories} />

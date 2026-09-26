@@ -37,7 +37,7 @@ export function EmiElectricalPropertiesEditor({ filename, frequenciesHz, value, 
 
   return <section className="emi-electrical-editor" aria-labelledby={`emi-electrical-heading-${filename}`}>
     <div className="emi-editor-heading">
-      <div><span className="emi-step-kicker">Optional theoretical comparison</span><h3 id={`emi-electrical-heading-${filename}`}>Four-point resistance &amp; Simon estimate</h3><p>Enter each raw four-point-probe resistance in Ω. MAXCalc averages the readings, applies the fixed geometric correction factor 4.532, then derives conductivity for the Simon estimate.</p></div>
+      <div><h3 id={`emi-electrical-heading-${filename}`}>Four-point resistance &amp; Simon estimate</h3><p>Enter each raw four-point-probe resistance in Ω. MAXCalc averages the readings, applies the fixed geometric correction factor 4.532, then derives conductivity for the Simon estimate.</p></div>
       <span className={`emi-readiness-badge ${calculation.ok ? "emi-readiness-ready" : "emi-readiness-optional"}`}>{calculation.ok ? "Simon ready" : "Optional"}</span>
     </div>
     {thicknessConflict && <div className="emi-thickness-conflict" role="alert">

@@ -112,7 +112,7 @@ export function XrdExperimentalWorkspace({ onAnalysisChange }: { readonly onAnal
   const shown = active?.measurement;
   return <div className="xrd-experimental-stack">
     <section className="xrd-panel" aria-labelledby="xrd-import-title">
-      <div className="xrd-section-heading"><div><span className="xrd-step-kicker">Experimental XRD · raw ingestion</span><h2 id="xrd-import-title">Import a measurement</h2><p>Exact bytes are hashed before parsing. Previewing and plotting do not smooth, normalize, reorder, or otherwise transform measured values.</p></div></div>
+      <div className="xrd-section-heading"><div><h2 id="xrd-import-title">Import measurement</h2><p>Exact bytes are hashed before parsing. Previewing and plotting do not transform measured values.</p></div></div>
       <div className="xrd-dropzone" onDragOver={(event) => event.preventDefault()} onDrop={onDrop}>
         <div><strong>Drop an XRD text file here</strong><span>CSV, TSV, TXT, XY, XYE, or safely readable text DAT · maximum 25 MB by default</span></div>
         <button className="ui-button" disabled={pending} onClick={() => inputRef.current?.click()} type="button">Choose file</button>
@@ -121,7 +121,7 @@ export function XrdExperimentalWorkspace({ onAnalysisChange }: { readonly onAnal
       <p aria-live="polite" className="xrd-status">{message}</p>
 
       {preview && <div className="xrd-import-preview">
-        <div className="xrd-section-heading"><div><span className="xrd-step-kicker">Import preview · not yet saved</span><h3>{preview.rawArtifact.originalFilename}</h3></div></div>
+        <div className="xrd-section-heading"><div><h3>{preview.rawArtifact.originalFilename}</h3><p>Import preview · not yet saved</p></div></div>
         <dl className="xrd-pattern-metadata">
           <div><dt>File</dt><dd>{bytes(preview.rawArtifact.byteLength)}</dd></div><div><dt>SHA-256</dt><dd className="xrd-hash" title={preview.rawArtifact.sha256}>{preview.rawArtifact.sha256.slice(0, 16)}…</dd></div>
           <div><dt>Detected format</dt><dd>{preview.measurement.parserProvenance.detectedFormat} · {preview.measurement.parserProvenance.detectionConfidence} confidence</dd></div>
@@ -145,14 +145,14 @@ export function XrdExperimentalWorkspace({ onAnalysisChange }: { readonly onAnal
     </section>
 
     {shown && <section className="xrd-panel" aria-labelledby="xrd-raw-pattern-title">
-      <div className="xrd-section-heading"><div><span className="xrd-step-kicker">Raw experimental pattern · schema {shown.schemaVersion}</span><h2 id="xrd-raw-pattern-title">{active?.displayName ?? shown.sampleName ?? shown.sourceFilename}</h2><p>{shown.characterization.pointCount.toLocaleString()} original points · SHA-256 <span className="xrd-hash">{shown.rawArtifactSha256.slice(0, 16)}…</span> · no preprocessing</p></div></div>
+      <div className="xrd-section-heading"><div><h2 id="xrd-raw-pattern-title">{active?.displayName ?? shown.sampleName ?? shown.sourceFilename}</h2><p>{shown.characterization.pointCount.toLocaleString()} original points · SHA-256 <span className="xrd-hash">{shown.rawArtifactSha256.slice(0, 16)}…</span> · no preprocessing</p></div></div>
       <RawPatternPlot measurement={shown} />
     </section>}
 
     {active && <XrdPeakAnalysisWorkspace database={repositories.database} key={active.id} measurementRecord={active} onAnalysisChange={onAnalysisChange} />}
 
     <section className="xrd-panel" aria-labelledby="xrd-library-title">
-      <div className="xrd-section-heading"><div><span className="xrd-step-kicker">This browser · IndexedDB</span><h2 id="xrd-library-title">Measurement library</h2><p>Measurements stay on this device and can be reopened after a reload.</p></div></div>
+      <div className="xrd-section-heading"><div><h2 id="xrd-library-title">Measurement library</h2><p>Measurements stay on this device and can be reopened after a reload.</p></div></div>
       {library.length === 0 ? <p className="xrd-status">No local experimental measurements yet.</p> : <div className="xrd-results-list">{library.map((record) => <article key={record.id}><div><h3>{record.displayName}<small>{record.measurement.sourceFilename}</small></h3><dl><div><dt>Imported</dt><dd>{new Date(record.importedAt).toLocaleString()}</dd></div><div><dt>Points</dt><dd>{record.measurement.characterization.pointCount.toLocaleString()}</dd></div><div><dt>2θ range</dt><dd>{fmt(record.measurement.characterization.minTwoThetaDeg)}° – {fmt(record.measurement.characterization.maxTwoThetaDeg)}°</dd></div><div><dt>Raw SHA-256</dt><dd className="xrd-hash">{record.rawArtifactSha256.slice(0, 16)}…</dd></div></dl></div><div className="xrd-library-actions"><button className="ui-button" onClick={() => setActive(record)} type="button">Open</button><button className="ui-button" onClick={() => void rename(record)} type="button">Rename</button><button className="ui-button" onClick={() => void remove(record)} type="button">Delete</button></div></article>)}</div>}
     </section>
   </div>;

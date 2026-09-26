@@ -224,11 +224,9 @@ test("POLISH-009 route navigation stays in the header while workflow bars remain
     const toolbar = route === "/workspace"
       ? page.getByRole("toolbar", { name: "Calculator page actions" })
       : page.getByRole("toolbar", { name: "Comparison page actions" });
-    await expect(header.getByRole("link", { name: "Compare" })).toBeVisible();
-    await expect(header.getByRole("link", { name: "Settings" })).toBeVisible();
+    await expect(header.getByRole("button", { name: route === "/workspace" ? "Calculator" : "Comparison" })).toBeVisible();
     await expect(header.getByText(/^More/)).toBeVisible();
     await expect(toolbar.getByRole("link", { name: "Compare" })).toHaveCount(0);
-    await expect(toolbar.getByRole("link", { name: "Settings" })).toHaveCount(0);
     await expect(toolbar.getByText("More", { exact: true })).toHaveCount(0);
     const toolbarBox = await toolbar.boundingBox();
     const firstControl = toolbar.locator("button, a").first();

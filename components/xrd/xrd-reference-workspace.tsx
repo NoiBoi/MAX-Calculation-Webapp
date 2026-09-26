@@ -111,7 +111,7 @@ export function XrdReferenceWorkspace({ onPatternChange }: { readonly onPatternC
 
   return <div className="xrd-workspace">
     <section className="xrd-panel" aria-labelledby="xrd-search-title">
-      <div className="xrd-section-heading"><div><span className="xrd-step-kicker">Reference source · COD</span><h2 id="xrd-search-title">Find a crystal structure</h2><p>Formula search is composition-exact. COD results are normalized before they reach this workspace.</p></div></div>
+      <div className="xrd-section-heading"><div><h2 id="xrd-search-title">Find a crystal structure</h2><p>Search COD by exact composition. Results are normalized before they reach this workspace.</p></div></div>
       <form className="xrd-search-form" onSubmit={search}>
         <label><span>Formula or COD ID</span><input aria-label="Formula or COD ID" maxLength={120} onChange={(event) => setQuery(event.target.value)} placeholder="Ti3AlC2" value={query} /></label>
         <label><span>Radiation convention</span><select aria-label="Radiation convention" onChange={(event) => { setRadiationPreset(event.target.value as XRDRadiationPreset); setPattern(null); onPatternChange?.(null); }} value={radiationPreset}>{Object.entries(XRD_RADIATION_PRESETS).map(([value, item]) => <option key={value} value={value}>{item.label} · {item.wavelengthAngstrom} Å</option>)}</select></label>
@@ -121,7 +121,7 @@ export function XrdReferenceWorkspace({ onPatternChange }: { readonly onPatternC
     </section>
 
     {results.length > 0 && <section className="xrd-panel" aria-labelledby="xrd-results-title">
-      <div className="xrd-section-heading"><div><span className="xrd-step-kicker">Search results</span><h2 id="xrd-results-title">Available structures</h2></div></div>
+      <div className="xrd-section-heading"><div><h2 id="xrd-results-title">Search results</h2></div></div>
       <div className="xrd-results-list">{results.map((result) => <article key={result.sourceId}>
         <div><h3>{result.formula}{result.phaseName && result.phaseName !== result.formula ? <small>{result.phaseName}</small> : null}</h3><dl><div><dt>COD ID</dt><dd>{result.sourceId}</dd></div><div><dt>Space group</dt><dd>{result.spaceGroup ?? "Not reported"}</dd></div><div><dt>Cell a × b × c</dt><dd><LatticeSummary lattice={result.lattice} /></dd></div><div><dt>Reference</dt><dd>{result.doi ?? result.publication?.title ?? "Not reported"}</dd></div><div><dt>Revision</dt><dd>{result.sourceRevision ?? "Latest available"}</dd></div></dl></div>
         <button className="ui-button" disabled={state !== "idle"} onClick={() => void calculateReference(result)} type="button">{state === "calculating" ? "Calculating…" : "Use reference"}</button>
@@ -129,7 +129,7 @@ export function XrdReferenceWorkspace({ onPatternChange }: { readonly onPatternC
     </section>}
 
     {pattern && <section className="xrd-panel" aria-labelledby="xrd-pattern-title">
-      <div className="xrd-section-heading"><div><span className="xrd-step-kicker">Calculated reference · schema {pattern.schemaVersion}</span><h2 id="xrd-pattern-title">{pattern.reference.formula} theoretical powder pattern</h2><p>Calculated by {pattern.calculationProvenance.engine} {pattern.calculationProvenance.engineVersion}; intensities normalized to the strongest calculated reflection.</p></div></div>
+      <div className="xrd-section-heading"><div><h2 id="xrd-pattern-title">{pattern.reference.formula} theoretical powder pattern</h2><p>Calculated by {pattern.calculationProvenance.engine} {pattern.calculationProvenance.engineVersion}; intensities normalized to the strongest calculated reflection.</p></div></div>
       <dl className="xrd-pattern-metadata"><div><dt>Source</dt><dd>COD {pattern.reference.sourceId} · revision {pattern.reference.sourceRevision ?? "unreported"}</dd></div><div><dt>Crystal system</dt><dd>{pattern.crystalSystem}</dd></div><div><dt>Space group</dt><dd>{pattern.spaceGroup}</dd></div><div><dt>Lattice a × b × c</dt><dd><LatticeSummary lattice={pattern.lattice} /></dd></div><div><dt>Angles α / β / γ</dt><dd>{fmt(pattern.lattice.alphaDeg)}° / {fmt(pattern.lattice.betaDeg)}° / {fmt(pattern.lattice.gammaDeg)}°</dd></div><div><dt>Radiation</dt><dd>{pattern.radiation.label} · λ {fmt(pattern.radiation.wavelengthAngstrom, 5)} Å</dd></div><div><dt>CIF SHA-256</dt><dd className="xrd-hash">{pattern.reference.cifSha256}</dd></div><div><dt>Retrieved</dt><dd>{new Date(pattern.reference.retrievedAt).toLocaleString()}</dd></div></dl>
       <StickPlot pattern={pattern} />
       <div className="xrd-reflection-table"><table><caption>Calculated reflections</caption><thead><tr><th>2θ (°)</th><th>Relative intensity</th><th>d (Å)</th><th>hkl · multiplicity</th></tr></thead><tbody>{pattern.reflections.map((peak, index) => <tr key={`${peak.twoThetaDeg}-${index}`}><td>{fmt(peak.twoThetaDeg)}</td><td>{fmt(peak.relativeIntensity, 2)}</td><td>{fmt(peak.dAngstrom, 5)}</td><td>{hklLabel(peak)}</td></tr>)}</tbody></table></div>

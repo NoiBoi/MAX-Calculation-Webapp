@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 async function openMore(page: import("@playwright/test").Page) { await page.getByRole("button", { name: /More actions/ }).click(); }
 async function chooseExample(page: import("@playwright/test").Page, id = "ti2aln") { await openMore(page); await page.getByLabel("Start or reset").selectOption(id); }
-async function openCompare(page: import("@playwright/test").Page) { await page.getByRole("link", { name: "Compare", exact: true }).click(); }
+async function openCompare(page: import("@playwright/test").Page) { await page.getByRole("button", { name: "Calculator" }).click(); await page.getByRole("menuitem", { name: /Comparison/ }).click(); }
 async function addCurrentPair(page: import("@playwright/test").Page) { await page.getByRole("toolbar", { name: "Comparison page actions" }).getByRole("button", { name: "Add current recipe" }).click(); await page.getByLabel("Unsaved calculation scenario", { exact: true }).getByRole("button", { name: "Duplicate" }).click(); }
 async function saveRecipe(page: import("@playwright/test").Page) { await page.getByRole("button", { name: "Save", exact: true }).click(); const dialog = page.getByRole("dialog", { name: "Save recipe" }); await dialog.getByRole("button", { name: /Save recipe|Save revision|Rename recipe/ }).click(); await expect(dialog).not.toBeVisible(); }
 

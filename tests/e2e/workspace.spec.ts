@@ -164,11 +164,11 @@ test("UX-PERSIST-004 undo and redo restore scientific edits synchronously", asyn
 });
 
 test("UX-PERSIST-006 saves and applies an immutable reusable route", async ({ page }) => {
-  await openMore(page); await page.getByRole("button", { name: "Apply or save route" }).click();
+  await openMore(page); await page.getByRole("button", { name: "Manage routes" }).click();
   await page.getByRole("button", { name: "Save current precursor setup as route" }).click();
   await page.getByLabel("Close library").click();
   await page.keyboard.press("Control+Alt+N");
-  await openMore(page); await page.getByRole("button", { name: "Apply or save route" }).click();
+  await openMore(page); await page.getByRole("button", { name: "Manage routes" }).click();
   await page.getByRole("button", { name: "Apply copy" }).click();
   await expect(page.locator("#precursor-formula-ti")).toHaveValue("Ti");
   await expect(page.getByText(/Applied .* revision 1/)).toBeVisible();

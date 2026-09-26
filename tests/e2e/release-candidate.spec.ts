@@ -3,8 +3,8 @@ import { readFile } from "node:fs/promises";
 
 async function openMore(page: import("@playwright/test").Page) { await page.getByRole("button", { name: /More actions/ }).click(); }
 async function chooseExample(page: import("@playwright/test").Page, id = "ti2aln") { await openMore(page); await page.getByLabel("Start or reset").selectOption(id); }
-async function openSettings(page: import("@playwright/test").Page) { await openMore(page); await page.getByRole("link", { name: "Layouts, data, backup, and settings" }).click(); }
-async function openCompare(page: import("@playwright/test").Page) { const direct = page.getByRole("link", { name: "Compare", exact: true }); if (await direct.isVisible()) await direct.click(); else { await openMore(page); await page.getByRole("link", { name: "Open route comparison" }).click(); } }
+async function openSettings(page: import("@playwright/test").Page) { await page.getByRole("button", { name: "Calculator" }).click(); await page.getByRole("menuitem", { name: "Settings" }).click(); }
+async function openCompare(page: import("@playwright/test").Page) { await page.getByRole("button", { name: "Calculator" }).click(); await page.getByRole("menuitem", { name: /Comparison/ }).click(); }
 async function addCurrentPair(page: import("@playwright/test").Page) { await page.getByRole("toolbar", { name: "Comparison page actions" }).getByRole("button", { name: "Add current recipe" }).click(); const scenario = page.getByRole("region").filter({ has: page.getByRole("button", { name: "Duplicate" }) }).first(); await scenario.getByRole("button", { name: "Duplicate" }).click(); }
 async function saveRecipe(page: import("@playwright/test").Page) { await page.getByRole("button", { name: "Save", exact: true }).click(); const dialog = page.getByRole("dialog", { name: "Save recipe" }); await dialog.getByRole("button", { name: /Save recipe|Save revision|Rename recipe/ }).click(); await expect(dialog).not.toBeVisible(); }
 
@@ -50,7 +50,8 @@ test("UX-LAYOUT-001 saves and restores a bounded layout without scientific chang
   await openSettings(page);
   await page.getByRole("article").filter({ hasText: "Compact Balance View" }).getByRole("button", { name: "Set default" }).click();
   await expect(page.getByText(/default local layout/)).toBeVisible();
-  await page.getByRole("link", { name: /Workspace/ }).click();
+  await page.getByRole("button", { name: "Choose workspace" }).click();
+  await page.getByRole("menuitem", { name: /Calculator/ }).click();
   await expect(page).toHaveURL(/\/workspace$/);
   await openMore(page);
   await expect(page.getByLabel("Workspace layout", { exact: true })).toHaveValue(/layout-/);
@@ -92,7 +93,7 @@ test("UX-OFFLINE-001 and zoom: calculation, comparison, local save, and export r
   await saveRecipe(page); await expect(page.getByText(/Saved/)).toBeVisible();
   const download = page.waitForEvent("download"); await page.getByRole("button", { name: "JSON", exact: true }).click(); await download;
   await context.setOffline(false); await openCompare(page); await addCurrentPair(page); await expect(page.getByLabel("Ti2AlN recipe scenario", { exact: true })).toBeVisible();
-  await context.setOffline(true); await page.getByLabel("Copy of Ti2AlN recipe precursor 2 purity").fill("97"); await expect(page.getByLabel("Copy of Ti2AlN recipe scenario")).toContainText("Final total"); await page.getByRole("button", { name: "Save comparison" }).click(); await expect(page.getByText("Comparison saved", { exact: true })).toBeVisible(); await page.getByText("More", { exact: true }).click(); const comparisonDownload = page.waitForEvent("download"); await page.getByRole("button", { name: "Export comparison JSON" }).click(); await comparisonDownload; await context.setOffline(false);
+  await context.setOffline(true); await page.getByLabel("Copy of Ti2AlN recipe precursor 2 purity").fill("97"); await expect(page.getByLabel("Copy of Ti2AlN recipe scenario")).toContainText("Final total"); await page.getByRole("button", { name: "Save comparison" }).click(); await expect(page.getByText("Comparison saved", { exact: true })).toBeVisible(); const comparisonDownload = page.waitForEvent("download"); await page.getByRole("button", { name: "Export", exact: true }).click(); await comparisonDownload; await context.setOffline(false);
 });
 
 test("UX-ACCESS-001 completes comparison review and save controls from the keyboard", async ({ page }) => {

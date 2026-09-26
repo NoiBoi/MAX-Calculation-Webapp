@@ -32,7 +32,7 @@ test("UX-REMEDIATION-003 top bar keeps primary actions and demotes secondary nav
   const bar = page.getByRole("toolbar", { name: "Calculator page actions" });
   await expect(bar.getByRole("button", { name: "New" })).toBeVisible(); await expect(bar.getByRole("button", { name: "Open" })).toBeVisible(); await expect(bar.getByRole("button", { name: "Save" })).toBeVisible();
   await expect(bar.getByRole("button", { name: "Routes" })).toHaveCount(0); await expect(bar.getByRole("link", { name: /Layouts/ })).toHaveCount(0);
-  await more(page); await expect(page.getByRole("button", { name: "Apply or save route" })).toBeVisible(); await expect(page.getByRole("link", { name: "Layouts, data, backup, and settings" })).toBeVisible();
+  await more(page); await expect(page.getByRole("button", { name: "Manage routes" })).toBeVisible(); await page.getByRole("button", { name: "Close more actions" }).click(); await page.getByRole("button", { name: "Calculator" }).click(); await expect(page.getByRole("menuitem", { name: "Settings" })).toBeVisible();
 });
 
 test("UX-REMEDIATION-004 standard and advanced modes are materially different without state loss", async ({ page }) => {
