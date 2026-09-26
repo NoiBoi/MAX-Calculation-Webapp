@@ -43,6 +43,8 @@ The scientific reference registry records 20 required cases and their source, to
 
 The `/emi` workspace imports Keysight complex S-parameter CSV files locally and calculates forward/reverse `R`, `T`, `A`, `SET`, `SER`, and `SEA`. Optional sample thickness and four-point-probe resistance readings add conductivity and Simon-model estimates without changing the measured VNA results.
 
+The in-development `/xrd` workspace now provides its first reference-pattern slice: search the official Crystallography Open Database, pin and hash a retrieved CIF, calculate a Cu Kα theoretical powder pattern with pymatgen, and inspect lattice, symmetry, provenance, and grouped hkl reflections. The Python calculation service is deployed separately from Vercel; see `docs/XRD_STAGE_1.md`.
+
 The Publication Figure editor uses one reproducible figure specification for its interactive Plotly preview, vector SVG export, and deterministic PNG rasterization. It supports exact physical dimensions, 300/600 DPI output, manual axes, publication-safe palettes, line and marker styling, legends, panel labels, configuration JSON, and plotted-data CSV. Matching dataset/direction series retain their custom styling when the EMI quantity changes; double-click restores the plot’s original zoom. See `docs/EMI_ANALYSIS.md`, `docs/EMI_PUBLICATION_FIGURES.md`, and `docs/EMI_EXPORT_FORMAT.md`.
 
 ## Current workflow

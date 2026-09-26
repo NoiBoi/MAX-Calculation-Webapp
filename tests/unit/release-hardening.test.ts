@@ -8,7 +8,7 @@ describe("Milestone 5A release hardening", () => {
     expect(baseline.releaseCandidate).toBe("v1.0.0-rc.2");
     expect(baseline.applicationVersion).toBe("1.0.0-rc.2");
     expect(baseline.gitCommit).toBe("abc123");
-    expect(baseline.indexedDbVersion).toBe(12);
+    expect(baseline.indexedDbVersion).toBe(16);
     expect(baseline.supabaseMigrationVersion).toBe("202607170004");
   });
 

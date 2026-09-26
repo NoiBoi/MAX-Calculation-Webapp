@@ -1,0 +1,9 @@
+services:
+  xrd-science:
+    build: ./scientific-service
+    environment:
+      MAXCALC_SERVICE_TOKEN: ${XRD_SCIENCE_SERVICE_TOKEN:-}
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+

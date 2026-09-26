@@ -1,0 +1,21 @@
+# Idealized wurtzite ZnO cell used as a local, network-independent test fixture.
+data_zinc_oxide
+_chemical_formula_sum 'Zn O'
+_cell_length_a 3.2495
+_cell_length_b 3.2495
+_cell_length_c 5.2069
+_cell_angle_alpha 90
+_cell_angle_beta 90
+_cell_angle_gamma 120
+_symmetry_space_group_name_H-M 'P 63 m c'
+_symmetry_Int_Tables_number 186
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Zn1 Zn 0.3333333333 0.6666666667 0 1
+O1 O 0.3333333333 0.6666666667 0.3825 1
+

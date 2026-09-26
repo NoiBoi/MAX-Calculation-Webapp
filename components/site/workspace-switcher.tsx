@@ -9,7 +9,7 @@ const WORKSPACES = [
   { id: "calculator", href: "/workspace", name: "Calculator", description: "Stoichiometry & synthesis calculations", icon: "∑", development: false },
   { id: "comparison", href: "/compare", name: "Comparison", description: "Compare recipes and calculated properties", icon: "⇄", development: false },
   { id: "emi", href: "/emi", name: "EMI Analysis", description: "Analyze, visualize, and export EMI measurements", icon: "≈", development: false },
-  { id: "xrd", href: "/xrd", name: "XRD Analysis", description: "Diffraction analysis", icon: "⌁", development: true },
+  { id: "xrd", href: "/xrd", name: "XRD Analysis", description: "COD reference patterns", icon: "⌁", development: true },
 ] as const;
 
 export function WorkspaceSwitcher({ activeWorkspace }: Readonly<{ activeWorkspace?: WorkspaceId }>) {

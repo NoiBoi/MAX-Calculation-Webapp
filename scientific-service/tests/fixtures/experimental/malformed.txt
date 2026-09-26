@@ -1,0 +1,4 @@
+angle intensity
+40.0 4
+not-a-number 8
+40.2 6

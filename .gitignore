@@ -12,3 +12,6 @@ Thumbs.db
 
 .vercel
 .env*
+scientific-service/.venv/
+scientific-service/.pytest_cache/
+scientific-service/**/__pycache__/

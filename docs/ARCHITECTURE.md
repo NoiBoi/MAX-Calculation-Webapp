@@ -31,6 +31,7 @@ The chemistry engine in `packages/chemistry-engine` is framework-independent. It
 | Authentication | `lib/supabase`, `components/auth`, `app/auth`, `proxy.ts` | Cookie-backed Supabase sessions, safe redirects, profile boundary |
 | Private labs | `lib/labs`, `components/labs`, `app/api/labs`, `app/labs` | Role-aware lab cache, publication, invitations, audit, retention |
 | Data registries | `data/`, `packages/chemistry-engine/default-*` | Versioned atomic weights and radius datasets with provenance |
+| XRD scientific service | `scientific-service`, `lib/xrd`, `app/api/xrd` | Isolated COD access, CIF parsing, pymatgen calculations, and versioned diffraction contracts |
 | Build and verification | `scripts/`, `tests/`, `supabase/tests` | Ingestion, hardening, unit/browser/RLS verification, release evidence |
 
 ## Primary data flows

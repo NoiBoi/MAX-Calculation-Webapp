@@ -75,3 +75,7 @@ npm run start
 - Follow `ROLLBACK_5A.md`; applied database migrations use a reviewed forward-fix policy rather than an assumed automatic rollback.
 
 If Supabase is unavailable, the correct degraded state is signed out/local-only—not the scientific workspace recovery screen.
+
+## XRD scientific service
+
+The XRD workspace adds an isolated Python deployment rather than installing pymatgen in Vercel. Build `scientific-service/Dockerfile`, expose its `/health` endpoint to the hosting platform, and give it outbound HTTPS access to the official COD host. Configure `XRD_SCIENCE_SERVICE_URL` and `XRD_SCIENCE_SERVICE_TOKEN` only in Vercel server environments; configure the matching value as `MAXCALC_SERVICE_TOKEN` on the service. The browser remains same-origin through `/api/xrd` and does not need direct CORS access. See `XRD_STAGE_1.md` for resource, startup, test, and security details.

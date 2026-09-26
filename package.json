@@ -22,6 +22,7 @@
     "data:atomic-weights": "tsx scripts/data-ingest/import-ciaaw-atomic-weights.ts",
     "data:radii": "tsx scripts/data-ingest/import-teatum-metallic-radii.ts && tsx scripts/data-ingest/import-cordero-covalent-radii.ts && tsx scripts/data-ingest/import-rahm-atomic-radii.ts",
     "emi:verify": "tsx scripts/emi/verify-reference-data.ts",
+    "science:test": "python -m pytest scientific-service",
     "check": "npm run typecheck && npm run lint && npm run test"
   },
   "dependencies": {
