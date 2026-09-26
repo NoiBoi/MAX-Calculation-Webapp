@@ -26,7 +26,7 @@ Positions are persisted in degrees 2theta, wavelengths and d spacings in angstro
 
 ## Validation
 
-Validation includes deterministic CIF fixtures for cubic, tetragonal, orthorhombic, and hexagonal/MAX-like systems; independent analytical d-spacing and Bragg-law checks; wavelength-shift regression tests; seeded synthetic peak generation; parser through lattice-refinement golden flow; numerical failure tests; hash-corruption rejection; clean-database project round trip; FigureSpec serialization; vector-SVG inspection; and exact physical-size/DPI checks. See `docs/XRD_STAGE_6.md` for the structured results and measured tolerances.
+Validation includes deterministic CIF fixtures for cubic, tetragonal, orthorhombic, and hexagonal/MAX-like systems; independent analytical d-spacing and Bragg-law checks; wavelength-shift regression tests; seeded synthetic peak generation; parser through lattice-refinement golden flow; numerical failure tests; hash-corruption rejection; clean-database project round trip; FigureSpec serialization; vector-SVG inspection; and exact physical-size/DPI checks. See [`XRD_STAGE_6.md`](XRD_STAGE_6.md) for the structured results and measured tolerances.
 
 GSAS-II is not a production dependency and was not available for an executed comparison in this environment. MAXCalc therefore makes no GSAS-II validation claim. The portable local fixtures and exact settings are suitable for a separately reviewed external-oracle comparison.
 

@@ -39,9 +39,9 @@ produce a failed parse result.
 
 ## Legacy master workbook
 
-The referenced workbook was found at
-`C:\Users\Matthew Deng\Downloads\Master file for EMI measurement_02.xlsx`.
-It contains one sheet (`Sheet1`, used range A1:P209) with 201 Agilent E5071C
+The reviewed legacy source was `Master file for EMI measurement_02.xlsx`.
+It is an external laboratory workbook and is not stored in this repository. It
+contains one sheet (`Sheet1`, used range A1:P209) with 201 Agilent E5071C
 measurements from 8.2 GHz through 12.4 GHz. Raw columns A:I are frequency,
 S11, S21, S12, and S22 real/imaginary pairs. Columns K:M calculate forward
 SET, SER, and SEA.

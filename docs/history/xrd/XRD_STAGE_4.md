@@ -49,7 +49,7 @@ No residual outlier is silently removed or down-weighted. The residual table pre
 
 Results include reference/initial/refined parameters; per-reflection experimental and predicted 2theta, signed delta, observed and predicted d-spacing, hkl, inclusion, and center uncertainty; RMS/mean/maximum absolute 2theta residual; RMS d-spacing residual; rank, parameter count, degrees of freedom, and condition number; optimizer status/message; and included/excluded match IDs.
 
-When the Jacobian is full-rank, the condition number is acceptable, and degrees of freedom are positive, covariance is estimated as `(JᵀJ)⁻¹ * RSS/dof`; parameter standard errors and the covariance/correlation matrices are returned. Otherwise they are `null` with a warning—never zero-filled. These are model/fit uncertainties only and do not represent complete instrument, specimen, assignment, or wavelength uncertainty.
+When the Jacobian is full-rank, the condition number is acceptable, and degrees of freedom are positive, covariance is estimated as `(JᵀJ)⁻¹ * RSS/dof`; parameter standard errors and the covariance/correlation matrices are returned. Otherwise they are `null` with a warning and are never zero-filled. These are model/fit uncertainties only and do not represent complete instrument, specimen, assignment, or wavelength uncertainty.
 
 ## API, persistence, and provenance
 

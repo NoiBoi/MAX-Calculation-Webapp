@@ -43,6 +43,6 @@ test("uploads, versions, reloads, and selects an offline CIF library reference",
   await expect(page.getByRole("heading", { name: "Silicon", exact: true })).toBeVisible();
   await page.reload(); await page.getByRole("button", { name: "References" }).click();
   await page.getByRole("button", { name: "Open", exact: true }).click();
-  await page.getByRole("button", { name: "Use in Stage 4" }).click();
+  await page.getByRole("button", { name: "Use for matching" }).click();
   await expect(page.getByText(/library revision 1/)).toBeVisible();
 });

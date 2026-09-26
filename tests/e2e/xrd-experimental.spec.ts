@@ -115,7 +115,7 @@ test("saves and reopens immutable XRD processing and peak-analysis lineage", asy
   await expect(page.getByRole("heading", { name: "Saved analysis revisions" })).toBeVisible();
   await page.getByRole("button", { name: "Open analysis" }).click();
   await expect(page.getByRole("heading", { name: "Import → process → peaks → reference → match → lattice" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Saved Stage 4 analyses" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Saved reference-matching analyses" })).toBeVisible();
   await page.getByRole("button", { name: "Open matching result" }).click();
   await page.getByRole("button", { name: "Open refinement result" }).click();
   await expect(page.getByRole("heading", { name: "Reference vs refined lattice" })).toBeVisible();

@@ -1,17 +1,33 @@
+# Dependencies
 node_modules/
+
+# Build output
 .next/
+*.tsbuildinfo
+
+# Testing
 coverage/
 playwright-report/
 test-results/
 emi-reference-data/verification-report.json
-*.tsbuildinfo
+
+# Environment
 .env*
 !.env.example
-.DS_Store
-Thumbs.db
 
-.vercel
-.env*
+# Scientific-service Python
 scientific-service/.venv/
 scientific-service/.pytest_cache/
 scientific-service/**/__pycache__/
+scientific-service/*.egg-info/
+
+# Deployment
+.vercel/
+
+# OS and editor
+.DS_Store
+Thumbs.db
+
+# Development logs and local agent state
+.codex/
+.codex-devserver.*.log

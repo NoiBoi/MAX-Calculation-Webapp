@@ -423,6 +423,18 @@ button[aria-pressed="true"] { box-shadow: inset 0 0 0 1px currentColor; }
 .xrd-workspace { display: grid; gap: var(--layout-gap); }
 .xrd-workspace-tabs { display: flex; flex-wrap: wrap; gap: .55rem; position: sticky; top: .75rem; z-index: 8; padding: .65rem; border: 1px solid var(--border); border-radius: .8rem; background: color-mix(in srgb, var(--surface) 94%, transparent); backdrop-filter: blur(12px); }
 .xrd-workspace-tabs [aria-current="page"] { border-color: var(--accent); color: var(--accent); }
+.xrd-guide { display: grid; gap: var(--layout-gap); }
+.xrd-guide-intro { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.xrd-guide-intro h1, .xrd-guide-intro p, .xrd-guide .xrd-panel h2 { margin-top: 0; }
+.xrd-guide-intro p { max-width: 58rem; color: var(--text-secondary); }
+.xrd-guide-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: var(--layout-gap); }
+.xrd-guide-flow { font-weight: 700; letter-spacing: .01em; word-spacing: .3em; }
+.xrd-method-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: .75rem; }
+.xrd-method-list div { border-left: 3px solid var(--border-strong); padding-left: .75rem; }
+.xrd-method-list dt { color: var(--text-muted); font-size: .72rem; font-weight: 700; text-transform: uppercase; }
+.xrd-method-list dd { margin: .2rem 0 0; }
+.xrd-info { display: inline-grid; place-items: center; width: 1.05rem; height: 1.05rem; margin-left: .25rem; border: 1px solid var(--border-default); border-radius: 50%; color: var(--text-muted); font-size: .7rem; font-weight: 700; cursor: help; }
+.xrd-help-text { margin: -.15rem 0 0; color: var(--text-muted); font-size: .72rem; line-height: 1.35; }
 .xrd-panel { min-width: 0; border: 1px solid var(--border-subtle); border-radius: .75rem; background: var(--background-panel); padding: var(--panel-padding); box-shadow: var(--shadow-panel); }
 .xrd-section-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: .85rem; }
 .xrd-section-heading h2, .xrd-section-heading p { margin: 0; }

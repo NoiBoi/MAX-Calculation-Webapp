@@ -20,7 +20,7 @@ function errorMessage(body: unknown, fallback: string): string {
 }
 
 function fmt(value: number, digits = 4): string {
-  return Number.isFinite(value) ? value.toFixed(digits).replace(/\.?0+$/, "") : "—";
+  return Number.isFinite(value) ? value.toFixed(digits).replace(/\.?0+$/, "") : "Not available";
 }
 
 function hklLabel(reflection: CalculatedXRDPattern["reflections"][number]): string {

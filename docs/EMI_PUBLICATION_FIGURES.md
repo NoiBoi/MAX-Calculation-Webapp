@@ -1,8 +1,8 @@
 # EMI publication figures
 
-## Release status
+## Versioning
 
-The publication editor is included in MAXCalc `1.0.0-rc.2`. Its configuration schema is `1.0.0`, and its renderer identifier is `plotly-basic-4.1.1`. These values are recorded in exported figure JSON alongside the chemistry-engine version.
+The publication editor records its configuration schema, renderer identifier, and chemistry-engine version in exported figure JSON. Application release metadata comes from `package.json` rather than a duplicated version in this guide.
 
 ## Renderer decision
 
