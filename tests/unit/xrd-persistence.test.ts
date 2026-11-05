@@ -56,7 +56,7 @@ describe("local experimental XRD persistence", () => {
 
   it("uses IndexedDB schema version 16 with complete XRD lineage and reference stores", async () => {
     const { database } = createRepository(); await database.open();
-    expect(database.verno).toBe(16);
+    expect(database.verno).toBe(17);
     expect(database.tables.map((table) => table.name)).toEqual(expect.arrayContaining(["xrdRawArtifacts", "xrdMeasurements", "xrdProcessedRepresentations", "xrdPeakAnalyses", "xrdReferenceMatchingResults", "xrdLatticeRefinementResults", "xrdReferences", "xrdReferenceRevisions"]));
   });
 

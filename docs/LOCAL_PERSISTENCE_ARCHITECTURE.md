@@ -71,3 +71,9 @@ Recovery actions have strict safety boundaries:
 - Route and global error boundaries expose raw IndexedDB recovery actions so a failure before the workspace mounts cannot trap the user behind a reload-only Retry button.
 - Emergency backup export is explicit and may include local record contents; the on-screen technical disclosure contains only error metadata.
 - Full reset is confirmed separately, names the lost record categories, and deletes every local database table.
+
+## Physical sample IDs
+
+Each **Sample IDs** registration creates a separate local record for an existing saved recipe revision. The internal UUID is independent of the printed Crockford Base32 label. A unique label index and an IndexedDB transaction protect registration within the active browser data profile, including across tabs.
+
+Deleting a recipe leaves its issued sample labels reserved. Lookup still finds the ID, while printing requires the linked revision and stored calculation snapshot. Sample records are local to the profile and are outside cloud sync, laboratory publication, and recipe backups. Clearing the profile database removes the registry.

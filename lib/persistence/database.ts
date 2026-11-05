@@ -9,9 +9,12 @@ import type { EmiProjectRecord } from "../emi/project";
 import type { StoredExperimentalXRDMeasurement, StoredProcessedXRDRepresentation, StoredRawXRDArtifact, StoredXRDPeakAnalysis, StoredXRDReferenceMatchingResult, StoredXRDLatticeRefinementResult } from "../xrd/persistence";
 import type { XRDReference, XRDReferenceRevision } from "../xrd/references";
 
-export const DATABASE_VERSION = 16;
+import type { LocalSample } from "./samples";
+
+export const DATABASE_VERSION = 17;
 
 export class MaxStoichDatabase extends Dexie {
+  samples!: Table<LocalSample, string>;
   recipes!: Table<SavedRecipe, string>;
   recipeRevisions!: Table<RecipeRevision, string>;
   snapshots!: Table<CalculationSnapshot, string>;
@@ -218,5 +221,6 @@ export class MaxStoichDatabase extends Dexie {
     }).upgrade(async (transaction) => {
       await transaction.table("migrations").put({ schemaVersion: "16.0.0", id: "15-to-16-versioned-xrd-reference-library", fromVersion: 15, toVersion: 16, appliedAt: new Date().toISOString(), status: "complete" });
     });
+    this.version(17).stores({ samples: "&id,&label,recipeRevisionId" });
   }
 }

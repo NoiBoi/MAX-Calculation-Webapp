@@ -27,6 +27,7 @@ import { assessWorkspacePrecursors, suggestWorkspaceAdditions, type WorkspacePre
 import { PrecursorSuggestions } from "@/components/workspace/precursor-suggestions";
 import { MaterialOverrides, PrecursorConstraints } from "@/components/workspace/advanced-precursor-settings";
 import { PrecursorRows } from "@/components/workspace/precursor-rows";
+import { SampleIdsDialog } from "@/components/workspace/sample-ids-dialog";
 import { RecipeNotesDialog } from "@/components/workspace/recipe-notes-dialog";
 import { useDismissibleLayer } from "@/components/workspace/use-dismissible-layer";
 import { CalculationVerificationDialog } from "@/components/verification/calculation-verification-dialog";
@@ -137,6 +138,7 @@ export function WorkspaceShell() {
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [verificationOpen, setVerificationOpen] = useState(false);
   const [saveOpen, setSaveOpen] = useState(false);
+  const [samplesOpen, setSamplesOpen] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);
   const [publishSource, setPublishSource] = useState<Readonly<{ recipe: SavedRecipe; revision: RecipeRevision; snapshot: CalculationSnapshot; notes: readonly RecipeNote[] }>>();
@@ -733,6 +735,7 @@ export function WorkspaceShell() {
       <div className="flex rounded border p-1 sm:hidden"><button className={`flex-1 rounded p-2 text-sm ${mode === "standard" ? "bg-slate-900 text-white" : ""}`} onClick={() => setMode("standard")}>Standard</button><button className={`flex-1 rounded p-2 text-sm ${mode === "advanced" ? "bg-slate-900 text-white" : ""}`} onClick={() => setMode("advanced")}>Advanced</button></div>
       {mode === "standard" && <div className="grid gap-2" aria-label="Recipe actions">{secondaryActions}</div>}
       <button className="rounded border p-2 text-left" onClick={(event) => { panelTriggerRef.current = moreButtonRef.current ?? event.currentTarget; setActivePanel("routes"); setCommandOpen(false); void refreshLibraries(); }}>Manage routes</button>
+      <button className="rounded border p-2 text-left" onClick={() => { setCommandOpen(false); setSamplesOpen(true); }} type="button">Sample IDs</button>
       {savedRecipe && <button className="rounded border p-2 text-left" onClick={(event) => { void openNotes(savedRecipe, event.currentTarget); setCommandOpen(false); }}>Recipe notes</button>}
       <Link className="rounded border p-2 text-left" href="/demo">Documentation</Link><button className="rounded border p-2 text-left" onClick={() => { setTraceOpen(true); setCommandOpen(false); }}>Open calculation trace</button>{activePreset && <button className="rounded border p-2 text-left" onClick={() => { choosePreset(activePreset.id); setCommandOpen(false); }}>Reset copied example</button>}
     </div></section>}
@@ -773,7 +776,7 @@ export function WorkspaceShell() {
           <button className="ui-button ui-button-compact" onClick={() => { setMode("advanced"); requestAnimationFrame(() => document.getElementById("inputs-heading")?.focus()); }} type="button">Inspect in Advanced</button>
         </div>}
 
-        {mode === "advanced" && recipe.siteComposition && <div className="mt-3 space-y-2"><h3 className="text-sm font-semibold">Editable explicit sites</h3>{recipe.siteComposition.sites.map((site, siteIndex) => <fieldset className="rounded border p-2" key={site.id}><legend className="px-1 text-sm font-semibold">{site.id} site</legend><label className="text-xs">Multiplicity <input aria-label={`${site.id} site multiplicity`} className="ml-1 w-20 rounded border px-2 font-mono" onChange={(event) => updateSiteMultiplicity(siteIndex, event.target.value)} value={site.multiplicity} /></label><div className="mt-2 flex flex-wrap gap-2">{site.occupants.map((occupant, occupantIndex) => <label className="text-xs" key={`${site.id}-${occupant.element}`}>{occupant.element} fraction <input aria-label={`${site.id} ${occupant.element} fraction`} className="ml-1 w-20 rounded border px-2 font-mono" onChange={(event) => updateSiteFraction(siteIndex, occupantIndex, event.target.value)} value={occupant.fraction} /></label>)}</div></fieldset>)}</div>}
+        {mode === "advanced" && recipe.siteComposition && <div className="mt-3 space-y-2"><h3 className="text-sm font-semibold">Editable explicit sites</h3><div className="advanced-site-fields">{recipe.siteComposition.sites.map((site, siteIndex) => <fieldset className="rounded border p-2" key={site.id}><legend className="px-1 text-sm font-semibold">{site.id} site</legend><label className="text-xs">Multiplicity <input aria-label={`${site.id} site multiplicity`} className="rounded border px-1 tabular-nums" onChange={(event) => updateSiteMultiplicity(siteIndex, event.target.value)} value={site.multiplicity} /></label><div>{site.occupants.map((occupant, occupantIndex) => <label className="text-xs" key={`${site.id}-${occupant.element}`}>{occupant.element} fraction <input aria-label={`${site.id} ${occupant.element} fraction`} className="ml-1 w-20 rounded border px-2 font-mono" onChange={(event) => updateSiteFraction(siteIndex, occupantIndex, event.target.value)} value={occupant.fraction} /></label>)}</div></fieldset>)}</div></div>}
         {mode === "advanced" && <>
           <h3 className="calculator-group-heading" id="feed-precursors" tabIndex={-1}>Feed &amp; precursors</h3>
           <div className="advanced-field-grid">
@@ -846,6 +849,7 @@ export function WorkspaceShell() {
       <p className="mt-3 text-xs text-slate-600">Local-first workspace recovery is automatic. Recipe revisions are created only by explicit Save. Engine {ENGINE_VERSION}.</p>
     </details>}
     {displayed && <section aria-labelledby="print-radius-heading" className="hidden mx-auto mb-6 max-w-[1500px] border-y border-slate-300 bg-white p-4 text-sm print:block"><h2 className="font-semibold" id="print-radius-heading">Site-radius screening descriptors</h2><p>{recipe.radiusDescriptorConfig ? "Per-site dataset selections, resolved values, trust status, and descriptor results are preserved with this calculation snapshot and its JSON/CSV export." : "No site-radius descriptor configuration is attached to this calculation."}</p><p>Screening descriptor only; not a direct prediction of physical stress, lattice strain, phase stability, or synthesis success.</p></section>}
+    {samplesOpen && <SampleIdsDialog database={repositories.database} onClose={() => { setSamplesOpen(false); requestAnimationFrame(() => moreButtonRef.current?.focus()); }} printSettings={userSettings.print} recipe={savedRecipe} revision={savedRevision?.recipeId === savedRecipe?.id ? savedRevision : undefined} />}
     <SaveRecipeDialog currentRevisionNumber={savedRecipe?.currentRevisionNumber} defaultAction={userSettings.saveBehavior.defaultPostSaveAction} initialName={savedRecipe?.name ?? (duplicationSource ? `Copy of ${duplicationSource.name}` : `${recipe.targetFormula || "Untitled"} recipe`)} onClose={() => setSaveOpen(false)} onSave={saveCurrent} open={saveOpen} returnFocusRef={saveButtonRef} scientificChanged={scientificInputChanged} validationStatus={savedRecipe?.validationStatus ?? activePreset?.validationStatus ?? "synthetic"} />
     <RecipeNotesDialog onClose={() => setNotesOpen(false)} open={notesOpen} recipe={notesRecipe} repositories={repositories} returnFocusRef={notesTriggerRef} revisions={notesRevisions} />
     <PublishToLabDialog entries={labEntries} labs={labCaches} notes={publishSource?.notes ?? []} onClose={() => setPublishOpen(false)} onPublished={setStatusMessage} open={publishOpen} recipe={publishSource?.recipe} revision={publishSource?.revision} snapshot={publishSource?.snapshot} />

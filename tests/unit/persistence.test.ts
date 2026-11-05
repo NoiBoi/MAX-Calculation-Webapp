@@ -1,9 +1,10 @@
 import "fake-indexeddb/auto";
 import Dexie from "dexie";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { DEFAULT_ATOMIC_RADIUS_REGISTRY, calculateBatchRecipe, createStandardMaxComposition, parseFormula, type BatchCalculationResult } from "@max-stoich/chemistry-engine";
 import { buildLaboratoryCsv, buildLaboratoryJson, buildWeighingTableTsv, safeExportFilename } from "../../lib/export/laboratory-export";
 import { canonicalizeWorkspaceScientificInput, sha256Hex, stableCanonicalize } from "../../lib/persistence/canonical";
+import { findSample, registerSample } from "../../lib/persistence/samples";
 import { MaxStoichDatabase } from "../../lib/persistence/database";
 import { LOCAL_SCHEMA_VERSION, type WorkspaceRecoveryState } from "../../lib/persistence/entities";
 import { migrateEditableWorkspaceInput, migrateRecord } from "../../lib/persistence/migrations";
@@ -249,5 +250,38 @@ describe("undo and laboratory export", () => {
     expect(buildLaboratoryJson(context)).toContain(`"canonical": "${exact}"`);
     expect(buildWeighingTableTsv(context).split("\n")[0]).toBe("Precursor\tFormula\tPurity\tFinal weighing mass\tUnit");
     expect(safeExportFilename("A / risky:name", "csv")).toBe("A-risky-name.csv");
+  });
+});
+
+describe("local physical sample IDs", () => {
+  it("retries collisions across concurrent registrations and persists both associations", async () => {
+    const repo = repository();
+    const saved = await repo.saveCalculatedRevision({ name: "Sample formulation", inputState: state(), result: result() });
+    const random = vi.spyOn(crypto, "getRandomValues");
+    try {
+      for (const fill of [0, 0, 1]) {
+        random.mockImplementationOnce((bytes) => { (bytes as Uint8Array).fill(fill); return bytes; });
+      }
+      const samples = await Promise.all([registerSample(repo.database, saved.revision.id), registerSample(repo.database, saved.revision.id)]);
+      expect(samples.map((sample) => sample.label)).toEqual(["M-0000000000", "M-1111111111"]);
+      expect(samples[0]?.id).not.toBe(samples[1]?.id);
+      expect(samples.every((sample) => sample.recipeRevisionId === saved.revision.id)).toBe(true);
+      repo.database.close();
+      await repo.database.open();
+      expect(await findSample(repo.database, "m-oooooooooo")).toEqual(samples[0]);
+      expect(await findSample(repo.database, "11111 11111")).toEqual(samples[1]);
+    } finally {
+      random.mockRestore();
+    }
+  });
+
+  it("keeps an issued label reserved when its recipe is deleted", async () => {
+    const repo = repository();
+    const saved = await repo.saveCalculatedRevision({ name: "Sample formulation", inputState: state(), result: result() });
+    const sample = await registerSample(repo.database, saved.revision.id);
+    await repo.deleteRecipePermanently(saved.recipe.id);
+    await expect(registerSample(repo.database, saved.revision.id)).rejects.toThrow("unavailable");
+    expect(await findSample(repo.database, sample.label)).toEqual(sample);
+    await expect(repo.database.samples.add({ ...sample, id: "another-id" })).rejects.toMatchObject({ name: "ConstraintError" });
   });
 });

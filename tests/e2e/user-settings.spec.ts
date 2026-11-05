@@ -33,7 +33,7 @@ test("SETTINGS-004 applies independent Standard columns without changing the cal
 
 test("SETTINGS-005 shows elemental radius but not a compound average only in configured Advanced mode", async ({ page }) => {
   await openSettings(page); await page.getByRole("region", { name: "Advanced mode columns" }).getByLabel("Element atomic radius", { exact: true }).check(); await saveSettings(page); await readyWorkspace(page); await choose(page, "ti3alc2");
-  await page.getByRole("button", { name: "Add precursor" }).click(); const formulas = page.locator("[data-precursor-formula]"); const count = await formulas.count(); await formulas.nth(count - 1).fill("TiC"); await page.getByRole("button", { name: "Advanced" }).click();
+  await page.getByRole("button", { name: "Add precursor" }).click(); const formulas = page.locator("[data-precursor-formula]"); const count = await formulas.count(); await formulas.nth(count - 1).fill("TiC"); await page.getByRole("button", { name: "Advanced", exact: true }).click();
   const table = page.getByRole("table", { name: /Final gross weighing masses/ }); await expect(table.getByRole("columnheader", { name: "Element atomic radius" })).toBeVisible(); const tiRows = table.locator('tbody tr[data-precursor-id="ti"]'); await expect(tiRows.getByText(/pm · metallic/)).toBeVisible(); const ticRows = table.locator("tbody tr").filter({ hasText: "TiC" }); await expect(ticRows.getByText("Not applicable", { exact: true })).toBeVisible(); await page.getByRole("button", { name: "Standard" }).click(); await expect(page.getByRole("table", { name: /Final gross weighing masses/ }).getByRole("columnheader", { name: "Element atomic radius" })).toHaveCount(0);
 });
 

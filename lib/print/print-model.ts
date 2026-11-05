@@ -6,7 +6,7 @@ export const PRINT_JOB_SCHEMA_VERSION = "1.0.0" as const;
 export const PRINT_JOB_STORAGE_PREFIX = "max-stoich.print-job.";
 
 export type PrintableRecipeEntry = Readonly<
-  | { id: string; summary: WeighingSummary; unavailable?: never }
+  | { id: string; summary: WeighingSummary; sampleLabel?: string; unavailable?: never }
   | { id: string; summary?: never; unavailable: Readonly<{ title: string; sourceStatus: string; reason: string; validationStatus: string }> }
 >;
 
@@ -36,7 +36,7 @@ function entrySize(entry: PrintableRecipeEntry, settings: PrintSettings): number
   if (entry.unavailable) return 2;
   const summary = entry.summary;
   const visibleColumns = ["precursorName", "precursorFormula", "molarRatio", "purity", "molarMass", "atomicRadius"].filter((field) => settings.fields[field as keyof typeof settings.fields]).length;
-  return summary.precursors.length
+  return summary.precursors.length + (entry.sampleLabel ? 1 : 0)
     + Math.ceil(summary.adjustedFeedFormula.length / 36)
     + Math.max(0, visibleColumns - 3)
     + (settings.formulaStyle === "all-formulas" ? 3 : settings.formulaStyle === "target-and-adjusted" ? 1 : 0)
