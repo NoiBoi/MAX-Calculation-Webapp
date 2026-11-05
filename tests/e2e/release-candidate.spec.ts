@@ -79,7 +79,7 @@ test("UX-RESTORE-001 previews and restores a verified backup", async ({ page }) 
 });
 
 test("UX-IMPORT-001/002 preserves a valid historical export and blocks tampering", async ({ page }) => {
-  await saveRecipe(page); const pending = page.waitForEvent("download"); await page.getByRole("button", { name: "JSON", exact: true }).click(); const download = await pending; const path = await download.path(); if (!path) throw new Error("Missing download"); const json = await readFile(path, "utf8");
+  await saveRecipe(page); await page.getByRole("button", { name: /More actions/ }).click(); const pending = page.waitForEvent("download"); await page.getByRole("button", { name: "JSON", exact: true }).click(); const download = await pending; const path = await download.path(); if (!path) throw new Error("Missing download"); const json = await readFile(path, "utf8");
   await openSettings(page); await page.getByLabel("Choose MAXCalc JSON file").setInputFiles({ name: "calculation.json", mimeType: "application/json", buffer: Buffer.from(json) });
   await expect(page.getByText("Calculation import preview · verified")).toBeVisible(); await page.getByRole("button", { name: "Import as new recipe" }).click(); await expect(page.getByText(/Imported historical calculation/)).toBeVisible();
   const tampered = JSON.parse(json); tampered.scientificResult.batch.finalRoundedTotalWeighingMassGrams = "999";
@@ -91,6 +91,7 @@ test("UX-OFFLINE-001 and zoom: calculation, comparison, local save, and export r
   await context.setOffline(true);
   await page.getByLabel("Target batch mass").fill("11"); await expect(page.getByText("Final rounded total")).toBeVisible();
   await saveRecipe(page); await expect(page.getByText(/Saved/)).toBeVisible();
+  await page.getByRole("button", { name: /More actions/ }).click();
   const download = page.waitForEvent("download"); await page.getByRole("button", { name: "JSON", exact: true }).click(); await download;
   await context.setOffline(false); await openCompare(page); await addCurrentPair(page); await expect(page.getByLabel("Ti2AlN recipe scenario", { exact: true })).toBeVisible();
   await context.setOffline(true); await page.getByLabel("Copy of Ti2AlN recipe precursor 2 purity").fill("97"); await expect(page.getByLabel("Copy of Ti2AlN recipe scenario")).toContainText("Final total"); await page.getByRole("button", { name: "Save comparison" }).click(); await expect(page.getByText("Comparison saved", { exact: true })).toBeVisible(); const comparisonDownload = page.waitForEvent("download"); await page.getByRole("button", { name: "Export", exact: true }).click(); await comparisonDownload; await context.setOffline(false);

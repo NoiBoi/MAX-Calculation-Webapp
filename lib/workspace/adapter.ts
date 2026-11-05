@@ -1,7 +1,6 @@
 import {
   ChemistryDecimal,
   calculateBatchRecipe,
-  normalizeLeadingSiteRatioGroup,
   parseFormula,
   type BatchCalculationResult,
   type BatchMassBasis,
@@ -11,7 +10,7 @@ import {
   type SolverPrecursorConstraint,
 } from "@max-stoich/chemistry-engine";
 import type { WorkspacePrecursorInput } from "./presets";
-import { analyzeWorkspaceAluminumFeed } from "./aluminum-feed";
+import { analyzeWorkspaceAluminumFeed, resolveWorkspaceNormalization } from "./aluminum-feed";
 
 export interface WorkspaceRecipeState {
   readonly transientId: string;
@@ -51,18 +50,18 @@ export function percentDisplayToFraction(value: string): string {
 }
 
 export function resolveWorkspaceTarget(recipe: WorkspaceRecipeState) {
-  const normalized = recipe.normalizeLeadingSiteRatios ? normalizeLeadingSiteRatioGroup(recipe.targetFormula, { enabled: true, expectedSite: "M" }) : undefined;
+  const parsed = parseFormula(recipe.targetFormula);
+  const normalized = resolveWorkspaceNormalization(recipe, parsed);
   if (normalized?.success) return normalized.value.calculationComposition;
   if (recipe.siteComposition) return recipe.siteComposition;
-  const parsed = parseFormula(recipe.targetFormula);
   return parsed.success ? parsed.composition : undefined;
 }
 
 export function buildWorkspaceCalculation(recipe: WorkspaceRecipeState): WorkspaceCalculationState {
-  const normalized = recipe.normalizeLeadingSiteRatios ? normalizeLeadingSiteRatioGroup(recipe.targetFormula, { enabled: true, expectedSite: "M" }) : undefined;
+  const parsed = parseFormula(recipe.targetFormula);
+  const normalized = resolveWorkspaceNormalization(recipe, parsed);
   if (normalized && !normalized.success) return { state: "invalid", errors: normalized.errors.map((error) => ({ code: error.code, message: error.message, fieldPath: "targetFormula" })) };
-  const parsed = normalized?.success ? undefined : parseFormula(recipe.targetFormula);
-  if (parsed && !parsed.success) return { state: "invalid", errors: parsed.errors.map((error) => ({ code: error.code, message: error.message, fieldPath: "targetFormula" })) };
+  if (!parsed.success) return { state: "invalid", errors: parsed.errors.map((error) => ({ code: error.code, message: error.message, fieldPath: "targetFormula" })) };
   const constraints: SolverPrecursorConstraint[] = [];
   for (const item of recipe.precursors) {
     if (item.constraintMode === "fixed") constraints.push({ schemaVersion: "1.0.0", mode: "fixed", precursorId: item.id, value: item.fixedValue });
@@ -73,14 +72,14 @@ export function buildWorkspaceCalculation(recipe: WorkspaceRecipeState): Workspa
   const precursorExcess = percentDisplayToFraction(recipe.precursorExcessPercent);
   const loss = percentDisplayToFraction(recipe.handlingLossPercent);
   const adjustments = [
-    ...(aluminum.visible ? [{ schemaVersion: "1.0.0" as const, id: "ui-aluminum-feed", type: "elemental-feed-coefficient" as const, stage: "pre-solver" as const, element: "Al", coefficient: aluminum.enteredCoefficient ?? recipe.aluminumPerFormula ?? "", idealCoefficient: aluminum.idealCoefficient ?? "", calculationScaleFactor: aluminum.calculationScaleFactor ?? "1", order: 0, source: "user" as const }] : []),
+    ...(aluminum.visible ? [{ schemaVersion: "1.0.0" as const, id: "ui-aluminum-feed", type: "elemental-feed-coefficient" as const, stage: "pre-solver" as const, element: "Al", coefficient: aluminum.enteredCoefficient ?? recipe.aluminumPerFormula ?? "", idealCoefficient: aluminum.idealCoefficient ?? "", calculationScaleFactor: aluminum.calculationScaleFactor ?? "1", order: 0, source: recipe.aluminumPerFormula === undefined && recipe.alExcessPercent === undefined ? "system-default" as const : "user" as const }] : []),
     ...(recipe.precursorExcessId && precursorExcess !== "" && precursorExcess !== "0" ? [{ schemaVersion: "1.0.0" as const, id: "ui-precursor-excess", type: "precursor-molar-excess" as const, stage: "post-solver" as const, precursorId: recipe.precursorExcessId, fraction: precursorExcess, order: 0, source: "user" as const }] : []),
     ...(loss !== "" && loss !== "0" ? [{ schemaVersion: "1.0.0" as const, id: "ui-handling-loss", type: "handling-loss" as const, stage: "mass-domain" as const, label: "Handling loss", fraction: loss, scope: "all" as const, order: 0, source: "user" as const }] : []),
   ];
   try {
     const result = calculateBatchRecipe({
       schemaVersion: "1.0.0",
-      idealCrystalComposition: normalized?.success ? normalized.value.idealCalculationComposition : recipe.siteComposition ?? parsed!.composition,
+      idealCrystalComposition: normalized?.success ? normalized.value.idealCalculationComposition : recipe.siteComposition ?? parsed.composition,
       ...(normalized?.success ? { intendedFeedComposition: normalized.value.calculationComposition } : {}),
       precursors: recipe.precursors.map((item, order) => ({ schemaVersion: "1.0.0", id: item.id, name: item.name, formula: item.formula, order, ...(item.purityPercent.trim() ? { purity: percentDisplayToFraction(item.purityPercent) } : {}), ...(item.molarMassOverride.trim() ? { molarMassOverride: { value: item.molarMassOverride, units: "g/mol" as const, source: item.molarMassOverrideSource, reason: "Explicit workspace material override", provenance: "User-entered advanced workspace value" } } : {}) })),
       solverConstraints: constraints,

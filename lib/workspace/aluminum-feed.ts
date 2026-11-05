@@ -4,6 +4,7 @@ export interface AluminumFeedInput {
   readonly targetFormula: string;
   readonly normalizeLeadingSiteRatios?: boolean;
   readonly siteComposition?: SiteComposition;
+  /** Omit to derive Al from the target formula. Stored strings are explicit overrides. */
   readonly aluminumPerFormula?: string;
   /** Legacy schema-5 percentage input; read only for migration. */
   readonly alExcessPercent?: string;
@@ -26,6 +27,17 @@ export function legacyAluminumCoefficient(idealCoefficient: string, excessPercen
   try { const percent = new ChemistryDecimal(excessPercent); if (!ideal || !percent.isFinite()) return undefined; const coefficient = ideal.times(percent.dividedBy(100).plus(1)); return coefficient.greaterThan(0) ? coefficient.toFixed() : undefined; } catch { return undefined; }
 }
 
+export function resolveWorkspaceNormalization(input: AluminumFeedInput, parsed?: ReturnType<typeof parseFormula>) {
+  if (!input.normalizeLeadingSiteRatios || !input.targetFormula.startsWith("(")) return undefined;
+  parsed ??= parseFormula(input.targetFormula);
+  if (!parsed.success) return undefined;
+  const groupEnd = parsed.tokens.findIndex((token) => token.kind === "close-parenthesis");
+  const remainder = parsed.tokens.slice(groupEnd + 1);
+  const elements = remainder.filter((token) => token.kind === "element").map((token) => token.value);
+  if (!elements.includes("Al") || elements.includes("B") || !(elements.includes("C") || elements.includes("N"))) return undefined;
+  return normalizeLeadingSiteRatioGroup(input.targetFormula, { enabled: true, expectedSite: "M" });
+}
+
 export function analyzeWorkspaceAluminumFeed(input: AluminumFeedInput): AluminumFeedAnalysis {
   const parsed = parseFormula(input.targetFormula);
   let idealCoefficient = parsed.success ? parsed.composition.amounts.Al : undefined;
@@ -33,7 +45,7 @@ export function analyzeWorkspaceAluminumFeed(input: AluminumFeedInput): Aluminum
   if (!idealCoefficient) return { visible: false };
   const enteredCoefficient = input.aluminumPerFormula ?? (input.alExcessPercent !== undefined ? legacyAluminumCoefficient(idealCoefficient, input.alExcessPercent) : idealCoefficient) ?? "";
   const entered = finitePositive(enteredCoefficient);
-  const normalized = input.normalizeLeadingSiteRatios ? normalizeLeadingSiteRatioGroup(input.targetFormula, { enabled: true, expectedSite: "M" }) : undefined;
+  const normalized = resolveWorkspaceNormalization(input, parsed);
   let calculationAl = normalized?.success ? normalized.value.calculationComposition.amounts.Al : undefined;
   if (!calculationAl && input.siteComposition) { const converted = siteCompositionToElementalComposition(input.siteComposition); if (converted.success) calculationAl = converted.value.amounts.Al; }
   calculationAl ??= idealCoefficient;
@@ -43,22 +55,9 @@ export function analyzeWorkspaceAluminumFeed(input: AluminumFeedInput): Aluminum
   return { visible: true, idealCoefficient, enteredCoefficient: entered.toFixed(), calculationScaleFactor };
 }
 
-/** Keeps the user-owned feed coefficient stable while the ideal target reference changes. */
-export function aluminumCoefficientForTargetChange(current: AluminumFeedInput, nextTargetFormula: string): string {
-  const next = parseFormula(nextTargetFormula);
-  if (!next.success) return current.aluminumPerFormula ?? "";
-  const nextIdeal = next.composition.amounts.Al;
-  if (!nextIdeal) return "";
-  const currentParsed = parseFormula(current.targetFormula);
-  const currentContainsAluminum = currentParsed.success && Boolean(currentParsed.composition.amounts.Al);
-  if (currentContainsAluminum && typeof current.aluminumPerFormula === "string" && current.aluminumPerFormula.trim() !== "") return current.aluminumPerFormula;
-  return nextIdeal;
-}
-
-export function migrateWorkspaceAluminumInput<T extends AluminumFeedInput>(input: T): Omit<T, "aluminumPerFormula" | "alExcessPercent"> & { aluminumPerFormula: string } {
-  if (typeof input.aluminumPerFormula === "string") return input as Omit<T, "aluminumPerFormula" | "alExcessPercent"> & { aluminumPerFormula: string };
-  const analysis = analyzeWorkspaceAluminumFeed(input);
-  const migrated = { ...input, aluminumPerFormula: analysis.enteredCoefficient ?? "" } as Omit<T, "aluminumPerFormula" | "alExcessPercent"> & { aluminumPerFormula: string; alExcessPercent?: string };
-  delete migrated.alExcessPercent;
-  return migrated;
+export function migrateWorkspaceAluminumInput<T extends AluminumFeedInput>(input: T): Omit<T, "aluminumPerFormula" | "alExcessPercent"> & AluminumFeedInput {
+  const { aluminumPerFormula, alExcessPercent, ...editable } = input;
+  if (aluminumPerFormula === "" && !analyzeWorkspaceAluminumFeed(input).visible) return editable;
+  if (aluminumPerFormula !== undefined || alExcessPercent === undefined) return input;
+  return { ...editable, aluminumPerFormula: analyzeWorkspaceAluminumFeed(input).enteredCoefficient ?? "" };
 }

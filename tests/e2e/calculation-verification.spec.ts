@@ -5,6 +5,7 @@ async function ready(page: Page) {
   await expect(page.locator('[data-recovery-ready="true"]')).toBeVisible();
   await page.getByRole("button", { name: /More actions/ }).click();
   await page.getByLabel("Start or reset").selectOption("ti2aln");
+  await page.getByRole("button", { name: "Advanced", exact: true }).click();
 }
 
 async function openVerification(page: Page) {

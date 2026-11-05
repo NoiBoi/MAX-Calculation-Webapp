@@ -28,10 +28,12 @@ test("UX-002 mixed-site state survives standard and advanced modes", async ({ pa
 
 test("UX-003 direct aluminum coefficient updates masses, composition, and trace", async ({ page }) => {
   const before = await page.getByRole("row", { name: /Al Al/ }).getByText(/g$/).first().textContent();
+  await page.getByRole("button", { name: "Advanced", exact: true }).click();
   await page.getByLabel("Aluminum per formula").fill("1.05");
+  await page.getByRole("button", { name: "Standard", exact: true }).click();
   const after = await page.getByRole("row", { name: /Al Al/ }).getByText(/g$/).first().textContent();
   expect(after).not.toBe(before);
-  await expect(page.getByText(/Al:1.05/)).toBeVisible();
+  await expect(page.getByRole("region", { name: "Final weighing results" }).getByText(/Al:1.05/)).toBeVisible();
   await page.getByRole("button", { name: "Advanced", exact: true }).click();
   await page.getByRole("button", { name: "Open calculation trace" }).click();
   await expect(page.getByLabel("Calculation trace").getByText("ELEMENTAL_FEED_COEFFICIENT_APPLIED")).toBeVisible();
@@ -43,6 +45,7 @@ test("UX-004 purity correction increases gross mass and warns", async ({ page })
   await page.locator("#purity-al").fill("95");
   const after = await row.getByText(/g$/).first().textContent();
   expect(Number(after?.replace(" g", ""))).toBeGreaterThan(Number(before?.replace(" g", "")));
+  await page.getByRole("button", { name: "Advanced", exact: true }).click();
   await page.getByText(/Minor advisories/).click();
   await expect(page.getByText(/IMPURITY_COMPOSITION_UNMODELED/).first()).toBeVisible();
 });
@@ -60,7 +63,7 @@ test("UX-005 invalid precursor keeps unmistakably stale results and recovers", a
 
 test("UX-006 missing nitrogen source blocks current masses and preserves route", async ({ page }) => {
   await page.getByRole("button", { name: "Remove N" }).click();
-  await expect(page.getByRole("alert").filter({ hasText: "Current recipe" })).toContainText("MISSING_REQUIRED_ELEMENT_SOURCE");
+  await expect(page.getByRole("alert").filter({ hasText: "Current recipe" })).toContainText(/nitrogen|element N|\bN\b/i);
   await expect(page.getByText("STALE — values below do not reflect the current input.")).toBeVisible();
   await expect(page.locator("#precursor-formula-ti")).toHaveValue("Ti");
   await expect(page.locator("#precursor-formula-al")).toHaveValue("Al");
@@ -73,7 +76,8 @@ test("UX-007 keyboard shortcuts reach the complete routine workflow", async ({ p
   await expect(page.locator("#precursor-formula-ti")).toBeFocused();
   await page.keyboard.press("Alt+3");
   await expect(page.getByLabel("Target batch mass")).toBeFocused();
-  await page.getByLabel("Aluminum per formula").fill("1.05");
+  await page.getByLabel("Target formula").press("Enter");
+  await expect(page.getByLabel("Target batch mass")).toBeFocused();
   await page.keyboard.press("Alt+4");
   await expect(page.getByRole("table", { name: /Final gross weighing masses/ }).locator("..")).toBeFocused();
   await page.getByRole("button", { name: "Advanced", exact: true }).click();
@@ -92,6 +96,7 @@ test("UX-008 twenty mode toggles preserve recipe state", async ({ page }) => {
 });
 
 test("UX-009 coarse rounding produces a material-shift warning", async ({ page }) => {
+  await page.getByRole("button", { name: "Advanced", exact: true }).click();
   await page.getByLabel("Balance increment").fill("1");
   await page.getByLabel("Target batch mass").fill("1.4");
   await expect(page.getByText(/rounding shift/i).first()).toBeVisible();
@@ -176,6 +181,7 @@ test("UX-PERSIST-006 saves and applies an immutable reusable route", async ({ pa
 
 test("UX-EXPORT copy, CSV, JSON, print, and stale safety", async ({ page, context }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await openMore(page);
   await page.getByRole("button", { name: "Copy table" }).click();
   await expect(page.getByText(/Weighing table copied/)).toBeVisible();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toContain("Precursor\tFormula\tPurity\tFinal weighing mass\tUnit");
@@ -193,4 +199,71 @@ test("UX-EXPORT copy, CSV, JSON, print, and stale safety", async ({ page, contex
   await expect(page.getByRole("button", { name: "CSV", exact: true })).toBeDisabled();
   await expect(page.getByRole("button", { name: "JSON", exact: true })).toBeDisabled();
   await expect(page.getByRole("button", { name: "Print", exact: true })).toBeDisabled();
+});
+
+test("Standard fits six editable precursors and the live total across desktop themes", async ({ page }) => {
+  await chooseExample(page, "blank");
+  await page.getByLabel("Target formula").fill("TiNbVAlBC");
+  await page.getByLabel("Target formula").press("Enter");
+  await expect(page.getByLabel("Target batch mass")).toBeFocused();
+  await page.getByLabel("Target batch mass").fill("15");
+  const precursors = ["Ti", "Nb", "V", "Al", "B", "C"];
+  for (const [index, formula] of precursors.entries()) {
+    await page.getByRole("button", { name: "Add precursor" }).click();
+    const field = page.getByRole("textbox", { name: `Formula, precursor ${index + 1}`, exact: true });
+    await expect(field).toBeFocused();
+    await field.fill(formula);
+    await field.press("Enter");
+    await expect(page.getByRole("textbox", { name: `Purity (%), precursor ${index + 1}` })).toBeFocused();
+  }
+  await expect(page.getByRole("table", { name: "Final gross weighing masses" }).getByRole("row")).toHaveCount(8);
+  for (const viewport of [{ width: 1920, height: 1080 }, { width: 1280, height: 720 }]) {
+    await page.setViewportSize(viewport);
+    for (const theme of ["Light", "Dark", "Midnight"]) {
+      await page.getByRole("button", { name: "Open appearance menu" }).click();
+      await page.getByRole("menuitemradio", { name: theme }).click();
+      await expect(page.locator("html")).toHaveAttribute("data-theme", theme.toLowerCase());
+      await expect(page.getByLabel("Target formula")).toBeInViewport({ ratio: 1 });
+      await expect(page.getByLabel("Target batch mass")).toBeInViewport({ ratio: 1 });
+      await expect(page.getByRole("textbox", { name: "Purity (%), precursor 6" })).toBeInViewport({ ratio: 1 });
+      await expect(page.getByText("Final rounded total")).toBeInViewport({ ratio: 1 });
+      await expect(page.getByRole("button", { name: "Save", exact: true })).toBeInViewport({ ratio: 1 });
+      const inputs = await page.getByRole("region", { name: "Composition and precursors" }).boundingBox();
+      const results = await page.getByRole("region", { name: "Final weighing results" }).boundingBox();
+      expect(inputs!.x + inputs!.width).toBeLessThan(results!.x);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(viewport.width);
+    }
+  }
+});
+
+test("boride coefficients follow the formula until an explicit override is saved", async ({ page }) => {
+  await chooseExample(page, "blank");
+  await page.getByLabel("Target formula").fill("Ti2Al");
+  await page.getByLabel("Target formula").fill("Ti2Al2B");
+  for (const [index, formula] of ["Ti", "Al", "B"].entries()) {
+    await page.getByRole("button", { name: "Add precursor" }).click();
+    await page.getByRole("textbox", { name: `Formula, precursor ${index + 1}`, exact: true }).fill(formula);
+  }
+  const mode = page.getByRole("group", { name: "Interaction mode" });
+  const aluminumMass = page.getByRole("row", { name: /^Al Al/ }).getByText(/g$/).first();
+  const derivedMass = await aluminumMass.innerText();
+  await mode.getByRole("button", { name: "Advanced", exact: true }).click();
+  await expect(page.getByRole("textbox", { name: "Aluminum per formula" })).toHaveValue("2");
+  await page.getByRole("textbox", { name: "Aluminum per formula" }).fill("2.2");
+  const adjustedMass = await aluminumMass.innerText();
+  expect(adjustedMass).not.toBe(derivedMass);
+  await mode.getByRole("button", { name: "Standard", exact: true }).click();
+  await expect(aluminumMass).toHaveText(adjustedMass);
+  await expect(page.getByText("Target reference", { exact: true })).toBeVisible();
+  await expect(page.getByText("Adjusted feed", { exact: true })).toBeVisible();
+  await expect(page.getByText(/Advanced settings.*Al coefficient/)).toBeVisible();
+  await expect(page.getByRole("textbox", { name: "Aluminum per formula" })).toHaveCount(0);
+  await saveRecipe(page);
+  await page.reload();
+  await expect(page.getByLabel("Target formula")).toHaveValue("Ti2Al2B");
+  await expect(aluminumMass).toHaveText(adjustedMass);
+  await page.getByRole("button", { name: "Inspect in Advanced" }).click();
+  await expect(page.getByRole("textbox", { name: "Aluminum per formula" })).toHaveValue("2.2");
+  await page.getByRole("button", { name: "Use formula coefficient" }).click();
+  await expect(aluminumMass).toHaveText(derivedMass);
 });

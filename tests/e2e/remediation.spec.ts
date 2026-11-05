@@ -46,12 +46,13 @@ test("UX-REMEDIATION-004 standard and advanced modes are materially different wi
 test("UX-REMEDIATION-005 compact balance layout makes the weighing result dominant", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 }); await ready(page); await example(page, "ti2aln"); await more(page); await page.getByLabel("Workspace layout").selectOption("builtin-compact-balance");
   await expect(page.locator('[data-layout="builtin-compact-balance"]')).toBeVisible();
-  const result = await page.getByRole("heading", { name: "Final weighing results" }).locator("..").boundingBox(); const input = await page.getByRole("heading", { name: "Target and precursor route" }).locator("..").boundingBox();
+  const result = await page.getByRole("region", { name: "Final weighing results" }).boundingBox(); const input = await page.getByRole("heading", { name: "Composition and precursors" }).locator("..").boundingBox();
   expect(result?.width ?? 0).toBeGreaterThan(input?.width ?? 0); await expect(page.getByText("Final rounded total")).toBeInViewport();
 });
 
 test("UX-REMEDIATION-006 provenance is information and exact codes remain in details", async ({ page }) => {
   await ready(page); await example(page, "ti3alc2");
+  await page.getByRole("button", { name: "Advanced", exact: true }).click();
   await expect(page.getByText(/calculation details/).first()).toBeVisible(); await page.getByText(/Calculation details \(/).click();
   const information = page.locator("article").filter({ hasText: "uses the CIAAW abridged calculation value" }).first();
   await expect(information).toBeVisible(); await expect(information).not.toHaveClass(/bg-amber-50/); await information.getByText("Show exact source message").click(); await expect(information.getByText(/ATOMIC_WEIGHT_INTERVAL/)).toBeVisible();
@@ -65,6 +66,7 @@ test("UX-REMEDIATION-007 high-entropy elements have usable atomic weights", asyn
 
 test("SITE-RATIO-001 explicitly normalizes a leading mixed M-site group and restores ordinary parsing", async ({ page }) => {
   await ready(page);
+  await page.getByRole("button", { name: "Advanced", exact: true }).click();
   const formula = "(TiVMoNbW1.2Ta0.4)4AlC3";
   await page.getByLabel("Target formula").fill(formula);
   await page.getByLabel("Normalize leading mixed-site ratios").check();
@@ -82,12 +84,13 @@ test("SITE-RATIO-001 explicitly normalizes a leading mixed M-site group and rest
   await page.getByLabel("Normalize leading mixed-site ratios").uncheck();
   await expect(page.getByLabel("Target formula")).toHaveValue(formula);
   await expect(page.getByRole("heading", { name: "M-site ratio normalization" })).toHaveCount(0);
-  await expect(page.getByText(/Flat elemental formula/)).toBeVisible();
+  await expect(page.getByText(/Site model: Flat elemental formula/)).toBeVisible();
   await expect(page.getByText("Final rounded total")).toBeVisible();
 });
 
 test("SITE-RATIO-002 preserves deficient carbon feed and sorts weighing rows without recalculation", async ({ page }) => {
   await ready(page);
+  await page.getByRole("button", { name: "Advanced", exact: true }).click();
   const formula = "(TiVMoTa0.5W1.5)4AlC2.7";
   await page.getByLabel("Target formula").fill(formula);
   await expect(page.getByText(`Entered target formula: ${formula}`)).toBeVisible();
@@ -125,7 +128,7 @@ test("SITE-RATIO-002 preserves deficient carbon feed and sorts weighing rows wit
 });
 
 test("AL-FEED-001 uses and persists direct aluminum and carbon feed coefficients", async ({ page }) => {
-  await ready(page); await example(page, "ti3alc2");
+  await ready(page); await example(page, "ti3alc2"); await page.getByRole("button", { name: "Advanced", exact: true }).click();
   const aluminum = page.getByLabel("Aluminum per formula"), carbon = page.getByLabel("Carbon per formula");
   await expect(aluminum).toHaveValue("1"); await expect(page.getByText(/Stoichiometric aluminum/)).toBeVisible();
   const before = await page.getByRole("row", { name: /Al Al/ }).getByText(/g$/).first().textContent();

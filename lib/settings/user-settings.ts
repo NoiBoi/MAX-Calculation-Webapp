@@ -177,7 +177,7 @@ export function displaySettingsForMode(settings: LocalUserSettings, mode: Mode):
 export function applyFeedDefaultsToNewTemplate(recipe: WorkspaceRecipeState, settings: LocalUserSettings, template?: "211" | "312" | "413"): WorkspaceRecipeState {
   let targetFormula = recipe.targetFormula;
   if (template) { const x = analyzeMaxXComponent(targetFormula); if (x.success && x.value.element === "C" && !targetFormula.includes("N")) { const replaced = replaceMaxXCoefficient(targetFormula, settings.feedDefaults.carbonPerFormula[template]); if (replaced.success) targetFormula = replaced.formula; } }
-  return { ...recipe, targetFormula, aluminumPerFormula: settings.feedDefaults.aluminumPerFormula };
+  return { ...recipe, targetFormula, aluminumPerFormula: settings.feedDefaults.aluminumPerFormula === "1" ? undefined : settings.feedDefaults.aluminumPerFormula };
 }
 
 export function relativeTemplateCarbonLabel(template: "211" | "312" | "413", value: string): string {

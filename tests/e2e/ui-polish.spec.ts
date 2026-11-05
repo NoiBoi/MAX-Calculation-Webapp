@@ -127,6 +127,7 @@ test("POLISH-005 exposes MAXCalc branding and preserves print identity", async (
   await page.getByRole("button", { name: /More actions/ }).click();
   await page.getByLabel("Start or reset").selectOption("ti2aln");
   const popupPromise = page.waitForEvent("popup");
+  await page.getByRole("button", { name: /More actions/ }).click();
   await page.getByRole("button", { name: "Print", exact: true }).click();
   const printPage = await popupPromise;
   await expect(printPage.getByText("MAXCalc", { exact: true })).toBeVisible();

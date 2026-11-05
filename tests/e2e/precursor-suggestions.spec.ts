@@ -5,7 +5,7 @@ async function ready(page: Page) { await page.goto("/workspace"); await expect(p
 test("PRECURSOR-SUGGEST-001 suggests, applies, and calculates a deterministic candidate", async ({ page }) => {
   await ready(page);
   await page.getByLabel("Target formula").fill("Ti3AlC2");
-  await expect(page.getByText("Candidate precursor routes available.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Suggest precursors" })).toBeEnabled();
   await page.getByRole("button", { name: "Suggest precursors" }).click();
   const panel = page.getByRole("region", { name: "Suggested precursors" });
   await expect(panel.getByText(/registered/).first()).toBeVisible();
@@ -17,7 +17,7 @@ test("PRECURSOR-SUGGEST-001 suggests, applies, and calculates a deterministic ca
 });
 
 test("PRECURSOR-SUGGEST-002 clear all confirms, preserves target/settings, and one undo restores rows", async ({ page }) => {
-  await ready(page); await page.getByLabel("Target formula").fill("Ti3AlC2"); await page.getByLabel("Target batch mass").fill("12.345"); await page.getByLabel("Aluminum per formula").fill("1.2"); await page.getByRole("button", { name: "Autofill best candidate" }).click();
+  await ready(page); await page.getByRole("button", { name: "Advanced", exact: true }).click(); await page.getByLabel("Target formula").fill("Ti3AlC2"); await page.getByLabel("Target batch mass").fill("12.345"); await page.getByLabel("Aluminum per formula").fill("1.2"); await page.getByRole("button", { name: "Autofill best candidate" }).click();
   const formulas = await page.locator('[id^="precursor-formula-"]').evaluateAll((items) => items.map((item) => (item as HTMLInputElement).value));
   page.once("dialog", (dialog) => dialog.accept()); await page.getByRole("button", { name: "Clear all precursors" }).click();
   await expect(page.locator('[id^="precursor-formula-"]')).toHaveCount(0); await expect(page.getByLabel("Target formula")).toHaveValue("Ti3AlC2"); await expect(page.getByLabel("Target batch mass")).toHaveValue("12.345"); await expect(page.getByLabel("Aluminum per formula")).toHaveValue("1.2");
@@ -27,7 +27,7 @@ test("PRECURSOR-SUGGEST-002 clear all confirms, preserves target/settings, and o
 });
 
 test("PRECURSOR-SUGGEST-003 formula changes never replace the existing route", async ({ page }) => {
-  await ready(page); await page.getByLabel("Target formula").fill("Ti3AlC2"); await page.getByRole("button", { name: "Autofill best candidate" }).click();
+  await ready(page); await page.getByRole("button", { name: "Advanced", exact: true }).click(); await page.getByLabel("Target formula").fill("Ti3AlC2"); await page.getByRole("button", { name: "Autofill best candidate" }).click();
   const before = await page.locator('[id^="precursor-formula-"]').evaluateAll((items) => items.map((item) => (item as HTMLInputElement).value));
   await page.getByLabel("Target formula").fill("Ti4AlN3");
   await expect(page.getByText("Current precursor route no longer covers all target elements.")).toBeVisible();
@@ -36,13 +36,13 @@ test("PRECURSOR-SUGGEST-003 formula changes never replace the existing route", a
 });
 
 test("PRECURSOR-SUGGEST-004 autofill confirms before replacing a non-empty route", async ({ page }) => {
-  await ready(page); await page.getByLabel("Target formula").fill("Ti3AlC2"); await page.getByRole("button", { name: "Add precursor" }).click(); await page.locator('[id^="precursor-formula-"]').fill("Ti");
+  await ready(page); await page.getByRole("button", { name: "Advanced", exact: true }).click(); await page.getByLabel("Target formula").fill("Ti3AlC2"); await page.getByRole("button", { name: "Add precursor" }).click(); await page.locator('[id^="precursor-formula-"]').fill("Ti");
   page.once("dialog", async (dialog) => { expect(dialog.message()).toContain("Replace the current 1 precursor"); await dialog.dismiss(); });
   await page.getByRole("button", { name: "Autofill best candidate" }).click(); await expect(page.locator('[id^="precursor-formula-"]')).toHaveCount(1); await expect(page.locator('[id^="precursor-formula-"]')).toHaveValue("Ti");
 });
 
 test("PRECURSOR-COVERAGE-001 direct elemental fallback handles a large high-entropy target", async ({ page }) => {
-  await ready(page); const clear = page.getByRole("button", { name: "Clear all precursors" }); if (await clear.isEnabled()) { page.once("dialog", (dialog) => dialog.accept()); await clear.click(); } await page.getByLabel("Target formula").fill("(ScTiVCrMnFeCoNiZr)4AlC3");
+  await ready(page); await page.getByLabel("Target formula").fill("(ScTiVCrMnFeCoNiZr)4AlC3");
   await page.getByRole("button", { name: "Suggest precursors" }).click(); const panel = page.getByRole("region", { name: "Suggested precursors" }); await expect(panel.getByText(/Generic direct elemental route/)).toBeVisible(); await expect(panel.getByText(/absent from the registered precursor inventory/)).toHaveCount(0);
   const direct = panel.getByRole("article").filter({ hasText: "Generic direct elemental route" }); await direct.getByRole("button", { name: "Use this route" }).click(); await expect(page.locator("[data-precursor-formula]")).toHaveCount(11); await expect(page.getByRole("table", { name: /Final gross weighing masses/ })).toBeVisible(); await page.getByRole("button", { name: "Undo" }).click();
 });

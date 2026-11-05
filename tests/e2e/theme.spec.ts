@@ -26,13 +26,14 @@ test("THEME-003 compact control, panels, dialogs, trace, and settings share Dark
   const toggle = page.getByRole("button", { name: /Change appearance/ }); await expect(toggle).toHaveAttribute("title", "Change appearance");
   await page.getByRole("button", { name: /More actions/ }).click(); await expect(page.getByRole("region", { name: "More actions" })).toHaveCSS("background-color", "rgb(32, 34, 38)");
   await page.getByLabel("Start or reset").selectOption("ti2aln"); await page.getByRole("button", { name: "Save", exact: true }).click(); await expect(page.getByRole("dialog", { name: "Save recipe" })).toHaveCSS("color-scheme", "dark"); await page.keyboard.press("Escape");
+  await page.getByText("Calculation summary and audit", { exact: true }).click();
   await page.getByRole("button", { name: "Open calculation trace" }).click(); await expect(page.getByRole("region", { name: "Calculation details", exact: true })).toBeVisible();
   await page.goto("/settings"); await expect(page.getByRole("combobox", { name: "Appearance" })).toHaveValue("dark");
 });
 
 test("THEME-004 changes presentation without changing scientific values or exports", async ({ page }) => {
   await ready(page); await page.getByRole("button", { name: /More actions/ }).click(); await page.getByLabel("Start or reset").selectOption("ti3alc2");
-  const total = page.getByText(/Final rounded total/).locator("..").innerText(); const csv = page.getByRole("button", { name: "CSV" }); await expect(csv).toBeEnabled();
+  const total = page.getByText(/Final rounded total/).locator("..").innerText(); await page.getByRole("button", { name: /More actions/ }).click(); const csv = page.getByRole("button", { name: "CSV" }); await expect(csv).toBeEnabled(); await page.keyboard.press("Escape");
   await chooseAppearance(page, "Dark"); expect(await page.getByText(/Final rounded total/).locator("..").innerText()).toBe(await total); await expect(page.getByRole("table", { name: /Final gross weighing masses/ })).toHaveCSS("color-scheme", "dark");
   await expect(page.getByText(/Unsaved/).first()).toBeVisible();
 });
@@ -40,6 +41,7 @@ test("THEME-004 changes presentation without changing scientific values or expor
 test("THEME-005 dedicated print remains white in Dark mode", async ({ page }) => {
   await page.context().addInitScript(() => { window.print = () => undefined; });
   await ready(page); await page.getByRole("button", { name: /More actions/ }).click(); await page.getByLabel("Start or reset").selectOption("ti2aln"); await chooseAppearance(page, "Dark");
+  await page.getByRole("button", { name: /More actions/ }).click();
   const popupPromise = page.waitForEvent("popup"); await page.getByRole("button", { name: "Print" }).click(); const popup = await popupPromise; await expect(popup.locator(".dedicated-print-root")).toHaveCSS("background-color", "rgb(238, 242, 244)"); await expect(popup.locator(".print-page").first()).toHaveCSS("background-color", "rgb(255, 255, 255)"); await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 });
 

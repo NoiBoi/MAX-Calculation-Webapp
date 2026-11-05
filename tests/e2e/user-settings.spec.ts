@@ -14,7 +14,7 @@ test("SETTINGS-001 persists feed, save, and Standard table settings across refre
 });
 
 test("SETTINGS-002 applies template-specific feed defaults only to new recipes", async ({ page }) => {
-  await openSettings(page); await setDefaults(page); await saveSettings(page); await readyWorkspace(page);
+  await openSettings(page); await setDefaults(page); await saveSettings(page); await readyWorkspace(page); await page.getByRole("button", { name: "Advanced", exact: true }).click();
   for (const [template, carbon] of [["211", "0.9"], ["312", "1.8"], ["413", "2.7"]] as const) { await choose(page, `generic-${template}`); await expect(page.getByLabel("Aluminum per formula")).toHaveValue("1.2"); await expect(page.getByLabel("Carbon per formula")).toHaveValue(carbon); }
   await choose(page, "ti2aln"); await expect(page.getByLabel("Aluminum per formula")).toHaveValue("1"); await expect(page.getByLabel("Nitrogen per formula")).toHaveValue("1");
   await choose(page, "ti3alcn"); await expect(page.getByLabel("Aluminum per formula")).toHaveValue("1"); await expect(page.getByLabel("Carbon per formula")).toHaveCount(0);
@@ -28,7 +28,7 @@ test("SETTINGS-003 main Save and Enter follow the configured default while the m
 
 test("SETTINGS-004 applies independent Standard columns without changing the calculation", async ({ page }) => {
   await openSettings(page); const standard = page.getByRole("region", { name: "Standard mode columns" }); await standard.getByLabel("Purity", { exact: true }).uncheck(); await standard.getByLabel("Status", { exact: true }).uncheck(); await saveSettings(page); await readyWorkspace(page); await choose(page, "ti2aln");
-  const table = page.getByRole("table", { name: /Final gross weighing masses/ }); await expect(table.locator("thead").getByRole("columnheader")).toHaveCount(3); await expect(table.getByRole("columnheader", { name: "Precursor" })).toBeVisible(); await expect(table.getByRole("columnheader", { name: "Formula" })).toBeVisible(); await expect(table.getByRole("columnheader", { name: "Final weighing mass" })).toBeVisible(); await expect(table.getByRole("columnheader", { name: "Purity" })).toHaveCount(0); await expect(page.getByText("Calculation summary", { exact: true })).toBeVisible(); await expect(page.getByRole("button", { name: "Verify calculations" })).toBeEnabled();
+  const table = page.getByRole("table", { name: /Final gross weighing masses/ }); await expect(table.locator("thead").getByRole("columnheader")).toHaveCount(3); await expect(table.getByRole("columnheader", { name: "Precursor" })).toBeVisible(); await expect(table.getByRole("columnheader", { name: "Formula" })).toBeVisible(); await expect(table.getByRole("columnheader", { name: "Final weighing mass" })).toBeVisible(); await expect(table.getByRole("columnheader", { name: "Purity" })).toHaveCount(0); await page.getByText("Calculation summary and audit", { exact: true }).click(); await expect(page.getByRole("button", { name: "Verify calculations" })).toBeEnabled();
 });
 
 test("SETTINGS-005 shows elemental radius but not a compound average only in configured Advanced mode", async ({ page }) => {
@@ -52,5 +52,6 @@ test("PRINT-SETTINGS-001 persists paper, packing, fields, and required-field pro
 
 test("VERIFY-PLACEMENT-001 puts verification beside trace at the bottom and restores focus", async ({ page }) => {
   await readyWorkspace(page); await choose(page, "ti2aln"); const top = page.getByRole("toolbar", { name: "Calculator page actions" }); await expect(top.getByRole("button", { name: /Verify/ })).toHaveCount(0); await page.getByRole("button", { name: "Calculator" }).click(); await expect(page.getByRole("menuitem", { name: "Settings" })).toBeVisible(); await page.keyboard.press("Escape");
+  await page.getByText("Calculation summary and audit", { exact: true }).click();
   const details = page.getByRole("region", { name: "Calculation details" }); const verify = details.getByRole("button", { name: "Verify calculations" }); await expect(verify).toBeEnabled(); await expect(details.getByRole("button", { name: "Open calculation trace" })).toBeVisible(); await verify.click(); await page.getByRole("dialog", { name: "Calculation verification" }).getByRole("button", { name: "Close" }).click(); await expect(verify).toBeFocused();
 });

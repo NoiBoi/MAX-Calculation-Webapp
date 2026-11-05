@@ -160,6 +160,8 @@ Stages are fixed: direct elemental feed coefficients and advanced elemental exce
 
 `Aluminum per formula` is the total intended-feed coefficient, never a percentage. If `Al_ideal` is the target/template coefficient and `Al_feed` is entered, the pre-solver requirement is set directly to `Al_feed`; the explanatory relative change is `Al_feed/Al_ideal - 1`. Thus `1.2` means Al1.2 and 20% above an ideal coefficient of 1, while `2.2` means Al2.2 and 120% above ideal. Exact normalized compositions may use an equivalent calculation scale, which is recorded separately in the trace and never changes the displayed per-formula coefficient.
 
+When no explicit Al coefficient is stored, the workspace derives it from the current target in mol Al per mol target formula. For example, `Ti2Al2B` supplies Ti:Al:B in a 2:2:1 ratio by ordinary elemental parsing. Boride feed does not use the C/N site-normalization shortcut. Existing stored Al coefficients remain explicit, including when they equal an earlier target’s coefficient.
+
 Approved algebraic identity for purity correction, when purity fraction `q` is in `(0,1]`:
 
 `corrected mass = pure-required mass / q`
