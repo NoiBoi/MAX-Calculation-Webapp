@@ -33,7 +33,7 @@ export function AppHeader({
       <Link aria-label="MAXCalc calculator" className="app-header-brand" href="/workspace">
         <SiteBrand />
       </Link>
-      <WorkspaceSwitcher activeWorkspace={(["calculator", "comparison", "emi", "xrd"] as const).includes(activeSection as WorkspaceId) ? activeSection as WorkspaceId : undefined} />
+      <WorkspaceSwitcher settingsActive={activeSection === "settings"} activeWorkspace={(["calculator", "comparison", "emi", "xrd"] as const).includes(activeSection as WorkspaceId) ? activeSection as WorkspaceId : undefined} />
       <div className="app-header-context">
         <h1 title={title}>{title}</h1>
         <p aria-live="polite">{status ?? <span aria-hidden="true">&nbsp;</span>}</p>

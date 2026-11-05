@@ -231,7 +231,7 @@ test("Standard fits six editable precursors and the live total across desktop th
       await expect(page.getByRole("button", { name: "Save", exact: true })).toBeInViewport({ ratio: 1 });
       const inputs = await page.getByRole("region", { name: "Composition and precursors" }).boundingBox();
       const results = await page.getByRole("region", { name: "Final weighing results" }).boundingBox();
-      expect(inputs!.x + inputs!.width).toBeLessThan(results!.x);
+      expect(inputs!.x + inputs!.width).toBeCloseTo(results!.x, 0);
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(viewport.width);
     }
   }

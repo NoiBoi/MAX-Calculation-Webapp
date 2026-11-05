@@ -29,7 +29,7 @@ describe("MAXCalc shared UI architecture", () => {
     const detailMode = source("components/site/detail-mode-control.tsx");
     const switcher = source("components/site/workspace-switcher.tsx");
     const styles = source("app/globals.css");
-    expect(workspace).toContain('className="workspace-command-bar"');
+    expect(workspace).toContain('className="calculator-setup-bar"');
     expect(comparison).toContain('className="comparison-command-bar"');
     expect(workspace).not.toContain('className="ui-button header-navigation-button" href="/compare"');
     expect(comparison).not.toContain('className="ui-button header-navigation-button" href="/settings"');
@@ -49,7 +49,8 @@ describe("MAXCalc shared UI architecture", () => {
     expect(source("components/site/app-header.tsx")).toMatch(/\{moreActions\}\s*<ThemeControl \/>/);
     expect(comparison).toContain('More <span aria-hidden="true">•••</span>');
     expect(comparison).toContain('href="/demo">Documentation</Link>');
-    expect(styles).toContain('.workspace-command-bar-inner { width: min(calc(100% - (2 * var(--page-gutter))), var(--workspace-max-width)); }');
+    expect(workspace).toContain('className="command-group"');
+    expect(switcher).toContain('className="workbench-navigation"');
     expect(styles).toMatch(/\.workspace-switcher-trigger \{[^}]+font-size: var\(--font-button\);/);
     expect(styles).toContain('.detail-mode-control button { padding-inline: .42rem; font-size: .78rem;');
     expect(styles).toContain('.action-menu-panel *,\n.workspace-command-layer * { font-weight: 400 !important; }');

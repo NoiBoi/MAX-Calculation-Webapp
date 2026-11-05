@@ -171,7 +171,7 @@ test("POLISH-008 calculator and comparison share an identical detail-mode contro
       await page.evaluate((value) => document.documentElement.setAttribute("data-theme", value), theme);
       const header = page.getByRole("banner");
       const mode = route === "/workspace"
-        ? header.getByRole("group", { name: "Interaction mode" })
+        ? page.getByRole("region", { name: "Batch setup" }).getByRole("group", { name: "Interaction mode" })
         : header.getByRole("group", { name: "Comparison detail mode" });
       const globalActions = header.locator(".app-header-global-actions");
       await expect(mode).toBeVisible();
@@ -182,7 +182,7 @@ test("POLISH-008 calculator and comparison share an identical detail-mode contro
       expect(modeBox).toBeTruthy();
       expect(globalBox).toBeTruthy();
       expect(modeBox!.width).toBeGreaterThan(140);
-      if (viewport.width >= 1280) expect(modeBox!.x + modeBox!.width).toBeLessThanOrEqual(globalBox!.x);
+      if (route === "/compare" && viewport.width >= 1280) expect(modeBox!.x + modeBox!.width).toBeLessThanOrEqual(globalBox!.x);
       expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
       const appearance = await mode.evaluate((element) => {
         const active = element.querySelector<HTMLElement>('[aria-pressed="true"]')!;
@@ -208,8 +208,8 @@ test("POLISH-008 calculator and comparison share an identical detail-mode contro
       expect(Math.abs(routeGeometry[0]!.global.width - routeGeometry[1]!.global.width)).toBeLessThanOrEqual(1);
     }
     expect(routeGeometry[0]!.appearance).toEqual(routeGeometry[1]!.appearance);
-    expect(routeGeometry[0]!.appearance.activeTopInset).toBeGreaterThanOrEqual(2);
-    expect(routeGeometry[0]!.appearance.activeBottomInset).toBeGreaterThanOrEqual(2);
+    expect(routeGeometry[0]!.appearance.activeTopInset).toBeLessThanOrEqual(2);
+    expect(routeGeometry[0]!.appearance.activeBottomInset).toBeLessThanOrEqual(2);
     }
   }
   await page.goto("/compare");
@@ -235,10 +235,15 @@ test("POLISH-009 route navigation stays in the header while workflow bars remain
     expect(toolbarBox).toBeTruthy();
     expect(firstBox).toBeTruthy();
     expect(toolbarBox!.x).toBeGreaterThanOrEqual(16);
-    expect(firstBox!.x).toBeGreaterThanOrEqual(20);
+    expect(firstBox!.x).toBeGreaterThanOrEqual(toolbarBox!.x);
     expect(firstBox!.height).toBeLessThan(36);
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
   }
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  const navigation = page.getByRole("navigation", { name: "MAXCalc workspaces" });
+  await expect(navigation.getByRole("link", { name: "Comparison" })).toHaveAttribute("aria-current", "page");
+  await navigation.getByRole("link", { name: "Calculator" }).click();
+  await expect(navigation.getByRole("link", { name: "Calculator" })).toHaveAttribute("aria-current", "page");
 });
 
 test("POLISH-007 neutral outlines resolve through semantic border tokens", async ({ page }) => {

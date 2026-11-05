@@ -12,7 +12,7 @@ const WORKSPACES = [
   { id: "xrd", href: "/xrd", name: "XRD Analysis", description: "COD reference patterns", icon: "⌁", development: true },
 ] as const;
 
-export function WorkspaceSwitcher({ activeWorkspace }: Readonly<{ activeWorkspace?: WorkspaceId }>) {
+export function WorkspaceSwitcher({ activeWorkspace, settingsActive }: Readonly<{ activeWorkspace?: WorkspaceId; settingsActive?: boolean }>) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -37,20 +37,28 @@ export function WorkspaceSwitcher({ activeWorkspace }: Readonly<{ activeWorkspac
     items[next]?.focus();
   };
 
-  return <div className="workspace-switcher" onKeyDown={moveFocus} ref={rootRef}>
-    <button aria-controls="workspace-menu" aria-expanded={open} aria-haspopup="menu" className="workspace-switcher-trigger" onClick={() => setOpen((value) => !value)} ref={triggerRef} type="button">
-      <span className="workspace-switcher-trigger-icon" aria-hidden="true">{active?.icon ?? "⌘"}</span>
-      <span className="workspace-switcher-label">{active?.name ?? "Choose workspace"}</span>
-      <svg aria-hidden="true" className="workspace-switcher-chevron" fill="none" viewBox="0 0 16 16"><path d="m4 6 4 4 4-4" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" /></svg>
-    </button>
-    {open && <div aria-label="MAXCalc workspaces" className="workspace-menu" id="workspace-menu" role="menu">
-      <p className="workspace-menu-label">Workspaces</p>
-      {WORKSPACES.map((workspace) => <Link aria-current={workspace.id === activeWorkspace ? "page" : undefined} className={`workspace-menu-item ${workspace.id === activeWorkspace ? "is-active" : ""}`} href={workspace.href} key={workspace.id} onClick={() => setOpen(false)} role="menuitem">
-        <span className="workspace-menu-icon" aria-hidden="true">{workspace.icon}</span>
-        <span className="workspace-menu-copy"><strong>{workspace.name}</strong><small>{workspace.description}</small></span>
-        {workspace.development && <span className="workspace-menu-badge">In development</span>}
+  return <>
+    <nav aria-label="MAXCalc workspaces" className="workbench-navigation">
+      {WORKSPACES.map((workspace) => <Link aria-current={workspace.id === activeWorkspace ? "page" : undefined} href={workspace.href} key={workspace.id} title={workspace.development ? "XRD Analysis · In development" : workspace.description}>
+        <span aria-hidden="true">{workspace.icon}</span>{workspace.name}
       </Link>)}
-      <Link className="workspace-menu-utility" href="/settings" onClick={() => setOpen(false)} role="menuitem"><span aria-hidden="true">⚙</span><span>Settings</span></Link>
-    </div>}
-  </div>;
+      <Link aria-current={settingsActive ? "page" : undefined} href="/settings"><span aria-hidden="true">⚙</span>Settings</Link>
+    </nav>
+    <div className="workspace-switcher" onKeyDown={moveFocus} ref={rootRef}>
+      <button aria-controls="workspace-menu" aria-expanded={open} aria-haspopup="menu" className="workspace-switcher-trigger" onClick={() => setOpen((value) => !value)} ref={triggerRef} type="button">
+        <span className="workspace-switcher-trigger-icon" aria-hidden="true">{active?.icon ?? "⌘"}</span>
+        <span className="workspace-switcher-label">{active?.name ?? "Choose workspace"}</span>
+        <svg aria-hidden="true" className="workspace-switcher-chevron" fill="none" viewBox="0 0 16 16"><path d="m4 6 4 4 4-4" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" /></svg>
+      </button>
+      {open && <div aria-label="MAXCalc workspaces" className="workspace-menu" id="workspace-menu" role="menu">
+        <p className="workspace-menu-label">Workspaces</p>
+        {WORKSPACES.map((workspace) => <Link aria-current={workspace.id === activeWorkspace ? "page" : undefined} className={`workspace-menu-item ${workspace.id === activeWorkspace ? "is-active" : ""}`} href={workspace.href} key={workspace.id} onClick={() => setOpen(false)} role="menuitem">
+          <span className="workspace-menu-icon" aria-hidden="true">{workspace.icon}</span>
+          <span className="workspace-menu-copy"><strong>{workspace.name}</strong><small>{workspace.description}</small></span>
+          {workspace.development && <span className="workspace-menu-badge">In development</span>}
+        </Link>)}
+        <Link className="workspace-menu-utility" href="/settings" onClick={() => setOpen(false)} role="menuitem"><span aria-hidden="true">⚙</span><span>Settings</span></Link>
+      </div>}
+    </div>
+  </>;
 }
