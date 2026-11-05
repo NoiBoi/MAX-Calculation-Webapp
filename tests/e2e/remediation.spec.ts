@@ -37,9 +37,9 @@ test("UX-REMEDIATION-003 top bar keeps primary actions and demotes secondary nav
 
 test("UX-REMEDIATION-004 standard and advanced modes are materially different without state loss", async ({ page }) => {
   await ready(page); await example(page, "tinbaln"); await page.getByLabel("Target batch mass").fill("12.340");
-  await expect(page.getByRole("heading", { name: "Advanced controls and diagnostics" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Batch & constraints" })).toHaveCount(0);
   await page.getByRole("button", { name: "Advanced", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Advanced controls and diagnostics" })).toBeVisible(); await expect(page.getByRole("heading", { name: "Site descriptors" })).toBeVisible(); await expect(page.getByText("Matrix and solver diagnostics")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Batch & constraints" })).toBeVisible(); await expect(page.getByRole("heading", { name: "Site descriptors" })).toBeVisible(); await expect(page.getByText("Matrix and solver diagnostics")).toBeVisible();
   await page.getByRole("button", { name: "Standard", exact: true }).click(); await expect(page.getByLabel("Target batch mass")).toHaveValue("12.340"); await expect(page.getByText("Matrix and solver diagnostics")).toHaveCount(0);
 });
 
@@ -53,7 +53,7 @@ test("UX-REMEDIATION-005 compact balance layout makes the weighing result domina
 test("UX-REMEDIATION-006 provenance is information and exact codes remain in details", async ({ page }) => {
   await ready(page); await example(page, "ti3alc2");
   await page.getByRole("button", { name: "Advanced", exact: true }).click();
-  await expect(page.getByText(/calculation details/).first()).toBeVisible(); await page.getByText(/Calculation details \(/).click();
+  await page.getByText(/Calculation details \(/).click();
   const information = page.locator("article").filter({ hasText: "uses the CIAAW abridged calculation value" }).first();
   await expect(information).toBeVisible(); await expect(information).not.toHaveClass(/bg-amber-50/); await information.getByText("Show exact source message").click(); await expect(information.getByText(/ATOMIC_WEIGHT_INTERVAL/)).toBeVisible();
 });
@@ -96,8 +96,11 @@ test("SITE-RATIO-002 preserves deficient carbon feed and sorts weighing rows wit
   await expect(page.getByText(`Entered target formula: ${formula}`)).toBeVisible();
   const carbon = page.getByLabel("Carbon per formula");
   await expect(carbon).toHaveValue("2.7");
-  const alBox = await page.getByLabel("Aluminum per formula").boundingBox(); const carbonBox = await carbon.boundingBox();
-  expect(Math.abs((alBox?.y ?? 0) - (carbonBox?.y ?? 100))).toBeLessThan(8);
+  await expect.poll(async () => {
+    const aluminumBox = await page.getByLabel("Aluminum per formula").boundingBox();
+    const carbonBox = await carbon.boundingBox();
+    return aluminumBox && carbonBox ? Math.abs(aluminumBox.y - carbonBox.y) : Infinity;
+  }).toBeLessThan(8);
   await page.getByLabel("Normalize leading mixed-site ratios").check();
   await page.getByLabel("Aluminum per formula").fill("1.2");
   const formulaStages = page.getByRole("region", { name: "Target and adjusted feed formulas" });

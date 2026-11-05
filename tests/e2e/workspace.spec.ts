@@ -21,7 +21,8 @@ test("UX-001 routine formula workflow updates without a calculate action", async
 test("UX-002 mixed-site state survives standard and advanced modes", async ({ page }) => {
   await chooseExample(page, "tinbaln");
   await page.getByRole("button", { name: "Advanced", exact: true }).click();
-  await expect(page.getByText("Ti 0.5 + Nb 0.5")).toBeVisible();
+  await expect(page.getByLabel("M Ti fraction")).toHaveValue("0.5");
+  await expect(page.getByLabel("M Nb fraction")).toHaveValue("0.5");
   await page.getByRole("button", { name: "Standard", exact: true }).click();
   await expect(page.getByLabel("Target formula")).toHaveValue("(Ti0.5Nb0.5)2AlN");
 });
@@ -266,4 +267,40 @@ test("boride coefficients follow the formula until an explicit override is saved
   await expect(page.getByRole("textbox", { name: "Aluminum per formula" })).toHaveValue("2.2");
   await page.getByRole("button", { name: "Use formula coefficient" }).click();
   await expect(aluminumMass).toHaveText(derivedMass);
+});
+
+test("Advanced keeps weighing results visible while inspecting constraints in all explicit themes", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.getByRole("button", { name: "Advanced", exact: true }).click();
+  const sections = page.getByRole("navigation", { name: "Advanced calculator sections" });
+  const results = page.getByRole("region", { name: "Final weighing results" });
+  const total = results.getByRole("row").filter({ hasText: "Final rounded total" });
+  const baseline = (await total.innerText()).match(/[\d.]+ g/)?.[0];
+  expect(baseline).toBeTruthy();
+  for (const theme of ["Light", "Dark", "Midnight"]) {
+    await page.getByRole("button", { name: "Open appearance menu" }).click();
+    await page.getByRole("menuitemradio", { name: theme }).click();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", theme.toLowerCase());
+    await sections.getByRole("link", { name: "Batch & constraints" }).click();
+    await expect(page.getByRole("heading", { name: "Batch & constraints" })).toBeInViewport();
+    await expect(results.getByRole("heading", { name: "Final weighing results" })).toBeInViewport();
+    await expect(total).toBeInViewport();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(1280);
+  }
+  await page.getByLabel("Ti control", { exact: true }).selectOption("ratio");
+  await page.getByLabel("Ti ratio denominator").selectOption({ label: "Al" });
+  await page.getByLabel("Ti numerator ratio").fill("2");
+  await expect(total).toContainText(baseline!);
+  await page.getByRole("button", { name: "Standard", exact: true }).click();
+  await expect(page.getByText(/Advanced settings.*solver settings/)).toBeVisible();
+  await expect(total).toContainText(baseline!);
+  await page.getByRole("button", { name: "Inspect in Advanced" }).click();
+  await expect(page.getByLabel("Ti control", { exact: true })).toHaveValue("ratio");
+  await expect(page.getByLabel("Ti numerator ratio")).toHaveValue("2");
+  await expect(page.getByLabel("Ti ratio denominator")).toHaveValue("al");
+  await sections.getByRole("link", { name: "Material properties" }).click();
+  await page.getByText("Molar mass and source overrides", { exact: true }).click();
+  await expect(page.getByLabel("Ti molar mass override")).toBeVisible();
+  await sections.getByRole("link", { name: "Diagnostics & provenance" }).click();
+  await expect(page.getByRole("heading", { name: "Matrix and solver diagnostics" })).toBeVisible();
 });

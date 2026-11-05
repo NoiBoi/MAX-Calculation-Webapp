@@ -49,7 +49,7 @@ The left region contains conventional formula, route, target-mass, and common en
 
 ### Advanced mode
 
-Advanced mode adds in-place tabs/panels for sites, constraints, adjustment order, residuals, trace, descriptors, custom materials, uncertainty, and rounding. The primary weighing table remains visible. Expensive descriptor content loads only when opened.
+Advanced groups composition and sites, feed and precursors, batch and constraints, material properties, and diagnostics and provenance. Section links jump to the controls, and the weighing pane stays visible beside the inputs on desktop.
 
 ### Tablet behavior
 
@@ -143,11 +143,10 @@ The single-row responsive command bar, mode/layout distinction, blank/example be
 
 # Precursor-suggestion and management requirements
 
-- `Suggest precursors`, `Autofill best candidate`, `Add precursor`, and destructive-styled `Clear all` remain beside the precursor heading.
-- Suggestion cards expose formulas, source type, validation status, exact solver status, introduced elements, explanation, and a separate Use action. They state that candidates are not experimental-success predictions.
-- Autofill confirms replacement of a non-empty list, preserves registered IDs, and leaves purity blank unless the source record explicitly stores it.
-- Clear all confirms the row count, preserves target/settings/adjustments, never deletes registry or saved-route data, returns focus to Suggest, and is one undo step.
-- A target change never replaces the active route. An invalid old route offers Suggest replacements, Keep current route, and Clear precursors.
+- Enter precursor formulas and purity directly. The assistance row identifies missing elemental sources or incompatible proportions and opens an inline list of candidate additions.
+- Candidates use registered materials, matching saved routes, and eligible synthetic fallback identities. Results distinguish source validation from elemental feasibility and label partial coverage. The live recipe calculation applies the actual constraints.
+- Accepting a candidate appends only new formulas in one undoable edit. Existing formulas, purities, and constraints stay intact. New rows inherit purity only when the source stores it. Escape closes the list and restores focus to its trigger.
+- Advanced retains Clear all with a row-count confirmation and one-step undo. Applying a saved route remains a separate command in the route library.
 - Route origin (`manual`, `loaded`, or `suggestion-generated`) persists as workflow metadata but does not affect scientific arithmetic or canonical input digests.
 
 Blocking and action-required issues expand by default; minor advisories and calculation details are collapsed. Information never uses warning color or count. Display formatting follows `SCIENTIFIC_FORMATTING.md`, including balance-increment mass precision and exact-value access. The per-site radius selector reports definition, version, coverage, source-verification status, and separate laboratory approval.

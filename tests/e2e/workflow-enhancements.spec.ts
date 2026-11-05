@@ -14,7 +14,7 @@ test("SAVE-UI-001 renames before revision 1, records revision notes, and keeps m
 
 test("AL-RESET-001 preserves direct aluminum feed through unrelated workflow changes and recovery", async ({ page }) => {
   page.on("dialog", (dialog) => void dialog.accept()); await ready(page, "/workspace"); await example(page, "ti3alc2"); await page.getByRole("button", { name: "Advanced", exact: true }).click(); const aluminum = page.getByLabel("Aluminum per formula"); await aluminum.fill("1.2"); await page.getByLabel("Carbon per formula").fill("1.8"); await expect(aluminum).toHaveValue("1.2");
-  await page.getByRole("group", { name: "Route row 1" }).getByLabel("Formula").fill("Ti"); await expect(aluminum).toHaveValue("1.2"); await page.getByRole("button", { name: "Autofill best candidate" }).click(); await expect(aluminum).toHaveValue("1.2");
+  await page.getByRole("group", { name: "Route row 1" }).getByLabel("Formula").fill("Ti"); await expect(aluminum).toHaveValue("1.2"); await page.getByRole("button", { name: "Remove C", exact: true }).click(); await page.getByRole("button", { name: "Suggest precursors" }).click(); await page.getByRole("region", { name: "Suggested additions" }).getByRole("button", { name: "Add C", exact: true }).click(); await expect(aluminum).toHaveValue("1.2");
   await page.getByRole("button", { name: "Standard", exact: true }).click(); await openMore(page); await page.getByLabel("Workspace layout").selectOption("builtin-compact-balance"); await expect(page.getByText(/Advanced settings.*Al coefficient/)).toBeVisible(); await page.reload(); await expect(page.locator('[data-recovery-ready="true"]')).toBeVisible(); await page.getByRole("button", { name: "Advanced", exact: true }).click(); await expect(aluminum).toHaveValue("1.2");
 });
 
