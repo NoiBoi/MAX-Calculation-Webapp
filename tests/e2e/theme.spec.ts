@@ -45,6 +45,19 @@ test("THEME-005 dedicated print remains white in Dark mode", async ({ page }) =>
 
 test("theme toggle is keyboard operable at a 200 percent equivalent viewport", async ({ page }) => {
   await page.setViewportSize({ width: 640, height: 720 }); await ready(page); const toggle = page.getByRole("button", { name: /Change appearance/ }); await toggle.focus(); await page.keyboard.press("Enter"); await expect(page.locator("html")).toHaveAttribute("data-theme", /light|dark/); await expect(toggle).toBeFocused();
+  const menu = page.getByRole("button", { name: "Open appearance menu" });
+  await menu.press("Enter");
+  await page.keyboard.press("Home");
+  await expect(page.getByRole("menuitemradio", { name: "Light" })).toBeFocused();
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("Enter");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "midnight");
+  await expect(menu).toBeFocused();
+  await menu.press("Enter");
+  await page.keyboard.press("Escape");
+  await expect(menu).toBeFocused();
+  await expect(menu).toHaveAttribute("aria-expanded", "false");
 });
 
 test("Dark calculator and Settings have no serious accessibility violations", async ({ page }) => {

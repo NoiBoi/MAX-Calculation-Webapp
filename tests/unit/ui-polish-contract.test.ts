@@ -50,7 +50,7 @@ describe("MAXCalc shared UI architecture", () => {
     expect(comparison).toContain('More <span aria-hidden="true">•••</span>');
     expect(comparison).toContain('href="/demo">Documentation</Link>');
     expect(styles).toContain('.workspace-command-bar-inner { width: min(calc(100% - (2 * var(--page-gutter))), var(--workspace-max-width)); }');
-    expect(styles).toContain('font-size: 1.08rem;');
+    expect(styles).toMatch(/\.workspace-switcher-trigger \{[^}]+font-size: var\(--font-button\);/);
     expect(styles).toContain('.detail-mode-control button { padding-inline: .42rem; font-size: .78rem;');
     expect(styles).toContain('.action-menu-panel *,\n.workspace-command-layer * { font-weight: 400 !important; }');
     expect(workspace).toContain('<DetailModeControl ariaLabel="Interaction mode"');

@@ -207,7 +207,7 @@ export function DataManagementShell() {
           </button>
           <div className="mt-3 space-y-2">
             {layouts.map((layout) => (
-              <article className="rounded border p-3" key={layout.id}>
+              <article className="border-t border-slate-300 py-3" key={layout.id}>
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     {layout.builtIn ? (
@@ -550,7 +550,7 @@ export function DataManagementShell() {
           </p>
           <div className="mt-3 space-y-2">
             {DEFAULT_ATOMIC_RADIUS_REGISTRY.datasets.map((dataset) => (
-              <article className="rounded border p-3" key={dataset.datasetId}>
+              <article className="border-t border-slate-300 py-3" key={dataset.datasetId}>
                 <h3 className="font-semibold">{dataset.name}</h3>
                 <p className="text-xs">
                   {dataset.definition} · version {dataset.datasetVersion} ·{" "}

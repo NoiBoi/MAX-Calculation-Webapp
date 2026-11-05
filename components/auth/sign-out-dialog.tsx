@@ -26,7 +26,7 @@ export function SignOutDialog({ open, onClose }: Readonly<{ open: boolean; onClo
       close();
     } catch (error) { setMessage(error instanceof Error ? error.message : "Sign-out could not be completed."); }
   };
-  return <dialog aria-labelledby="sign-out-title" className="m-auto w-[min(94vw,36rem)] rounded-xl border-2 bg-white p-0 shadow-2xl backdrop:bg-slate-950/60" onCancel={(event) => { event.preventDefault(); close(); }} ref={dialog}>
+  return <dialog aria-labelledby="sign-out-title" className="m-auto w-[min(94vw,36rem)] bg-white p-0" onCancel={(event) => { event.preventDefault(); close(); }} ref={dialog}>
     <form className="p-5" method="dialog" onSubmit={(event) => { event.preventDefault(); void confirm(); }}>
       <h2 className="text-xl font-bold" id="sign-out-title">Sign out</h2>
       <fieldset className="mt-4 space-y-3">
