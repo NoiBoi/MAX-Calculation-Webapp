@@ -31,13 +31,13 @@ export function LoginForm({ nextPath }: { readonly nextPath: string }) {
       setError(reason instanceof Error ? reason.message : "Sign-in failed. Check your credentials and try again.");
     } finally { setPending(false); }
   };
-  return <form className="mt-6 space-y-4" onSubmit={(event) => void submit(event)}>
+  return <form className="space-y-4" onSubmit={(event) => void submit(event)}>
     <label className="block text-sm font-semibold">Email<input autoComplete="email" className="mt-1 min-h-11 w-full rounded border px-3" inputMode="email" name="email" onChange={(event) => setEmail(event.target.value)} required type="email" value={email} /></label>
     <label className="block text-sm font-semibold">Password<span className="relative mt-1 block"><input autoComplete="current-password" className="min-h-11 w-full rounded border px-3 pr-20" name="password" onChange={(event) => setPassword(event.target.value)} required type={showPassword ? "text" : "password"} value={password} /><button aria-pressed={showPassword} className="absolute right-1 top-1 min-h-9 rounded px-3 text-xs font-semibold" onClick={() => setShowPassword((value) => !value)} type="button">{showPassword ? "Hide" : "Show"}</button></span></label>
     {error && <p aria-live="assertive" className="rounded border border-red-400 bg-red-50 p-3 text-sm font-semibold text-red-900">{error}</p>}
-    <button className="min-h-11 w-full rounded bg-teal-800 px-4 py-2 font-semibold text-white disabled:bg-slate-400" disabled={pending} type="submit">{pending ? "Signing in…" : "Sign in"}</button>
+    <button className="ui-button ui-button-primary" disabled={pending} type="submit">{pending ? "Signing in…" : "Sign in"}</button>
     <div className="flex flex-wrap justify-between gap-3 text-sm"><Link className="underline" href="/forgot-password">Forgot password?</Link>{signupsEnabled ? <Link className="underline" href="/signup">Create account</Link> : <span className="text-slate-600">Accounts are invitation-only.</span>}</div>
-    <Link className="block text-center text-sm underline" href="/workspace">Continue with the local calculator</Link>
+    <Link className="block text-center text-sm underline" href="/workspace">Open calculator</Link>
   </form>;
 }
 

@@ -55,17 +55,17 @@ test("UX-005 invalid precursor keeps unmistakably stale results and recovers", a
   const tiFormula = page.locator("#precursor-formula-ti");
   await expect(page.getByText("Final rounded total")).toBeVisible();
   await tiFormula.fill("Ti(");
-  await expect(page.getByText("STALE — values below do not reflect the current input.")).toBeVisible();
+  await expect(page.getByText("Stale results. Resolve the input errors before weighing.")).toBeVisible();
   await expect(tiFormula).toHaveValue("Ti(");
   await tiFormula.fill("Ti");
-  await expect(page.getByText("STALE — values below do not reflect the current input.")).toHaveCount(0);
+  await expect(page.getByText("Stale results. Resolve the input errors before weighing.")).toHaveCount(0);
   await expect(page.getByText("Final rounded total")).toBeVisible();
 });
 
 test("UX-006 missing nitrogen source blocks current masses and preserves route", async ({ page }) => {
   await page.getByRole("button", { name: "Remove N" }).click();
   await expect(page.getByRole("alert").filter({ hasText: "Current recipe" })).toContainText(/nitrogen|element N|\bN\b/i);
-  await expect(page.getByText("STALE — values below do not reflect the current input.")).toBeVisible();
+  await expect(page.getByText("Stale results. Resolve the input errors before weighing.")).toBeVisible();
   await expect(page.locator("#precursor-formula-ti")).toHaveValue("Ti");
   await expect(page.locator("#precursor-formula-al")).toHaveValue("Al");
 });

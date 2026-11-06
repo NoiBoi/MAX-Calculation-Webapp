@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useRef, useState, type ReactNode } from "react";
+import { WorkbenchIcon } from "@/components/site/workbench-icon";
 import { useDismissibleLayer } from "./use-dismissible-layer";
 
 export function ActionMenu({ label, children }: { readonly label: string; readonly children: ReactNode }) {
@@ -13,7 +14,7 @@ export function ActionMenu({ label, children }: { readonly label: string; readon
   return (
     <div className="relative">
       <button aria-controls={open ? id : undefined} aria-expanded={open} aria-label={label} className="ui-button header-navigation-button" onClick={() => setOpen((value) => !value)} ref={triggerRef} type="button">
-        More <span aria-hidden="true">•••</span>
+        More <WorkbenchIcon name="more" />
       </button>
       {open && <section aria-label={label} className="workbench-menu" id={id} ref={layerRef}>{children}</section>}
     </div>

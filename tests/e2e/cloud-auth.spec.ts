@@ -19,7 +19,7 @@ test("AUTH-004 missing cloud configuration preserves the local calculator", asyn
   await expect(page).toHaveURL(/\/login$/);
   await expect(page.getByRole("heading", { name: "Sign in to MAXCalc" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Cloud accounts unavailable" })).toBeVisible();
-  await expect(page.getByText(/calculator, local recipes, comparisons, notes, backups, recovery, and printing continue/i)).toBeVisible();
+  await expect(page.getByText("This installation uses local storage.")).toBeVisible();
   await expect(page.getByText(/local application recovery/i)).toHaveCount(0);
   await page.getByRole("link", { name: "Calculator", exact: true }).click();
   await expect(page.locator('[data-recovery-ready="true"]')).toBeVisible();

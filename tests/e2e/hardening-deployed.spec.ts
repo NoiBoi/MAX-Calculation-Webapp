@@ -19,7 +19,7 @@ test("HARDEN-DEPLOYED-002 protected account data is not publicly rendered or cac
   if (process.env.TEST_CLOUD_UNCONFIGURED === "true") {
     await expect(page.getByRole("heading", { name: "Cloud accounts unavailable" })).toBeVisible();
   } else {
-    await expect(page.getByText(/Sign in before synchronizing account-scoped data/i)).toBeVisible();
+    await expect(page.getByText("Sign in to manage sync.")).toBeVisible();
   }
   const cacheControl = response?.headers()["cache-control"] ?? "";
   expect(cacheControl).not.toContain("public");

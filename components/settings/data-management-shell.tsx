@@ -50,7 +50,7 @@ export function DataManagementShell() {
   const [resolution, setResolution] =
     useState<ConflictResolution>("keep-local");
   const [integrity, setIntegrity] = useState<IntegrityResult>();
-  const [status, setStatus] = useState("Opening local data management…");
+  const [status, setStatus] = useState("Opening settings…");
   const refresh = useCallback(async () => {
     setLayouts(await repositories.listLayouts());
     setIntegrity(await repositories.checkIntegrity());
@@ -63,7 +63,7 @@ export function DataManagementShell() {
       .then(async () => {
         if (navigator.storage?.estimate)
           setStorage(await navigator.storage.estimate());
-        if (active) setStatus("Local data ready");
+        if (active) setStatus("");
       })
       .catch(
         (error) =>
@@ -106,7 +106,7 @@ export function DataManagementShell() {
     } catch {
       setCalculationPreview(await previewApplicationCalculation(text));
     }
-    setStatus("Import preview complete; no local records were changed.");
+    setStatus("Import preview ready");
   };
   const restore = async (mode: "merge" | "replace") => {
     if (!backupPreview?.valid) return;
@@ -143,7 +143,7 @@ export function DataManagementShell() {
       updatedAt: now,
     });
     await refresh();
-    setStatus("Saved a bounded user layout; scientific inputs were unchanged.");
+    setStatus("Layout saved");
   };
   const makeDefault = async (layout: WorkspaceLayout) => {
     const now = new Date().toISOString();
@@ -209,19 +209,18 @@ export function DataManagementShell() {
             Saved workspace layouts
           </h2>
           <p className="mt-1 text-sm">
-            Layouts store bounded presentation preferences only. Target,
-            precursor, batch, and results regions always remain available.
+            Layouts control pane order, width, and density.
           </p>
           <button
             className="mt-2 rounded border px-2 py-1 text-sm"
             onClick={() =>
               void repositories.resetDefaultLayout().then(async () => {
                 await refresh();
-                setStatus("Restored the tested Simple Calculator default.");
+                setStatus("Default layout restored");
               })
             }
           >
-            Reset tested default
+            Reset default layout
           </button>
           <div className="mt-3 space-y-2">
             {layouts.map((layout) => (
@@ -288,9 +287,8 @@ export function DataManagementShell() {
             Full local backup
           </h2>
           <p className="mt-1 text-sm">
-            Backups include recipes, immutable revisions and snapshots, routes,
-            comparisons, layouts, exact rationals, dataset versions, and a
-            verified manifest. Recovery drafts are excluded.
+            Includes recipes and revisions, calculations, routes, comparisons,
+            and layouts. Save recovery drafts before backing up.
           </p>
           <button
             className="mt-3 rounded bg-teal-800 px-3 py-2 font-semibold text-white"
@@ -336,12 +334,10 @@ export function DataManagementShell() {
           aria-labelledby="restore-heading"
         >
           <h2 className="text-lg font-semibold" id="restore-heading">
-            Preview restore or application JSON import
+            Restore or import
           </h2>
           <p className="mt-1 text-sm">
-            Accepted formats: MAXCalc full backup, complete saved
-            calculation, saved recipe, saved route, and comparison JSON.
-            Arbitrary JSON, CSV, spreadsheets, code, and HTML are rejected.
+            Choose a MAXCalc backup, calculation, recipe, route, or comparison JSON file.
           </p>
           <input
             accept="application/json,.json"

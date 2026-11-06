@@ -20,9 +20,9 @@ test("UX-REMEDIATION-001 fresh workspace starts blank and calculates from scratc
 
 test("UX-REMEDIATION-002 examples are immutable resettable working copies", async ({ page }) => {
   await ready(page); await example(page, "ti3alc2");
-  await expect(page.getByText(/Unsaved copy of Ti₃AlC₂ example/).first()).toBeVisible();
+  await expect(page.getByText("Unsaved example").first()).toBeVisible();
   await page.getByLabel("Target batch mass").fill("12.5");
-  await more(page); await page.getByRole("button", { name: "Reset copied example" }).click();
+  await more(page); await page.getByRole("button", { name: "Reset example" }).click();
   await expect(page.getByLabel("Target batch mass")).toHaveValue("10.000");
   await expect(page.getByLabel("Target formula")).toHaveValue("Ti3AlC2");
 });
@@ -84,7 +84,7 @@ test("SITE-RATIO-001 explicitly normalizes a leading mixed M-site group and rest
   await page.getByLabel("Normalize leading mixed-site ratios").uncheck();
   await expect(page.getByLabel("Target formula")).toHaveValue(formula);
   await expect(page.getByRole("heading", { name: "M-site ratio normalization" })).toHaveCount(0);
-  await expect(page.getByText(/Site model: Flat elemental formula/)).toBeVisible();
+  await expect(page.getByText(/Site model: Elemental formula/)).toBeVisible();
   await expect(page.getByText("Final rounded total")).toBeVisible();
 });
 

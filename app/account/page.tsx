@@ -6,10 +6,10 @@ import { createSupabaseServerClient, getServerAuthUser } from "@/lib/supabase/se
 
 export default async function AccountPage() {
   const cloud = getSupabasePublicConfig();
-  if (!cloud.configured) return <AuthPageShell title="MAXCalc account" description="Cloud identity is optional; local scientific work remains available."><CloudUnavailable message={cloud.message} /></AuthPageShell>;
+  if (!cloud.configured) return <AuthPageShell title="MAXCalc account"><CloudUnavailable message={cloud.message} /></AuthPageShell>;
 
   const user = await getServerAuthUser();
-  if (!user) return <AuthPageShell title="MAXCalc account" description="Sign in to view your cloud identity and profile."><div className="mt-5 rounded border bg-slate-50 p-4"><p>You are signed out. Your local MAXCalc data remains available on this device.</p><div className="mt-4 flex flex-wrap gap-3"><Link className="rounded bg-teal-800 px-4 py-2 font-semibold text-white" href="/login?next=/account">Sign in</Link><Link className="rounded border px-4 py-2 font-semibold" href="/workspace">Open calculator</Link></div></div></AuthPageShell>;
+  if (!user) return <AuthPageShell title="MAXCalc account"><div className="mt-5 rounded border bg-slate-50 p-4"><p>You are signed out.</p><div className="mt-4 flex flex-wrap gap-3"><Link className="rounded bg-teal-800 px-4 py-2 font-semibold text-white" href="/login?next=/account">Sign in</Link><Link className="rounded border px-4 py-2 font-semibold" href="/workspace">Open calculator</Link></div></div></AuthPageShell>;
 
   const client = await createSupabaseServerClient();
   let initialDisplayName = user.displayName;
@@ -23,5 +23,5 @@ export default async function AccountPage() {
       if (profile?.display_name) initialDisplayName = profile.display_name;
     }
   }
-  return <AuthPageShell title="MAXCalc account" description="Manage your identity, explicit cloud synchronization, and the boundary between anonymous and account-scoped device data." wide><AccountPanel initialDisplayName={initialDisplayName} profileError={profileError} user={user} /></AuthPageShell>;
+  return <AuthPageShell title="MAXCalc account" wide><AccountPanel initialDisplayName={initialDisplayName} profileError={profileError} user={user} /></AuthPageShell>;
 }

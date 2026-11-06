@@ -6,8 +6,8 @@ export default function EmiAnalyzerPage() {
   return <>
     <AppHeader
       activeSection="emi"
-      status="Local complex S-parameter analysis · files stay in this browser"
-      title="EMI Analysis"
+      status="Electromagnetic interference"
+      title="EMI analysis"
       contextualActions={<Link className="ui-button" href="/demo#emi-analysis">Documentation</Link>}
     />
     <main><PageContainer width="comparison"><EmiAnalyzerShell /></PageContainer></main>

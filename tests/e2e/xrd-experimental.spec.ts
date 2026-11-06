@@ -21,7 +21,7 @@ test("imports, persists, reloads, and reopens an exact raw XRD measurement", asy
   await page.route("**/api/xrd/data/parse", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(parseResponse()) }));
   await page.goto("/xrd");
   await page.getByLabel("Choose experimental XRD file").setInputFiles({ name: "sample.xy", mimeType: "text/plain", buffer: Buffer.from("2theta intensity\n10 100\n") });
-  await expect(page.getByText("Import preview · not yet saved")).toBeVisible();
+  await expect(page.getByText("Unsaved preview")).toBeVisible();
   await expect(page.getByText(/2θ: 2theta · intensity: intensity/)).toBeVisible();
   await expect(page.getByText(/Delimiter was detected heuristically/)).toBeVisible();
   await page.getByLabel("Display / sample name").fill("LMSL sample A");
@@ -93,7 +93,7 @@ test("saves and reopens immutable XRD processing and peak-analysis lineage", asy
   await page.getByLabel("Reference name").fill("LMSL empirical sample A");
   await page.getByLabel("Composition / formula").fill("X");
   await page.getByRole("button", { name: "Save as LMSL empirical reference" }).click();
-  await expect(page.getByText(/Empirical reference saved as UNREVIEWED/)).toBeVisible();
+  await expect(page.getByText("Empirical reference saved for review.")).toBeVisible();
   await page.getByLabel("Formula or COD ID").fill("1234567");
   await page.getByRole("button", { name: "Search COD" }).click();
   await page.getByRole("button", { name: "Use reference" }).click();
@@ -115,7 +115,7 @@ test("saves and reopens immutable XRD processing and peak-analysis lineage", asy
   await expect(page.getByRole("heading", { name: "Saved analysis revisions" })).toBeVisible();
   await page.getByRole("button", { name: "Open analysis" }).click();
   await expect(page.getByRole("heading", { name: "Analysis lineage" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Saved reference-matching analyses" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Saved matches" })).toBeVisible();
   await page.getByRole("button", { name: "Open matching result" }).click();
   await page.getByRole("button", { name: "Open refinement result" }).click();
   await expect(page.getByRole("heading", { name: "Reference vs refined lattice" })).toBeVisible();

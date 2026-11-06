@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-async function openSettings(page: Page) { await page.goto("/settings"); await expect(page.getByRole("heading", { name: "Local user settings" })).toBeVisible(); await expect(page.getByText("Local data ready", { exact: true })).toBeVisible(); }
+async function openSettings(page: Page) { await page.goto("/settings"); await expect(page.getByRole("heading", { name: "Local user settings" })).toBeVisible(); await expect(page.getByRole("button", { name: "Create verified backup" })).toBeVisible(); }
 async function saveSettings(page: Page) { await page.getByRole("button", { name: "Save settings" }).click(); await expect(page.getByText(/Settings saved locally/)).toBeVisible(); }
 async function setDefaults(page: Page) { await page.getByLabel("Default aluminum per formula").fill("1.2"); await page.getByLabel("211 carbon per formula").fill("0.9"); await page.getByLabel("312 carbon per formula").fill("1.8"); await page.getByLabel("413 carbon per formula").fill("2.7"); }
 async function readyWorkspace(page: Page) { await page.goto("/workspace"); await expect(page.locator('[data-recovery-ready="true"]')).toBeVisible(); }

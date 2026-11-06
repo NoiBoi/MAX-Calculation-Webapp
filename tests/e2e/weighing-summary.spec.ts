@@ -37,7 +37,7 @@ test("COMPARE-CONTROLS-001 add, duplicate, remove, undo, and precursor buttons s
   const blank = page.getByLabel("Blank scenario scenario", { exact: true }); await blank.getByRole("button", { name: "Add precursor" }).click(); await expect(blank.getByLabel("Blank scenario precursor 1 formula")).toBeVisible();
   await blank.getByRole("button", { name: "Duplicate" }).click(); await expect(page.locator('section[aria-label$=" scenario"]')).toHaveCount(2); await expect(page.getByText("Duplicated Blank scenario.", { exact: true })).toBeVisible();
   await page.getByLabel("Copy of Blank scenario scenario", { exact: true }).getByRole("button", { name: "Remove", exact: true }).click(); await expect(page.locator('section[aria-label$=" scenario"]')).toHaveCount(1);
-  await page.getByRole("button", { name: "Undo scenario removal" }).click(); await expect(page.locator('section[aria-label$=" scenario"]')).toHaveCount(2); await expect(page.getByText("Restored the removed scenario.", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Undo scenario removal" }).click(); await expect(page.locator('section[aria-label$=" scenario"]')).toHaveCount(2); await expect(page.getByText("Scenario restored", { exact: true })).toBeVisible();
 });
 
 test("SUMMARY-002 keeps valid and invalid comparison scenarios visible", async ({ page, context }) => {

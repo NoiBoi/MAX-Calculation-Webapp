@@ -7,17 +7,6 @@ import { WorkspaceNavigation, type WorkspaceId } from "./workspace-switcher";
 
 export type AppSection = WorkspaceId | "settings" | "account" | "labs" | "other";
 
-const sectionNames: Record<AppSection, string> = {
-  calculator: "Calculator",
-  comparison: "Comparison",
-  emi: "Electromagnetic interference",
-  xrd: "X-ray diffraction",
-  settings: "Preferences & data",
-  account: "Account",
-  labs: "Laboratory",
-  other: "Resources",
-};
-
 interface AppHeaderProps {
   readonly activeSection: AppSection;
   readonly title: string;
@@ -39,7 +28,6 @@ export function AppHeader({
     <header className="app-header" data-active-section={activeSection} data-component="app-header" data-testid={testId} role="banner">
       <div className="workbench-masthead">
         <Link aria-label="MAXCalc calculator" className="app-header-brand" href="/workspace"><SiteBrand /></Link>
-        <span className="workbench-masthead-label">Research workbench</span>
         <div className="app-header-global-actions">
           <ThemeControl />
           <AccountControl />
@@ -48,7 +36,6 @@ export function AppHeader({
       <WorkspaceNavigation activeSection={activeSection} />
       <div className="app-header-inner">
         <div className="app-header-context">
-          <p className="ui-eyebrow">{sectionNames[activeSection]}</p>
           <h1>{title}</h1>
           {status && <p aria-live="polite" className="workspace-status">{status}</p>}
         </div>

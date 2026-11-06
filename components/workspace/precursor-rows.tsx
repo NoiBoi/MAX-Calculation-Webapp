@@ -1,3 +1,4 @@
+import { WorkbenchIcon } from "@/components/site/workbench-icon";
 import type { WorkspacePrecursorInput } from "@/lib/workspace/presets";
 
 interface PrecursorRowsProps {
@@ -26,10 +27,10 @@ export function PrecursorRows({ precursors, advanced, onChange, onNavigate, onMo
       <input aria-label={`Purity (%), precursor ${index + 1}`} className="px-2 text-right" data-primary-field id={`purity-${item.id}`} inputMode="decimal" onChange={(event) => onChange(index, { purityPercent: event.target.value })} placeholder="Assumed" value={item.purityPercent} />
       <div className="precursor-row-actions command-group">
         {advanced && <>
-          <button aria-label={`Move ${item.name} up`} className="ui-icon-button ui-button-compact" disabled={index === 0} onClick={() => onMove(index, -1)} type="button">↑</button>
-          <button aria-label={`Move ${item.name} down`} className="ui-icon-button ui-button-compact" disabled={index === precursors.length - 1} onClick={() => onMove(index, 1)} type="button">↓</button>
+          <button aria-label={`Move ${item.name} up`} className="ui-icon-button ui-button-compact" disabled={index === 0} onClick={() => onMove(index, -1)} type="button"><WorkbenchIcon name="up" /></button>
+          <button aria-label={`Move ${item.name} down`} className="ui-icon-button ui-button-compact" disabled={index === precursors.length - 1} onClick={() => onMove(index, 1)} type="button"><WorkbenchIcon name="down" /></button>
         </>}
-        <button aria-label={`Remove ${item.name}`} className="ui-icon-button ui-button-compact" onClick={() => onRemove(index)} title={`Remove precursor ${index + 1}`} type="button">×</button>
+        <button aria-label={`Remove ${item.name}`} className="ui-icon-button ui-button-compact" onClick={() => onRemove(index)} title={`Remove precursor ${index + 1}`} type="button"><WorkbenchIcon name="close" /></button>
       </div>
     </div>)}
   </div>;

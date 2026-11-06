@@ -5,6 +5,13 @@ const paths = {
   xrd: "M2.5 3v14h15 M4 14h2l1.8-5 2 5h1.5l2.4-9 2 9h1.8",
   labs: "M7 2.5h6 M8 2.5v6l-4.3 6.6A1.4 1.4 0 0 0 5 17.5h10a1.4 1.4 0 0 0 1.3-2.4L12 8.5v-6 M6 12h8",
   settings: "M3 5h14 M3 10h14 M3 15h14 M7 3v4 M13 8v4 M8 13v4",
+  more: "M3 10h1.5 M9.25 10h1.5 M15.5 10H17",
+  add: "M10 4v12 M4 10h12",
+  close: "M5 5l10 10 M15 5 5 15",
+  up: "M10 16V4 M5 9l5-5 5 5",
+  down: "M10 4v12 M5 11l5 5 5-5",
+  undo: "M7 4 3 8l4 4 M3 8h9a4 4 0 0 1 0 8h-2",
+  redo: "M13 4l4 4-4 4 M17 8H8a4 4 0 0 0 0 8h2",
   empty: "M5 2.5h7l3 3v12H5z M11.5 2.5V6h3.5 M8 9.5h4 M8 13h4",
 } as const;
 

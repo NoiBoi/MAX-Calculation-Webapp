@@ -181,7 +181,6 @@ export function EmiPlot({
     clone.setAttribute("height", String(format?.figureHeight ?? HEIGHT));
     clone.style.background = format?.lightBackground === false ? "#111827" : "#ffffff";
     const style = document.createElementNS("http://www.w3.org/2000/svg", "style"); style.textContent = exportStyle; clone.prepend(style);
-    clone.querySelector('[aria-label="Exported trace legend"]')?.remove();
     if (format?.legendPosition !== "none") {
       const columns = 4;
       const rows = Math.ceil(legendTraces.length / columns);
@@ -219,7 +218,7 @@ export function EmiPlot({
     : simonUnavailableCount > 0 ? `${simonUnavailableCount} displayed sample${simonUnavailableCount === 1 ? "" : "s"} lack valid electrical inputs; available estimates can still be shown.` : "";
 
   return <section className="emi-panel" aria-label={title} data-emi-graph-id={graphId}>
-    <div className="emi-section-heading"><div><h2>{format?.title || title}</h2>{format?.subtitle && <p>{format.subtitle}</p>}<p>Invalid calculated values are displayed as gaps.</p></div><div aria-label="Plot exports" className="command-group" role="group"><button aria-label={`Export ${exportName} SVG`} className="ui-button ui-button-compact" onClick={exportSvg} title="Export SVG" type="button">SVG</button><button aria-label={`Export ${exportName} PNG`} className="ui-button ui-button-compact" onClick={exportPng} title="Export PNG" type="button">PNG</button></div></div>
+    <div className="emi-section-heading"><div><h2>{format?.title || title}</h2>{format?.subtitle && <p>{format.subtitle}</p>}</div><div aria-label="Plot exports" className="command-group" role="group"><button aria-label={`Export ${exportName} SVG`} className="ui-button ui-button-compact" onClick={exportSvg} title="Export SVG" type="button">SVG</button><button aria-label={`Export ${exportName} PNG`} className="ui-button ui-button-compact" onClick={exportPng} title="Export PNG" type="button">PNG</button></div></div>
     {format?.legendPosition !== "none" && <div className={`emi-chart-legend emi-legend-${format?.legendPosition ?? "top"}`} aria-label={`${title} traces`}>
       {legendTraces.map((trace) => <button aria-pressed={!hidden.has(trace.id)} className={`emi-legend-item ${"sampleName" in trace ? "emi-legend-simon" : ""}`} key={trace.id} onClick={() => toggle(trace.id)} type="button">
         <span aria-hidden="true" style={"sampleName" in trace ? { backgroundColor: "transparent", borderTop: `2px dashed ${trace.color}` } : { backgroundColor: trace.color }} />{trace.label}{"sampleName" in trace && <em>Theoretical</em>}
@@ -230,7 +229,7 @@ export function EmiPlot({
       {simonEligible && <label className="emi-checkbox-label"><input checked={showSimonEstimate} disabled={simonTraces.length === 0} onChange={(event) => setShowSimonEstimate(event.target.checked)} type="checkbox" />Show Simon estimate</label>}
       {smoothingEnabled && <span className="emi-view-badge" aria-live="polite">Smoothed display</span>}
     </div>}
-    {(canSmooth || simonEligible) && <p className="emi-graph-help" id={`${graphId}-help`}>Smoothing affects the display only. {simonEligible && (simonUnavailableMessage || "Simon estimates are theoretical and use the original measurements.")}</p>}
+    {(canSmooth || simonEligible) && <p className="emi-graph-help" id={`${graphId}-help`}>{smoothingEnabled && "Smoothing is display only. "}{simonEligible && (simonUnavailableMessage || (showSimonEstimate ? "Simon estimates are theoretical and use the original measurements." : ""))}</p>}
     {all.length === 0 ? <div className="emi-empty-chart">No valid selected points are available for this plot.</div> : <div className="emi-chart-wrap">
       <svg
         aria-describedby={`${graphId}-help`}
@@ -267,9 +266,8 @@ export function EmiPlot({
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
       >
         <title>{title}; hover for exact values, use left and right arrow keys while focused, and use legend buttons to toggle traces.</title>
-        <text className="emi-axis-label" textAnchor="middle" x={WIDTH / 2} y="14">{format?.title || title}</text>
-        {format?.subtitle && <text className="emi-axis-text" textAnchor="middle" x={WIDTH / 2} y="28">{format.subtitle}</text>}
-        {format?.legendPosition !== "none" && <g aria-label="Exported trace legend">{legendTraces.slice(0, 4).map((trace, index) => <g key={`svg-legend-${trace.id}`} transform={`translate(${72 + index * 200} 43)`}><line stroke={trace.color} strokeDasharray={"sampleName" in trace ? "7 5" : undefined} strokeWidth="3" x1="0" x2="16" y1="0" y2="0" /><text className="emi-axis-text" x="21" y="4">{trace.label.length > 22 ? `${trace.label.slice(0, 21)}…` : trace.label}</text></g>)}{legendTraces.length > 4 && <text className="emi-axis-text" textAnchor="end" x={WIDTH - 24} y="55">+{legendTraces.length - 4} additional traces</text>}</g>}
+        <text className="emi-axis-label emi-export-heading" textAnchor="middle" x={WIDTH / 2} y="14">{format?.title || title}</text>
+        {format?.subtitle && <text className="emi-axis-text emi-export-heading" textAnchor="middle" x={WIDTH / 2} y="28">{format.subtitle}</text>}
         {(minimumHz !== undefined || maximumHz !== undefined) && <rect data-selected-frequency-band fill="#0f766e" fillOpacity="0.035" height={plotHeight} width={plotWidth} x={plotMargin.left} y={plotMargin.top}><title>Selected analysis frequency band</title></rect>}
         {(format?.gridVisibility === false ? [] : yAxis.ticks).map((tick) => { const yy = y(tick.value); return <g data-y-axis-tick={tick.value} key={`y-${tick.value}`}><line className="emi-grid-line" x1={plotMargin.left} x2={WIDTH - plotMargin.right} y1={yy} y2={yy} /><text className="emi-axis-text emi-y-tick-label" textAnchor="end" x={plotMargin.left - 9} y={yy + 4}>{tick.label}</text></g>; })}
         {(format?.gridVisibility === false ? [] : [0, 0.25, 0.5, 0.75, 1]).map((fraction) => { const xx = plotMargin.left + fraction * plotWidth; const transformed = transformedXMin + fraction * (transformedXMax - transformedXMin); const value = (logarithmicX ? 10 ** transformed : transformed) / factor; return <g key={`x-${fraction}`}><line className="emi-grid-line" x1={xx} x2={xx} y1={plotMargin.top} y2={HEIGHT - plotMargin.bottom} /><text className="emi-axis-text" textAnchor="middle" x={xx} y={HEIGHT - plotMargin.bottom + 20}>{axisValue(value)}</text></g>; })}
@@ -280,7 +278,7 @@ export function EmiPlot({
         {renderedSimon.flatMap(({ trace, segments }) => segments.map((segment, index) => <polyline data-series-kind="simon" data-trace-id={trace.id} data-values={segment.map((point) => point.value).join(",")} fill="none" key={`${trace.id}-${index}`} opacity="0.72" points={segment.map((point) => `${x(point.frequencyHz)},${y(point.value)}`).join(" ")} stroke={trace.color} strokeDasharray="7 5" strokeLinejoin="round" strokeWidth="1.5" />))}
         {hover && <g data-active-frequency-hz={hover.frequencyHz} pointerEvents="none"><line className="emi-hover-line" data-frequency-hz={hover.frequencyHz} x1={hover.x} x2={hover.x} y1={plotMargin.top} y2={HEIGHT - plotMargin.bottom} /><circle cx={hover.x} cy={hover.y} data-frequency-hz={hover.frequencyHz} fill={hover.color} r={format?.markerVisibility === false ? "3.5" : "4"} /></g>}
       </svg>
-      {hover && <div className="emi-chart-tooltip" data-frequency-hz={hover.frequencyHz} role="status"><strong>{hover.label}</strong><span>Frequency: {(hover.frequencyHz / factor).toPrecision(10)} {unit}</span>{hover.kind === "measured" ? <>{smoothingActive ? <><span>Raw measured value: {hover.rawValue.toPrecision(10)} {yLabel}</span><span>Smoothed display: {hover.value.toPrecision(10)} {yLabel}</span></> : <span>Measured value: {hover.rawValue.toPrecision(10)} {yLabel}</span>}</> : <><span>Simon theoretical SET: {hover.value.toPrecision(10)} dB</span><span>Conductivity: {scientific(hover.simon?.conductivitySiemensPerMeter ?? Number.NaN)} S/m</span><span>Thickness: {axisValue(hover.simon?.thicknessMicrometers ?? Number.NaN)} µm</span><span>Calculation version: {hover.simon?.calculationVersion}</span><span>Theoretical estimate, not measured.</span></>}</div>}
+      {hover && <div className="emi-chart-tooltip" data-frequency-hz={hover.frequencyHz} role="status"><strong>{hover.label}</strong><span>Frequency: {(hover.frequencyHz / factor).toPrecision(10)} {unit}</span>{hover.kind === "measured" ? <>{smoothingActive ? <><span>Raw measured value: {hover.rawValue.toPrecision(10)} {yLabel}</span><span>Smoothed display: {hover.value.toPrecision(10)} {yLabel}</span></> : <span>Measured value: {hover.rawValue.toPrecision(10)} {yLabel}</span>}</> : <><span>Simon theoretical SET: {hover.value.toPrecision(10)} dB</span><span>Conductivity: {scientific(hover.simon?.conductivitySiemensPerMeter ?? Number.NaN)} S/m</span><span>Thickness: {axisValue(hover.simon?.thicknessMicrometers ?? Number.NaN)} µm</span><span>Calculation version: {hover.simon?.calculationVersion}</span></>}</div>}
     </div>}
   </section>;
 }

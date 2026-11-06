@@ -7,8 +7,8 @@ export type WorkspaceId = "calculator" | "comparison" | "emi" | "xrd";
 const WORKSPACES = [
   { id: "calculator", href: "/workspace", name: "Calculator" },
   { id: "comparison", href: "/compare", name: "Comparison" },
-  { id: "emi", href: "/emi", name: "EMI Analysis" },
-  { id: "xrd", href: "/xrd", name: "XRD Analysis" },
+  { id: "emi", href: "/emi", name: "EMI analysis" },
+  { id: "xrd", href: "/xrd", name: "XRD analysis" },
 ] as const;
 
 const UTILITIES = [
@@ -27,11 +27,9 @@ export function WorkspaceNavigation({ activeSection }: { readonly activeSection:
   return (
     <nav aria-label="MAXCalc workspaces" className="workbench-navigation">
       <div className="workbench-nav-group">
-        <p className="ui-eyebrow">Workspaces</p>
         {links(WORKSPACES)}
       </div>
       <div className="workbench-nav-group">
-        <p className="ui-eyebrow">Manage</p>
         {links(UTILITIES)}
       </div>
     </nav>

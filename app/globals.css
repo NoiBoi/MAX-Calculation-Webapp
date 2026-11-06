@@ -13,7 +13,7 @@
 :root {
   color-scheme: light;
   font-family: var(--font-sans);
-  --background-page: #f2f3f4;
+  --background-page: #eef0f2;
   --background-panel: #ffffff;
   --background-elevated: #ffffff;
   --background-input: #ffffff;
@@ -51,8 +51,8 @@
   --font-page-title: 1.125rem;
   --font-formula: 1.05rem;
   --font-table: .8125rem;
-  --control-height: 2.25rem;
-  --control-height-compact: 2rem;
+  --control-height: 2.125rem;
+  --control-height-compact: 1.875rem;
   --space-inline-control: .4rem;
   --space-toolbar-group: .65rem;
   --space-field-stack: .6rem;
@@ -70,7 +70,7 @@
   --radius-panel: 0px;
   --radius-overlay: 2px;
   --shadow-overlay: 0 4px 14px #10182026;
-  --background-header: #e9eef0;
+  --background-header: #f3f5f7;
   --selection-fill: color-mix(in srgb, var(--accent) 12%, var(--background-panel));
 }
 
@@ -106,7 +106,7 @@
   --status-info-text: #dbeafe;
   --focus-ring: #91d4cb;
   --overlay-backdrop: #090a0bcc;
-  --background-header: #292e34;
+  --background-header: #26292e;
   --shadow-overlay: 0 4px 14px #0008;
 }
 
@@ -142,7 +142,7 @@
   --status-info-text: #b8cada;
   --focus-ring: #68c8ba;
   --overlay-backdrop: #000000e0;
-  --background-header: #1a1c20;
+  --background-header: #17191c;
   --shadow-overlay: 0 4px 14px #000a;
 }
 
@@ -192,7 +192,7 @@ button[aria-pressed="true"] { box-shadow: inset 0 0 0 1px currentColor; }
 .cloud-first-sync-dialog { width: min(34rem, 100%); border: 1px solid var(--border-strong); border-radius: var(--radius-overlay); background: var(--background-elevated); color: var(--text-primary); padding: 1.25rem; }
 .auth-card input { background: var(--background-input); color: var(--text-primary); }
 .auth-card a { text-underline-offset: 2px; }
-.creator-credit { display: flex; width: 100%; flex-wrap: wrap; justify-content: center; gap: .15rem .4rem; margin: 0; border-top: 1px solid var(--border-subtle); background: var(--background-panel); color: var(--text-muted); padding: .65rem var(--page-gutter); font-size: .72rem; line-height: 1.2; text-align: center; }
+.creator-credit { display: flex; width: 100%; flex-wrap: wrap; justify-content: flex-end; gap: .15rem .45rem; margin: 0; color: var(--text-muted); padding: .5rem var(--page-gutter); font-size: .7rem; line-height: 1.2; text-align: center; }
 .creator-credit a { color: var(--text-secondary); text-decoration: underline; text-underline-offset: 2px; }
 .site-brand { display: inline-flex; align-items: center; gap: .45rem; white-space: nowrap; }
 .site-logo { display: block; width: max(31px, calc(var(--control-height) - .55rem)); height: max(31px, calc(var(--control-height) - .55rem)); object-fit: contain; }
@@ -286,9 +286,9 @@ button[aria-pressed="true"] { box-shadow: inset 0 0 0 1px currentColor; }
   padding: var(--space-card);
 }
 .comparison-scenario-card.is-baseline { outline: 2px solid var(--accent); outline-offset: -2px; }
-.scenario-header { display: grid; grid-template-columns: auto minmax(8rem, 1fr) auto auto; align-items: center; gap: var(--space-inline-control); }
-.scenario-baseline-badge { border-radius: var(--radius-control); background: var(--status-success-background); color: var(--status-success-text); padding: .3rem .5rem; font-size: .7rem; font-weight: 600; }
-.scenario-name-input { min-width: 0; min-height: var(--control-height); border: 1px solid var(--border-default); border-radius: var(--radius-control); padding-inline: .65rem; font-weight: 600; }
+.scenario-header { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-inline-control); }
+.scenario-baseline-badge { color: var(--accent); font-size: .75rem; font-weight: 600; }
+.scenario-name-input { flex: 1 1 10rem; min-width: 0; min-height: var(--control-height); border: 1px solid var(--border-default); border-radius: var(--radius-control); padding-inline: .65rem; font-weight: 600; }
 .scenario-status, .scenario-source { color: var(--text-muted); font-size: .75rem; }
 .scenario-header-actions, .scenario-footer-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-inline-control); }
 .scenario-source { margin-top: .35rem; }
@@ -315,19 +315,12 @@ main.min-h-screen > header:not(.sticky) + div.mx-auto.grid > section { padding: 
   dialog { max-width: min(82vw, 110rem); }
 }
 
-@media (max-width: 1400px) {
-  .scenario-header { grid-template-columns: auto minmax(8rem, 1fr) auto; }
-  .scenario-header-actions { grid-column: 1 / -1; justify-content: flex-end; }
-}
-
 @media (max-width: 900px) {
   html { font-size: 16px; }
 }
 
 @media (max-width: 640px) {
   .site-brand-navigation > span:last-child { display: inline; }
-  .scenario-header { grid-template-columns: minmax(0, 1fr) auto; }
-  .scenario-baseline-badge, .scenario-status { grid-column: 1 / -1; }
 }
 
 /* Existing utility colors are mapped centrally onto the semantic palette. */
@@ -412,6 +405,7 @@ main:not(.dedicated-print-root) .font-bold { font-weight: 600; }
   box-shadow: var(--shadow-overlay);
 }
 dialog {
+  max-height: calc(100dvh - 2rem);
   border: 1px solid var(--border-strong);
   background: var(--background-elevated);
   color: var(--text-primary);
@@ -430,7 +424,6 @@ dialog {
 }
 .xrd-workspace,
 .emi-analyzer { gap: var(--layout-gap); }
-.xrd-workspace-divider { border-top-width: 1px; }
 .workspace-landing { margin-block: var(--space-section); padding: var(--panel-padding); }
 
 /* Four-level type hierarchy: app title, section, subsection, field label. */
@@ -479,6 +472,12 @@ main label :is(input:not([type="checkbox"], [type="radio"]), select, textarea) {
 .ui-button-primary,
 :is(main, dialog) button[class*="bg-teal"] { border-color: var(--accent); background: var(--accent); color: var(--accent-foreground); }
 .ui-button-destructive { background: transparent; }
+.ui-button:disabled, .ui-icon-button:disabled {
+  border-color: var(--border-subtle);
+  background: var(--background-header);
+  color: var(--text-muted);
+}
+.ui-button:active:not(:disabled), .ui-icon-button:active:not(:disabled) { box-shadow: inset 0 1px 2px #0002; }
 .segmented-control { border-radius: var(--radius-control); }
 .segmented-control button { border-radius: calc(var(--radius-control) - 1px); }
 

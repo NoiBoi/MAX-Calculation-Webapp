@@ -40,7 +40,7 @@ test("DISPLAY-2K-001 scales calculator, comparison, and Settings without overflo
 
   await page.goto("/settings");
   await expect(page.getByRole("heading", { name: "Local user settings" })).toBeVisible();
-  expect(await page.getByRole("combobox", { name: "Appearance" }).evaluate((element) => element.getBoundingClientRect().height)).toBeGreaterThan(41);
+  expect(await page.getByRole("combobox", { name: "Theme" }).evaluate((element) => element.getBoundingClientRect().height)).toBeGreaterThan(41);
   await noHorizontalOverflow(page);
 });
 

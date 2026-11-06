@@ -32,7 +32,7 @@ async function downloadText(download: Download): Promise<string> {
 
 test("EMI analyzer imports multiple files, shows failures, switches directions, and removes files", async ({ page }) => {
   await page.goto("/emi");
-  await expect(page.getByRole("heading", { name: "EMI Analysis" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "EMI analysis" })).toBeVisible();
   await page.locator('input[type="file"][accept^=".csv"]').setInputFiles([
     { name: "alpha.csv", mimeType: "text/csv", buffer: Buffer.from(validCsv()) },
     { name: "beta.csv", mimeType: "text/csv", buffer: Buffer.from(validCsv(0.02)) },
@@ -40,7 +40,7 @@ test("EMI analyzer imports multiple files, shows failures, switches directions, 
   ]);
   await expect(page.getByText("2 of 3 files ready")).toBeVisible();
   await expect(page.getByTestId("emi-file-card")).toHaveCount(3);
-  await expect(page.getByText("Parse failed")).toBeVisible();
+  await expect(page.getByText("Import failed")).toBeVisible();
   await expect(page.getByText("No Keysight data-section BEGIN marker was found.")).toBeVisible();
   await expect(page.getByText("Keysight Technologies · N5247B · SERIAL-1").first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "alpha.csv", exact: true })).toBeVisible();
@@ -104,7 +104,7 @@ test("EMI thickness, themed electrical controls, and graph interaction use one c
   await card.getByLabel("Raw four-point-probe resistance 1 for interaction.csv").fill("1.2");
   await expect(card.getByText(/12,858\.5742 S\/m/).first()).toBeVisible();
   await expect(card.getByText(/128\.585742 S\/cm/)).toBeVisible();
-  await expect(card.getByText("3 unsmoothed theoretical points are available at the measured frequencies. They remain separate from measured SET.")).toBeVisible();
+  await expect(card.getByText("3 theoretical points at the measured frequencies.")).toBeVisible();
   await card.getByLabel("Sample thickness for interaction.csv").fill("0.0200");
   await expect(card.getByText("20 µm", { exact: true })).toBeVisible();
   await expect(card.getByText(/9,193\.880553 S\/m/).first()).toBeVisible();
@@ -194,7 +194,7 @@ test("EMI projects support bulk metadata, replicate interpolation, persistence, 
   await firstCard.getByRole("button", { name: "Add first reading" }).click();
   await firstCard.getByLabel("Raw four-point-probe resistance 1 for batch-1.1.csv").fill("1");
   await expect(firstCard.getByText(/22,065\.31333 S\/m/).first()).toBeVisible();
-  await expect(firstCard.getByText("3 unsmoothed theoretical points are available at the measured frequencies. They remain separate from measured SET.")).toBeVisible();
+  await expect(firstCard.getByText("3 theoretical points at the measured frequencies.")).toBeVisible();
 
   await page.getByText("Advanced interpolation settings").click();
   await page.getByLabel("Enable interpolation for incompatible grids").check();
@@ -277,7 +277,7 @@ test("SET smoothing and Simon overlay are independent, theoretical, and export-n
   for (let index = 0; index < 10; index += 1) await setPlot.locator("svg.emi-chart").press("ArrowRight");
   await setPlot.locator("svg.emi-chart").press("ArrowUp");
   await expect(setPlot.getByRole("status")).toContainText("Simon theoretical SET");
-  await expect(setPlot.getByRole("status")).toContainText("Theoretical estimate, not measured");
+  await expect(setPlot.getByRole("status")).toContainText("Calculation version:");
   await setPlot.getByLabel("Show Simon estimate").uncheck();
   await expect(setPlot.locator('polyline[data-series-kind="simon"]')).toHaveCount(0);
   await setPlot.getByLabel("Show Simon estimate").check();

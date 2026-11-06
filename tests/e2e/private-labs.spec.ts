@@ -11,8 +11,8 @@ test("private lab library requires authentication without blocking the local cal
 
 test("invitation acceptance explains the secure authorization checks", async ({ page }) => {
   await page.goto("/labs/invitations/accept?token=test-token");
-  await expect(page.getByRole("heading", { name: "Accept private lab invitation" })).toBeVisible();
-  await expect(page.getByText(/signed-in email to match/i)).toBeVisible();
-  await expect(page.getByText(/expired, revoked, or previously used invitations are rejected/i)).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Lab invitation" })).toBeVisible();
+  await expect(page.getByText(/Sign in with the email address on the invitation/)).toBeVisible();
+  await expect(page.getByText(/Use a valid link before it expires/)).toBeVisible();
   await expect(page.getByRole("button", { name: "Accept invitation" })).toBeVisible();
 });

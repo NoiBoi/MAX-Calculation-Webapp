@@ -9,7 +9,7 @@ test("COMPARE-CONSISTENCY-001 uses calculator result tables and advanced hierarc
   const first = page.getByLabel("Unsaved calculation scenario", { exact: true });
   await expect(first.getByRole("table", { name: "Final precursor weighing masses and molar quantities" })).toBeVisible();
   await expect(first.getByRole("columnheader", { name: "Purity" })).toBeVisible(); await expect(first.getByRole("columnheader", { name: "Status" })).toBeVisible();
-  await page.getByRole("button", { name: "Advanced", exact: true }).click(); await expect(first.getByText("Solver, balance, residuals, and provenance")).toBeVisible(); await expect(first.getByText("Site descriptors")).toBeVisible();
+  await page.getByRole("button", { name: "Advanced", exact: true }).click(); await expect(first.getByText("Calculation details")).toBeVisible(); await expect(first.getByText("Site descriptors")).toBeVisible();
 });
 
 test("SUMMARY-RADIUS-001 only adds configured explicit-site descriptors to advanced summary", async ({ page, context }) => {

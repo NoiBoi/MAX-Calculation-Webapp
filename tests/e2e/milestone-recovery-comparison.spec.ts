@@ -101,7 +101,7 @@ test("COMPARE-ANALYSIS-001 supports baseline, normalization, sorting, hiding, ex
   const rows = page.getByRole("table").first().locator("tbody tr"); await expect(rows.nth(0)).toContainText("Route A");
   await page.getByLabel("Route A", { exact: true }).uncheck(); await expect(page.getByRole("table").first()).not.toContainText("Route A");
   const download = page.waitForEvent("download"); await page.getByRole("button", { name: "Export CSV" }).click(); await download;
-  await page.getByLabel("Comparison print content").selectOption("overview-only");
+  await page.getByLabel("Print content").selectOption("overview-only");
   const popupPromise = page.waitForEvent("popup"); await page.getByRole("button", { name: "Print comparison" }).click(); const popup = await popupPromise;
   await expect(popup.getByRole("heading", { name: "Comparison overview" })).toBeVisible(); await expect(popup.locator(".print-recipe")).toHaveCount(0);
 });

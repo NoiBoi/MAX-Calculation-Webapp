@@ -28,7 +28,7 @@ test("THEME-003 compact control, panels, dialogs, trace, and settings share Dark
   await page.getByLabel("Start or reset").selectOption("ti2aln"); await page.getByRole("button", { name: "Save", exact: true }).click(); await expect(page.getByRole("dialog", { name: "Save recipe" })).toHaveCSS("color-scheme", "dark"); await page.keyboard.press("Escape");
   await page.getByText("Calculation summary and audit", { exact: true }).click();
   await page.getByRole("button", { name: "Open calculation trace" }).click(); await expect(page.getByRole("region", { name: "Calculation details", exact: true })).toBeVisible();
-  await page.goto("/settings"); await expect(page.getByRole("combobox", { name: "Appearance" })).toHaveValue("dark");
+  await page.goto("/settings"); await expect(page.getByRole("combobox", { name: "Theme" })).toHaveValue("dark");
 });
 
 test("THEME-004 changes presentation without changing scientific values or exports", async ({ page }) => {

@@ -27,12 +27,12 @@ export function AccountControl() {
     <button aria-expanded={open} aria-haspopup="menu" className="account-button" onClick={() => setOpen((value) => !value)} type="button"><span className="account-button-label">{user.displayName}</span><span aria-hidden="true">▾</span></button>
     {open && <div aria-label="Account" className="account-menu" role="menu">
       <p className="account-identity">{user.email}</p>
-      <p className="account-cloud-status">Cloud account connected<br /><span>{cloud.statusLabel}</span></p>
+      <p className="account-cloud-status">{cloud.statusLabel}</p>
       <button className="account-menu-item" disabled={cloud.pending || !cloud.online} onClick={() => void cloud.syncNow().then(() => setOpen(false))} role="menuitem" type="button">{cloud.pending ? "Syncing…" : "Sync now"}</button>
       <button className="account-menu-item" onClick={() => void (cloud.preferences.paused ? cloud.resume() : cloud.pause()).then(() => setOpen(false))} role="menuitem" type="button">{cloud.preferences.paused ? "Resume automatic sync" : "Pause automatic sync"}</button>
       <Link className="account-menu-item" href="/account" role="menuitem" onClick={() => setOpen(false)}>Account</Link>
       <Link className="account-menu-item" href="/account/cloud-data" role="menuitem" onClick={() => setOpen(false)}>Cloud data</Link>
-      <Link className="account-menu-item" href="/labs" role="menuitem" onClick={() => setOpen(false)}>Private lab libraries</Link>
+      <Link className="account-menu-item" href="/labs" role="menuitem" onClick={() => setOpen(false)}>Lab libraries</Link>
       {cloud.counts.pendingUpload > 0 && <Link className="account-menu-item" href="/account/cloud-data#pending" role="menuitem" onClick={() => setOpen(false)}>Review pending changes ({cloud.counts.pendingUpload})</Link>}
       {cloud.counts.conflicts > 0 && <Link className="account-menu-item" href="/account/cloud-data#conflicts" role="menuitem" onClick={() => setOpen(false)}>Review conflicts ({cloud.counts.conflicts})</Link>}
       <Link className="account-menu-item" href="/reset-password" role="menuitem" onClick={() => setOpen(false)}>Change password</Link>
