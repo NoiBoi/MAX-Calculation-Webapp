@@ -13,7 +13,7 @@ test("AUTH-004 missing cloud configuration preserves the local calculator", asyn
     return { account: account.getBoundingClientRect().toJSON(), more: more.getBoundingClientRect().toJSON() };
   });
   expect(controls).not.toBeNull();
-  expect(controls!.more.right).toBeLessThanOrEqual(controls!.account.left);
+  expect(controls!.more.top).toBeGreaterThanOrEqual(controls!.account.bottom);
   await expect(page.getByRole("link", { name: "Cloud setup" })).toBeVisible();
   await page.getByRole("link", { name: "Cloud setup" }).click();
   await expect(page).toHaveURL(/\/login$/);
@@ -21,7 +21,7 @@ test("AUTH-004 missing cloud configuration preserves the local calculator", asyn
   await expect(page.getByRole("heading", { name: "Cloud accounts unavailable" })).toBeVisible();
   await expect(page.getByText(/calculator, local recipes, comparisons, notes, backups, recovery, and printing continue/i)).toBeVisible();
   await expect(page.getByText(/local application recovery/i)).toHaveCount(0);
-  await page.getByRole("link", { name: "Calculator" }).click();
+  await page.getByRole("link", { name: "Calculator", exact: true }).click();
   await expect(page.locator('[data-recovery-ready="true"]')).toBeVisible();
 });
 

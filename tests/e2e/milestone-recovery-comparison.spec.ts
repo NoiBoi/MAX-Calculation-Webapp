@@ -11,8 +11,7 @@ async function chooseExample(page: Page) {
 }
 
 async function openComparison(page: Page) {
-  await page.getByRole("button", { name: "Calculator" }).click();
-  await page.getByRole("menuitem", { name: /Comparison/ }).click();
+  await page.getByRole("navigation", { name: "MAXCalc workspaces" }).getByRole("link", { name: "Comparison", exact: true }).click();
 }
 
 async function corruptRecovery(page: Page) {
@@ -63,7 +62,7 @@ test("RECOVERY-RETRY-001 performs a real retry and repair enters the calculator"
   await expect(page.getByRole("heading", { name: "MAXCalc could not finish opening" })).toBeVisible();
   await page.getByText("Technical details").click(); await expect(page.getByText("recovery-record-corrupt", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Repair local workspace" }).click();
-  await expect(page.getByRole("heading", { name: "Composition and precursors" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Precursors" })).toBeVisible();
   await expect(page.locator('[data-recovery-ready="true"]')).toBeVisible();
 });
 
@@ -84,7 +83,7 @@ test("RECOVERY-SETTINGS-001 corrupt settings do not crash or delete scientific r
   await ready(page); await chooseExample(page);
   await page.getByRole("button", { name: "Save", exact: true }).click(); const dialog = page.getByRole("dialog", { name: "Save recipe" }); await dialog.getByRole("button", { name: /Save recipe/ }).click(); await expect(dialog).not.toBeVisible();
   await page.goto("/demo"); await corruptSettings(page); await page.goto("/workspace");
-  await expect(page.getByRole("heading", { name: "Composition and precursors" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Precursors" })).toBeVisible();
   await expect(page.getByText(/Settings record was unreadable and defaults are being used/)).toBeVisible();
   await page.getByRole("button", { name: "Open", exact: true }).click(); await expect(page.getByLabel("Recipe name for Ti2AlN")).toBeVisible();
 });

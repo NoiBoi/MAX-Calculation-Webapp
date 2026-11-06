@@ -1,0 +1,156 @@
+.dedicated-print-root {
+  --weighing-results-font: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  color-scheme: light;
+  background: #eef2f4;
+  color: #111827;
+  padding: 16px;
+  font-family: var(--weighing-results-font);
+  font-variant-numeric: tabular-nums;
+}
+.dedicated-print-root[data-paper-size="letter"][data-orientation="portrait"] { --print-page-width: 197.9mm; --print-page-height: 261.4mm; --print-page-ratio: 215.9 / 279.4; }
+.dedicated-print-root[data-paper-size="letter"][data-orientation="landscape"] { --print-page-width: 261.4mm; --print-page-height: 197.9mm; --print-page-ratio: 279.4 / 215.9; }
+.dedicated-print-root[data-paper-size="a4"][data-orientation="portrait"] { --print-page-width: 192mm; --print-page-height: 279mm; --print-page-ratio: 210 / 297; }
+.dedicated-print-root[data-paper-size="a4"][data-orientation="landscape"] { --print-page-width: 279mm; --print-page-height: 192mm; --print-page-ratio: 297 / 210; }
+.print-settings-preview,
+:is([data-theme="dark"], [data-theme="midnight"]) .print-settings-preview { color-scheme: light; color: #0f172a !important; }
+.print-settings-preview .dedicated-print-root,
+.print-settings-preview .dedicated-print-root * { color: #111827 !important; border-color: #334155 !important; }
+.print-document-preview { width: min(100%, 980px); padding: 8px; }
+.print-document-preview .print-page { margin-bottom: 8px; }
+.print-page { display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; box-sizing: border-box; width: min(100%, 1100px); aspect-ratio: var(--print-page-ratio); margin: 0 auto 18px; gap: 2.5mm; background: white; padding: 5mm; box-shadow: 0 2px 12px #0002; break-after: page; page-break-after: always; }
+.print-page:last-child { break-after: auto; }
+.print-page:last-child { page-break-after: auto; }
+.print-page-header { display: flex; min-width: 0; align-items: baseline; justify-content: space-between; gap: 4mm; border-bottom: .4mm solid #334155; padding-bottom: 1mm; font-size: 8.5pt; }
+.print-page-header > span { min-width: 0; overflow-wrap: anywhere; text-align: right; }
+.page-app { flex: none; font-size: 11pt; font-weight: 800; }
+.print-recipe-grid { display: grid; min-height: 0; align-content: start; align-items: start; gap: 3mm; }
+.configured-2 .print-recipe-grid { grid-template-columns: 1fr; }
+[data-orientation="landscape"] .configured-2 .print-recipe-grid,
+.configured-4 .print-recipe-grid,
+.configured-6 .print-recipe-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.configured-2.print-grid-2 .print-recipe-grid,
+.configured-4.print-grid-4 .print-recipe-grid,
+.configured-6.print-grid-6 .print-recipe-grid { align-content: space-between; }
+.configured-4.print-grid-3 .print-recipe-grid,
+.configured-6.print-grid-3 .print-recipe-grid,
+.configured-6.print-grid-4 .print-recipe-grid,
+.configured-6.print-grid-5 .print-recipe-grid { align-content: start; }
+.configured-6[data-orientation="landscape"] .print-recipe-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.print-grid-1 .print-recipe-grid { grid-template-columns: 1fr; }
+.print-recipe-region { min-width: 0; align-self: start; }
+.print-recipe { min-width: 0; align-self: start; break-inside: avoid; page-break-inside: avoid; border: 1px solid #334155; padding: 2mm; font-size: 10pt; }
+.print-recipe h2 { margin: 0; font-size: 15pt; line-height: 1.1; }
+.print-recipe header p, .print-recipe footer { margin: .6mm 0 0; font-size: 9pt; }
+.print-formulas { margin-top: 1mm; }
+.print-formulas p { display: flex; gap: 1.5mm; justify-content: space-between; margin: .3mm 0; font-size: 11pt; }
+.print-formulas strong { max-width: 72%; overflow-wrap: anywhere; font-family: inherit; text-align: right; }
+.print-formulas .adjusted { font-size: 13pt; }
+.print-recipe .batch { margin: 1mm 0; font-size: 10pt; }
+.print-recipe table { width: 100%; border-collapse: collapse; font-size: 10pt; }
+.print-recipe thead { display: table-header-group; }
+.print-recipe th, .print-recipe td { border-bottom: .3mm solid #cbd5e1; padding: .55mm; text-align: left; overflow-wrap: anywhere; }
+.print-recipe .mass { font-size: 12.5pt; font-weight: 800; text-align: right; white-space: nowrap; }
+.print-recipe tfoot .mass { font-size: 16pt; }
+.print-recipe .verification, .print-recipe .warnings, .print-recipe .radius { margin: 1mm 0 0; font-size: 9pt; }
+.print-recipe .warnings ul { margin: .5mm 0 0; padding-left: 4mm; }
+.signatures { display: grid; grid-template-columns: 1fr 1fr; gap: 2mm; margin-top: 2mm; font-size: 9pt; }
+.print-page-footer { display: flex; min-width: 0; align-items: flex-end; justify-content: space-between; gap: 3mm; border-top: .3mm solid #64748b; padding-top: 1mm; font-size: 7.5pt; }
+.print-credit { display: flex; min-width: 0; flex-wrap: wrap; gap: .1rem .35rem; }
+.print-credit a { color: inherit; text-decoration: none; }
+.page-meta { display: flex; flex: none; gap: 4mm; justify-content: flex-end; }
+.packing-notice { margin: 0; padding: .8mm; border: .3mm solid #92400e; background: #fef3c7; font-size: 9pt; }
+.print-comparison-analysis { min-height: 0; overflow: hidden; }
+.print-comparison-analysis h1 { margin: 0 0 1mm; font-size: 15pt; }
+.print-comparison-analysis > p { margin: 0 0 2mm; font-size: 9pt; }
+.print-comparison-analysis table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+.print-comparison-analysis th, .print-comparison-analysis td { border: .3mm solid #64748b; padding: 1mm; text-align: left; overflow-wrap: anywhere; }
+.print-comparison-analysis td:not(:nth-child(2)) { font-variant-numeric: tabular-nums; }
+.configured-4 .print-recipe { font-size: 9pt; padding: 1.5mm; }
+.configured-4 .print-recipe h2 { font-size: 12pt; }
+.configured-4 .print-formulas p { font-size: 9.5pt; }
+.configured-4 .print-formulas .adjusted { font-size: 10.5pt; }
+.configured-4 .print-recipe table { font-size: 9pt; }
+.configured-4 .print-recipe .mass { font-size: 11pt; }
+.configured-4 .print-recipe tfoot .mass { font-size: 13pt; }
+.configured-4 .print-recipe header p, .configured-4 .print-recipe footer, .configured-4 .print-recipe .verification { font-size: 8.5pt; }
+.configured-6 .print-recipe { padding: 1.2mm; font-size: 8.5pt; }
+.configured-6 .print-recipe h2 { font-size: 10.5pt; }
+.configured-6 .print-formulas p { font-size: 8.5pt; }
+.configured-6 .print-formulas .adjusted { font-size: 9.25pt; }
+.configured-6 .print-recipe table { font-size: 8.5pt; }
+.configured-6 .print-recipe .mass { font-size: 10pt; }
+.configured-6 .print-recipe tfoot .mass { font-size: 11.5pt; }
+.configured-6 .print-recipe .verification, .configured-6 .print-recipe .warnings, .configured-6 .print-recipe footer { display: none; }
+.configured-6.print-grid-1 .print-recipe .verification,
+.configured-6.print-grid-1 .print-recipe .warnings,
+.configured-6.print-grid-1 .print-recipe footer { display: block; }
+
+@media print {
+  @page { size: auto; margin: 12mm; }
+  :root, :root[data-theme="dark"], :root[data-theme="midnight"] { color-scheme: light !important; }
+  body, dialog, section, article, table, thead, tbody, tfoot, tr, th, td { background: white !important; color: black !important; }
+  body { font-size: 10pt; }
+  .theme-control { display: none !important; }
+  .account-control { display: none !important; }
+  .creator-credit { display: none !important; }
+  body:has(.dedicated-print-root) { margin: 0; }
+  body:has(.dedicated-print-root) > :not(.dedicated-print-root) { display: none !important; }
+  .dedicated-print-root { padding: 0 !important; background: white !important; color: #111827 !important; }
+  .dedicated-print-root,
+  .dedicated-print-root * { color: #111827 !important; border-color: #334155 !important; box-shadow: none !important; filter: none !important; opacity: 1 !important; text-shadow: none !important; }
+  .dedicated-print-root .print-page { display: grid !important; width: var(--print-page-width); min-height: var(--print-page-height); height: var(--print-page-height); margin: 0; background: white !important; }
+  .dedicated-print-root .print-recipe-grid { display: grid !important; }
+  .dedicated-print-root .print-recipe { display: block !important; break-inside: avoid-page !important; page-break-inside: avoid !important; background: white !important; }
+  .dedicated-print-root .print-page-header,
+  .dedicated-print-root .print-page-footer { display: flex !important; background: white !important; }
+  .dedicated-print-root .packing-notice { background: white !important; }
+  body:not(:has(.dedicated-print-root)) header,
+  body:not(:has(.dedicated-print-root)) button,
+  body:not(:has(.dedicated-print-root)) select,
+  body:not(:has(.dedicated-print-root)) input,
+  body:not(:has(.dedicated-print-root)) label,
+  body:not(:has(.dedicated-print-root)) fieldset,
+  body:not(:has(.dedicated-print-root)) [aria-label="Command menu"] { display: none !important; }
+  body:not(:has(.dedicated-print-root)) main,
+  body:not(:has(.dedicated-print-root)) main > div,
+  body:not(:has(.dedicated-print-root)) main section { display: block !important; max-width: none !important; box-shadow: none !important; border-color: #777 !important; }
+  body:not(:has(.dedicated-print-root)) main > div > section:first-child { display: none !important; }
+  table { width: 100%; border-collapse: collapse; }
+  thead { display: table-header-group; }
+  tr, .weighing-summary-card h2, .summary-radius article { break-inside: avoid; }
+  .print\:hidden { display: none !important; }
+  body:has(.weighing-summary-dialog[open]) main > *:not(.weighing-summary-dialog) { display: none !important; }
+  body:has(.calculation-verification-dialog[open]) main > *:not(.calculation-verification-dialog) { display: none !important; }
+  .weighing-summary-dialog[open] { position: static !important; display: block !important; width: auto !important; max-width: none !important; max-height: none !important; overflow: visible !important; border: 0 !important; padding: 0 !important; }
+  .weighing-summary-dialog::backdrop, .summary-control { display: none !important; }
+  .calculation-verification-dialog[open] { position: static !important; display: block !important; width: auto !important; max-width: none !important; max-height: none !important; overflow: visible !important; border: 0 !important; padding: 0 !important; }
+  .calculation-verification-dialog::backdrop, .verification-control { display: none !important; }
+  .verification-print-root { display: block !important; padding: 0 !important; }
+  .verification-scenario { break-before: page; border: 1px solid #333 !important; border-radius: 0 !important; padding: 3mm !important; font-size: 10pt; }
+  .verification-scenario:first-child { break-before: auto; }
+  .verification-scenario h2 { font-size: 13pt !important; }
+  .verification-scenario h3 { font-size: 10pt !important; margin-top: 2mm !important; }
+  .verification-scenario section[aria-label$="conversion verification"] > div { display: none !important; }
+  .verification-compact-conversion { display: table !important; margin-top: 2mm; font-size: 9pt; }
+  .verification-scenario table th, .verification-scenario table td, .verification-overview th, .verification-overview td { border-bottom: 0.5px solid #aaa; padding: 1mm; }
+  .verification-scenario details { display: none !important; }
+  .verification-reconciliation { min-width: 0 !important; font-size: 9pt !important; }
+  .verification-overview { margin: 0 0 2mm !important; padding: 1.5mm !important; font-size: 9.5pt; }
+  .comparison-print-overview { display: block !important; margin-bottom: 5mm; border-bottom: 1px solid #333; padding-bottom: 2mm; font-size: 9pt; }
+  .weighing-summary-print-root { display: block !important; padding: 0 !important; }
+  .weighing-summary-print-root[data-summary-count="2"] { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6mm !important; }
+  .weighing-summary-card { break-inside: auto; margin-bottom: 6mm; border: 1px solid #333 !important; border-radius: 0 !important; padding: 4mm !important; box-shadow: none !important; font-size: 9pt; }
+  .weighing-summary-card h2 { font-size: 13pt !important; }
+  .weighing-summary-card [aria-label^="Adjusted intended feed formula"] { font-size: 12pt !important; overflow-wrap: anywhere; }
+  .summary-weighing-table { margin-top: 3mm !important; font-size: 9pt !important; }
+  .summary-weighing-table th, .summary-weighing-table td { padding: 1.5mm 1mm !important; overflow-wrap: anywhere; }
+  .summary-weighing-table td:nth-child(5), .summary-weighing-table tfoot td { font-size: 12pt !important; white-space: nowrap; }
+  .summary-weighing-table tfoot th { font-size: 11pt !important; }
+  .summary-radius { margin-top: 3mm !important; padding-top: 2mm !important; }
+  .summary-radius article { margin-top: 2mm !important; }
+  .summary-radius article > p { font-size: 8.5pt !important; }
+  .radius-detail-table { display: none !important; }
+  .weighing-summary-card:not(:first-child) .radius-disclaimer { display: none !important; }
+  .summary-signature { margin-top: 3mm !important; }
+  .summary-dataset-warning { margin: 0 0 3mm !important; padding: 2mm !important; }
+}

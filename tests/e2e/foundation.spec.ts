@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("landing opens the one-screen laboratory calculator", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Composition and precursors" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Precursors" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Final weighing results" })).toBeVisible();
 });
 

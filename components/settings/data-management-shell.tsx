@@ -32,6 +32,7 @@ import {
 import { UserSettingsPanel } from "./user-settings-panel";
 import { writeAppearanceBootstrap } from "@/lib/theme/theme";
 import { AppHeader, PageContainer } from "@/components/site/app-header";
+import { SectionIndex } from "@/components/ui/workbench";
 
 export function DataManagementShell() {
   const repositories = useAccountRepositories();
@@ -175,16 +176,33 @@ export function DataManagementShell() {
     setStatus(`Renamed layout to ${trimmed}.`);
   };
   return (
-    <main className="min-h-screen bg-slate-100 text-slate-950">
+    <main>
       <AppHeader
         activeSection="settings"
         status={status}
         title="Settings"
       />
-      <PageContainer className="grid gap-4 lg:grid-cols-2" width="settings">
+      <PageContainer className="settings-layout" width="settings">
+        <aside className="settings-index">
+          <SectionIndex label="Settings sections" items={[
+            { id: "appearance-heading", name: "Appearance" },
+            { id: "feed-defaults-heading", name: "Formula & feed defaults" },
+            { id: "save-behavior-heading", name: "Save behavior" },
+            { id: "weighing-display-heading", name: "Weighing display" },
+            { id: "print-settings-heading", name: "Printing" },
+            { id: "account-sync-settings-heading", name: "Account & sync" },
+            { id: "settings-data-heading", name: "Data & reset" },
+            { id: "layouts-heading", name: "Workspace layouts" },
+            { id: "backup-heading", name: "Backups" },
+            { id: "restore-heading", name: "Restore" },
+            { id: "integrity-heading", name: "Integrity & diagnostics" },
+            { id: "radius-datasets-heading", name: "Atomic-radius datasets" },
+          ]} />
+        </aside>
+        <div className="settings-content">
         <UserSettingsPanel onStatus={setStatus} repositories={repositories} />
         <section
-          className="rounded border bg-white p-4"
+          className="workbench-panel padded-panel"
           aria-labelledby="layouts-heading"
         >
           <h2 className="text-lg font-semibold" id="layouts-heading">
@@ -263,7 +281,7 @@ export function DataManagementShell() {
           </div>
         </section>
         <section
-          className="rounded border bg-white p-4"
+          className="workbench-panel padded-panel"
           aria-labelledby="backup-heading"
         >
           <h2 className="text-lg font-semibold" id="backup-heading">
@@ -314,7 +332,7 @@ export function DataManagementShell() {
           )}
         </section>
         <section
-          className="rounded border bg-white p-4 lg:col-span-2"
+          className="workbench-panel padded-panel"
           aria-labelledby="restore-heading"
         >
           <h2 className="text-lg font-semibold" id="restore-heading">
@@ -475,8 +493,8 @@ export function DataManagementShell() {
             </div>
           )}
         </section>
-        <section className="rounded border bg-white p-4">
-          <h2 className="text-lg font-semibold">Integrity and diagnostics</h2>
+        <section className="workbench-panel padded-panel" aria-labelledby="integrity-heading">
+          <h2 className="text-lg font-semibold" id="integrity-heading">Integrity and diagnostics</h2>
           <p className="mt-1 text-sm">
             Startup and full scan:{" "}
             {integrity?.valid
@@ -539,8 +557,8 @@ export function DataManagementShell() {
             Clear local data…
           </button>
         </section>
-        <section className="rounded border bg-white p-4">
-          <h2 className="text-lg font-semibold">Atomic-radius datasets</h2>
+        <section className="workbench-panel padded-panel" aria-labelledby="radius-datasets-heading">
+          <h2 className="text-lg font-semibold" id="radius-datasets-heading">Atomic-radius datasets</h2>
           <p className="mt-1 text-sm">
             Installed datasets: {DEFAULT_ATOMIC_RADIUS_REGISTRY.datasets.length}
             . Source-verified for screening:{" "}
@@ -580,6 +598,7 @@ export function DataManagementShell() {
             {RADIUS_DESCRIPTOR_DISCLAIMER}
           </p>
         </section>
+        </div>
       </PageContainer>
     </main>
   );

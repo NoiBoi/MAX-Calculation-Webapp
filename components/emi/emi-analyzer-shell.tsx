@@ -1,5 +1,7 @@
 "use client";
 
+import { EmptyPane, SectionIndex } from "@/components/ui/workbench";
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   EMI_PARSER_VERSION,
@@ -345,26 +347,21 @@ export function EmiAnalyzerShell() {
   }, [comparisonSort, directions, project.datasets, project.groups, range, ready]);
 
   return <div className="emi-analyzer" data-testid="emi-analyzer">
-    <section className="emi-panel" aria-label="EMI project controls">
-      <div className="emi-section-heading"><div><h2>Local EMI project</h2><p>Projects preserve parsed S-parameters, provenance, metadata, groups, analysis settings, and notes in this browser.</p></div><details className="emi-provenance"><summary>Provenance</summary><p>Schema {project.schemaVersion} · Engine {project.calculationEngineVersion}</p></details></div>
-      <div className="emi-project-toolbar">
-        <label>Project name<input aria-label="Project name" onChange={(event) => setProject((current) => ({ ...current, name: event.target.value }))} value={project.name} /></label>
-        <label>Open saved project<select className="ui-select" onChange={(event) => { const restored = savedProjects.find((entry) => entry.id === event.target.value); if (restored) restoreProject(restored); }} value=""><option value="">Choose saved project…</option>{savedProjects.map((entry) => <option key={entry.id} value={entry.id}>{entry.name} · {new Date(entry.updatedAt).toLocaleString()}</option>)}</select></label>
-      </div>
-      <label className="emi-project-description">Description<textarea onChange={(event) => setProject((current) => ({ ...current, description: event.target.value }))} rows={2} value={project.description ?? ""} /></label>
-      <div className="emi-export-actions">
-        <button className="ui-button" onClick={() => { const fresh = createEmptyEmiProject(); setProject(fresh); clearFiles(); setProject(fresh); setProjectStatus("Created a new blank EMI project."); }} type="button">New project</button>
-        <button className="ui-button ui-button-primary" onClick={() => void (async () => { const saved = await repositoryRef.current?.save(projectSnapshot()); if (saved) { setProject(saved); await refreshProjects(); setProjectStatus(`Saved ${saved.name} locally.`); } })()} type="button">Save project</button>
-        <button className="ui-button" onClick={() => void (async () => { const duplicate = await repositoryRef.current?.duplicate(projectSnapshot()); if (duplicate) { restoreProject(duplicate); await refreshProjects(); setProjectStatus(`Duplicated as ${duplicate.name}.`); } })()} type="button">Duplicate</button>
-        <button className="ui-button ui-button-destructive" disabled={!savedProjects.some((entry) => entry.id === project.id)} onClick={() => { if (!window.confirm(`Delete the local EMI project “${project.name}”?`)) return; void repositoryRef.current?.delete(project.id).then(() => { const fresh = createEmptyEmiProject(); restoreProject(fresh); return refreshProjects(); }); }} type="button">Delete</button>
-        <button className="ui-button" onClick={() => downloadContent(`${project.name.replace(/[^a-z0-9]+/gi, "-") || "emi-project"}.json`, serializeEmiProject(projectSnapshot()), "application/json;charset=utf-8")} type="button">Export project JSON</button>
-        <button className="ui-button" onClick={() => projectInputRef.current?.click()} type="button">Import project JSON</button>
-        <input accept="application/json,.json" className="sr-only" onChange={(event) => { const file = event.target.files?.[0]; if (!file) return; void file.text().then((text) => { const imported = parseEmiProjectJson(text); restoreProject({ ...imported, id: crypto.randomUUID(), name: `${imported.name} (imported)`, updatedAt: new Date().toISOString() }); setProjectStatus("Validated and loaded the imported project as an unsaved copy."); }).catch((error) => setProjectStatus(`Project import failed: ${error instanceof Error ? error.message : "invalid project"}`)); event.currentTarget.value = ""; }} ref={projectInputRef} type="file" />
-      </div>
-      <p aria-live="polite" className="emi-status">{projectStatus}</p>
-    </section>
-    <section className="emi-panel emi-import-panel">
-      <div className="emi-section-heading"><div><h2>1. Import measurement data</h2><p>Add one or many Keysight complex S-parameter CSV files. Files are parsed locally and never uploaded.</p></div>{files.length > 0 && <button className="ui-button ui-button-compact" onClick={clearFiles} type="button">Clear all</button>}</div>
+    <SectionIndex label="EMI workspace sections" items={[
+      { id: "emi-measurements", name: "Measurements" },
+      { id: "emi-project", name: "Project" },
+      { id: "emi-band", name: "Band & direction" },
+      ...(selected.length > 0 ? [
+        { id: "emi-graphs", name: "Plots" },
+        { id: "emi-statistics", name: "Statistics" },
+        { id: "emi-quality", name: "Quality control" },
+        { id: "emi-table", name: "Data table" },
+        { id: "emi-exports", name: "Exports" },
+      ] : []),
+    ]} />
+    <div className="emi-intake" data-has-files={files.length > 0}>
+    <section className="emi-panel emi-import-panel" id="emi-measurements">
+      <div className="emi-section-heading"><div><h2>Import measurement data</h2><p>Add one or many Keysight complex S-parameter CSV files. Files are parsed locally and never uploaded.</p></div>{files.length > 0 && <button className="ui-button ui-button-compact" onClick={clearFiles} type="button">Clear all</button>}</div>
       <div className={`emi-dropzone ${files.length > 0 ? "emi-dropzone-compact" : ""}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); void importFiles([...event.dataTransfer.files]); }}>
         <div className="emi-dropzone-icon" aria-hidden="true">CSV</div><div><strong>{files.length > 0 ? "Add more measurement files" : "Drop measurement CSV files here"}</strong><span>Multiple files are supported</span></div>
         <button className="ui-button ui-button-primary" onClick={() => fileInputRef.current?.click()} type="button">Choose CSV files</button>
@@ -409,9 +406,32 @@ export function EmiAnalyzerShell() {
         {ready.length > 0 && <p className="emi-causal-note"><strong>Measurement-quality interpretation:</strong> warnings screen measured behavior; they do not diagnose a single cause. Review calibration, fixture and reference-plane quality, instrument drift, and source-file integrity before deciding whether a point is experimentally acceptable.</p>}
       </>}
     </section>
+    <section className="emi-panel emi-project" id="emi-project" aria-label="EMI project controls">
+      <div className="emi-section-heading"><div><h2>Local EMI project</h2><p>Projects preserve parsed S-parameters, provenance, metadata, groups, analysis settings, and notes in this browser.</p></div><details className="emi-provenance"><summary>Provenance</summary><p>Schema {project.schemaVersion} · Engine {project.calculationEngineVersion}</p></details></div>
+      <div className="emi-project-toolbar">
+        <label>Project name<input aria-label="Project name" onChange={(event) => setProject((current) => ({ ...current, name: event.target.value }))} value={project.name} /></label>
+        <label>Open saved project<select className="ui-select" onChange={(event) => { const restored = savedProjects.find((entry) => entry.id === event.target.value); if (restored) restoreProject(restored); }} value=""><option value="">Choose saved project…</option>{savedProjects.map((entry) => <option key={entry.id} value={entry.id}>{entry.name} · {new Date(entry.updatedAt).toLocaleString()}</option>)}</select></label>
+      </div>
+      <label className="emi-project-description">Description<textarea onChange={(event) => setProject((current) => ({ ...current, description: event.target.value }))} rows={2} value={project.description ?? ""} /></label>
+      <div className="emi-export-actions">
+        <div className="command-group">
+        <button className="ui-button" onClick={() => { const fresh = createEmptyEmiProject(); setProject(fresh); clearFiles(); setProject(fresh); setProjectStatus("Created a new blank EMI project."); }} type="button">New project</button>
+        <button className="ui-button ui-button-primary" onClick={() => void (async () => { const saved = await repositoryRef.current?.save(projectSnapshot()); if (saved) { setProject(saved); await refreshProjects(); setProjectStatus(`Saved ${saved.name} locally.`); } })()} type="button">Save project</button>
+        <button className="ui-button" onClick={() => void (async () => { const duplicate = await repositoryRef.current?.duplicate(projectSnapshot()); if (duplicate) { restoreProject(duplicate); await refreshProjects(); setProjectStatus(`Duplicated as ${duplicate.name}.`); } })()} type="button">Duplicate</button>
+        <button className="ui-button ui-button-destructive" disabled={!savedProjects.some((entry) => entry.id === project.id)} onClick={() => { if (!window.confirm(`Delete the local EMI project “${project.name}”?`)) return; void repositoryRef.current?.delete(project.id).then(() => { const fresh = createEmptyEmiProject(); restoreProject(fresh); return refreshProjects(); }); }} type="button">Delete</button>
+        </div>
+        <div className="command-group">
+        <button className="ui-button" onClick={() => downloadContent(`${project.name.replace(/[^a-z0-9]+/gi, "-") || "emi-project"}.json`, serializeEmiProject(projectSnapshot()), "application/json;charset=utf-8")} type="button">Export project JSON</button>
+        <button className="ui-button" onClick={() => projectInputRef.current?.click()} type="button">Import project JSON</button>
+        </div>
+        <input accept="application/json,.json" className="sr-only" onChange={(event) => { const file = event.target.files?.[0]; if (!file) return; void file.text().then((text) => { const imported = parseEmiProjectJson(text); restoreProject({ ...imported, id: crypto.randomUUID(), name: `${imported.name} (imported)`, updatedAt: new Date().toISOString() }); setProjectStatus("Validated and loaded the imported project as an unsaved copy."); }).catch((error) => setProjectStatus(`Project import failed: ${error instanceof Error ? error.message : "invalid project"}`)); event.currentTarget.value = ""; }} ref={projectInputRef} type="file" />
+      </div>
+      <p aria-live="polite" className="emi-status">{projectStatus}</p>
+    </section>
+    </div>
 
-    <section className="emi-panel" aria-label="Dataset controls">
-      <div className="emi-section-heading"><div><h2>2. Dataset and direction controls</h2><p>The selected frequency band changes views and statistics only; imported measurements remain intact in memory.</p></div></div>
+    <section className="emi-panel" id="emi-band" aria-label="Dataset controls">
+      <div className="emi-section-heading"><div><h2>Dataset and direction controls</h2><p>The selected frequency band changes views and statistics only; imported measurements remain intact in memory.</p></div></div>
       <div className="emi-controls-grid">
         <fieldset><legend>Measurement direction</legend><div className="segmented-control emi-direction-control">{(["forward", "reverse", "both"] as const).map((mode) => <button aria-pressed={directionMode === mode} key={mode} onClick={() => setDirectionMode(mode)} type="button">{mode === "forward" ? "Forward" : mode === "reverse" ? "Reverse" : "Both"}</button>)}</div></fieldset>
         <label>Frequency units<select className="ui-select" onChange={(event) => setUnit(event.target.value as FrequencyUnit)} value={unit}><option>GHz</option><option>Hz</option></select></label>
@@ -438,9 +458,15 @@ export function EmiAnalyzerShell() {
       </div></details>
     </section>}
 
-    {selected.length === 0 ? <section className="emi-panel emi-empty-state"><h2>Select a successfully parsed file to analyze</h2><p>Plots, statistics, quality checks, tabular data, and exports will appear here.</p></section> : <>
-      <section className="emi-panel" aria-label="Summary statistics">
-        <div className="emi-section-heading"><div><h2>3. Summary statistics</h2><p>Each file remains independent. Invalid metric values are excluded and counted explicitly.</p></div></div>
+    {selected.length === 0 ? <section className="workbench-panel"><EmptyPane title="Select a successfully parsed file to analyze">Plots, statistics, quality checks, and exports will appear here.</EmptyPane></section> : <>
+      <div className="emi-plot-deck" id="emi-graphs">
+      <EmiPlot bands={bands(["SET"])} exportName="emi-total-shielding-effectiveness" format={project.plot} graphId="set-vs-frequency" maximumHz={range.maximumHz} minimumHz={range.minimumHz} simonEligible simonTraces={simonTraces} simonUnavailableCount={simonUnavailableCount} title="Total shielding effectiveness (SET)" traces={traces(["SET"])} unit={unit} yLabel="dB" />
+      <EmiPlot bands={bands(["SER"])} exportName="emi-reflection-contribution" format={project.plot} graphId="ser-vs-frequency" maximumHz={range.maximumHz} minimumHz={range.minimumHz} title="Reflection contribution (SER)" traces={traces(["SER"])} unit={unit} yLabel="dB" />
+      <EmiPlot bands={bands(["SEA"])} exportName="emi-absorption-contribution" format={project.plot} graphId="sea-vs-frequency" maximumHz={range.maximumHz} minimumHz={range.minimumHz} title="Effective absorption contribution (SEA)" traces={traces(["SEA"])} unit={unit} yLabel="dB" />
+      <EmiPlot bands={bands(["R", "T", "A"])} exportName="emi-power-coefficients" format={project.plot} graphId="rta-vs-frequency" maximumHz={range.maximumHz} minimumHz={range.minimumHz} title="Incident-power coefficients" traces={traces(["R", "T", "A"])} unit={unit} yLabel="Dimensionless" />
+      </div>
+      <section className="emi-panel" id="emi-statistics" aria-label="Summary statistics">
+        <div className="emi-section-heading"><div><h2>Summary statistics</h2><p>Each file remains independent. Invalid metric values are excluded and counted explicitly.</p></div></div>
         <h3>Measured power-coefficient band means</h3>
         <p className="emi-supporting">R and T are squared complex S-parameter magnitudes; A = 1 − R − T. The bidirectional result is the equal-weight mean of the forward and reverse band means, matching the supplied workbook convention without replacing either direction.</p>
         <div className="emi-table-scroll"><table className="emi-table" aria-label="Power coefficient summary"><thead><tr><th>File</th><th>Forward R</th><th>Reverse R</th><th>Bidirectional R</th><th>Forward T</th><th>Reverse T</th><th>Bidirectional T</th><th>Forward A</th><th>Reverse A</th><th>Bidirectional A</th><th>A identity residual</th><th>Common valid points (F/R)</th></tr></thead><tbody>{powerCoefficientRows.map(({ file, R, T, A, balanceResidual }) => <tr key={`${file.id}-power-coefficients`}><td>{file.filename}</td><td>{formatNumber(R.forwardMean)}</td><td>{formatNumber(R.reverseMean)}</td><td>{formatNumber(R.bidirectionalMean)}</td><td>{formatNumber(T.forwardMean)}</td><td>{formatNumber(T.reverseMean)}</td><td>{formatNumber(T.bidirectionalMean)}</td><td>{formatNumber(A.forwardMean)}</td><td>{formatNumber(A.reverseMean)}</td><td>{formatNumber(A.bidirectionalMean)}</td><td>{formatIdentityResidual(balanceResidual)}</td><td>{Math.min(R.forward.validPointCount, T.forward.validPointCount, A.forward.validPointCount)}/{Math.min(R.reverse.validPointCount, T.reverse.validPointCount, A.reverse.validPointCount)}</td></tr>)}</tbody></table></div>
@@ -480,13 +506,8 @@ export function EmiAnalyzerShell() {
 
       <PublicationFigureEditor engineVersion={ENGINE_VERSION} range={range} traces={traces(EMI_METRICS)} unit={unit} />
 
-      <EmiPlot bands={bands(["SET"])} exportName="emi-total-shielding-effectiveness" format={project.plot} graphId="set-vs-frequency" maximumHz={range.maximumHz} minimumHz={range.minimumHz} simonEligible simonTraces={simonTraces} simonUnavailableCount={simonUnavailableCount} title="4. Total shielding effectiveness (SET)" traces={traces(["SET"])} unit={unit} yLabel="dB" />
-      <EmiPlot bands={bands(["SER"])} exportName="emi-reflection-contribution" format={project.plot} graphId="ser-vs-frequency" maximumHz={range.maximumHz} minimumHz={range.minimumHz} title="5. Reflection contribution (SER)" traces={traces(["SER"])} unit={unit} yLabel="dB" />
-      <EmiPlot bands={bands(["SEA"])} exportName="emi-absorption-contribution" format={project.plot} graphId="sea-vs-frequency" maximumHz={range.maximumHz} minimumHz={range.minimumHz} title="6. Effective absorption contribution (SEA)" traces={traces(["SEA"])} unit={unit} yLabel="dB" />
-      <EmiPlot bands={bands(["R", "T", "A"])} exportName="emi-power-coefficients" format={project.plot} graphId="rta-vs-frequency" maximumHz={range.maximumHz} minimumHz={range.minimumHz} title="7. Incident-power coefficients" traces={traces(["R", "T", "A"])} unit={unit} yLabel="Dimensionless" />
-
-      <section className="emi-panel" aria-label="Quality control">
-        <div className="emi-section-heading"><div><h2>8. Quality-control report</h2><p>Warnings are screening results only; the software does not alter measurements or determine their physical cause.</p></div></div>
+      <section className="emi-panel" id="emi-quality" aria-label="Quality control">
+        <div className="emi-section-heading"><div><h2>Quality-control report</h2><p>Warnings are screening results only; the software does not alter measurements or determine their physical cause.</p></div></div>
         <p className="emi-causal-note">Flagged values can indicate calibration uncertainty, fixture or reference-plane effects, instrument drift, or malformed data. Review the measurement context before drawing physical conclusions.</p>
         {selected.map((file) => <article className="emi-qc-file" key={file.id}><h3>{file.filename} · {file.issues.length} warning{file.issues.length === 1 ? "" : "s"}</h3>
           {[...directions, "shared" as const].map((group) => {
@@ -501,15 +522,15 @@ export function EmiAnalyzerShell() {
         </article>)}
       </section>
 
-      <section className="emi-panel" aria-label="Data table">
-        <div className="emi-section-heading"><div><h2>9. Tabular inspection</h2><p>Raw complex values and calculated metrics for one selected file and direction.</p></div></div>
+      <section className="emi-panel" id="emi-table" aria-label="Data table">
+        <div className="emi-section-heading"><div><h2>Tabular inspection</h2><p>Raw complex values and calculated metrics for one selected file and direction.</p></div></div>
         <div className="emi-table-controls"><label>File<select className="ui-select" onChange={(event) => setTableFileId(event.target.value)} value={tableFile?.id ?? ""}>{selected.map((file) => <option key={file.id} value={file.id}>{file.filename}</option>)}</select></label><label>Direction<select className="ui-select" onChange={(event) => setTableDirection(event.target.value as EmiDirection)} value={tableDirection}><option value="forward">Forward (S11 / S21)</option><option value="reverse">Reverse (S22 / S12)</option></select></label></div>
         <div className="emi-table-scroll emi-data-table-scroll"><table className="emi-table"><thead><tr><th>Frequency ({unit})</th><th>Reflection Re</th><th>Reflection Im</th><th>Transmission Re</th><th>Transmission Im</th><th>R</th><th>T</th><th>A</th><th>SET (dB)</th><th>SER (dB)</th><th>SEA (dB)</th><th>Status</th><th>Validation messages</th></tr></thead><tbody>{tableRows.map((row, index) => <tr key={`${row.frequencyHz}-${index}`}><td>{formatNumber(row.frequencyHz / factor, 10)}</td><td>{formatNumber(row.reflectionReal, 10)}</td><td>{formatNumber(row.reflectionImaginary, 10)}</td><td>{formatNumber(row.transmissionReal, 10)}</td><td>{formatNumber(row.transmissionImaginary, 10)}</td><td>{formatNumber(row.R, 10)}</td><td>{formatNumber(row.T, 10)}</td><td>{formatNumber(row.A, 10)}</td><td>{formatNumber(row.SET, 10)}</td><td>{formatNumber(row.SER, 10)}</td><td>{formatNumber(row.SEA, 10)}</td><td><span className={`emi-validity emi-validity-${row.validity}`}>{row.validity}</span></td><td>{row.validationCodes.length > 0 ? <details><summary>{row.validationCodes.join(", ")}</summary><ul>{row.validationMessages.map((message, messageIndex) => <li key={messageIndex}>{message}</li>)}</ul></details> : "None"}</td></tr>)}</tbody></table></div>
         <p className="emi-supporting">Showing {tableRows.length} points in the selected frequency band.</p>
       </section>
 
-      <section className="emi-panel" aria-label="CSV exports">
-        <div className="emi-section-heading"><div><h2>10. Analysis notes and exports</h2><p>Blank shielding cells represent undefined metrics. Project and manifest JSON formats are versioned.</p></div></div>
+      <section className="emi-panel" id="emi-exports" aria-label="CSV exports">
+        <div className="emi-section-heading"><div><h2>Analysis notes and exports</h2><p>Blank shielding cells represent undefined metrics. Project and manifest JSON formats are versioned.</p></div></div>
         <label className="emi-project-description">Project notes<textarea onChange={(event) => setProject((current) => ({ ...current, notes: event.target.value }))} rows={4} value={project.notes} /></label>
         <div className="emi-export-actions"><button className="ui-button ui-button-primary" onClick={() => { const snapshot = projectSnapshot(); downloadBytes("emi-analysis.xlsx", createEmiAnalysisXlsx(snapshot, selected, directions, range), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"); }} type="button">Export analysis workbook XLSX</button><button className="ui-button" onClick={() => { const snapshot = projectSnapshot(); downloadCsv("emi-processed-data.csv", createProcessedEmiCsv(selected, directions, snapshot)); }} type="button">Export processed data CSV</button><button className="ui-button" onClick={() => { const snapshot = projectSnapshot(); downloadCsv("emi-power-coefficients.csv", createPowerCoefficientSummaryCsv(selected, range, snapshot)); }} type="button">Export power coefficients CSV</button><button className="ui-button" onClick={() => { const snapshot = projectSnapshot(); downloadCsv("emi-summary-statistics.csv", createSummaryStatisticsCsv(selected, directions, range, snapshot)); }} type="button">Export summary statistics CSV</button><button className="ui-button" disabled={project.groups.length === 0} onClick={() => downloadCsv("emi-replicate-pointwise-summary.csv", createReplicatePointwiseCsv(projectSnapshot(), ready, directions, interpolation))} type="button">Export replicate pointwise CSV</button><button className="ui-button" onClick={() => downloadCsv("emi-band-summary.csv", createBandSummaryCsv(projectSnapshot(), ready, directions, range))} type="button">Export band summary CSV</button><button className="ui-button" onClick={() => downloadContent("emi-analysis-manifest.json", createEmiAnalysisManifest(projectSnapshot()), "application/json;charset=utf-8")} type="button">Export analysis manifest</button><button className="ui-button" onClick={() => { const figures = [...document.querySelectorAll("svg[data-emi-plot]")].map((element) => new XMLSerializer().serializeToString(element)); downloadContent("emi-analysis-summary.html", createEmiAnalysisSummaryHtml(projectSnapshot(), figures), "text/html;charset=utf-8"); }} type="button">Export analysis summary HTML</button></div>
       </section>

@@ -3,9 +3,20 @@ import type { ReactNode } from "react";
 import { AccountControl } from "@/components/auth/account-control";
 import { ThemeControl } from "@/components/theme/theme-control";
 import { SiteBrand } from "./site-brand";
-import { WorkspaceSwitcher, type WorkspaceId } from "./workspace-switcher";
+import { WorkspaceNavigation, type WorkspaceId } from "./workspace-switcher";
 
 export type AppSection = WorkspaceId | "settings" | "account" | "labs" | "other";
+
+const sectionNames: Record<AppSection, string> = {
+  calculator: "Calculator",
+  comparison: "Comparison",
+  emi: "Electromagnetic interference",
+  xrd: "X-ray diffraction",
+  settings: "Preferences & data",
+  account: "Account",
+  labs: "Laboratory",
+  other: "Resources",
+};
 
 interface AppHeaderProps {
   readonly activeSection: AppSection;
@@ -16,10 +27,6 @@ interface AppHeaderProps {
   readonly testId?: string;
 }
 
-/**
- * Shared route banner that keeps product identity, route context, account
- * controls, and appearance controls in a stable accessible order.
- */
 export function AppHeader({
   activeSection,
   title,
@@ -28,30 +35,29 @@ export function AppHeader({
   moreActions,
   testId = "app-header",
 }: AppHeaderProps) {
-  return <header className="app-header" data-active-section={activeSection} data-component="app-header" data-testid={testId} role="banner">
-    <div className="app-header-inner">
-      <Link aria-label="MAXCalc calculator" className="app-header-brand" href="/workspace">
-        <SiteBrand />
-      </Link>
-      <WorkspaceSwitcher settingsActive={activeSection === "settings"} activeWorkspace={(["calculator", "comparison", "emi", "xrd"] as const).includes(activeSection as WorkspaceId) ? activeSection as WorkspaceId : undefined} />
-      <div className="app-header-context">
-        <h1 title={title}>{title}</h1>
-        <p aria-live="polite">{status ?? <span aria-hidden="true">&nbsp;</span>}</p>
+  return (
+    <header className="app-header" data-active-section={activeSection} data-component="app-header" data-testid={testId} role="banner">
+      <div className="workbench-masthead">
+        <Link aria-label="MAXCalc calculator" className="app-header-brand" href="/workspace"><SiteBrand /></Link>
+        <span className="workbench-masthead-label">Research workbench</span>
+        <div className="app-header-global-actions">
+          <ThemeControl />
+          <AccountControl />
+        </div>
       </div>
-      {contextualActions && <div className="app-header-actions">{contextualActions}</div>}
-      <div className="app-header-global-actions">
-        <AccountControl />
-        {moreActions}
-        <ThemeControl />
+      <WorkspaceNavigation activeSection={activeSection} />
+      <div className="app-header-inner">
+        <div className="app-header-context">
+          <p className="ui-eyebrow">{sectionNames[activeSection]}</p>
+          <h1>{title}</h1>
+          {status && <p aria-live="polite" className="workspace-status">{status}</p>}
+        </div>
+        {(contextualActions || moreActions) && <div className="app-header-actions">{contextualActions}{moreActions}</div>}
       </div>
-    </div>
-  </header>;
+    </header>
+  );
 }
 
-/**
- * Applies the route-specific maximum-width contract without adding page
- * semantics or changing the order of its children.
- */
 export function PageContainer({
   children,
   className = "",

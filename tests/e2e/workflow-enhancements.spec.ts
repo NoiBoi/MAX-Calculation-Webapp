@@ -27,12 +27,12 @@ test("SUMMARY-MOLAR-001 shows and copies engine molar quantities with final mass
 });
 
 test("PANEL-DISMISS-001 closes utility layers outside and with Escape while preserving trigger focus", async ({ page }) => {
-  await ready(page, "/workspace"); await page.getByRole("button", { name: "Open", exact: true }).click(); await expect(page.getByRole("complementary", { name: "Saved recipe library" })).toBeVisible(); await page.getByRole("heading", { name: "Composition and precursors" }).click(); await expect(page.getByRole("complementary", { name: "Saved recipe library" })).toHaveCount(0); const more = page.getByRole("button", { name: /More actions/ }); await more.click(); await expect(page.getByLabel("More actions", { exact: true })).toBeVisible(); await page.keyboard.press("Escape"); await expect(page.getByLabel("More actions", { exact: true })).toHaveCount(0); await expect(more).toBeFocused();
+  await ready(page, "/workspace"); await page.getByRole("button", { name: "Open", exact: true }).click(); await expect(page.getByRole("complementary", { name: "Saved recipe library" })).toBeVisible(); await page.getByRole("heading", { name: "Precursors" }).click(); await expect(page.getByRole("complementary", { name: "Saved recipe library" })).toHaveCount(0); const more = page.getByRole("button", { name: /More actions/ }); await more.click(); await expect(page.getByLabel("More actions", { exact: true })).toBeVisible(); await page.keyboard.press("Escape"); await expect(page.getByLabel("More actions", { exact: true })).toHaveCount(0); await expect(more).toBeFocused();
 });
 
 test("DEFAULT-ROUTE-001 opens the calculator and keeps the feature demo as a labeled secondary route", async ({ page }) => {
   await ready(page);
-  await expect(page.getByRole("heading", { name: "Composition and precursors" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Precursors" })).toBeVisible();
   await openMore(page);
   await page.getByRole("link", { name: "Documentation", exact: true }).click();
   await expect(page).toHaveURL(/\/demo$/);
@@ -40,9 +40,9 @@ test("DEFAULT-ROUTE-001 opens the calculator and keeps the feature demo as a lab
   await expect(page.getByRole("heading", { name: "Workflows and calculation references" })).toBeVisible();
   await expect(page.getByText("MAXCalc documentation", { exact: true })).toBeVisible();
 
-  await page.getByRole("link", { name: "Calculator", exact: true }).click();
+  await page.getByRole("navigation", { name: "MAXCalc workspaces" }).getByRole("link", { name: "Calculator", exact: true }).click();
   await expect(page).toHaveURL(/\/workspace$/);
-  await expect(page.getByRole("heading", { name: "Composition and precursors" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Precursors" })).toBeVisible();
 });
 
 test("NOTES-001 creates searchable revision-linked multiline notes and keeps them with the saved recipe", async ({ page }) => {

@@ -144,7 +144,7 @@ test("POLISH-006 comparison commands stay outside the app header and never overl
   await expect(toolbar).toBeVisible();
   await expect(mode).toBeVisible();
   await expect(header.getByRole("toolbar", { name: "Comparison page actions" })).toHaveCount(0);
-  await expect(header.getByRole("group", { name: "Comparison detail mode" })).toBeVisible();
+  await expect(header.getByRole("group", { name: "Comparison detail mode" })).toHaveCount(0);
   const visibleControls = await toolbar.getByRole("button").all();
   const boxes = (await Promise.all(visibleControls.map(async (control) => {
     if (!await control.isVisible()) return null;
@@ -171,8 +171,8 @@ test("POLISH-008 calculator and comparison share an identical detail-mode contro
       await page.evaluate((value) => document.documentElement.setAttribute("data-theme", value), theme);
       const header = page.getByRole("banner");
       const mode = route === "/workspace"
-        ? page.getByRole("region", { name: "Batch setup" }).getByRole("group", { name: "Interaction mode" })
-        : header.getByRole("group", { name: "Comparison detail mode" });
+        ? page.getByRole("group", { name: "Interaction mode" })
+        : page.getByRole("group", { name: "Comparison detail mode" });
       const globalActions = header.locator(".app-header-global-actions");
       await expect(mode).toBeVisible();
       await expect(mode.getByRole("button", { name: "Standard" })).toBeVisible();
@@ -182,7 +182,7 @@ test("POLISH-008 calculator and comparison share an identical detail-mode contro
       expect(modeBox).toBeTruthy();
       expect(globalBox).toBeTruthy();
       expect(modeBox!.width).toBeGreaterThan(140);
-      if (route === "/compare" && viewport.width >= 1280) expect(modeBox!.x + modeBox!.width).toBeLessThanOrEqual(globalBox!.x);
+      expect(modeBox!.y).toBeGreaterThan(globalBox!.y + globalBox!.height);
       expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
       const appearance = await mode.evaluate((element) => {
         const active = element.querySelector<HTMLElement>('[aria-pressed="true"]')!;
@@ -225,7 +225,7 @@ test("POLISH-009 route navigation stays in the header while workflow bars remain
     const toolbar = route === "/workspace"
       ? page.getByRole("toolbar", { name: "Calculator page actions" })
       : page.getByRole("toolbar", { name: "Comparison page actions" });
-    await expect(header.getByRole("button", { name: route === "/workspace" ? "Calculator" : "Comparison" })).toBeVisible();
+    await expect(header.getByRole("navigation", { name: "MAXCalc workspaces" }).getByRole("link", { name: route === "/workspace" ? "Calculator" : "Comparison", exact: true })).toHaveAttribute("aria-current", "page");
     await expect(header.getByText(/^More/)).toBeVisible();
     await expect(toolbar.getByRole("link", { name: "Compare" })).toHaveCount(0);
     await expect(toolbar.getByText("More", { exact: true })).toHaveCount(0);
@@ -242,8 +242,8 @@ test("POLISH-009 route navigation stays in the header while workflow bars remain
   await page.setViewportSize({ width: 1920, height: 1080 });
   const navigation = page.getByRole("navigation", { name: "MAXCalc workspaces" });
   await expect(navigation.getByRole("link", { name: "Comparison" })).toHaveAttribute("aria-current", "page");
-  await navigation.getByRole("link", { name: "Calculator" }).click();
-  await expect(navigation.getByRole("link", { name: "Calculator" })).toHaveAttribute("aria-current", "page");
+  await navigation.getByRole("link", { name: "Calculator", exact: true }).click();
+  await expect(navigation.getByRole("link", { name: "Calculator", exact: true })).toHaveAttribute("aria-current", "page");
 });
 
 test("POLISH-007 neutral outlines resolve through semantic border tokens", async ({ page }) => {

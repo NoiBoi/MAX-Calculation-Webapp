@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 async function openMore(page: import("@playwright/test").Page) { await page.getByRole("button", { name: /More actions/ }).click(); }
 async function chooseExample(page: import("@playwright/test").Page, id = "ti2aln") { await openMore(page); await page.getByLabel("Start or reset").selectOption(id); }
-async function openCompare(page: import("@playwright/test").Page) { await page.getByRole("button", { name: "Calculator" }).click(); await page.getByRole("menuitem", { name: /Comparison/ }).click(); }
+async function openCompare(page: import("@playwright/test").Page) { await page.getByRole("navigation", { name: "MAXCalc workspaces" }).getByRole("link", { name: "Comparison", exact: true }).click(); }
 async function addCurrentPair(page: import("@playwright/test").Page) { await page.getByRole("toolbar", { name: "Comparison page actions" }).getByRole("button", { name: "Add current recipe" }).click(); await page.getByLabel("Unsaved calculation scenario", { exact: true }).getByRole("button", { name: "Duplicate" }).click(); }
 async function saveRecipe(page: import("@playwright/test").Page) { await page.getByRole("button", { name: "Save", exact: true }).click(); const dialog = page.getByRole("dialog", { name: "Save recipe" }); await dialog.getByRole("button", { name: /Save recipe|Save revision|Rename recipe/ }).click(); await expect(dialog).not.toBeVisible(); }
 
@@ -51,7 +51,7 @@ test("SUMMARY-002 keeps valid and invalid comparison scenarios visible", async (
 test("COMPARE-SAVE-001 saves and reopens scenario names and order", async ({ page }) => {
   await openCompare(page); await addCurrentPair(page); const secondName = page.getByLabel("Copy of Unsaved calculation name"); await secondName.fill("Alternate route");
   await page.getByRole("button", { name: "Save comparison" }).click(); await expect(page.getByText("Comparison saved", { exact: true })).toBeVisible();
-  await page.getByRole("link", { name: "Calculator" }).click(); await openCompare(page); await page.getByLabel("Open saved comparison").selectOption({ label: "Untitled comparison" });
+  await page.getByRole("link", { name: "Calculator", exact: true }).click(); await openCompare(page); await page.getByLabel("Open saved comparison").selectOption({ label: "Untitled comparison" });
   const regions = page.locator('section[aria-label$=" scenario"]'); await expect(regions).toHaveCount(2); await expect(regions.nth(0)).toHaveAttribute("aria-label", "Unsaved calculation scenario"); await expect(regions.nth(1)).toHaveAttribute("aria-label", "Alternate route scenario");
 });
 
@@ -69,6 +69,6 @@ test("COMPARE-GENERAL-001 imports and calculates recipes with different targets"
   await openCompare(page); await page.getByRole("toolbar", { name: "Comparison page actions" }).getByRole("button", { name: "Add saved recipes" }).click(); const picker = page.getByRole("dialog", { name: "Add saved recipes" }); await picker.getByRole("button", { name: "Select all visible" }).click(); await picker.getByRole("button", { name: "Add selected" }).click();
   await expect(picker).not.toBeVisible(); await expect(page.locator('section[aria-label$=" scenario"]')).toHaveCount(2); await expect(page.getByLabel("Ti2AlN recipe scenario", { exact: true })).toContainText("Final total"); await expect(page.getByLabel("Ti3AlC2 recipe scenario", { exact: true })).toContainText("Final total");
   await page.getByLabel("Comparison name").fill("Mixed target comparison"); await page.getByRole("button", { name: "Save comparison" }).click(); await expect(page.getByText("Comparison saved", { exact: true })).toBeVisible();
-  await page.getByRole("link", { name: "Calculator" }).click(); await openCompare(page); await page.getByLabel("Open saved comparison").selectOption({ label: "Mixed target comparison" });
+  await page.getByRole("link", { name: "Calculator", exact: true }).click(); await openCompare(page); await page.getByLabel("Open saved comparison").selectOption({ label: "Mixed target comparison" });
   await expect(page.getByLabel("Ti2AlN recipe scenario", { exact: true })).toContainText("Final total"); await expect(page.getByLabel("Ti3AlC2 recipe scenario", { exact: true })).toContainText("Final total");
 });

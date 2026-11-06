@@ -229,9 +229,11 @@ test("Standard fits six editable precursors and the live total across desktop th
       await expect(page.getByRole("textbox", { name: "Purity (%), precursor 6" })).toBeInViewport({ ratio: 1 });
       await expect(page.getByText("Final rounded total")).toBeInViewport({ ratio: 1 });
       await expect(page.getByRole("button", { name: "Save", exact: true })).toBeInViewport({ ratio: 1 });
-      const inputs = await page.getByRole("region", { name: "Composition and precursors" }).boundingBox();
+      const inputs = await page.getByRole("region", { name: "Precursors" }).boundingBox();
       const results = await page.getByRole("region", { name: "Final weighing results" }).boundingBox();
-      expect(inputs!.x + inputs!.width).toBeCloseTo(results!.x, 0);
+      const gap = results!.x - (inputs!.x + inputs!.width);
+      expect(gap).toBeGreaterThanOrEqual(0);
+      expect(gap).toBeLessThan(32);
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(viewport.width);
     }
   }

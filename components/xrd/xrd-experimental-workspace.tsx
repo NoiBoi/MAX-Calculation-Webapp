@@ -110,12 +110,12 @@ export function XrdExperimentalWorkspace({ onAnalysisChange }: { readonly onAnal
   };
 
   const shown = active?.measurement;
-  return <div className="xrd-experimental-stack">
+  return <div className="xrd-experimental-stack" data-preview={Boolean(preview || shown)}>
     <section className="xrd-panel" aria-labelledby="xrd-import-title">
       <div className="xrd-section-heading"><div><h2 id="xrd-import-title">Import measurement</h2><p>Exact bytes are hashed before parsing. Previewing and plotting do not transform measured values.</p></div></div>
       <div className="xrd-dropzone" onDragOver={(event) => event.preventDefault()} onDrop={onDrop}>
         <div><strong>Drop an XRD text file here</strong><span>CSV, TSV, TXT, XY, XYE, or safely readable text DAT · maximum 25 MB by default</span></div>
-        <button className="ui-button" disabled={pending} onClick={() => inputRef.current?.click()} type="button">Choose file</button>
+        <button className="ui-button ui-button-primary" disabled={pending} onClick={() => inputRef.current?.click()} type="button">Choose file</button>
         <input accept={ACCEPT} aria-label="Choose experimental XRD file" hidden onChange={(event) => selectFile(event.target.files?.[0])} ref={inputRef} type="file" />
       </div>
       <p aria-live="polite" className="xrd-status">{message}</p>

@@ -13,6 +13,7 @@ import { RecipeCommandHistory } from "@/lib/workspace/history";
 import { AtomicRadiusPanel } from "@/components/descriptor-panel/atomic-radius-panel";
 import { AppHeader } from "@/components/site/app-header";
 import { DetailModeControl } from "@/components/site/detail-mode-control";
+import { EmptyPane, PaneHeading, SectionIndex } from "@/components/ui/workbench";
 import { InputWithSuffix } from "@/components/ui/input-with-suffix";
 import { presentDiagnostics, precursorStatus } from "@/lib/presentation/diagnostics";
 import { formatDescriptor, formatMassForBalance, formatMoles, formatPercent } from "@/lib/presentation/scientific-format";
@@ -29,7 +30,7 @@ import { MaterialOverrides, PrecursorConstraints } from "@/components/workspace/
 import { PrecursorRows } from "@/components/workspace/precursor-rows";
 import { SampleIdsDialog } from "@/components/workspace/sample-ids-dialog";
 import { RecipeNotesDialog } from "@/components/workspace/recipe-notes-dialog";
-import { useDismissibleLayer } from "@/components/workspace/use-dismissible-layer";
+import { useDismissibleLayer } from "@/components/ui/use-dismissible-layer";
 import { CalculationVerificationDialog } from "@/components/verification/calculation-verification-dialog";
 import { buildCalculationVerification } from "@/lib/presentation/calculation-verification";
 import { FIELD_LABELS, applyFeedDefaultsToNewTemplate, createDefaultUserSettings, displaySettingsForMode, type LocalUserSettings, type WeighingResultField } from "@/lib/settings/user-settings";
@@ -642,7 +643,7 @@ export function WorkspaceShell() {
     catch (error) { setStatusMessage(`Print unavailable: ${error instanceof Error ? error.message : "print state could not be created"}`); }
   };
   const renderResultCell = (field: WeighingResultField, item: BatchCalculationResult["precursors"][number], formula: string | undefined) => {
-    const status = precursorStatus(displayed!, item.precursorId); const radius = elementalRadius(formula); const numeric = "p-2 text-right tabular-nums";
+    const status = precursorStatus(displayed!, item.precursorId); const radius = elementalRadius(formula); const numeric = "weighing-number p-2 text-right tabular-nums";
     switch (field) {
       case "precursor-name": return <th className="p-2 text-left font-medium" key={field}>{item.displayName}</th>;
       case "formula": return <td className="p-2 text-left font-mono" key={field}>{formula ?? "—"}</td>;
@@ -707,7 +708,7 @@ export function WorkspaceShell() {
   </>;
 
   if (startupFailure) return <StartupRecoveryScreen failure={startupFailure} pending={startupPending} onExport={() => void exportStartupDiagnostic()} onFullReset={() => void fullStartupReset()} onOpenBlank={() => void initializeWorkspace({ skipRecovery: true })} onRepair={() => void repairStartup()} onResetRecovery={() => void resetStartupRecovery()} onRetry={() => void initializeWorkspace()} />;
-  if (startupPending && !recoveryReady) return <main className="min-h-screen bg-slate-100 p-8 text-slate-950"><p className="font-semibold">Opening local workspace…</p></main>;
+  if (startupPending && !recoveryReady) return <main><AppHeader activeSection="calculator" title="Calculator" status="Opening local workspace…" /></main>;
   return <main className="calculator-workspace min-h-screen" onKeyDown={primaryNavigation}>
     <AppHeader
       activeSection="calculator"
@@ -715,22 +716,34 @@ export function WorkspaceShell() {
       testId="primary-command-bar"
       title={currentIdentity}
       moreActions={
-        <button aria-expanded={commandOpen} aria-label="More actions and commands" className="ui-button header-navigation-button" onClick={() => { setActivePanel("none"); setCommandOpen((current) => !current); }} ref={moreButtonRef}>More <span aria-hidden="true">•••</span></button>
+        <div className="relative">
+          <button aria-controls={commandOpen ? "calculator-command-menu" : undefined} aria-expanded={commandOpen} aria-label="More actions and commands" className="ui-button header-navigation-button" onClick={() => { setActivePanel("none"); setCommandOpen((current) => !current); }} ref={moreButtonRef}>More <span aria-hidden="true">•••</span></button>
+          {commandOpen && <section aria-label="More actions" className="workbench-menu" id="calculator-command-menu" ref={commandLayerRef}>
+            <div className="flex items-center justify-between"><h2 className="font-semibold">More actions</h2><button aria-label="Close more actions" className="ui-icon-button ui-button-compact" onClick={() => { setCommandOpen(false); moreButtonRef.current?.focus(); }} type="button">×</button></div>
+            <div className="workbench-menu-group">
+      <label className="text-xs font-normal uppercase tracking-wide text-slate-600" htmlFor="template-picker">Start or reset<select className="mt-1 min-h-10 w-full rounded border border-slate-400 bg-white px-2 text-sm font-normal normal-case tracking-normal" id="template-picker" onChange={(event) => { choosePreset(event.target.value); setCommandOpen(false); }} value=""><option disabled value="">Choose…</option><option value="blank">New blank calculation</option><optgroup label="New carbide templates"><option value="generic-211">New 211 carbide</option><option value="generic-312">New 312 carbide</option><option value="generic-413">New 413 carbide</option></optgroup><optgroup label="Built-in examples">{WORKSPACE_PRESETS.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</optgroup></select></label>
+      <label className="text-xs font-normal uppercase tracking-wide text-slate-600" htmlFor="layout-picker">Workspace layout<select aria-label="Workspace layout" className="mt-1 min-h-10 w-full rounded border border-slate-400 bg-white px-2 text-sm font-normal normal-case tracking-normal" id="layout-picker" onChange={(event) => { const selected = layouts.find((item) => item.id === event.target.value); if (!selected) return; if (selected.kind === "route-comparison") { window.location.href = "/compare"; return; } setActiveLayout(selected); setMode(selected.kind === "advanced-calculator" ? "advanced" : "standard"); setCommandOpen(false); }} value={activeLayout?.id ?? ""}><optgroup label="Built-in layouts">{layouts.filter((item) => item.builtIn).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</optgroup>{layouts.some((item) => !item.builtIn) && <optgroup label="My layouts">{layouts.filter((item) => !item.builtIn).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</optgroup>}</select></label>
+            </div>
+            <div className="workbench-menu-group">
+              <p className="ui-eyebrow">Records</p>
+      <button className="workbench-menu-item" onClick={(event) => { panelTriggerRef.current = moreButtonRef.current ?? event.currentTarget; setActivePanel("routes"); setCommandOpen(false); void refreshLibraries(); }}>Manage routes</button>
+      <button className="workbench-menu-item" onClick={() => { setCommandOpen(false); setSamplesOpen(true); }} type="button">Sample IDs</button>
+      {savedRecipe && <button className="workbench-menu-item" onClick={(event) => { void openNotes(savedRecipe, moreButtonRef.current ?? event.currentTarget); setCommandOpen(false); }}>Recipe notes</button>}
+            </div>
+            {mode === "standard" && <div className="workbench-menu-group"><p className="ui-eyebrow">Recipe actions</p><div className="calculator-menu-actions">{secondaryActions}</div></div>}
+            <div className="workbench-menu-group">
+              <p className="ui-eyebrow">Review & help</p>
+              <button className="workbench-menu-item" onClick={() => { setTraceOpen(true); setCommandOpen(false); }}>Open calculation trace</button>
+              {activePreset && <button className="workbench-menu-item" onClick={() => { choosePreset(activePreset.id); setCommandOpen(false); }}>Reset copied example</button>}
+              <Link className="workbench-menu-item" href="/demo">Documentation</Link>
+            </div>
+          </section>}
+        </div>
       }
     />
     {remoteUpdateAvailable && <section aria-live="polite" className="mx-auto mt-3 flex w-[min(100%-1.5rem,1480px)] flex-wrap items-center gap-3 rounded border border-blue-400 bg-blue-50 p-3 text-sm"><p className="mr-auto font-medium">{unsavedChanges ? "A newer cloud revision was downloaded. Your unsaved work remains open." : "A newer cloud revision is available. Your current view was not replaced."}</p><button className="rounded border border-blue-500 bg-white px-3 py-2 font-semibold" onClick={() => { if (unsavedChanges && !window.confirm("Open the downloaded revision and replace the unsaved workspace? Save or duplicate first if you need to preserve these edits.")) return; const latest = remoteUpdateAvailable; setRemoteUpdateAvailable(undefined); void openRecipe(latest); }} type="button">Open newer revision</button><button className="rounded border px-3 py-2" onClick={() => setRemoteUpdateAvailable(undefined)} type="button">Keep viewing current</button></section>}
 
-    {commandOpen && <section aria-label="More actions" className="workspace-command-layer fixed right-3 z-30 max-h-[82vh] w-[min(22rem,calc(100vw-1.5rem))] overflow-auto rounded-lg border border-slate-400 bg-white p-3" ref={commandLayerRef}><div className="flex items-center justify-between"><h2>More actions</h2><button aria-label="Close more actions" className="min-h-8 min-w-8 rounded border" onClick={() => setCommandOpen(false)}>×</button></div><div className="mt-3 grid gap-2">
-      <label className="text-xs font-normal uppercase tracking-wide text-slate-600" htmlFor="template-picker">Start or reset<select className="mt-1 min-h-10 w-full rounded border border-slate-400 bg-white px-2 text-sm font-normal normal-case tracking-normal" id="template-picker" onChange={(event) => { choosePreset(event.target.value); setCommandOpen(false); }} value=""><option disabled value="">Choose…</option><option value="blank">New blank calculation</option><optgroup label="New carbide templates"><option value="generic-211">New 211 carbide</option><option value="generic-312">New 312 carbide</option><option value="generic-413">New 413 carbide</option></optgroup><optgroup label="Built-in examples">{WORKSPACE_PRESETS.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</optgroup></select></label>
-      <label className="text-xs font-normal uppercase tracking-wide text-slate-600" htmlFor="layout-picker">Workspace layout<select aria-label="Workspace layout" className="mt-1 min-h-10 w-full rounded border border-slate-400 bg-white px-2 text-sm font-normal normal-case tracking-normal" id="layout-picker" onChange={(event) => { const selected = layouts.find((item) => item.id === event.target.value); if (!selected) return; if (selected.kind === "route-comparison") { window.location.href = "/compare"; return; } setActiveLayout(selected); setMode(selected.kind === "advanced-calculator" ? "advanced" : "standard"); setCommandOpen(false); }} value={activeLayout?.id ?? ""}><optgroup label="Built-in layouts">{layouts.filter((item) => item.builtIn).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</optgroup>{layouts.some((item) => !item.builtIn) && <optgroup label="My layouts">{layouts.filter((item) => !item.builtIn).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</optgroup>}</select></label>
-      {mode === "standard" && <div className="calculator-menu-actions" aria-label="Recipe actions">{secondaryActions}</div>}
-      <button className="rounded border p-2 text-left" onClick={(event) => { panelTriggerRef.current = moreButtonRef.current ?? event.currentTarget; setActivePanel("routes"); setCommandOpen(false); void refreshLibraries(); }}>Manage routes</button>
-      <button className="rounded border p-2 text-left" onClick={() => { setCommandOpen(false); setSamplesOpen(true); }} type="button">Sample IDs</button>
-      {savedRecipe && <button className="rounded border p-2 text-left" onClick={(event) => { void openNotes(savedRecipe, event.currentTarget); setCommandOpen(false); }}>Recipe notes</button>}
-      <Link className="rounded border p-2 text-left" href="/demo">Documentation</Link><button className="rounded border p-2 text-left" onClick={() => { setTraceOpen(true); setCommandOpen(false); }}>Open calculation trace</button>{activePreset && <button className="rounded border p-2 text-left" onClick={() => { choosePreset(activePreset.id); setCommandOpen(false); }}>Reset copied example</button>}
-    </div></section>}
-
-    {activePanel !== "none" && <aside aria-label={activePanel === "recipes" ? "Saved recipe library" : activePanel === "routes" ? "Saved route library" : "Recipe revision history"} className="fixed inset-y-14 right-0 z-20 w-full max-w-md overflow-auto border-l border-slate-400 bg-white p-4 shadow-xl print:hidden" ref={panelLayerRef}>
+    {activePanel !== "none" && <aside aria-label={activePanel === "recipes" ? "Saved recipe library" : activePanel === "routes" ? "Saved route library" : "Recipe revision history"} className="workbench-drawer print:hidden" ref={panelLayerRef}>
       <div className="flex items-center justify-between"><h2 className="text-lg font-semibold">{activePanel === "recipes" ? "Local recipes" : activePanel === "routes" ? "Precursor routes" : `Revision history · ${savedRecipe?.name ?? "recipe"}`}</h2><button aria-label="Close library" className="min-h-9 min-w-9 rounded border" onClick={() => setActivePanel("none")}>×</button></div>
       {activePanel !== "revisions" && <input aria-label="Search local library" className="mt-3 min-h-10 w-full rounded border px-3" onChange={(event) => setLibrarySearch(event.target.value)} placeholder="Search name, formula, or status" value={librarySearch} />}
       {activePanel === "recipes" && recipes.length > 0 && <section aria-label="Print selected recipes" className="mt-3 rounded border bg-slate-50 p-3"><label className="text-sm font-semibold">Recipes to print<select aria-label="Recipes to print" className="mt-1 min-h-24 w-full rounded border bg-white p-2 text-sm" multiple onChange={(event) => setSelectedPrintRecipeIds(Array.from(event.currentTarget.selectedOptions, (option) => option.value))} value={[...selectedPrintRecipeIds]}>{recipes.map((item) => <option key={item.id} value={item.id}>{item.name} · revision {item.currentRevisionNumber}</option>)}</select></label><p className="mt-1 text-xs">Use Ctrl or Command to select multiple recipes. The configured 2/4/6-up layout is applied in this visible list order.</p><button className="mt-2 w-full rounded border border-slate-500 px-3 py-2 font-semibold disabled:text-slate-400" disabled={!selectedPrintRecipeIds.length} onClick={() => void printSelectedRecipes()}>Print selected recipes</button></section>}
@@ -740,9 +753,7 @@ export function WorkspaceShell() {
     </aside>}
 
     <div className={`page-container page-container-workspace calculator-work-area ${mode === "standard" ? "calculator-standard" : "calculator-advanced"}`} data-layout={activeLayout?.id ?? "builtin-simple-calculator"} style={{ "--workspace-input": `${activeLayout?.inputWidthPercent ?? 40}%` } as CSSProperties}>
-      <section aria-labelledby="batch-setup-heading" className="calculator-setup">
-        <div className="calculator-setup-bar">
-          <h2 id="batch-setup-heading">Batch setup</h2>
+      <div className="workbench-command-bar calculator-command-bar">
           <div aria-label="Calculator page actions" className="page-toolbar" role="toolbar">
             <div className="command-group">
               <button className="ui-button" onClick={newRecipe}>New</button>
@@ -753,7 +764,10 @@ export function WorkspaceShell() {
             {mode === "advanced" && secondaryActions}
           </div>
           <DetailModeControl ariaLabel="Interaction mode" className="workspace-detail-mode" mode={mode} onChange={setMode} />
-        </div>
+      </div>
+      <div className="calculator-inputs">
+      <section aria-labelledby="batch-setup-heading" className="workbench-panel calculator-setup">
+        <PaneHeading id="batch-setup-heading" index="01" title="Batch setup" />
         <div className="calculator-target-fields">
           <label className="block text-sm font-medium" htmlFor="target-formula">Target formula<input aria-describedby={recipe.targetFormula.trim() !== "" && calculation.errors.some((item) => item.fieldPath === "targetFormula") ? "formula-error" : undefined} className="w-full rounded border px-3" placeholder="e.g. Ti2AlC" data-primary-field id="target-formula" onChange={(event) => { const targetFormula = event.target.value; const normalized = resolveWorkspaceNormalization({ ...recipe, targetFormula }); setRecipe({ ...recipe, targetFormula, siteComposition: normalized?.success ? normalized.value.explicitSiteModel : undefined, radiusDescriptorConfig: undefined }); }} ref={formulaRef} spellCheck={false} value={recipe.targetFormula} /></label>
           <label className="block text-sm font-medium" htmlFor="batch-mass">Target batch mass<InputWithSuffix aria-invalid={batchMassInvalid} className="tabular-nums" aria-label="Target batch mass (g)" data-primary-field id="batch-mass" inputMode="decimal" onChange={(event) => setRecipe({ ...recipe, requestedMassGrams: event.target.value })} ref={batchRef} suffix="g" value={recipe.requestedMassGrams} /></label>
@@ -765,20 +779,21 @@ export function WorkspaceShell() {
           <button className="ui-button ui-button-compact" onClick={() => { setMode("advanced"); requestAnimationFrame(() => document.getElementById("inspector-heading")?.focus()); }} type="button">Inspect in Advanced</button>
         </div>}
       </section>
-      <section aria-labelledby="inputs-heading" className="calculator-feed min-w-0">
-        <div className="calculator-feed-header">
-          <h2 className="calculator-input-heading" id="inputs-heading" tabIndex={-1}>Composition and precursors</h2>
-          <div className="calculator-precursor-toolbar">
+      <section aria-labelledby="inputs-heading" className="workbench-panel calculator-feed">
+        <PaneHeading id="inputs-heading" index="02" title="Precursors" actions={
+          <div className="command-group">
             <button className="ui-button ui-button-compact" id="add-precursor" onClick={addPrecursor}><span aria-hidden="true">＋ </span>Add precursor</button>
             {mode === "advanced" && <button aria-label="Clear all precursors" className="ui-button ui-button-compact ui-button-destructive" disabled={!recipe.precursors.length} onClick={clearAllPrecursors}>Clear all</button>}
           </div>
-        </div>
+        } />
+        {!recipe.precursors.length && <p className="calculator-feed-empty">Add the materials you will weigh and enter their purity.</p>}
         <PrecursorRows advanced={mode === "advanced"} onChange={(index, patch) => setRecipe(replacePrecursor(recipe, index, patch))} onMove={movePrecursor} onNavigate={navigatePrecursorFormula} onRemove={removePrecursor} precursors={recipe.precursors} />
         <PrecursorSuggestions enabled={Boolean(assistanceTarget && !currentValid)} loading={routes.length > 0 && !catalogReady} message={coverageMessage} onAdd={addSuggestedPrecursors} onOpenChange={setSuggestionOpen} open={suggestionOpen} suggestions={suggestions} />
       </section>
+      </div>
 
-      <section aria-labelledby="results-heading" className="calculator-results min-w-0">
-        <div className="calculator-pane-title"><h2 id="results-heading" className="text-lg font-semibold">Final weighing results</h2><span className="weighing-result-state" data-state={historicalSnapshot ? "historical" : stale ? "stale" : currentValid ? "current" : "pending"}>{historicalSnapshot ? "Historical saved result" : stale ? "Stale" : currentValid ? "Current working result" : "Awaiting balance"}</span></div>
+      <section aria-labelledby="results-heading" className="workbench-panel calculator-results">
+        <PaneHeading id="results-heading" index="03" title="Final weighing results" actions={<span className="weighing-result-state" data-state={historicalSnapshot ? "historical" : stale ? "stale" : currentValid ? "current" : "pending"}>{historicalSnapshot ? "Historical saved result" : stale ? "Stale" : currentValid ? "Current working result" : "Awaiting balance"}</span>} />
         {mode === "standard" && (currentValid || historicalSnapshot) && reference && (reference !== intended || intended !== adjusted) && <dl className="calculator-feed-summary">
           <div><dt>Target reference</dt><dd>{reference}</dd></div>
           {reference !== intended && <div><dt>Intended feed</dt><dd>{intended}</dd></div>}
@@ -789,17 +804,20 @@ export function WorkspaceShell() {
         {!currentValid && recipe.targetFormula.trim() !== "" && (stale || recipe.precursors.length > 0 || !suggestionTarget || batchMassInvalid) && <div aria-live="polite" className="mt-3 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-950" role="alert"><p className="font-semibold">Current recipe cannot be calculated.</p>{calculation.errors.map((error, index) => <p className="mt-1" key={`${error.code}-${index}`}>{mode === "advanced" && <><span className="font-mono">{error.code}</span>: </>}{error.message}</p>)}</div>}
         {displayed ? <><div className="weighing-table-scroll overflow-x-auto" ref={resultsRef} tabIndex={0}><table className={`w-full border-collapse text-left text-sm ${mode === "advanced" ? "min-w-[680px]" : ""}`}><caption className="sr-only">Final gross weighing masses</caption><thead><tr>{visibleResultFields.map((field) => <th className={`p-2 ${["purity", "solver-molar-ratio", "final-intended-molar-ratio", "batch-scaled-moles", "molar-mass", "pure-required-mass", "pre-round-mass", "final-mass", "realized-moles"].includes(field) ? "text-right" : "text-left"}`} key={field} scope="col">{FIELD_LABELS[field]}</th>)}</tr></thead><tbody>{sortedPrecursors.map((item) => { const definition = recipe.precursors.find((precursor) => precursor.id === item.precursorId); return <tr className="border-b border-slate-200" data-precursor-id={item.precursorId} key={item.precursorId}>{visibleResultFields.map((field) => renderResultCell(field, item, definition?.formula))}</tr>; })}</tbody><tfoot><tr className="font-semibold">{visibleResultFields.map((field, index) => field === "final-mass" ? <td className="weighing-mass p-2 text-right font-semibold tabular-nums" key={field}>{formatMassForBalance(displayed.batch.finalRoundedTotalWeighingMassGrams, recipe.balanceIncrementGrams)} g</td> : index === 0 ? <th className="p-2" key={field}>Final rounded total</th> : <td className="p-2" key={field} />)}</tr></tfoot></table></div>{visibleResultFields.includes("atomic-radius") && !resultRadiusDataset && <p className="mt-2 rounded bg-amber-50 p-2 text-xs font-semibold">Atomic-radius column enabled, but no usable dataset is selected.</p>}
         {diagnosticPresentation && (diagnosticPresentation.blocking.length > 0 || diagnosticPresentation.action.length > 0) && <section aria-labelledby="diagnostics-heading" className="weighing-diagnostics"><h3 id="diagnostics-heading" className="text-sm font-semibold">Review before weighing</h3>{diagnosticPresentation.blocking.map((issue) => <article className="mt-2 rounded border-l-4 border-red-700 bg-red-50 p-3 text-sm text-red-950" key={issue.id}><strong>{issue.title}</strong><p>{issue.message}</p></article>)}{diagnosticPresentation.action.map((issue) => <article className="weighing-advisory" key={issue.id}><strong>{issue.title}</strong><p>{issue.message}</p><details className="text-xs"><summary>Technical detail</summary><p>Codes: {issue.underlyingCodes.join(", ")}</p>{issue.exactMessages.map((message) => <p className="font-mono" key={message}>{message}</p>)}</details></article>)}</section>}
-        </> : <p className="weighing-empty">Weighing masses appear here when the target and precursors balance.</p>}
+        </> : <EmptyPane title="Waiting for a balanced formulation" actions={!recipe.targetFormula.trim() && !recipe.precursors.length ? <button className="ui-button ui-button-compact" onClick={() => choosePreset("ti3alc2")} type="button">Load Ti₃AlC₂ example</button> : undefined}>Enter the target formula, batch mass, and precursors to calculate what to weigh.</EmptyPane>}
         <div className="calculator-result-tools flex flex-wrap items-center gap-2 print:hidden"><label className="text-xs font-medium" htmlFor="weighing-sort">Sort<select className="ml-2 min-h-9 rounded border border-slate-400 bg-white px-2 text-sm font-normal" id="weighing-sort" onChange={(event) => { const selected = event.target.value as WeighingSortOption; setWeighingSort(selected); window.localStorage.setItem(WEIGHING_SORT_STORAGE_KEY, selected); }} value={weighingSort}>{WEIGHING_SORT_OPTIONS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label><button className="ui-button ui-button-compact" disabled={!weighingSummary} onClick={() => setSummaryOpen(true)}>View weighing summary</button>{historicalSnapshot && <button className="rounded border border-blue-500 px-2 py-1 text-sm" onClick={() => { setHistoricalSnapshot(undefined); setUnsavedChanges(true); setStatusMessage("Recalculated with the current engine as an unsaved working state; the historical snapshot is unchanged."); }}>Recalculate with current engine</button>}</div>
       </section>
 
-      {mode === "advanced" && <section aria-labelledby="inspector-heading" className="calculator-inspector min-w-0">
-        <h2 id="inspector-heading" tabIndex={-1}>Formulation inspector</h2>
-        <nav aria-label="Advanced calculator sections" className="calculator-section-nav">
-          <a href="#composition-sites">Composition &amp; sites</a><a href="#feed-precursors">Feed &amp; precursors</a>
-          <a href="#batch-constraints">Batch &amp; constraints</a><a href="#material-properties">Material properties</a>
-          {displayed && <a href="#calculation-audit">Diagnostics &amp; provenance</a>}
-        </nav>
+      {mode === "advanced" && <section aria-labelledby="inspector-heading" className="workbench-panel calculator-inspector">
+        <PaneHeading id="inspector-heading" index="04" title="Formulation inspector" />
+        <SectionIndex label="Advanced calculator sections" items={[
+          { id: "composition-sites", name: "Composition & sites" },
+          { id: "feed-precursors", name: "Feed & precursors" },
+          { id: "batch-constraints", name: "Batch & constraints" },
+          { id: "material-properties", name: "Material properties" },
+          ...(displayed ? [{ id: "calculation-audit", name: "Diagnostics & provenance" }] : []),
+        ]} />
+        <div className="calculator-inspector-body">
         {mode === "advanced" && <h3 className="calculator-group-heading" id="composition-sites" tabIndex={-1}>Composition &amp; sites</h3>}
         {mode === "advanced" && <p className="mt-1 text-xs text-slate-600">{activePreset ? `You are editing an unsaved copy; ${activePreset.name} remains unchanged. ` : ""}{validationNote}</p>}
         {mode === "advanced" && <label className="mt-3 flex min-h-10 items-center gap-2 rounded border border-slate-300 bg-white px-3 text-sm"><input checked={recipe.normalizeLeadingSiteRatios ?? false} onChange={(event) => { const enabled = event.target.checked; const normalized = resolveWorkspaceNormalization({ ...recipe, normalizeLeadingSiteRatios: enabled }); setRecipe({ ...recipe, normalizeLeadingSiteRatios: enabled, siteComposition: normalized?.success ? normalized.value.explicitSiteModel : undefined, radiusDescriptorConfig: undefined }, "site-ratio-normalization", "normalize-leading-site-ratios"); }} type="checkbox" />Normalize leading mixed-site ratios</label>}
@@ -837,6 +855,7 @@ export function WorkspaceShell() {
           <AtomicRadiusPanel config={recipe.radiusDescriptorConfig} onConfigChange={(radiusDescriptorConfig) => setRecipe({ ...recipe, radiusDescriptorConfig })} onConfigureSites={() => setStatusMessage("Choose an explicit 211, 312, 413, or custom site model and assign every occupant; no sites were inferred from the flat formula.")} siteModel={recipe.siteComposition} />
         </section>}
 
+        </div>
       </section>}
     </div>
 

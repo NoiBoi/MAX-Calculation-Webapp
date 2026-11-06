@@ -69,7 +69,7 @@ test("EMI analyzer renders invalid shielding gaps and downloads both CSV exports
   await page.locator('input[type="file"][accept^=".csv"]').setInputFiles({ name: "gap.csv", mimeType: "text/csv", buffer: Buffer.from(validCsv()) });
   await expect(page.getByText("1 of 1 files ready")).toBeVisible();
 
-  const shieldingPlot = page.getByRole("region", { name: "4. Total shielding effectiveness (SET)" });
+  const shieldingPlot = page.getByRole("region", { name: "Total shielding effectiveness (SET)" });
   await expect(shieldingPlot.locator('polyline[data-trace-id$="-forward-SET"][data-segment-count="2"]')).toHaveCount(2);
 
   const processedDownload = page.waitForEvent("download");
@@ -120,7 +120,7 @@ test("EMI thickness, themed electrical controls, and graph interaction use one c
     expect(style.color).not.toBe(style.background);
     expect(style.border).not.toBe(style.background);
   }
-  const plot = page.getByRole("region", { name: "4. Total shielding effectiveness (SET)" });
+  const plot = page.getByRole("region", { name: "Total shielding effectiveness (SET)" });
   await expect(plot.locator('path[fill="#dc2626"]')).toHaveCount(0);
   const svg = plot.locator("svg.emi-chart");
   await svg.focus();
@@ -146,7 +146,7 @@ test("EMI graph axes use one readable notation for tiny and near-unity configure
   await page.getByText("Publication plot formatting").click();
   await page.getByLabel("Power Y minimum").fill("-0.00008967");
   await page.getByLabel("Power Y maximum").fill("0.00005049");
-  const powerPlot = page.getByRole("region", { name: "7. Incident-power coefficients" });
+  const powerPlot = page.getByRole("region", { name: "Incident-power coefficients" });
   const tinyLabels = await powerPlot.locator(".emi-y-tick-label").allTextContents();
   expect(tinyLabels).toHaveLength(5);
   expect(tinyLabels.filter((label) => label !== "0").every((label) => label.includes("×10"))).toBe(true);
@@ -199,7 +199,7 @@ test("EMI projects support bulk metadata, replicate interpolation, persistence, 
   await page.getByText("Advanced interpolation settings").click();
   await page.getByLabel("Enable interpolation for incompatible grids").check();
   await expect(page.getByText(/aggregate frequencies \(interpolated\)/)).toBeVisible();
-  await expect(page.getByRole("region", { name: "4. Total shielding effectiveness (SET)" }).locator("polygon")).not.toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Total shielding effectiveness (SET)" }).locator("polygon")).not.toHaveCount(0);
 
   await page.getByLabel("Project name").fill("Saved replicate project");
   await page.getByRole("button", { name: "Save project" }).click();
@@ -233,9 +233,9 @@ test("SET smoothing and Simon overlay are independent, theoretical, and export-n
   ]);
   await expect(page.getByText("2 of 2 files ready")).toBeVisible();
 
-  const setPlot = page.getByRole("region", { name: "4. Total shielding effectiveness (SET)" });
-  const serPlot = page.getByRole("region", { name: "5. Reflection contribution (SER)" });
-  const seaPlot = page.getByRole("region", { name: "6. Effective absorption contribution (SEA)" });
+  const setPlot = page.getByRole("region", { name: "Total shielding effectiveness (SET)" });
+  const serPlot = page.getByRole("region", { name: "Reflection contribution (SER)" });
+  const seaPlot = page.getByRole("region", { name: "Effective absorption contribution (SEA)" });
   await expect(setPlot.getByLabel("Smooth measured curves")).not.toBeChecked();
   await expect(setPlot.getByLabel("Show Simon estimate")).toBeDisabled();
   await expect(serPlot.getByLabel("Smooth measured curves")).not.toBeChecked();
@@ -257,7 +257,7 @@ test("SET smoothing and Simon overlay are independent, theoretical, and export-n
 
   const measuredBefore = await setPlot.locator('polyline[data-series-kind="measured"]').first().getAttribute("points");
   await setPlot.getByLabel("Smooth measured curves").check();
-  await setPlot.getByLabel("4. Total shielding effectiveness (SET) smoothing window").selectOption("3");
+  await setPlot.getByLabel("Total shielding effectiveness (SET) smoothing window").selectOption("3");
   await expect(setPlot.getByText("Smoothed display")).toBeVisible();
   await expect(setPlot.locator('polyline[data-series-kind="measured"]').first()).toHaveAttribute("data-smoothed", "true");
   expect(await setPlot.locator('polyline[data-series-kind="measured"]').first().getAttribute("points")).not.toBe(measuredBefore);
@@ -269,7 +269,7 @@ test("SET smoothing and Simon overlay are independent, theoretical, and export-n
   await expect(simonLine).toHaveCount(1);
   await expect(simonLine).toHaveAttribute("stroke-dasharray", "7 5");
   const simonBefore = await simonLine.getAttribute("data-values");
-  await setPlot.getByLabel("4. Total shielding effectiveness (SET) smoothing window").selectOption("7");
+  await setPlot.getByLabel("Total shielding effectiveness (SET) smoothing window").selectOption("7");
   await expect(simonLine).toHaveAttribute("data-values", simonBefore ?? "");
   await setPlot.locator("svg.emi-chart").focus();
   await expect(setPlot.getByRole("status")).toContainText("Raw measured value");
@@ -300,5 +300,5 @@ test("SET smoothing and Simon overlay are independent, theoretical, and export-n
   await page.goto("/emi");
   await expect(page.getByText("No files loaded")).toBeVisible();
   await page.locator('input[type="file"][accept^=".csv"]').setInputFiles({ name: "reopened.csv", mimeType: "text/csv", buffer: Buffer.from(continuousCsv()) });
-  await expect(page.getByRole("region", { name: "4. Total shielding effectiveness (SET)" }).getByLabel("Smooth measured curves")).not.toBeChecked();
+  await expect(page.getByRole("region", { name: "Total shielding effectiveness (SET)" }).getByLabel("Smooth measured curves")).not.toBeChecked();
 });

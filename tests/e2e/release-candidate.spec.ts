@@ -3,8 +3,8 @@ import { readFile } from "node:fs/promises";
 
 async function openMore(page: import("@playwright/test").Page) { await page.getByRole("button", { name: /More actions/ }).click(); }
 async function chooseExample(page: import("@playwright/test").Page, id = "ti2aln") { await openMore(page); await page.getByLabel("Start or reset").selectOption(id); }
-async function openSettings(page: import("@playwright/test").Page) { await page.getByRole("button", { name: "Calculator" }).click(); await page.getByRole("menuitem", { name: "Settings" }).click(); }
-async function openCompare(page: import("@playwright/test").Page) { await page.getByRole("button", { name: "Calculator" }).click(); await page.getByRole("menuitem", { name: /Comparison/ }).click(); }
+async function openSettings(page: import("@playwright/test").Page) { await page.getByRole("navigation", { name: "MAXCalc workspaces" }).getByRole("link", { name: "Settings", exact: true }).click(); }
+async function openCompare(page: import("@playwright/test").Page) { await page.getByRole("navigation", { name: "MAXCalc workspaces" }).getByRole("link", { name: "Comparison", exact: true }).click(); }
 async function addCurrentPair(page: import("@playwright/test").Page) { await page.getByRole("toolbar", { name: "Comparison page actions" }).getByRole("button", { name: "Add current recipe" }).click(); const scenario = page.getByRole("region").filter({ has: page.getByRole("button", { name: "Duplicate" }) }).first(); await scenario.getByRole("button", { name: "Duplicate" }).click(); }
 async function saveRecipe(page: import("@playwright/test").Page) { await page.getByRole("button", { name: "Save", exact: true }).click(); const dialog = page.getByRole("dialog", { name: "Save recipe" }); await dialog.getByRole("button", { name: /Save recipe|Save revision|Rename recipe/ }).click(); await expect(dialog).not.toBeVisible(); }
 
@@ -40,7 +40,7 @@ test("UX-COMPARE-004 saves a preferred scenario as an independent recipe", async
   await page.getByLabel("Copy of Unsaved calculation precursor 2 purity").fill("95");
   await page.getByLabel("Copy of Unsaved calculation scenario").getByRole("button", { name: "Save as recipe" }).click();
   await expect(page.getByText(/Saved Copy of Unsaved calculation from comparison/)).toBeVisible();
-  await page.getByRole("link", { name: "Calculator" }).click();
+  await page.getByRole("link", { name: "Calculator", exact: true }).click();
   await page.getByRole("button", { name: "Open", exact: true }).click();
   await expect(page.getByLabel("Recipe name for Ti2AlN")).toHaveValue("Copy of Unsaved calculation from comparison");
 });
@@ -50,8 +50,7 @@ test("UX-LAYOUT-001 saves and restores a bounded layout without scientific chang
   await openSettings(page);
   await page.getByRole("article").filter({ hasText: "Compact Balance View" }).getByRole("button", { name: "Set default" }).click();
   await expect(page.getByText(/default local layout/)).toBeVisible();
-  await page.getByRole("button", { name: "Choose workspace" }).click();
-  await page.getByRole("menuitem", { name: /Calculator/ }).click();
+  await page.getByRole("navigation", { name: "MAXCalc workspaces" }).getByRole("link", { name: "Calculator", exact: true }).click();
   await expect(page).toHaveURL(/\/workspace$/);
   await openMore(page);
   await expect(page.getByLabel("Workspace layout", { exact: true })).toHaveValue(/layout-/);

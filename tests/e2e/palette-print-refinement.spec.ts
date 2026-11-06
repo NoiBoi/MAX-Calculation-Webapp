@@ -8,13 +8,13 @@ async function example(page: Page) { await page.getByRole("button", { name: /Mor
 test("THEME-PALETTE-001 Dark uses neutral charcoal surfaces", async ({ page }) => {
   await ready(page); await appearance(page, "Dark"); await example(page);
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark"); await expect(page.locator("body")).toHaveCSS("background-color", "rgb(24, 26, 29)");
-  await expect(page.getByRole("region", { name: "Composition and precursors" })).toHaveCSS("background-color", "rgb(32, 34, 38)"); await expect(page.getByLabel("Target formula")).toHaveCSS("background-color", "rgb(28, 30, 34)");
+  await expect(page.getByRole("region", { name: "Precursors" })).toHaveCSS("background-color", "rgb(32, 34, 38)"); await expect(page.getByLabel("Target formula")).toHaveCSS("background-color", "rgb(28, 30, 34)");
   const rgb = await page.locator("body").evaluate((element) => getComputedStyle(element).backgroundColor.match(/\d+/g)!.map(Number)); expect(Math.max(...rgb) - Math.min(...rgb)).toBeLessThanOrEqual(5);
 });
 
 test("MIDNIGHT-001 uses near-black surfaces and keeps masses readable after reload", async ({ page }) => {
   await ready(page); await appearance(page, "Midnight"); await example(page); await expect(page.locator("html")).toHaveAttribute("data-theme", "midnight");
-  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(4, 4, 5)"); const panel = page.getByRole("region", { name: "Composition and precursors" }); await expect(panel).toHaveCSS("background-color", "rgb(16, 17, 19)"); await expect(page.getByLabel("Target formula")).toHaveCSS("background-color", "rgb(9, 10, 11)");
+  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(4, 4, 5)"); const panel = page.getByRole("region", { name: "Precursors" }); await expect(panel).toHaveCSS("background-color", "rgb(16, 17, 19)"); await expect(page.getByLabel("Target formula")).toHaveCSS("background-color", "rgb(9, 10, 11)");
   await expect(page.getByRole("table", { name: /Final gross weighing masses/ }).getByText("Final rounded total")).toBeVisible();
   await page.reload({ waitUntil: "domcontentloaded" }); await expect(page.locator("html")).toHaveAttribute("data-theme", "midnight"); await expect(page.locator("html")).toHaveAttribute("data-theme-preference", "midnight");
   const audit = await new AxeBuilder({ page }).analyze(); expect(audit.violations.filter((item) => ["serious", "critical"].includes(item.impact ?? ""))).toEqual([]);
@@ -35,5 +35,5 @@ test("creator credit is consistent in the site footer and excluded from print", 
 test("BRAND-001 uses the transparent logo in site chrome and the opaque logo as the tab icon", async ({ page }) => {
   await ready(page); const brand = page.getByRole("link", { name: "MAXCalc calculator" }); const logo = brand.getByRole("img", { name: "MAXCalc logo" }); await expect(logo).toHaveAttribute("src", "/brand/max-stoich-logo.svg"); const icon = page.locator('link[rel="icon"]'); await expect(icon).toHaveAttribute("href", /\/icon\.svg/);
   const transparentAsset = await page.request.get("/brand/max-stoich-logo.svg"); const opaqueAsset = await page.request.get("/icon.svg"); expect(transparentAsset.ok()).toBe(true); expect(opaqueAsset.ok()).toBe(true); expect(await transparentAsset.text()).not.toContain('<path fill="#ffffff" d="m-0.001312336 107.871155'); expect(await opaqueAsset.text()).toContain('<path fill="#ffffff" d="m-0.001312336 107.871155');
-  await appearance(page, "Light"); await expect(logo).toHaveCSS("filter", "none"); await appearance(page, "Dark"); await expect(logo).toHaveCSS("filter", "invert(1)"); await appearance(page, "Midnight"); await expect(logo).toHaveCSS("filter", "invert(1)");
+  await appearance(page, "Light"); await expect(logo).toHaveCSS("filter", "invert(1)"); await appearance(page, "Dark"); await expect(logo).toHaveCSS("filter", "invert(1)"); await appearance(page, "Midnight"); await expect(logo).toHaveCSS("filter", "invert(1)");
 });

@@ -32,7 +32,7 @@ test("UX-REMEDIATION-003 top bar keeps primary actions and demotes secondary nav
   const bar = page.getByRole("toolbar", { name: "Calculator page actions" });
   await expect(bar.getByRole("button", { name: "New" })).toBeVisible(); await expect(bar.getByRole("button", { name: "Open" })).toBeVisible(); await expect(bar.getByRole("button", { name: "Save" })).toBeVisible();
   await expect(bar.getByRole("button", { name: "Routes" })).toHaveCount(0); await expect(bar.getByRole("link", { name: /Layouts/ })).toHaveCount(0);
-  await more(page); await expect(page.getByRole("button", { name: "Manage routes" })).toBeVisible(); await page.getByRole("button", { name: "Close more actions" }).click(); await page.getByRole("button", { name: "Calculator" }).click(); await expect(page.getByRole("menuitem", { name: "Settings" })).toBeVisible();
+  await more(page); await expect(page.getByRole("button", { name: "Manage routes" })).toBeVisible(); await page.getByRole("button", { name: "Close more actions" }).click(); await expect(page.getByRole("navigation", { name: "MAXCalc workspaces" }).getByRole("link", { name: "Settings", exact: true })).toBeVisible();
 });
 
 test("UX-REMEDIATION-004 standard and advanced modes are materially different without state loss", async ({ page }) => {
@@ -46,7 +46,7 @@ test("UX-REMEDIATION-004 standard and advanced modes are materially different wi
 test("UX-REMEDIATION-005 compact balance layout makes the weighing result dominant", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 }); await ready(page); await example(page, "ti2aln"); await more(page); await page.getByLabel("Workspace layout").selectOption("builtin-compact-balance");
   await expect(page.locator('[data-layout="builtin-compact-balance"]')).toBeVisible();
-  const result = await page.getByRole("region", { name: "Final weighing results" }).boundingBox(); const input = await page.getByRole("heading", { name: "Composition and precursors" }).locator("..").boundingBox();
+  const result = await page.getByRole("region", { name: "Final weighing results" }).boundingBox(); const input = await page.getByRole("heading", { name: "Precursors" }).locator("..").boundingBox();
   expect(result?.width ?? 0).toBeGreaterThan(input?.width ?? 0); await expect(page.getByText("Final rounded total")).toBeInViewport();
 });
 

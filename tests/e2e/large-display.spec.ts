@@ -94,7 +94,8 @@ test("COMPARE-POLISH-001 exposes grouped actions and distinct comparison views",
   await page.goto("/compare");
   await expect(page.getByRole("heading", { name: "No recipes selected for comparison" })).toBeVisible();
   await expect(page.locator(".comparison-primary-actions")).toContainText("Add saved recipes");
-  await expect(page.locator(".comparison-secondary-actions")).toContainText("Add blank scenario");
+  await expect(page.locator(".comparison-primary-actions")).toContainText("Add blank scenario");
+  await expect(page.locator(".comparison-secondary-actions")).toContainText("Save comparison");
   await page.getByRole("toolbar", { name: "Comparison page actions" }).getByRole("button", { name: "Add blank scenario" }).click();
   await page.getByLabel("Blank scenario scenario", { exact: true }).getByRole("button", { name: "Duplicate" }).click();
   const views = page.getByRole("group", { name: "Comparison view" });

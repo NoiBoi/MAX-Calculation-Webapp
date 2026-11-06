@@ -7,6 +7,7 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { useCloudSync } from "@/components/cloud/cloud-sync-provider";
 import { useAccountRepositories } from "@/components/cloud/use-account-repositories";
 import { AppHeader, PageContainer } from "@/components/site/app-header";
+import { EmptyPane } from "@/components/ui/workbench";
 import { labApi } from "@/lib/labs/client";
 import { syncAuthorizedLabCaches } from "@/lib/labs/local-cache";
 import type { LabAuditEvent, LabInvitationSummary, LabLibraryEntry, LabLibraryVersion, LabMembership, LabPublicationNote, LabRetentionDays, LabRole, LabSummary } from "@/lib/labs/types";
@@ -16,8 +17,8 @@ type LabView = "library" | "members" | "audit" | "settings";
 const requestId = () => `ui-${crypto.randomUUID()}`;
 
 function LabNavigation({ lab, view }: { lab: LabSummary; view: LabView }) {
-  return <nav aria-label="Lab sections" className="flex flex-wrap gap-2 border-b pb-3">
-    {(["library","members","audit","settings"] as const).map((item) => <Link aria-current={view === item ? "page" : undefined} className={`rounded border px-3 py-2 text-sm font-semibold ${view === item ? "bg-teal-900 text-white" : ""}`} href={`/labs/${lab.id}/${item}`} key={item}>{item[0]!.toUpperCase() + item.slice(1)}</Link>)}
+  return <nav aria-label="Lab sections" className="section-index">
+    {(["library","members","audit","settings"] as const).map((item) => <Link aria-current={view === item ? "page" : undefined} href={`/labs/${lab.id}/${item}`} key={item}>{item[0]!.toUpperCase() + item.slice(1)}</Link>)}
   </nav>;
 }
 
@@ -37,9 +38,9 @@ export function LabsHome() {
     setMessage("");
   }, [cloud.online, repositories.database, user]);
   useEffect(() => { queueMicrotask(() => void load()); }, [load]);
-  if (!user) return <><AppHeader activeSection="labs" status="Sign in to access authorized libraries" title="Private lab libraries" contextualActions={<Link className="ui-button" href="/workspace">Calculator</Link>} /><main><PageContainer width="readable"><p>Sign in to access authorized lab libraries.</p><Link className="ui-button ui-button-primary mt-4" href="/login?next=/labs">Sign in</Link></PageContainer></main></>;
+  if (!user) return <><AppHeader activeSection="labs" status="Shared, revisioned recipe snapshots" title="Private lab libraries" /><main><PageContainer width="workspace"><section className="workbench-panel"><EmptyPane actions={<Link className="ui-button ui-button-primary mt-2" href="/login?next=/labs">Sign in</Link>} title="Sign in to access your lab libraries">View libraries available to your account and share selected recipe revisions with your lab.</EmptyPane></section></PageContainer></main></>;
   return <main className="min-h-screen">
-    <AppHeader activeSection="labs" status="Personal recipes remain private until explicitly published" title="Private lab libraries" contextualActions={<Link className="ui-button" href="/workspace">Calculator</Link>} />
+    <AppHeader activeSection="labs" status="Personal recipes remain private until explicitly published" title="Private lab libraries" />
     <PageContainer width="workspace">
     {message && <p aria-live="polite" className="mt-4 rounded border p-3">{message}</p>}
     <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_22rem]">
@@ -135,7 +136,7 @@ export function LabWorkspace({ labId, view }: { labId: string; view: LabView }) 
 
   if (!lab) return <><AppHeader activeSection="labs" status={message} title="Private lab library" contextualActions={<Link className="ui-button" href="/labs">All labs</Link>} /><main><PageContainer width="readable"><p className="rounded border p-4">{message}</p></PageContainer></main></>;
   return <main className="min-h-screen">
-    <AppHeader activeSection="labs" status={<>Private lab library · Your role: <strong>{lab.role}</strong></>} title={lab.name} contextualActions={<><Link className="ui-button" href="/labs">All labs</Link><span className="ui-button" role="status">Read-only snapshots</span></>} />
+    <AppHeader activeSection="labs" status={<>Private lab library · Your role: <strong>{lab.role}</strong></>} title={lab.name} contextualActions={<><Link className="ui-button" href="/labs">All labs</Link><span className="workspace-status" role="status">Read-only snapshots</span></>} />
     <PageContainer width="workspace">
     <LabNavigation lab={lab} view={view} />{message && <p aria-live="polite" className="mt-3 rounded border bg-white p-3">{message}</p>}
     {view === "library" && <section className="mt-4"><div className="flex flex-wrap gap-3"><input aria-label="Search lab library" className="min-w-64 flex-1 rounded border px-3 py-2" onChange={(event) => setSearch(event.target.value)} placeholder="Search title, formulas, or published note text" value={search} /><label className="flex items-center gap-2 rounded border px-3"><input checked={showArchived} onChange={(event) => setShowArchived(event.target.checked)} type="checkbox" />Archived and held</label><Link className="rounded bg-teal-900 px-4 py-2 font-semibold text-white" href="/workspace">Publish from calculator</Link></div>

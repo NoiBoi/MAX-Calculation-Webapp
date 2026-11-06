@@ -10,6 +10,11 @@ import { CloudSyncProvider } from "@/components/cloud/cloud-sync-provider";
 import { getSupabasePublicConfig } from "@/lib/supabase/config";
 import { getServerAuthUser } from "@/lib/supabase/server";
 import "./globals.css";
+import "./workbench.css";
+import "./analysis.css";
+import "./calculator.css";
+import "./workspace-layouts.css";
+import "./print.css";
 
 const plexSans = localFont({
   src: "./fonts/ibm-plex-sans-latin-wght-normal.woff2",

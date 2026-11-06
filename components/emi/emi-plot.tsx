@@ -219,7 +219,7 @@ export function EmiPlot({
     : simonUnavailableCount > 0 ? `${simonUnavailableCount} displayed sample${simonUnavailableCount === 1 ? "" : "s"} lack valid electrical inputs; available estimates can still be shown.` : "";
 
   return <section className="emi-panel" aria-label={title} data-emi-graph-id={graphId}>
-    <div className="emi-section-heading"><div><h2>{format?.title || title}</h2>{format?.subtitle && <p>{format.subtitle}</p>}<p>Invalid calculated values are displayed as gaps.</p></div><div className="emi-export-actions"><button className="ui-button ui-button-compact" onClick={exportSvg} type="button">Export {exportName} SVG</button><button className="ui-button ui-button-compact" onClick={exportPng} type="button">Export {exportName} PNG</button></div></div>
+    <div className="emi-section-heading"><div><h2>{format?.title || title}</h2>{format?.subtitle && <p>{format.subtitle}</p>}<p>Invalid calculated values are displayed as gaps.</p></div><div aria-label="Plot exports" className="command-group" role="group"><button aria-label={`Export ${exportName} SVG`} className="ui-button ui-button-compact" onClick={exportSvg} title="Export SVG" type="button">SVG</button><button aria-label={`Export ${exportName} PNG`} className="ui-button ui-button-compact" onClick={exportPng} title="Export PNG" type="button">PNG</button></div></div>
     {format?.legendPosition !== "none" && <div className={`emi-chart-legend emi-legend-${format?.legendPosition ?? "top"}`} aria-label={`${title} traces`}>
       {legendTraces.map((trace) => <button aria-pressed={!hidden.has(trace.id)} className={`emi-legend-item ${"sampleName" in trace ? "emi-legend-simon" : ""}`} key={trace.id} onClick={() => toggle(trace.id)} type="button">
         <span aria-hidden="true" style={"sampleName" in trace ? { backgroundColor: "transparent", borderTop: `2px dashed ${trace.color}` } : { backgroundColor: trace.color }} />{trace.label}{"sampleName" in trace && <em>Theoretical</em>}
@@ -230,7 +230,7 @@ export function EmiPlot({
       {simonEligible && <label className="emi-checkbox-label"><input checked={showSimonEstimate} disabled={simonTraces.length === 0} onChange={(event) => setShowSimonEstimate(event.target.checked)} type="checkbox" />Show Simon estimate</label>}
       {smoothingEnabled && <span className="emi-view-badge" aria-live="polite">Smoothed display</span>}
     </div>}
-    {(canSmooth || simonEligible) && <p className="emi-graph-help" id={`${graphId}-help`}>Display-only centered moving average. Raw measured values are retained for calculations, tooltips, summaries, and spreadsheet exports. Simon estimates are theoretical and never smoothed.{simonUnavailableMessage && <> {simonUnavailableMessage}</>}</p>}
+    {(canSmooth || simonEligible) && <p className="emi-graph-help" id={`${graphId}-help`}>Smoothing affects the display only. {simonEligible && (simonUnavailableMessage || "Simon estimates are theoretical and use the original measurements.")}</p>}
     {all.length === 0 ? <div className="emi-empty-chart">No valid selected points are available for this plot.</div> : <div className="emi-chart-wrap">
       <svg
         aria-describedby={`${graphId}-help`}
