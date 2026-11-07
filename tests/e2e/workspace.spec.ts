@@ -257,7 +257,7 @@ test("boride coefficients follow the formula until an explicit override is saved
   expect(adjustedMass).not.toBe(derivedMass);
   await mode.getByRole("button", { name: "Standard", exact: true }).click();
   await expect(aluminumMass).toHaveText(adjustedMass);
-  await expect(page.getByText("Target reference", { exact: true })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Final weighing results" }).getByText("Target composition", { exact: true })).toBeVisible();
   await expect(page.getByText("Adjusted feed", { exact: true })).toBeVisible();
   await expect(page.getByText(/Advanced settings.*Al coefficient/)).toBeVisible();
   await expect(page.getByRole("textbox", { name: "Aluminum per formula" })).toHaveCount(0);

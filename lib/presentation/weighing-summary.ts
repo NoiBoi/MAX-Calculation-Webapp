@@ -14,6 +14,7 @@ export interface WeighingSummaryPrecursor {
   readonly hasPostSolverAdjustment: boolean;
   readonly finalMass: string;
   readonly purityPercent: string;
+  readonly puritySource?: "input" | "assumed";
   readonly molarMass: string;
   readonly atomicRadius: string;
   readonly unit: "g";
@@ -116,7 +117,7 @@ export function buildWeighingSummary(input: Readonly<{
       const radiusDataset = DEFAULT_ATOMIC_RADIUS_REGISTRY.usableDatasets.find((item) => item.datasetId === input.atomicRadiusDatasetId);
       const elemental = result.molarMassContributions.length === 1 && result.molarMassContributions[0]?.coefficient === "1";
       const radius = elemental && radiusDataset ? radiusDataset.values.find((item) => item.element === result.molarMassContributions[0]!.element && item.defaultForPolicy) : undefined;
-      return [{ id, displayName: result.displayName, formula: definition?.formula ?? result.displayName, molarQuantity: finalMolarQuantity, ...(!adjusted ? { molarQuantityExact: result.solverMolesPerTargetFormulaMoleExact.canonical } : {}), solverMolarQuantity, solverMolarQuantityExact: result.solverMolesPerTargetFormulaMoleExact.canonical, hasPostSolverAdjustment: adjusted, finalMass: formatMassForBalance(result.finalRoundedGrossWeighingMassGrams, input.inputState.balanceIncrementGrams), purityPercent: new ChemistryDecimal(result.purity).times(100).toString(), molarMass: result.molarMassGramsPerMole, atomicRadius: !elemental ? "N/A" : radius ? `${radius.radiusPm} pm · ${radiusDataset!.definition}` : "N/A", unit: "g" as const, status: precursorStatus(input.result, id) }];
+      return [{ id, displayName: result.displayName, formula: definition?.formula ?? result.displayName, molarQuantity: finalMolarQuantity, ...(!adjusted ? { molarQuantityExact: result.solverMolesPerTargetFormulaMoleExact.canonical } : {}), solverMolarQuantity, solverMolarQuantityExact: result.solverMolesPerTargetFormulaMoleExact.canonical, hasPostSolverAdjustment: adjusted, finalMass: formatMassForBalance(result.finalRoundedGrossWeighingMassGrams, input.inputState.balanceIncrementGrams), purityPercent: new ChemistryDecimal(result.purity).times(100).toString(), puritySource: result.puritySource === "assumed-default" ? "assumed" as const : "input" as const, molarMass: result.molarMassGramsPerMole, atomicRadius: !elemental ? "N/A" : radius ? `${radius.radiusPm} pm · ${radiusDataset!.definition}` : "N/A", unit: "g" as const, status: precursorStatus(input.result, id) }];
     }),
     totalMass: formatMassForBalance(input.result.batch.finalRoundedTotalWeighingMassGrams, input.inputState.balanceIncrementGrams),
     unit: "g",

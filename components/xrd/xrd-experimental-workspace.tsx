@@ -69,7 +69,7 @@ export function XrdExperimentalWorkspace({ onAnalysisChange }: { readonly onAnal
   }, [refresh]);
 
   const parse = useCallback(async (selected: File, overrides: XRDParserOverride) => {
-    setPending(true); setMessage("Hashing exact file bytes and parsing a preview…"); setPreview(undefined); setDuplicates([]);
+    setPending(true); setMessage("Reading measurement…"); setPreview(undefined); setDuplicates([]);
     try {
       const form = new FormData(); form.set("file", selected, selected.name); form.set("parserConfig", JSON.stringify(overrides));
       const response = await fetch("/api/xrd/data/parse", { method: "POST", body: form });
@@ -78,7 +78,7 @@ export function XrdExperimentalWorkspace({ onAnalysisChange }: { readonly onAnal
       const parsed = experimentalXrdParseResponseSchema.parse(body);
       const existing = await storage.findByRawHash(parsed.rawArtifact.sha256);
       setPreview(parsed); setDuplicates(existing); setSampleName(parsed.measurement.sourceFilename);
-      setMessage(existing.length ? "This exact raw file is already stored. Open an existing measurement or import a new interpretation." : "Review the detected interpretation, provenance, and warnings before importing.");
+      setMessage(existing.length ? "This exact raw file is already stored. Open an existing measurement or import a new interpretation." : "Preview ready. Review columns and warnings before importing.");
     } catch (error) { setMessage(error instanceof Error ? error.message : "The XRD file could not be parsed."); }
     finally { setPending(false); }
   }, [storage]);
@@ -93,14 +93,14 @@ export function XrdExperimentalWorkspace({ onAnalysisChange }: { readonly onAnal
       await storage.save(preview.rawArtifact, file.slice(0, file.size, file.type), measurement, sampleName);
       const stored = await storage.get(measurement.measurementId);
       setActive(stored); setPreview(undefined); setDuplicates([]); await refresh();
-      setMessage("Measurement imported locally. Raw bytes and parsed arrays are preserved separately.");
+      setMessage("Measurement imported.");
     } catch (error) { setMessage(error instanceof Error ? error.message : "The measurement could not be saved locally."); }
     finally { setPending(false); }
   };
 
   const reparse = () => { if (file) void parse(file, settings); };
   const rename = async (record: StoredExperimentalXRDMeasurement) => {
-    const name = window.prompt("New display name (raw provenance will not change):", record.displayName);
+    const name = window.prompt("Measurement name:", record.displayName);
     if (!name?.trim()) return;
     await storage.rename(record.id, name); await refresh(); if (active?.id === record.id) setActive({ ...record, displayName: name.trim() });
   };
@@ -111,11 +111,11 @@ export function XrdExperimentalWorkspace({ onAnalysisChange }: { readonly onAnal
 
   const shown = active?.measurement;
   return <div className="xrd-experimental-stack" data-preview={Boolean(preview || shown)}>
-    <section className="xrd-panel" aria-labelledby="xrd-import-title">
+    <section aria-busy={pending} className="xrd-panel" aria-labelledby="xrd-import-title">
       <div className="xrd-section-heading"><div><h2 id="xrd-import-title">Import measurement</h2></div></div>
       <div className="xrd-dropzone" onDragOver={(event) => event.preventDefault()} onDrop={onDrop}>
         <div><strong>Drop an XRD text file here</strong><span>CSV, TSV, TXT, XY, XYE, or text DAT. Default limit 25 MB.</span></div>
-        <button className="ui-button ui-button-primary" disabled={pending} onClick={() => inputRef.current?.click()} type="button">Choose file</button>
+        <button className="ui-button ui-button-primary" disabled={pending} onClick={() => inputRef.current?.click()} type="button">{pending ? "Processing…" : "Choose file"}</button>
         <input accept={ACCEPT} aria-label="Choose experimental XRD file" hidden onChange={(event) => selectFile(event.target.files?.[0])} ref={inputRef} type="file" />
       </div>
       <p aria-live="polite" className="xrd-status">{message}</p>
@@ -140,7 +140,7 @@ export function XrdExperimentalWorkspace({ onAnalysisChange }: { readonly onAnal
           <label>Intensity column<select value={settings.intensityColumn ?? preview.measurement.parserProvenance.intensityColumn.index} onChange={(event) => setSettings({ ...settings, intensityColumn: Number(event.target.value) })}>{preview.availableColumns.map((column) => <option key={column.index} value={column.index}>{column.name ?? `Column ${column.index + 1}`}</option>)}</select></label>
           <button className="ui-button" disabled={pending} onClick={reparse} type="button">Reparse preview</button>
         </div></details>
-        <div className="xrd-import-actions"><label>Display / sample name<input maxLength={200} onChange={(event) => setSampleName(event.target.value)} value={sampleName} /></label><button className="ui-button ui-button-primary" disabled={pending} onClick={() => void commit()} type="button">Import measurement</button></div>
+        <div className="xrd-import-actions"><label>Display / sample name<input maxLength={200} onChange={(event) => setSampleName(event.target.value)} value={sampleName} /></label><button className="ui-button ui-button-primary" disabled={pending} onClick={() => void commit()} type="button">{pending ? "Importing…" : "Import measurement"}</button></div>
       </div>}
     </section>
 

@@ -77,6 +77,16 @@
 .xrd-reflection-table caption { padding: .65rem .75rem; text-align: left; font-weight: 600; }
 .xrd-reflection-table th { position: sticky; top: 0; background: var(--background-elevated); color: var(--text-secondary); text-align: left; }
 .xrd-reflection-table th, .xrd-reflection-table td { border-top: 1px solid var(--border-subtle); padding: .45rem .7rem; }
+.xrd-stage4-result { margin-top: var(--space-section); }
+.xrd-stage4-result > h3 { margin-bottom: .55rem; }
+.xrd-stage4-result > table { width: 100%; margin-block: .75rem; border-collapse: collapse; font-size: var(--font-table); }
+.xrd-stage4-result > table :is(th, td) { padding: .5rem .65rem; border-bottom: 1px solid var(--border-subtle); text-align: right; }
+.xrd-stage4-result > table :is(th, td):first-child { text-align: left; }
+.xrd-stage4-result > table th { background: var(--background-header); color: var(--text-secondary); font-weight: 500; }
+.xrd-peak-table caption { padding-block-end: .5rem; color: var(--text-secondary); text-align: left; }
+.xrd-workspace .emi-publication-preview-canvas { display: grid; place-items: center; background: var(--background-header); }
+.xrd-workspace .emi-publication-preview-canvas > div { width: min(100%, 54rem); }
+.xrd-workspace .emi-publication-preview-canvas svg { display: block; width: 100%; height: auto; }
 .xrd-experimental-stack, .xrd-workspace-divider { display: grid; gap: var(--layout-gap); }
 .xrd-workspace-divider { padding-top: .25rem; }
 .xrd-workspace-divider > div > h2, .xrd-workspace-divider > div > p { margin: 0; }
@@ -424,7 +434,16 @@
   font-weight: 600;
 }
 :is(.emi-table, .xrd-peak-table, .xrd-reflection-table table) :is(th, td) { padding: .45rem .55rem; }
-:is(.emi-table, .xrd-peak-table, .xrd-reflection-table table) :is(th, td):not(:first-child) { text-align: right; }
+:is(.emi-table, .xrd-peak-table, .xrd-reflection-table table) :is(th, td) { text-align: left; }
+.emi-power-table :is(th, td):nth-child(n + 2),
+.emi-statistics-table :is(th, td):nth-child(n + 4),
+.emi-replicate-table :is(th, td):nth-child(n + 5),
+.emi-comparison-table :is(th, td):nth-child(n + 6):nth-child(-n + 18),
+.emi-data-table-scroll :is(th, td):nth-child(-n + 11),
+.xrd-candidate-table :is(th, td):nth-child(n + 2):nth-child(-n + 6),
+.xrd-match-table :is(th, td):nth-child(-n + 4),
+.xrd-residual-table :is(th, td):nth-child(n + 2):nth-child(-n + 5),
+.xrd-reflection-table :is(th, td):nth-child(-n + 3) { text-align: right; }
 :is(.emi-table-scroll, .xrd-reflection-table) { border-radius: var(--radius-control); }
 
 /* Status is quiet by default; warning and error treatments remain semantic. */

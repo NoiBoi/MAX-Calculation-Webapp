@@ -13,6 +13,12 @@ const paths = {
   undo: "M7 4 3 8l4 4 M3 8h9a4 4 0 0 1 0 8h-2",
   redo: "M13 4l4 4-4 4 M17 8H8a4 4 0 0 0 0 8h2",
   empty: "M5 2.5h7l3 3v12H5z M11.5 2.5V6h3.5 M8 9.5h4 M8 13h4",
+  light: "M10 1v2 M10 17v2 M1 10h2 M17 10h2 M3.6 3.6 5 5 M15 15l1.4 1.4 M3.6 16.4 5 15 M15 5l1.4-1.4 M14 10a4 4 0 1 1-8 0 4 4 0 0 1 8 0",
+  dark: "M16.8 12.3A7.2 7.2 0 0 1 7.7 3.2a7.2 7.2 0 1 0 9.1 9.1",
+  midnight: "M15.8 11.5a6.4 6.4 0 0 1-7.3-8.3 6.7 6.7 0 1 0 7.3 8.3 M15 2v4 M13 4h4",
+  system: "M2.5 3.5h15v10h-15z M10 13.5v3 M6.5 16.5h7",
+  chevron: "M5 7.5l5 5 5-5",
+  check: "M4 10l4 4 8-8",
 } as const;
 
 export function WorkbenchIcon({ name }: { readonly name: keyof typeof paths }) {

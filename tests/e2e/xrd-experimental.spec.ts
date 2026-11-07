@@ -37,7 +37,7 @@ test("imports, persists, reloads, and reopens an exact raw XRD measurement", asy
   await expect(page.getByText(/3 original points/)).toBeVisible();
 });
 
-test("saves and reopens immutable XRD processing and peak-analysis lineage", async ({ page }) => {
+test("saves and reopens immutable XRD processing and peak-analysis lineage", async ({ page }, testInfo) => {
   const twoThetaDeg = Array.from({ length: 101 }, (_, index) => 20 + index * 0.1);
   const intensity = twoThetaDeg.map((value) => 5 + 100 * Math.exp(-((value - 25) ** 2) / 0.08));
   const fileBody = `2theta intensity\n${twoThetaDeg.map((value, index) => `${value} ${intensity[index]}`).join("\n")}\n`;
@@ -119,4 +119,13 @@ test("saves and reopens immutable XRD processing and peak-analysis lineage", asy
   await page.getByRole("button", { name: "Open matching result" }).click();
   await page.getByRole("button", { name: "Open refinement result" }).click();
   await expect(page.getByRole("heading", { name: "Reference vs refined lattice" })).toBeVisible();
+  for (const theme of ["Light", "Dark", "Midnight"]) {
+    await page.getByRole("button", { name: "Open appearance menu" }).click();
+    await page.getByRole("menuitemradio", { name: theme, exact: true }).click();
+    await page.getByRole("heading", { name: "Publication figure", exact: true }).scrollIntoViewIfNeeded();
+    await page.getByRole("img", { name: "Publication XRD figure" }).scrollIntoViewIfNeeded();
+    await page.screenshot({ path: testInfo.outputPath(`xrd-publication-${theme.toLowerCase()}.png`) });
+    await page.getByRole("heading", { name: "Reference vs refined lattice", exact: true }).scrollIntoViewIfNeeded();
+    await page.screenshot({ path: testInfo.outputPath(`xrd-refinement-${theme.toLowerCase()}.png`) });
+  }
 });

@@ -3,12 +3,13 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import { useTheme } from "./theme-provider";
 import type { AppearancePreference } from "@/lib/theme/theme";
+import { WorkbenchIcon } from "@/components/site/workbench-icon";
 
 const OPTIONS = [
-  { value: "light", label: "Light", icon: "☀" },
-  { value: "dark", label: "Dark", icon: "◐" },
-  { value: "midnight", label: "Midnight", icon: "●" },
-  { value: "system", label: "Use system setting", icon: "▣" },
+  { value: "light", label: "Light", icon: "light" },
+  { value: "dark", label: "Dark", icon: "dark" },
+  { value: "midnight", label: "Midnight", icon: "midnight" },
+  { value: "system", label: "Use system setting", icon: "system" },
 ] as const;
 
 export function ThemeControl() {
@@ -61,11 +62,11 @@ export function ThemeControl() {
   return <div className="theme-control" onBlur={(event) => {
     if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
   }} onKeyDown={moveFocus} ref={root}>
-    <button aria-label={`Change appearance. Current setting: ${active?.label}; active theme: ${resolvedTheme}.`} className="theme-toggle" onClick={() => void setPreference(resolvedTheme === "light" ? "dark" : "light")} title="Change appearance" type="button"><span aria-hidden="true">{resolved?.icon}</span></button>
-    <button aria-controls={open ? menuId : undefined} aria-expanded={open} aria-haspopup="menu" aria-label="Open appearance menu" className="theme-menu-trigger" onClick={() => setOpen((value) => !value)} ref={trigger} title="Choose appearance" type="button"><span aria-hidden="true">▾</span></button>
+    <button aria-label={`Change appearance. Current setting: ${active?.label}; active theme: ${resolvedTheme}.`} className="theme-toggle" onClick={() => void setPreference(resolvedTheme === "light" ? "dark" : "light")} title="Change appearance" type="button"><WorkbenchIcon name={resolved?.icon ?? "light"} /></button>
+    <button aria-controls={open ? menuId : undefined} aria-expanded={open} aria-haspopup="menu" aria-label="Open appearance menu" className="theme-menu-trigger" onClick={() => setOpen((value) => !value)} ref={trigger} title="Choose appearance" type="button"><WorkbenchIcon name="chevron" /></button>
     {open && <div aria-label="Appearance" className="theme-menu" id={menuId} role="menu">
       {OPTIONS.map(({ value, label, icon }) => <button aria-checked={preference === value} className="theme-menu-item" key={value} onClick={() => choose(value)} role="menuitemradio" type="button">
-        <span aria-hidden="true">{icon}</span><span>{label}</span>{preference === value && <span aria-hidden="true">✓</span>}
+        <WorkbenchIcon name={icon} /><span>{label}</span>{preference === value && <WorkbenchIcon name="check" />}
       </button>)}
     </div>}
   </div>;

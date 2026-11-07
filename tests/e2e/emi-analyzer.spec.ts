@@ -97,21 +97,21 @@ test("EMI thickness, themed electrical controls, and graph interaction use one c
   await expect(card.getByLabel("Thickness unit for interaction.csv")).toHaveValue("mm");
   await card.getByLabel("Sample thickness for interaction.csv").fill("0.0143");
   await expect(card.getByRole("heading", { name: "Four-point resistance & Simon estimate" })).toBeVisible();
-  await expect(card.getByText(/MAXCalc averages the readings, applies the fixed geometric correction factor 4\.532/)).toBeVisible();
+  await expect(card.getByText(/Conductivity is calculated from mean resistance, thickness, and geometric correction factor 4\.532/)).toBeVisible();
   await expect(card.getByText("14.3 µm", { exact: true })).toBeVisible();
   await expect(card.getByText("0.0143 mm", { exact: true })).toBeVisible();
   await card.getByRole("button", { name: "Add first reading" }).click();
   await card.getByLabel("Raw four-point-probe resistance 1 for interaction.csv").fill("1.2");
-  await expect(card.getByText(/12,858\.5742 S\/m/).first()).toBeVisible();
-  await expect(card.getByText(/128\.585742 S\/cm/)).toBeVisible();
+  await expect(card.getByText(/12,858\.6 S\/m/).first()).toBeVisible();
+  await expect(card.getByText(/128\.586 S\/cm/)).toBeVisible();
   await expect(card.getByText("3 theoretical points at the measured frequencies.")).toBeVisible();
   await card.getByLabel("Sample thickness for interaction.csv").fill("0.0200");
   await expect(card.getByText("20 µm", { exact: true })).toBeVisible();
-  await expect(card.getByText(/9,193\.880553 S\/m/).first()).toBeVisible();
+  await expect(card.getByText(/9,193\.88 S\/m/).first()).toBeVisible();
   await card.getByLabel("Thickness unit for interaction.csv").selectOption("um");
   await card.getByLabel("Sample thickness for interaction.csv").fill("20");
   await expect(card.getByText("20 µm", { exact: true })).toBeVisible();
-  await expect(card.getByText(/9,193\.880553 S\/m/).first()).toBeVisible();
+  await expect(card.getByText(/9,193\.88 S\/m/).first()).toBeVisible();
   const note = card.getByLabel("Electrical measurement note for interaction.csv");
   for (const theme of ["light", "dark", "midnight"] as const) {
     await page.evaluate((value) => document.documentElement.setAttribute("data-theme", value), theme);
@@ -193,7 +193,7 @@ test("EMI projects support bulk metadata, replicate interpolation, persistence, 
   await firstCard.getByLabel("Thickness unit for batch-1.1.csv").selectOption("um");
   await firstCard.getByRole("button", { name: "Add first reading" }).click();
   await firstCard.getByLabel("Raw four-point-probe resistance 1 for batch-1.1.csv").fill("1");
-  await expect(firstCard.getByText(/22,065\.31333 S\/m/).first()).toBeVisible();
+  await expect(firstCard.getByText(/22,065\.3 S\/m/).first()).toBeVisible();
   await expect(firstCard.getByText("3 theoretical points at the measured frequencies.")).toBeVisible();
 
   await page.getByText("Advanced interpolation settings").click();

@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { WorkbenchIcon } from "@/components/site/workbench-icon";
 import type { WorkspacePrecursorInput } from "@/lib/workspace/presets";
 
@@ -11,6 +12,7 @@ interface PrecursorRowsProps {
 }
 
 export function PrecursorRows({ precursors, advanced, onChange, onNavigate, onMove, onRemove }: PrecursorRowsProps) {
+  const purityHelpId = useId();
   if (!precursors.length) return null;
 
   return <div className={advanced ? "precursor-editor is-advanced" : "precursor-editor"} role="group" aria-label="Precursor inputs">
@@ -24,7 +26,7 @@ export function PrecursorRows({ precursors, advanced, onChange, onNavigate, onMo
         event.preventDefault();
         onNavigate(index, event.key === "ArrowDown" ? 1 : -1);
       }} placeholder="e.g. Ti" spellCheck={false} value={item.formula} />
-      <input aria-label={`Purity (%), precursor ${index + 1}`} className="px-2 text-right" data-primary-field id={`purity-${item.id}`} inputMode="decimal" onChange={(event) => onChange(index, { purityPercent: event.target.value })} placeholder="Assumed" value={item.purityPercent} />
+      <input aria-describedby={purityHelpId} aria-label={`Purity (%), precursor ${index + 1}`} className="px-2 text-right" data-primary-field id={`purity-${item.id}`} inputMode="decimal" onChange={(event) => onChange(index, { purityPercent: event.target.value })} placeholder="100 assumed" value={item.purityPercent} />
       <div className="precursor-row-actions command-group">
         {advanced && <>
           <button aria-label={`Move ${item.name} up`} className="ui-icon-button ui-button-compact" disabled={index === 0} onClick={() => onMove(index, -1)} type="button"><WorkbenchIcon name="up" /></button>
@@ -33,5 +35,6 @@ export function PrecursorRows({ precursors, advanced, onChange, onNavigate, onMo
         <button aria-label={`Remove ${item.name}`} className="ui-icon-button ui-button-compact" onClick={() => onRemove(index)} title={`Remove precursor ${index + 1}`} type="button"><WorkbenchIcon name="close" /></button>
       </div>
     </div>)}
+    <p className="precursor-purity-note" id={purityHelpId}>Purity values may include recipe defaults; verify against lot certificates. Blank assumes 100%.</p>
   </div>;
 }

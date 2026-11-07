@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { WorkbenchIcon } from "@/components/site/workbench-icon";
 
 export function PaneHeading({ id, title, actions }: {
   readonly id: string;
@@ -21,7 +20,6 @@ export function EmptyPane({ title, children, actions }: {
 }) {
   return (
     <div className="empty-pane">
-      <span className="empty-pane-icon"><WorkbenchIcon name="empty" /></span>
       <div><h3>{title}</h3>{children && <p>{children}</p>}{actions}</div>
     </div>
   );

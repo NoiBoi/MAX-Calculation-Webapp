@@ -75,7 +75,7 @@
 }
 
 .workbench-nav-group + .workbench-nav-group { margin-block-start: .6rem; border-block-start: 1px solid var(--border-subtle); padding-block-start: .6rem; }
-.ui-eyebrow { color: var(--text-muted); font-family: var(--font-mono); font-size: .67rem; letter-spacing: .065em; text-transform: uppercase; }
+.ui-eyebrow { color: var(--text-muted); font-size: var(--font-supporting); font-weight: 500; }
 .workbench-nav-group a {
   display: flex;
   align-items: center;
@@ -148,9 +148,9 @@
 .pane-heading h2 { min-width: 0; font-size: var(--font-section-heading); font-weight: 600; }
 .pane-actions { display: flex; min-width: 0; flex-wrap: wrap; align-items: center; gap: .45rem; margin-inline-start: auto; }
 .empty-pane { display: flex; align-items: flex-start; gap: .65rem; padding: 1.15rem var(--panel-padding); color: var(--text-secondary); }
-.empty-pane-icon { display: grid; flex: none; width: 1.4rem; height: 1.4rem; place-items: center; color: var(--text-muted); }
 .empty-pane h3 { color: var(--text-primary); font-size: .94rem; font-weight: 600; }
 .empty-pane p { margin-block: .16rem 0; font-size: var(--font-supporting); }
+.empty-pane .ui-button { margin-block-start: .65rem; }
 .section-index { display: flex; flex-wrap: wrap; align-items: stretch; border-block-end: 1px solid var(--border-subtle); }
 .section-index :is(a, button) { color: var(--text-secondary); padding: .45rem .75rem; font-size: var(--font-button); text-decoration: none; }
 .section-index :is(a, button):hover { background: var(--background-hover); color: var(--text-primary); }

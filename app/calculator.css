@@ -139,7 +139,10 @@ main .precursor-editor-row > [data-precursor-formula] { font-family: var(--font-
 .weighing-table-scroll tbody tr { border-top: 1px solid var(--border-subtle); }
 .weighing-table-scroll tbody tr:hover { background: var(--background-hover); }
 .weighing-table-scroll .weighing-number { white-space: nowrap; }
-.weighing-table-scroll .weighing-mass { font-family: var(--font-mono); font-size: .9rem; white-space: nowrap; }
+.weighing-table-scroll .weighing-mass { font-size: 1rem; font-weight: 600; white-space: nowrap; }
+.weighing-table-scroll :is(.weighing-number, .weighing-mass, th.text-right) { text-align: right; font-variant-numeric: tabular-nums; }
+.purity-assumption { display: block; color: var(--text-muted); font-size: .7rem; font-weight: 400; }
+.precursor-purity-note { padding: .5rem var(--panel-padding); border-top: 1px solid var(--border-subtle); color: var(--text-muted); font-size: .75rem; line-height: 1.4; }
 .weighing-table-scroll tfoot { background: var(--background-header); }
 .weighing-table-scroll tfoot th { white-space: nowrap; }
 .weighing-table-scroll tfoot .weighing-mass { color: var(--accent); }
@@ -164,3 +167,22 @@ main .precursor-editor-row > [data-precursor-formula] { font-family: var(--font-
 .calculator-group-heading { margin-top: .85rem; padding-top: .65rem; border-top: 1px solid var(--border-subtle); font-weight: 600; }
 
 .calculator-details { margin-block: .25rem var(--space-section); padding: .55rem .1rem; border-block-start: 1px solid var(--border-subtle); color: var(--text-secondary); }
+
+/* Descriptors remain secondary to the formulation and weighing table. */
+.radius-descriptors { min-width: 0; margin-top: var(--space-section); }
+.radius-descriptors > h2 { font-size: var(--font-section-heading); font-weight: 600; }
+.radius-site { min-width: 0; margin-top: .8rem; padding-top: .8rem; border-top: 1px solid var(--border-subtle); }
+.radius-site-heading { display: grid; gap: .55rem; }
+.radius-site-heading label { display: grid; min-width: 0; gap: .25rem; font-size: var(--font-supporting); }
+.radius-site-heading .ui-select { width: 100%; min-width: 0; max-width: 100%; margin: 0; }
+.radius-provenance { margin-top: .5rem; color: var(--text-muted); font-size: .75rem; overflow-wrap: anywhere; }
+.radius-provenance summary { cursor: pointer; }
+.radius-provenance p { margin-top: .35rem; }
+.radius-occupants { display: flex; flex-wrap: wrap; gap: .55rem 1rem; margin-top: .6rem; }
+.radius-occupant { min-width: 0; font-size: var(--font-supporting); }
+.radius-occupant-missing { border-inline-start: 2px solid var(--status-warning-border); padding-inline-start: .5rem; color: var(--status-warning-text); }
+.radius-statistics { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr)); gap: .65rem; margin-top: .65rem; }
+.radius-statistics dd { font-variant-numeric: tabular-nums; }
+.radius-qualification, .composition-basis-note { margin-top: .8rem; color: var(--text-muted); font-size: var(--font-supporting); line-height: 1.45; }
+.composition-audit dt { color: var(--text-muted); }
+.composition-audit dd { margin-top: .2rem; overflow-wrap: anywhere; }

@@ -23,6 +23,39 @@
 .comparison-table-panel :is(th, td) { border-inline: 0; border-color: var(--border-subtle); }
 .comparison-table-panel tbody tr:hover { background: var(--background-hover); }
 .comparison-scenario-card .scenario-header-actions { gap: 0; margin-inline-start: auto; }
+.comparison-metrics { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; margin-top: .65rem; font-size: var(--font-supporting); }
+.comparison-table-panel :is(th, td) { text-align: left; }
+.comparison-table-panel :is(td.text-right, th.text-right),
+.comparison-metrics-table :is(th, td):nth-child(n + 3):nth-child(-n + 7),
+.comparison-difference-table :is(th, td):nth-child(2),
+.comparison-precursor-table :is(th, td):nth-child(n + 2) { text-align: right; font-variant-numeric: tabular-nums; }
+.comparison-table-panel th { font-weight: 500; }
+.scenario-footer-actions.command-group { width: fit-content; }
+.settings-column-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .5rem; align-items: center; border-block-end: 1px solid var(--border-subtle); padding-block: .45rem; }
+.settings-column-row label { min-width: 0; }
+.settings-column-row .ui-button { padding-inline: .5rem; }
+
+@media screen {
+  .weighing-summary-card { min-width: 0; border: 1px solid var(--border-subtle); border-radius: var(--radius-panel); padding: var(--panel-padding); background: var(--background-panel); }
+  .weighing-summary-card > div:first-child :is(h2, h3) { font-size: var(--font-section-heading); font-weight: 600; }
+  .weighing-summary-card > div:nth-child(2) { margin-top: .85rem; }
+  .weighing-summary-card > div:nth-child(2) > p:first-child { color: var(--text-muted); font-size: var(--font-supporting); font-weight: 500; text-transform: none; letter-spacing: normal; }
+  .weighing-summary-card > div:nth-child(2) > p:last-child { font-size: 1.2rem; font-weight: 500; }
+  .weighing-summary-card > p { margin-top: .65rem; font-size: var(--font-supporting); }
+  .summary-weighing-scroll { overflow-x: auto; }
+  .summary-weighing-table { min-width: 35rem; margin-top: .8rem; font-size: var(--font-table); }
+  .summary-weighing-table thead { border-bottom: 1px solid var(--border-subtle); font-size: var(--font-supporting); text-transform: none; color: var(--text-secondary); }
+  .summary-weighing-table thead tr { border-bottom: 1px solid var(--border-subtle); text-transform: none; }
+  .summary-weighing-table :is(th, td) { padding: .5rem .35rem; font-weight: 400; }
+  .summary-weighing-table :is(th, td):nth-child(n + 3):nth-child(-n + 5) { text-align: right; }
+  .summary-weighing-table td:nth-child(5) { font-family: var(--font-sans); font-size: 1rem; font-weight: 600; white-space: nowrap; }
+  .summary-weighing-table tfoot { border-top: 1px solid var(--border-subtle); }
+  .summary-weighing-table tfoot tr { border-top: 1px solid var(--border-subtle); }
+  .summary-weighing-table tfoot th { font-size: var(--font-table); font-weight: 600; }
+  .summary-weighing-table tfoot td { text-align: right; font-family: var(--font-sans); font-size: 1.1rem; font-weight: 600; color: var(--accent); white-space: nowrap; }
+  .weighing-summary-card .summary-signature { color: var(--text-muted); }
+  .weighing-summary-card .signature-line { display: none; }
+}
 
 .settings-layout { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: var(--layout-gap); }
 .settings-index .section-index { gap: 0; border: 0; }
